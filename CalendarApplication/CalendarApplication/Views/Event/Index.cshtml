@@ -1,0 +1,51 @@
+﻿@model CalendarApplication.Models.Event.BasicEvent
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using CalendarApplication.Models.Event
+
+<h2>Event Index</h2>
+<table class="gridtable">
+    <tr>
+        <td>Event Id</td>
+        <td>@Model.ID </td>
+    </tr>
+    <tr>
+        <td>Event Name</td>
+        <td>@Model.Name</td>
+    </tr>
+    <tr>
+        <td>Event Creator</td>
+        <td>@Model.Creator</td>
+    </tr>
+    <tr>
+        <td>Event Type</td>
+        <td>@Model.Type</td>
+    </tr>
+    <tr>
+        <td>Event Start</td>
+        <td>@Model.Start</td>
+    </tr>
+    <tr>
+        <td>Event End</td>
+        <td>@Model.End</td>
+    </tr>
+    <tr>
+        <td>Event State</td>
+        <td>@Model.State</td>
+    </tr>
+    <tr>
+        <td>Event Visible</td>
+        <td>@Model.Visible</td>
+    </tr>
+    <tr>
+        <td>Rooms Used</td>
+            @foreach (Room room in Model.Rooms)
+            {
+                <td>room</td>
+            }
+        
+    </tr>
+</table>

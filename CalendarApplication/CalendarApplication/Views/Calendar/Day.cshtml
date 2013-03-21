@@ -1,0 +1,88 @@
+﻿@model CalendarApplication.Models.Calendar.CalendarDay
+
+@{
+    ViewBag.Title = "Day";
+}
+
+@using CalendarApplication.Models.Event;
+
+<h2>Day: @Model.Date.ToString("dd-MM-yyyy")</h2>
+
+<table style="font-size:20px;width:850px">
+    <tr>
+        <td colspan="3" style="text-align:center">
+            @Html.ActionLink("Today", "Day", "Calendar",
+                             new { year = DateTime.Now.Year, month = DateTime.Now.Month, day = DateTime.Now.Day }, null)
+        </td>
+    </tr>
+    <tr>
+        <td style="text-align:left;padding:0;width:20%">
+            @{DateTime date = Model.Date.AddDays(-1);}
+            @Html.ActionLink(date.ToString("<- d. MMM"), "Day", "Calendar",
+                             new { year = date.Year, month = date.Month, day = date.Day }, null)
+        </td>
+        <td style="text-align:center;padding:0;width:60%">
+            @Model.Date.ToString("d. ")
+            @Html.ActionLink(Model.Date.ToString("MMM"), "Index", "Calendar",
+                             new { year = Model.Date.Year, month = Model.Date.Month }, null)
+            @Model.Date.ToString(" yyy")
+        </td>
+        <td style="text-align:right;padding:0;width:20%">
+            @{date = Model.Date.AddDays(1);}
+            @Html.ActionLink(date.ToString("d. MMM ->"), "Day", "Calendar",
+                             new { year = date.Year, month = date.Month, day = date.Day }, null)
+        </td>
+    </tr>
+</table>
+
+<table border="1" style="padding:0;border-spacing:0;width:850px">
+
+    <tr>
+        <td style="width:50px"></td>
+        <td style="padding:0">
+            <table style="border-collapse:collapse;width:100%;padding:0">
+                <tr>
+                    @for (int i = 0; i < 24; i+=2)
+                    {
+                        <td style="width:@(100/12)%;border-left:solid;padding:0">@i</td>
+                    }
+                </tr>
+            </table>
+        </td>
+    </tr>
+
+    @foreach (Room room in Model.Rooms)
+    {
+        <tr>
+            <td style="width:50px">
+                @room.Name
+            </td>
+            <td style="padding:0;border-spacing:0">
+                <table style="border-collapse:collapse;width:100%"><tr style="border-spacing:0">
+                    @{int curEnd = 0;}
+                    @foreach (BasicEvent e in Model.Events)
+                    {
+                        if (e.Rooms.Contains(room))
+                        {
+                            int start = (e.Start < Model.Date ? 0 : ((e.Start.Hour * 60 + e.Start.Minute)*100) / 1440);
+                            int end = (e.End > Model.Date.AddDays(1) ? 100 : ((e.End.Hour * 60 + e.End.Minute)*100) / 1440);
+                    
+                    
+                    
+                            <td style="width:@(start-curEnd)%;height:100%;padding:0"></td>
+                            <td style="width:@(end-start)%;max-width:@(end-start);
+                                background-color:@(e.getColor());word-wrap:break-word;overflow:hidden">
+                                @e.Name
+                            </td>
+                    
+                            curEnd = end;
+                        }
+                    }
+                    <td style="width:@(100-curEnd)%;height:100%;padding:0"></td>
+                </tr></table>
+            </td>
+        </tr>
+    }
+</table>
+
+

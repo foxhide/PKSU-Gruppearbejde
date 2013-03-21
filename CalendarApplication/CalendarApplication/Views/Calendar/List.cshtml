@@ -1,0 +1,40 @@
+﻿@model CalendarApplication.Models.Calendar.CalendarList
+
+@{
+    ViewBag.Title = "List";
+}
+
+@using System;
+@using System.Data;
+@using CalendarApplication.Models.Calendar;
+@using CalendarApplication.Models.Event;
+
+<h2>Listing events from <i>@(Model.Start.ToString("d. MMM yyyy"))</i>
+                     to <i>@(Model.End.ToString("d. MMM yyyy"))</i></h2>
+
+<table border="1">
+    <tr>
+        <td><b>Event Name</b></td>   <td><b>Starting</b></td>    <td><b>Ending</b></td>  <td><b>Created by:</b></td>
+        <td><b>Event Type</b></td>
+    </tr>
+    @foreach (BasicEvent ev in Model.Events) {
+        <tr style="background-color:@(ev.getColor())">
+            <td>
+                @Html.DisplayFor(modelItem => ev.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => ev.Start)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => ev.End)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => ev.Creator)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => ev.Type)
+            </td>
+        </tr>
+    }
+
+</table>
