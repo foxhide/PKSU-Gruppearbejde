@@ -2,6 +2,13 @@
 [Bb]in/
 [Oo]bj/
 
+*/[Bb]in/
+*/[Oo]bj/
+*/Generated_Code/
+PrecompiledWeb
+*/ClientBin
+Thumbs.db
+
 # mstest test results
 TestResults
 
@@ -48,6 +55,17 @@ ipch/
 *.psess
 *.vsp
 *.vspx
+*.suo
+*.ncb
+*.user
+*.ccscc
+*.cache
+
+# Emacs
+*~
+*.bak
+\#*\#
+*.orig
 
 # Guidance Automation Toolkit
 *.gpState

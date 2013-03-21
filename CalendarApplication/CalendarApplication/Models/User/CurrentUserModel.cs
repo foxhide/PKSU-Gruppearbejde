@@ -17,8 +17,6 @@ namespace CalendarApplication.Models.User
 
         public string RealName { get; set; }
 
-        public string Email { get; set; }
-
         public static CurrentUserModel GetCurrent()
         {
             string[] data = HttpContext.Current.User.Identity.Name.Split(new char[] { '|' });
@@ -27,11 +25,10 @@ namespace CalendarApplication.Models.User
                 Id = int.Parse(data[0]),
                 UserName = data[1],
                 RealName = data[2],
-                Email = data[3]
             };
         }
 
-        public static bool UpdateCurrent()
+        public static bool UpdateCurrentName(string newRealName)
         {
             if (System.Web.HttpContext.Current.Request.Cookies.AllKeys.Contains(FormsAuthentication.FormsCookieName))
             {
@@ -40,7 +37,7 @@ namespace CalendarApplication.Models.User
                 FormsAuthenticationTicket oldTicket = FormsAuthentication.Decrypt(cookie.Value);
                 FormsAuthenticationTicket newTicket = new FormsAuthenticationTicket(
                     oldTicket.Version, 
-                    cur.Id + "|" + cur.UserName + "|" + cur.RealName + "|" + cur.Email,
+                    cur.Id + "|" + cur.UserName + "|" + newRealName,
                     oldTicket.IssueDate,
                     oldTicket.Expiration,
                     oldTicket.IsPersistent,

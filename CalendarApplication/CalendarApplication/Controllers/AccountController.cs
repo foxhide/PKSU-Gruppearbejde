@@ -63,7 +63,7 @@ namespace CalendarApplication.Controllers
             int userId = msc.CreateUser(model);
             if (userId >= 0)
             {
-                string userData = userId + "|" + model.UserName + "|" + model.RealName + "|" + model.Email;
+                string userData = userId + "|" + model.UserName + "|" + model.RealName;
 
                 FormsAuthentication.SetAuthCookie(userData, false);
                 return RedirectToAction("Index", "Home", null);
