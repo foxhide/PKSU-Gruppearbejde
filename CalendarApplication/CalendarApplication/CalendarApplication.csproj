@@ -126,6 +126,7 @@
     <Compile Include="Models\Account\AccountModels.cs" />
     <Compile Include="Models\Account\LoginModel.cs" />
     <Compile Include="Models\User\CurrentUserModel.cs" />
+    <Compile Include="Models\User\GroupModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -165,7 +166,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Models\Register\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
@@ -181,7 +181,7 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Views\Calendar\Index.cshtml" />
+    <Content Include="Views\Calendar\Month.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Calendar\Day.cshtml" />
