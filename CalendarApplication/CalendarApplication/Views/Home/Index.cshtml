@@ -10,7 +10,7 @@
 
     <text>
         You may view upcomming events using the
-        @Html.ActionLink("calendar menu", "", "calendar", new { year = DateTime.Now.Year, month = DateTime.Now.Month }, null).<br />
+        @Html.ActionLink("calendar menu", "Month", "Calendar", new { year = DateTime.Now.Year, month = DateTime.Now.Month }, null).<br />
         If you have an account, you may  
         @Html.ActionLink("log in", "Login", "Account", null, null)
         else you may create an account by @Html.ActionLink("registering", "Register", "Account", null, null).

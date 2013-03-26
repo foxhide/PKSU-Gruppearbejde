@@ -69,7 +69,7 @@
                          }
                         if(curActn != "" && curCtrl != "calendar")
                         {
-                            <tr><td>@Html.ActionLink("Calendar", "Index", "Calendar", new { year = DateTime.Now.Year, month = DateTime.Now.Month }, null)</td></tr>
+                            <tr><td>@Html.ActionLink("Calendar", "Month", "Calendar", new { year = DateTime.Now.Year, month = DateTime.Now.Month }, null)</td></tr>
                         }
                         else
                         {

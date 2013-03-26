@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using System.Data;
 using CalendarApplication.Models.Calendar;
 using CalendarApplication.Models.Event;
+using CalendarApplication.Models.User;
 
 namespace CalendarApplication.Controllers
 {
@@ -14,7 +15,7 @@ namespace CalendarApplication.Controllers
         //
         // GET: /Calendar/
 
-        public ActionResult Index(int year, int month)
+        public ActionResult Month(int year, int month, ViewCheckModel vcm)
         {
             DateTime date = DateTime.Today;
             if (year != 0 && month != 0)
@@ -23,11 +24,28 @@ namespace CalendarApplication.Controllers
             }
             List<CalendarDay> dayList = getDays(date.Month,date.Year);
 
-            ViewCheckModel vcm = new ViewCheckModel
+            if (true)
             {
-            };
+                vcm = new ViewCheckModel
+                {
+                    Month = month,
+                    Year = year,
+                    Eventtypes = 0,
+                    GroupsAvailable = new List<GroupModel>(),
+                    GroupsSelected = new List<GroupModel>()
+                };
+                vcm.GroupsAvailable.Add(new GroupModel { ID = 1, Name = "Admins" });
+                vcm.GroupsAvailable.Add(new GroupModel { ID = 2, Name = "PokerPlayers" });
+                vcm.GroupsAvailable.Add(new GroupModel { ID = 3, Name = "Band" });
+                vcm.GroupsSelected.Add(new GroupModel { ID = 3, Name = "Band" });
+            }
 
             return View(new CalendarMonth { Days = dayList, Date = date, VCM = vcm });
+        }
+
+        public ActionResult ViewCheck(ViewCheckModel vcm)
+        {
+            return RedirectToAction("Month", new { vcm.Year, vcm.Month, vcm });
         }
 
         private List<CalendarDay> getDays(int month, int year)
@@ -75,8 +93,8 @@ namespace CalendarApplication.Controllers
         {
             MySqlConnect msc = new MySqlConnect();
             DateTime temp = new DateTime(year, month, day);
-            string morning = temp.ToString("yyyy-MM-dd HH:mm:ss");//year+"-"+month+"-"+day+" 00:00:00";
-            string night = temp.AddDays(1).AddSeconds(-1).ToString("yyyy-MM-dd HH:mm:ss");//year+"-"+month+"-"+day+" 23:59:59";
+            string morning = temp.ToString("yyyy-MM-dd HH:mm:ss");
+            string night = temp.AddDays(1).AddSeconds(-1).ToString("yyyy-MM-dd HH:mm:ss");
             string where = "(eventStart <= '" + night + "' AND eventStart >= '" + morning
                             + "') OR (eventEnd <= '" + night + "' AND eventEnd >= '" + morning
                             + "') OR (eventEnd >= '" + night + "' AND eventStart <= '" + morning + "')";
