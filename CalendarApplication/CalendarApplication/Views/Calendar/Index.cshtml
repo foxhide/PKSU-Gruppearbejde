@@ -74,13 +74,13 @@
                 }
 
                 <b>Groups:</b><br />
-                @for (int i = 0; i < Model.GroupsAvailable.Count; i++)
+                @for (int i = 0; i < Model.Groups.Count; i++)
                 {
                     <div>
-                        @Html.HiddenFor(model => Model.GroupsAvailable[i].ID)
-                        @Html.HiddenFor(model => Model.GroupsAvailable[i].Name)
-                        @Html.CheckBoxFor(model => Model.GroupsAvailable[i].Selected)
-                        @Model.GroupsAvailable[i].Name
+                        @Html.HiddenFor(model => Model.Groups[i].ID)
+                        @Html.HiddenFor(model => Model.Groups[i].Name)
+                        @Html.CheckBoxFor(model => Model.Groups[i].Selected)
+                        @Model.Groups[i].Name
                     </div>
                 }
                 <b>Event Types:</b><br />

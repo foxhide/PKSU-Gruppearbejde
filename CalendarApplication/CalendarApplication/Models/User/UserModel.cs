@@ -42,7 +42,14 @@ namespace CalendarApplication.Models.User
         /// <returns>The ID of the currently signed in user</returns>
         public static int GetCurrentUserID()
         {
-            return int.Parse(HttpContext.Current.User.Identity.Name);
+            if (HttpContext.Current.User.Identity.IsAuthenticated)
+            {
+                return int.Parse(HttpContext.Current.User.Identity.Name);
+            }
+            else
+            {
+                return -1;
+            }
         }
 
         /// <summary>
@@ -51,7 +58,8 @@ namespace CalendarApplication.Models.User
         /// <returns>A model of the currently signed in user</returns>
         public static UserModel GetCurrent()
         {
-            return GetUser(GetCurrentUserID());
+            int id = GetCurrentUserID();
+            return (id >= 0 ? GetUser(id) : null);
         }
 
         /// <summary>

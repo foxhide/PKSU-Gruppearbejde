@@ -11,7 +11,7 @@
 
     <text>
         You may view upcomming events using the
-        @Html.ActionLink("calendar menu", "", "Calendar", Calendar.InitialView, null).<br />
+        @Html.ActionLink("calendar menu", "Index", "Calendar", Calendar.InitialView, null).<br />
         If you have an account, you may  
         @Html.ActionLink("log in", "Login", "Account", null, null)
         else you may create an account by @Html.ActionLink("registering", "Register", "Account", null, null).
@@ -22,7 +22,7 @@ else {
 
     <text>
         You may view upcomming events using the
-        @Html.ActionLink("calendar menu", "Month", "Calendar", new { year = DateTime.Now.Year, month = DateTime.Now.Month }, null).<br />
+        @Html.ActionLink("calendar menu", "Index", "Calendar", Calendar.InitialView, null).<br />
     </text>
     
 }

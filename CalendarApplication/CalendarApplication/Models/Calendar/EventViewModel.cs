@@ -24,8 +24,7 @@ namespace CalendarApplication.Models.Calendar
 
         public int Range { set; get; }
 
-        public List<GroupModel> GroupsAvailable { set; get; }
-        public List<GroupModel> GroupsSelected { set; get; }
+        public List<GroupModel> Groups { set; get; }
 
         public int Eventtypes { set; get; }
     }

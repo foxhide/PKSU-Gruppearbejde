@@ -17,6 +17,7 @@ namespace CalendarApplication.Controllers
 
         public ActionResult Index(int mode, int year, int month, int day, int range)
         {
+            MySqlConnect msc = new MySqlConnect();
             EventViewModel evm = new EventViewModel
             {
                 Mode = mode,
@@ -24,12 +25,22 @@ namespace CalendarApplication.Controllers
                 Month = month,
                 Year = year,
                 Range = range,
-                GroupsAvailable = new List<GroupModel> {
-                    new GroupModel { ID = 0, Name = "MyGroup", Selected = false },
-                    new GroupModel { ID = 1, Name = "OtherGroup", Selected = false },
-                },
-                GroupsSelected = new List<GroupModel>()
+                Groups = msc.GetGroups("groups","")
             };
+
+            if (UserModel.GetCurrentUserID() >= 0)
+            {
+                List<GroupModel> userGroups = UserModel.GetCurrent().GetGroups();
+                int j = 0;
+                for (int i = 0; i < evm.Groups.Count && j < userGroups.Count; i++)
+                {
+                    if (evm.Groups[i].ID == userGroups[j].ID)
+                    {
+                        evm.Groups[i].Selected = true;
+                        j++;
+                    }
+                }
+            }
 
             switch (mode)
             {
