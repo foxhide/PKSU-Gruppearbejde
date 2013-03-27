@@ -189,9 +189,6 @@
     <Content Include="Views\Calendar\Day.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Views\Calendar\ViewCheck.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Views\Account\Login.cshtml" />
   </ItemGroup>
   <ItemGroup>

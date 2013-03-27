@@ -78,7 +78,8 @@
                             {
                             <tr style="padding:0;background-color:@(e.getColor())">
                                 <td style="text-align:left;padding:0">
-                                    @Html.ActionLink((e.Name.Length > 10 ? e.Name.Substring(0,8)+"..." : e.Name), "Index", "Event", new { id = e.ID }, null)
+                                    @Html.ActionLink((e.Name.Length > 10 ? e.Name.Substring(0,8)+"..." : e.Name), "Index", "Event",
+                                    new { id = e.ID }, new { Class = "action add", title = e.Name })
                                 </td>
                             </tr>
                             }
