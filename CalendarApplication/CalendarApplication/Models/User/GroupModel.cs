@@ -9,6 +9,7 @@ namespace CalendarApplication.Models.User
     {
         public int ID { set; get; }
         public string Name { set; get; }
+        public bool Selected { set; get; }
 
         public override bool Equals(object obj)
         {

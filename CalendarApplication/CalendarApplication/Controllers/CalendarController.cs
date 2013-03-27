@@ -15,42 +15,71 @@ namespace CalendarApplication.Controllers
         //
         // GET: /Calendar/
 
-        public ActionResult Month(int year, int month, ViewCheckModel vcm)
+        public ActionResult Index(int mode, int year, int month, int day)
+        {
+            EventViewModel evm = new EventViewModel
+            {
+                Mode = mode,
+                Day = day,
+                Month = month,
+                Year = year,
+                GroupsAvailable = new List<GroupModel> {
+                    new GroupModel { ID = 0, Name = "MyGroup", Selected = false },
+                    new GroupModel { ID = 1, Name = "OtherGroup", Selected = true },
+                },
+                GroupsSelected = new List<GroupModel>()
+            };
+            //evm.GroupsAvailable.Add(new GroupModel { ID = 0, Name = "MyGroup", Selected = false });
+            //evm.GroupsAvailable.Add(new GroupModel { ID = 1, Name = "OtherGroup", Selected = true });
+
+            switch (mode)
+            {
+                case 0:     evm.CurrentModel = GetMonth(year,month);        break;
+                case 1:     evm.CurrentModel = GetDay(year, month, day);    break;
+                case 2:     evm.CurrentModel = GetList();                   break;
+            }
+
+            //evm.MSL = new MultiSelectList(evm.GroupsAvailable, "ID", "Name", evm.GroupsSelected.Select(x => x.ID));
+
+            return View(evm);
+        }
+
+        [HttpPost]
+        public ActionResult Index(EventViewModel evm)
+        {
+            evm.Year = evm.Year > 0 ? evm.Year : 1;
+            evm.Month = evm.Month <= 0 ? 1 : (evm.Month > 12 ? 12 : evm.Month);
+            int days = DateTime.DaysInMonth(evm.Year,evm.Month);
+            evm.Day = evm.Day <= 0 ? 1 : (evm.Day > days ? days : evm.Day);
+
+            switch (evm.Mode)
+            {
+                case 0: evm.CurrentModel = GetMonth(evm.Year, evm.Month); break;
+                case 1: evm.CurrentModel = GetDay(evm.Year, evm.Month, evm.Day); break;
+                case 2: evm.CurrentModel = GetList(); break;
+            }
+
+
+            /*evm.GroupsAvailable = new List<GroupModel>();
+            evm.GroupsAvailable.Add(new GroupModel { ID = 0, Name = "MyGroup" });
+            evm.GroupsAvailable.Add(new GroupModel { ID = 1, Name = "OtherGroup" });
+
+            evm.GroupsSelected = new List<GroupModel>();*/
+
+            //evm.MSL = new MultiSelectList(evm.GroupsAvailable, "ID", "Name", evm.GroupsSelected.Select(x => x.ID));
+
+            return View(evm);
+        }
+
+        private CalendarMonth GetMonth(int year, int month)
         {
             DateTime date = DateTime.Today;
             if (year != 0 && month != 0)
             {
                 date = new DateTime(year, month, 1);
             }
-            List<CalendarDay> dayList = getDays(date.Month,date.Year);
 
-            if (true)
-            {
-                vcm = new ViewCheckModel
-                {
-                    Month = month,
-                    Year = year,
-                    Eventtypes = 0,
-                    GroupsAvailable = new List<GroupModel>(),
-                    GroupsSelected = new List<GroupModel>()
-                };
-                vcm.GroupsAvailable.Add(new GroupModel { ID = 1, Name = "Admins" });
-                vcm.GroupsAvailable.Add(new GroupModel { ID = 2, Name = "PokerPlayers" });
-                vcm.GroupsAvailable.Add(new GroupModel { ID = 3, Name = "Band" });
-                vcm.GroupsSelected.Add(new GroupModel { ID = 3, Name = "Band" });
-            }
-
-            return View(new CalendarMonth { Days = dayList, Date = date, VCM = vcm });
-        }
-
-        public ActionResult ViewCheck(ViewCheckModel vcm)
-        {
-            return RedirectToAction("Month", new { vcm.Year, vcm.Month, vcm });
-        }
-
-        private List<CalendarDay> getDays(int month, int year)
-        {
-            List<CalendarDay> result = new List<CalendarDay>();
+            List<CalendarDay> cdays = new List<CalendarDay>();
 
             DateTime first = new DateTime(year,month,1);
             int before = (int)first.DayOfWeek == 0 ? 6 : (int)first.DayOfWeek - 1;
@@ -71,7 +100,7 @@ namespace CalendarApplication.Controllers
                     Active = myDate.Month == month,
                     Events = new List<BasicEvent>()
                 };
-                result.Add(cd);
+                cdays.Add(cd);
             }
 
             foreach (BasicEvent ev in events)
@@ -80,16 +109,16 @@ namespace CalendarApplication.Controllers
                 TimeSpan start = ev.Start - first;
                 if (start.Days < 0){continue;}
 
-                for (int i = start.Days; i <= end.Days && i < result.Count; i++)
+                for (int i = start.Days; i <= end.Days && i < cdays.Count; i++)
                 {
-                    result[i].Events.Add(ev);
+                    cdays[i].Events.Add(ev);
                 }
             }
 
-            return result;
+            return new CalendarMonth { Date = date, Days = cdays };
         }
 
-        public ActionResult Day(int year, int month, int day)
+        public CalendarDay GetDay(int year, int month, int day)
         {
             MySqlConnect msc = new MySqlConnect();
             DateTime temp = new DateTime(year, month, day);
@@ -107,10 +136,10 @@ namespace CalendarApplication.Controllers
                 Events = events
             };
 
-            return View(result);
+            return result;
         }
 
-        public ActionResult List()
+        public CalendarList GetList()
         {
             MySqlConnect msc = new MySqlConnect();
             List<BasicEvent> events = msc.GetEvents(false, "", "eventStart");
@@ -120,10 +149,9 @@ namespace CalendarApplication.Controllers
                 Events = events,
                 Start = DateTime.Now,
                 End = DateTime.Now.AddDays(10),
-                VCM = null
             };
 
-            return View(model);
+            return model;
         }
     }
 }

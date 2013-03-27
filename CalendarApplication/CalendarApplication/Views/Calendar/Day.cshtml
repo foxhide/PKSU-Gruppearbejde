@@ -1,9 +1,5 @@
 ﻿@model CalendarApplication.Models.Calendar.CalendarDay
 
-@{
-    ViewBag.Title = "Day";
-}
-
 @using CalendarApplication.Models.Event;
 
 <h2>Day: @Model.Date.ToString("dd-MM-yyyy")</h2>
@@ -11,26 +7,26 @@
 <table style="font-size:20px;width:850px">
     <tr>
         <td colspan="3" style="text-align:center">
-            @Html.ActionLink("Today", "Day", "Calendar",
-                             new { year = DateTime.Now.Year, month = DateTime.Now.Month, day = DateTime.Now.Day }, null)
+            @Html.ActionLink("Today", "Index", "Calendar",
+                             new { mode = 1, year = DateTime.Now.Year, month = DateTime.Now.Month, day = DateTime.Now.Day }, null)
         </td>
     </tr>
     <tr>
         <td style="text-align:left;padding:0;width:20%">
             @{DateTime date = Model.Date.AddDays(-1);}
-            @Html.ActionLink(date.ToString("<- d. MMM"), "Day", "Calendar",
-                             new { year = date.Year, month = date.Month, day = date.Day }, null)
+            @Html.ActionLink(date.ToString("<- d. MMM"), "Index", "Calendar",
+                             new { mode = 1, year = date.Year, month = date.Month, day = date.Day }, null)
         </td>
         <td style="text-align:center;padding:0;width:60%">
             @Model.Date.ToString("d. ")
             @Html.ActionLink(Model.Date.ToString("MMM"), "Index", "Calendar",
-                             new { year = Model.Date.Year, month = Model.Date.Month }, null)
+                             new { mode = 0, year = Model.Date.Year, month = Model.Date.Month, day = 0 }, null)
             @Model.Date.ToString(" yyy")
         </td>
         <td style="text-align:right;padding:0;width:20%">
             @{date = Model.Date.AddDays(1);}
-            @Html.ActionLink(date.ToString("d. MMM ->"), "Day", "Calendar",
-                             new { year = date.Year, month = date.Month, day = date.Day }, null)
+            @Html.ActionLink(date.ToString("d. MMM ->"), "Index", "Calendar",
+                             new { mode = 1, year = date.Year, month = date.Month, day = date.Day }, null)
         </td>
     </tr>
 </table>
@@ -70,7 +66,7 @@
                     
                     
                             <td style="width:@(start-curEnd)%;height:100%;padding:0"></td>
-                            <td style="width:@(end-start)%;max-width:@(end-start);
+                            <td style="width:@(end-start)%;max-width:@(end-start)%;
                                 background-color:@(e.getColor());word-wrap:break-word;overflow:hidden">
                                 @e.Name
                             </td>

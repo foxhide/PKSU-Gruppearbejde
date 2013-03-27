@@ -7,6 +7,5 @@ namespace CalendarApplication.Models.Calendar
 {
     public class Calendar
     {
-        public ViewCheckModel VCM { set; get; }
     }
 }

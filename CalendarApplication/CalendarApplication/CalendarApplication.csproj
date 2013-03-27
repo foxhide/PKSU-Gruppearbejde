@@ -119,7 +119,7 @@
     <Compile Include="Models\Calendar\CalendarDay.cs" />
     <Compile Include="Models\Calendar\CalendarList.cs" />
     <Compile Include="Models\Calendar\CalendarMonth.cs" />
-    <Compile Include="Models\Calendar\ViewCheckModel.cs" />
+    <Compile Include="Models\Calendar\EventViewModel.cs" />
     <Compile Include="Models\Event\BasicEvent.cs" />
     <Compile Include="Models\Event\EventWithDetails.cs" />
     <Compile Include="Models\Event\Room.cs" />
@@ -163,6 +163,8 @@
       <DependentUpon>Web.config</DependentUpon>
     </Content>
     <Content Include="Views\Web.config" />
+    <Content Include="Views\Calendar\Index.cshtml" />
+    <Content Include="Views\Calendar\List.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -185,9 +187,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Calendar\Day.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\Calendar\List.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Calendar\ViewCheck.cshtml" />
