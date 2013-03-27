@@ -1,41 +1,40 @@
 ﻿@model CalendarApplication.Models.Calendar.CalendarMonth
 
-<h2>Monthly view</h2>
-
 @using CalendarApplication.Models.Calendar;
 @using CalendarApplication.Models.Event;
 @using System.Globalization;
 
-@Html.ActionLink("View List", "Index", new { mode = 2, year = Model.Date.Year, month = Model.Date.Month, day = 1 })
+@Html.ActionLink("View List", "Index", new { mode = 2, year = Model.Date.Year, month = Model.Date.Month, day = DateTime.Now.Day, range = 10})
 
 <table style="font-size:20px;padding:0;border-spacing:0;width:700px">
     <tr style="padding:0">
         <td colspan="3" style="text-align:center;padding:0">
-            @Html.ActionLink("Today", "Index", "Calendar",new { year = DateTime.Now.Year, month = DateTime.Now.Month }, null)
+            @Html.ActionLink("Today", "Index", "Calendar",
+                        new { mode = 0, year = DateTime.Now.Year, month = DateTime.Now.Month, day = 0, range = 0 })
         </td>
     </tr>
     <tr style="padding:0">
         <td style="text-align:left;padding:0;width:15%">
                         @Html.ActionLink(Model.Date.AddYears(-1).ToString("<- yyyy"), "Index", "Calendar",
-                             new { mode = 0, year = Model.Date.AddYears(-1).Year, month = Model.Date.Month, day = 0 }, null)
+                             new { mode = 0, year = Model.Date.AddYears(-1).Year, month = Model.Date.Month, day = 0, range = 0})
         </td>
         <td style="padding:0;text-align:center;">@Model.Date.Year</td>
         <td style="text-align:right;padding:0;width:15%">
                         @Html.ActionLink(Model.Date.AddYears(1).ToString("yyyy ->"), "Index", "Calendar",
-                             new { mode = 0, year = Model.Date.AddYears(1).Year, month = Model.Date.Month, day = 0 }, null)
+                             new { mode = 0, year = Model.Date.AddYears(1).Year, month = Model.Date.Month, day = 0, range = 0})
         </td>
     </tr>
     <tr style="padding:0">
         <td style="text-align:left;padding:0;width:15%">
                         @Html.ActionLink(Model.Date.AddMonths(-1).ToString("<- MMMM"), "Index", "Calendar",
                              new { mode = 0, year = Model.Date.AddMonths(-1).Year,
-                                 month = Model.Date.AddMonths(-1).Month, day = 0}, null)
+                                    month = Model.Date.AddMonths(-1).Month, day = 0, range = 0})
         </td>
         <td style="padding:0;text-align:center">@(Model.Date.ToString("MMMM"))</td>
         <td style="text-align:right;padding:0;width:15%">
                         @Html.ActionLink(Model.Date.AddMonths(1).ToString("MMMM ->"), "Index", "Calendar",
                              new { mode = 0, year = Model.Date.AddMonths(1).Year,
-                                 month = Model.Date.AddMonths(1).Month, day = 0 }, null)
+                                    month = Model.Date.AddMonths(1).Month, day = 0, range = 0})
         </td>
     </tr>
 </table>
@@ -70,7 +69,7 @@
                 <tr>
                     <td style="text-align:left;vertical-align:top;padding:0;font-size:14px;width:8px">
                         @Html.ActionLink(day.Date.Day.ToString(), "Index", "Calendar",
-                                         new { mode = 1, year = day.Date.Year, month = day.Date.Month, day = day.Date.Day }, null)
+                                         new { mode = 1, year = day.Date.Year, month = day.Date.Month, day = day.Date.Day, range = 0})
                     </td>
                     <td style="padding:3px">
                         <table style="border-spacing:0;width:100%">

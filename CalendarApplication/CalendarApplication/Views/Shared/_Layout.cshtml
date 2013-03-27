@@ -1,5 +1,8 @@
 ﻿<!DOCTYPE html>
 <html>
+
+    @using CalendarApplication.Models.Calendar;
+
 <head>
     <meta charset="utf-8" />
     <title>Stengade calendar application - @ViewBag.Title</title>
@@ -69,7 +72,7 @@
                          }
                         if(curActn != "" && curCtrl != "calendar")
                         {
-                            <tr><td>@Html.ActionLink("Calendar", "Index", "Calendar", new { mode = 0, year = DateTime.Now.Year, month = DateTime.Now.Month, day = 0 }, null)</td></tr>
+                            <tr><td>@Html.ActionLink("Calendar", "Index", "Calendar", Calendar.InitialView, null)</td></tr>
                         }
                         else
                         {

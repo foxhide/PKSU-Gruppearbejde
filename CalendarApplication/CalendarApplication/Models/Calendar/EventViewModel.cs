@@ -22,6 +22,8 @@ namespace CalendarApplication.Models.Calendar
         [Display(Name = "Year")]
         public int Year { set; get; }
 
+        public int Range { set; get; }
+
         public List<GroupModel> GroupsAvailable { set; get; }
         public List<GroupModel> GroupsSelected { set; get; }
 

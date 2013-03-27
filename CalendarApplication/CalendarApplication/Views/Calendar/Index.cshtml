@@ -51,7 +51,7 @@
                     @Html.ValidationMessageFor(model => model.Month)
                 </div>
 
-                @if(Model.Mode == 1)
+                @if(Model.Mode != 0)
                 {
                     <div class="editor-label">
                         @Html.LabelFor(model => model.Day)
@@ -59,6 +59,17 @@
                     <div class="editor-field">
                         @Html.EditorFor(model => model.Day)
                         @Html.ValidationMessageFor(model => model.Day)
+                    </div>
+                }
+
+                @if(Model.Mode == 2)
+                {
+                    <div class="editor-label">
+                        @Html.LabelFor(model => model.Range)
+                    </div>
+                    <div class="editor-field">
+                        @Html.EditorFor(model => model.Range)
+                        @Html.ValidationMessageFor(model => model.Range)
                     </div>
                 }
 

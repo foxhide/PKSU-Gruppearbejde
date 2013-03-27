@@ -15,7 +15,7 @@ namespace CalendarApplication.Controllers
         //
         // GET: /Calendar/
 
-        public ActionResult Index(int mode, int year, int month, int day)
+        public ActionResult Index(int mode, int year, int month, int day, int range)
         {
             EventViewModel evm = new EventViewModel
             {
@@ -23,23 +23,21 @@ namespace CalendarApplication.Controllers
                 Day = day,
                 Month = month,
                 Year = year,
+                Range = range,
                 GroupsAvailable = new List<GroupModel> {
                     new GroupModel { ID = 0, Name = "MyGroup", Selected = false },
-                    new GroupModel { ID = 1, Name = "OtherGroup", Selected = true },
+                    new GroupModel { ID = 1, Name = "OtherGroup", Selected = false },
                 },
                 GroupsSelected = new List<GroupModel>()
             };
-            //evm.GroupsAvailable.Add(new GroupModel { ID = 0, Name = "MyGroup", Selected = false });
-            //evm.GroupsAvailable.Add(new GroupModel { ID = 1, Name = "OtherGroup", Selected = true });
 
             switch (mode)
             {
                 case 0:     evm.CurrentModel = GetMonth(year,month);        break;
                 case 1:     evm.CurrentModel = GetDay(year, month, day);    break;
-                case 2:     evm.CurrentModel = GetList();                   break;
+                case 2:     DateTime time = new DateTime(year,month,day);
+                            evm.CurrentModel = GetList(time,time.AddDays(range),"");   break;
             }
-
-            //evm.MSL = new MultiSelectList(evm.GroupsAvailable, "ID", "Name", evm.GroupsSelected.Select(x => x.ID));
 
             return View(evm);
         }
@@ -56,17 +54,10 @@ namespace CalendarApplication.Controllers
             {
                 case 0: evm.CurrentModel = GetMonth(evm.Year, evm.Month); break;
                 case 1: evm.CurrentModel = GetDay(evm.Year, evm.Month, evm.Day); break;
-                case 2: evm.CurrentModel = GetList(); break;
+                case 2: DateTime time = new DateTime(evm.Year, evm.Month, evm.Day);
+                        evm.CurrentModel = GetList(time, time.AddDays(evm.Range), "");
+                        break;
             }
-
-
-            /*evm.GroupsAvailable = new List<GroupModel>();
-            evm.GroupsAvailable.Add(new GroupModel { ID = 0, Name = "MyGroup" });
-            evm.GroupsAvailable.Add(new GroupModel { ID = 1, Name = "OtherGroup" });
-
-            evm.GroupsSelected = new List<GroupModel>();*/
-
-            //evm.MSL = new MultiSelectList(evm.GroupsAvailable, "ID", "Name", evm.GroupsSelected.Select(x => x.ID));
 
             return View(evm);
         }
@@ -139,16 +130,23 @@ namespace CalendarApplication.Controllers
             return result;
         }
 
-        public CalendarList GetList()
+        public CalendarList GetList(DateTime start, DateTime end, string whereRest)
         {
+            string morning = start.ToString("yyyy-MM-dd 00:00:00");
+            string night = end.ToString("yyyy-MM-dd 23:59:59");
+            string where = "(eventStart <= '" + night + "' AND eventStart >= '" + morning
+                            + "') OR (eventEnd <= '" + night + "' AND eventEnd >= '" + morning
+                            + "') OR (eventEnd >= '" + night + "' AND eventStart <= '" + morning + "')"
+                            + (string.IsNullOrEmpty(whereRest) ? "" : " AND (" + whereRest + ")");
+
             MySqlConnect msc = new MySqlConnect();
-            List<BasicEvent> events = msc.GetEvents(false, "", "eventStart");
+            List<BasicEvent> events = msc.GetEvents(false, where, "eventStart");
 
             CalendarList model = new CalendarList
             {
                 Events = events,
-                Start = DateTime.Now,
-                End = DateTime.Now.AddDays(10),
+                Start = start,
+                End = end,
             };
 
             return model;
