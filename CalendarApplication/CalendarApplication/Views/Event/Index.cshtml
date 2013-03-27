@@ -6,6 +6,10 @@
 
 @using CalendarApplication.Models.Event
 
+@if (Model.ID < 0) {
+    <h2>Error loading event!</h2>
+}
+else {
 <h2>Event Index</h2>
 <table class="gridtable">
     <tr>
@@ -38,14 +42,14 @@
     </tr>
     <tr>
         <td>Event Visible</td>
-        <td>@Model.Visible</td>
+        <td>AT Model.Visible</td>
     </tr>
-    <tr>
-        <td>Rooms Used</td>
             @foreach (Room room in Model.Rooms)
             {
-                <td>room</td>
+                <tr>
+                    <td>Rooms Used</td>
+                    <td>@room.Name</td>
+                </tr>
             }
-        
-    </tr>
 </table>
+}

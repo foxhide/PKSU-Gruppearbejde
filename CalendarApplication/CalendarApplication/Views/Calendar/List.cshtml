@@ -20,7 +20,7 @@
     @foreach (BasicEvent ev in Model.Events) {
         <tr style="background-color:@(ev.getColor())">
             <td>
-                @Html.DisplayFor(modelItem => ev.Name)
+                @Html.ActionLink((ev.Name.Length > 10 ? ev.Name.Substring(0,8)+"..." : ev.Name), "Index", "Event", new { id = ev.ID }, null)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => ev.Start)
