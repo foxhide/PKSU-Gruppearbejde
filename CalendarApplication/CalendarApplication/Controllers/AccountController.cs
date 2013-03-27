@@ -21,7 +21,7 @@ namespace CalendarApplication.Controllers
         [HttpPost]
         public ActionResult Login(LoginModel login)
         {
-            string userinf = "SELECT * FROM pksudb.users WHERE userName = '" + login.UserName
+            string userinf = "SELECT userId FROM pksudb.users WHERE userName = '" + login.UserName
                            + "' AND password = '" + login.Password+"'";
             MySqlConnect con = new MySqlConnect();
             DataTable table = con.ExecuteQuery(userinf);
@@ -31,10 +31,7 @@ namespace CalendarApplication.Controllers
                 DataRowCollection rows = table.Rows;
                 if (rows.Count == 1)
                 {
-                    string userData = (int)rows[0]["userId"] + "|" +
-                                        (string)rows[0]["userName"] + "|" +
-                                        (string)rows[0]["realName"] + "|" +
-                                        (string)rows[0]["email"];
+                    string userData = ""+(int)rows[0]["userId"];
 
                     FormsAuthentication.SetAuthCookie(userData, login.RememberMe);
                     
@@ -63,9 +60,9 @@ namespace CalendarApplication.Controllers
             int userId = msc.CreateUser(model);
             if (userId >= 0)
             {
-                string userData = userId + "|" + model.UserName + "|" + model.RealName;
+                //Remove this call if the user should not be logged in after registering.
+                FormsAuthentication.SetAuthCookie(""+userId, false);
 
-                FormsAuthentication.SetAuthCookie(userData, false);
                 return RedirectToAction("Index", "Home", null);
             }
             TempData["message"] = "This user name is all ready taken, please choose a new one...";

@@ -125,8 +125,8 @@
     <Compile Include="Models\Event\Room.cs" />
     <Compile Include="Models\Account\AccountModels.cs" />
     <Compile Include="Models\Account\LoginModel.cs" />
-    <Compile Include="Models\User\CurrentUserModel.cs" />
     <Compile Include="Models\User\GroupModel.cs" />
+    <Compile Include="Models\User\UserModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

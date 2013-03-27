@@ -17,11 +17,11 @@
     </text>
 }
 else {
-    <h2>Welcome @CurrentUserModel.GetCurrent().RealName</h2>
+    <h2>Welcome @UserModel.GetCurrent().RealName</h2>
 
     <text>
         You may view upcomming events using the
-        @Html.ActionLink("calendar menu", "", "calendar", new { year = DateTime.Now.Year, month = DateTime.Now.Month }, null).<br />
+        @Html.ActionLink("calendar menu", "Month", "Calendar", new { year = DateTime.Now.Year, month = DateTime.Now.Month }, null).<br />
     </text>
     
 }
