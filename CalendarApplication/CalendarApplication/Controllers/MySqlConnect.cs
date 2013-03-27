@@ -5,9 +5,11 @@ using System.Web;
 using System.Data;
 using MySql.Data.MySqlClient;
 using System.Windows.Forms;
+
 using CalendarApplication.Models.Calendar;
 using CalendarApplication.Models.Event;
 using CalendarApplication.Models.Account;
+using CalendarApplication.Models.User;
 
 namespace CalendarApplication.Controllers
 {
@@ -287,6 +289,66 @@ namespace CalendarApplication.Controllers
                 return null;
             }
 
+        }
+
+        public List<GroupModel> GetGroups(string Table, string Where)
+        {
+            if (this.OpenConnection())
+            {
+                List<GroupModel> result = new List<GroupModel>();
+
+                MySqlCommand msc = new MySqlCommand("SELECT * FROM (" + Table + ")"
+                                                + (string.IsNullOrEmpty(Where) ? "" : " WHERE (" + Where + ")"),
+                                                connection);
+                MySqlDataReader dataReader = msc.ExecuteReader();
+
+                while (dataReader.Read())
+                {
+                    GroupModel gm = new GroupModel
+                    {
+                        ID = (int)dataReader["groupId"],
+                        Name = (string)dataReader["groupName"]
+                    };
+                    result.Add(gm);
+                }
+
+                this.CloseConnection();
+                return result;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public UserModel GetUser(int ID)
+        {
+            if (this.OpenConnection())
+            {
+
+                MySqlCommand msc = new MySqlCommand("SELECT * FROM pksudb.users WHERE userId = "+ID,connection);
+                MySqlDataReader dataReader = msc.ExecuteReader();
+
+                if (!dataReader.Read())
+                {
+                    return null;
+                }
+
+                UserModel result = new UserModel
+                {
+                    ID = ID,
+                    UserName = (string)dataReader["userName"],
+                    RealName = (string)dataReader["realName"],
+                    Email = (string)dataReader["email"]
+                };
+
+                this.CloseConnection();
+                return result;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public int CreateUser(Register data)

@@ -69,7 +69,7 @@
                             <td style="width:@(start-curEnd)%;height:100%;padding:0"></td>
                             <td style="width:@(end-start)%;max-width:@(end-start)%;
                                 background-color:@(e.getColor());word-wrap:break-word;overflow:hidden">
-                                @e.Name
+                                @Html.ActionLink((e.Name.Length > 10 ? e.Name.Substring(0,8)+"..." : e.Name), "Index", "Event", new { id = e.ID }, null)
                             </td>
                     
                             curEnd = end;
