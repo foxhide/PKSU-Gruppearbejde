@@ -42,8 +42,11 @@ namespace CalendarApplication.Controllers
                     Room tmpRoom = new Room { ID = (int)rows[i]["roomId"], Name = (string)rows[i]["roomName"] };
                     result.Rooms.Add(tmpRoom);
                 }
-                string tableName = "table_"+result.TypeId;
-                result.EventSpecial = con.ExecuteQuery("SELECT * FROM " + tableName + " WHERE eventId = " + id);
+                if (result.TypeId != 1)
+                {
+                    string tableName = "table_" + result.TypeId;
+                    result.EventSpecial = con.ExecuteQuery("SELECT * FROM " + tableName + " WHERE eventId = " + id);
+                }
             }
             else
             {

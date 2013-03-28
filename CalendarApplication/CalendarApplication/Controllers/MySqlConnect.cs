@@ -10,6 +10,7 @@ using CalendarApplication.Models.Calendar;
 using CalendarApplication.Models.Event;
 using CalendarApplication.Models.Account;
 using CalendarApplication.Models.User;
+using CalendarApplication.Models.EventType;
 
 namespace CalendarApplication.Controllers
 {
@@ -341,6 +342,38 @@ namespace CalendarApplication.Controllers
                     RealName = (string)dataReader["realName"],
                     Email = (string)dataReader["email"]
                 };
+
+                this.CloseConnection();
+                return result;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public List<EventTypeModel> GetEventTypes(string where)
+        {
+            if (this.OpenConnection())
+            {
+
+                MySqlCommand msc = new MySqlCommand("SELECT * FROM pksudb.eventtypes" +
+                                                    (string.IsNullOrEmpty(where) ? "" : " WHERE "+where),
+                                                    connection);
+                MySqlDataReader dataReader = msc.ExecuteReader();
+
+                List<EventTypeModel> result = new List<EventTypeModel>();
+
+                while (dataReader.Read())
+                {
+                    EventTypeModel et = new EventTypeModel
+                    {
+                        ID = (int)dataReader["eventTypeId"],
+                        Name = (string)dataReader["eventTypeName"],
+                        Selected = true
+                    };
+                    result.Add(et);
+                }
 
                 this.CloseConnection();
                 return result;

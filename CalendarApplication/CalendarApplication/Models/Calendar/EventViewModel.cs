@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using CalendarApplication.Models.User;
 using System.ComponentModel.DataAnnotations;
+
+using CalendarApplication.Models.User;
+using CalendarApplication.Models.EventType;
+using CalendarApplication.Models.Event;
 
 namespace CalendarApplication.Models.Calendar
 {
@@ -24,8 +27,10 @@ namespace CalendarApplication.Models.Calendar
 
         public int Range { set; get; }
 
-        public List<GroupModel> Groups { set; get; }
+        public bool ViewState0 { set; get; }
+        public bool ViewState1 { set; get; }
+        public bool ViewState2 { set; get; }
 
-        public int Eventtypes { set; get; }
+        public List<EventTypeModel> Eventtypes { set; get; }
     }
 }

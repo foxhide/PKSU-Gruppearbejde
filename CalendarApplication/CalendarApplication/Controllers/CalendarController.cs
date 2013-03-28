@@ -4,9 +4,11 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.Data;
+
 using CalendarApplication.Models.Calendar;
 using CalendarApplication.Models.Event;
 using CalendarApplication.Models.User;
+using CalendarApplication.Models.EventType;
 
 namespace CalendarApplication.Controllers
 {
@@ -25,29 +27,17 @@ namespace CalendarApplication.Controllers
                 Month = month,
                 Year = year,
                 Range = range,
-                Groups = msc.GetGroups("groups","")
+                ViewState0 = true,
+                ViewState1 = true,
+                ViewState2 = true,
+                Eventtypes = msc.GetEventTypes("")
             };
-
-            if (UserModel.GetCurrentUserID() >= 0)
-            {
-                List<GroupModel> userGroups = UserModel.GetCurrent().GetGroups();
-                int j = 0;
-                for (int i = 0; i < evm.Groups.Count && j < userGroups.Count; i++)
-                {
-                    if (evm.Groups[i].ID == userGroups[j].ID)
-                    {
-                        evm.Groups[i].Selected = true;
-                        j++;
-                    }
-                }
-            }
 
             switch (mode)
             {
-                case 0:     evm.CurrentModel = GetMonth(year,month);        break;
-                case 1:     evm.CurrentModel = GetDay(year, month, day);    break;
-                case 2:     DateTime time = new DateTime(year,month,day);
-                            evm.CurrentModel = GetList(time,time.AddDays(range),"");   break;
+                case 0:     evm.CurrentModel = GetMonth(evm); break;
+                case 1:     evm.CurrentModel = GetDay(evm); break;
+                case 2:     evm.CurrentModel = GetList(evm); break;
             }
 
             return View(evm);
@@ -63,33 +53,27 @@ namespace CalendarApplication.Controllers
 
             switch (evm.Mode)
             {
-                case 0: evm.CurrentModel = GetMonth(evm.Year, evm.Month); break;
-                case 1: evm.CurrentModel = GetDay(evm.Year, evm.Month, evm.Day); break;
-                case 2: DateTime time = new DateTime(evm.Year, evm.Month, evm.Day);
-                        evm.CurrentModel = GetList(time, time.AddDays(evm.Range), "");
-                        break;
+                case 0: evm.CurrentModel = GetMonth(evm); break;
+                case 1: evm.CurrentModel = GetDay(evm); break;
+                case 2: evm.CurrentModel = GetList(evm); break;
             }
 
             return View(evm);
         }
 
-        private CalendarMonth GetMonth(int year, int month)
+        private CalendarMonth GetMonth(EventViewModel evm)
         {
-            DateTime date = DateTime.Today;
-            if (year != 0 && month != 0)
-            {
-                date = new DateTime(year, month, 1);
-            }
-
             List<CalendarDay> cdays = new List<CalendarDay>();
 
-            DateTime first = new DateTime(year,month,1);
+            DateTime first = new DateTime(evm.Year, evm.Month, 1);
             int before = (int)first.DayOfWeek == 0 ? 6 : (int)first.DayOfWeek - 1;
-            int days = DateTime.DaysInMonth(year, month) + before;
+            int days = DateTime.DaysInMonth(evm.Year, evm.Month) + before;
             days = days % 7 > 0 ? days + (7 - days % 7) : days;
 
+            string where = this.GetFilter(evm,first,first.AddDays(days-1));
+            
             MySqlConnect msc = new MySqlConnect();
-            List<BasicEvent> events = msc.GetEvents(false,"","eventStart");
+            List<BasicEvent> events = msc.GetEvents(false,where,"eventStart");
 
             first = first.AddDays(-before);
 
@@ -99,7 +83,7 @@ namespace CalendarApplication.Controllers
                 CalendarDay cd = new CalendarDay
                 {
                     Date = myDate,
-                    Active = myDate.Month == month,
+                    Active = myDate.Month == evm.Month,
                     Events = new List<BasicEvent>()
                 };
                 cdays.Add(cd);
@@ -109,31 +93,28 @@ namespace CalendarApplication.Controllers
             {
                 TimeSpan end = ev.End - first;
                 TimeSpan start = ev.Start - first;
-                if (start.Days < 0){continue;}
+                int startDay = start.Days < 0 ? 0 : start.Days;
 
-                for (int i = start.Days; i <= end.Days && i < cdays.Count; i++)
+                for (int i = startDay; i <= end.Days && i < cdays.Count; i++)
                 {
                     cdays[i].Events.Add(ev);
                 }
             }
 
-            return new CalendarMonth { Date = date, Days = cdays };
+            return new CalendarMonth { Date = new DateTime(evm.Year, evm.Month, 1), Days = cdays };
         }
 
-        public CalendarDay GetDay(int year, int month, int day)
+        private CalendarDay GetDay(EventViewModel evm)
         {
             MySqlConnect msc = new MySqlConnect();
-            DateTime temp = new DateTime(year, month, day);
-            string morning = temp.ToString("yyyy-MM-dd HH:mm:ss");
-            string night = temp.AddDays(1).AddSeconds(-1).ToString("yyyy-MM-dd HH:mm:ss");
-            string where = "(eventStart <= '" + night + "' AND eventStart >= '" + morning
-                            + "') OR (eventEnd <= '" + night + "' AND eventEnd >= '" + morning
-                            + "') OR (eventEnd >= '" + night + "' AND eventStart <= '" + morning + "')";
+            DateTime date = new DateTime(evm.Year, evm.Month, evm.Day);
+            string where = this.GetFilter(evm, date, date);
+
             List<BasicEvent> events = msc.GetEvents(true, where, "eventStart");
 
             CalendarDay result = new CalendarDay
             {
-                Date = new DateTime(year,month,day),
+                Date = date,
                 Rooms = msc.GetRooms(),
                 Events = events
             };
@@ -141,14 +122,11 @@ namespace CalendarApplication.Controllers
             return result;
         }
 
-        public CalendarList GetList(DateTime start, DateTime end, string whereRest)
+        private CalendarList GetList(EventViewModel evm)
         {
-            string morning = start.ToString("yyyy-MM-dd 00:00:00");
-            string night = end.ToString("yyyy-MM-dd 23:59:59");
-            string where = "(eventStart <= '" + night + "' AND eventStart >= '" + morning
-                            + "') OR (eventEnd <= '" + night + "' AND eventEnd >= '" + morning
-                            + "') OR (eventEnd >= '" + night + "' AND eventStart <= '" + morning + "')"
-                            + (string.IsNullOrEmpty(whereRest) ? "" : " AND (" + whereRest + ")");
+            DateTime start = new DateTime(evm.Year, evm.Month, evm.Day);
+            DateTime end = start.AddDays(evm.Range);
+            string where = this.GetFilter(evm, start, end);
 
             MySqlConnect msc = new MySqlConnect();
             List<BasicEvent> events = msc.GetEvents(false, where, "eventStart");
@@ -161,6 +139,37 @@ namespace CalendarApplication.Controllers
             };
 
             return model;
+        }
+
+        /// <summary>
+        /// Helper function: gets the string needed to filter events based on EventTypes, Dates and States
+        /// </summary>
+        /// <param name="evm">EventViewModel</param>
+        /// <param name="start">Start date</param>
+        /// <param name="end">End date</param>
+        /// <returns>A string used in the where part of a </returns>
+        private string GetFilter(EventViewModel evm, DateTime start, DateTime end)
+        {
+            string morning = start.ToString("yyyy-MM-dd 00:00:00");
+            string night = end.ToString("yyyy-MM-dd 23:59:59");
+            string result = "((eventStart <= '" + night + "' AND eventStart >= '" + morning
+                            + "') OR (eventEnd <= '" + night + "' AND eventEnd >= '" + morning
+                            + "') OR (eventEnd >= '" + night + "' AND eventStart <= '" + morning + "'))";
+
+            foreach (EventTypeModel etm in evm.Eventtypes)
+            {
+                if (!etm.Selected)
+                {
+                    result += " AND ";
+                    result += "(eventTypeId != " + etm.ID + ")";
+                }
+            }
+
+            result += (evm.ViewState0 ? "" : " AND (state != 0)");
+            result += (evm.ViewState1 ? "" : " AND (state != 1)");
+            result += (evm.ViewState2 ? "" : " AND (state != 2)");
+
+            return "("+result+")";
         }
     }
 }
