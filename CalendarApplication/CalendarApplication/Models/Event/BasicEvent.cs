@@ -25,18 +25,28 @@ namespace CalendarApplication.Models.Event
 
         public string getColor()
         {
-            switch (State)
-            {
-                case 0:     return "red";
-                case 1:     return "yellow";
-                case 2:     return "#40FF00";
-                default:    return "white";
-            }
+            return BasicEvent.getColor(this.State);
         }
 
         public string getStateText()
         {
-            switch (State)
+            return BasicEvent.getStateText(this.State);
+        }
+
+        public static string getColor(int state)
+        {
+            switch (state)
+            {
+                case 0: return "red";
+                case 1: return "yellow";
+                case 2: return "#40FF00";
+                default: return "white";
+            }
+        }
+
+        public static string getStateText(int state)
+        {
+            switch (state)
             {
                 case 0: return "Needs Approval";
                 case 1: return "Approved";
