@@ -121,7 +121,9 @@
     <Compile Include="Models\Calendar\CalendarMonth.cs" />
     <Compile Include="Models\Calendar\EventViewModel.cs" />
     <Compile Include="Models\Event\BasicEvent.cs" />
+    <Compile Include="Models\Event\EventType.cs" />
     <Compile Include="Models\Event\EventWithDetails.cs" />
+    <Compile Include="Models\Event\FieldData.cs" />
     <Compile Include="Models\Event\Room.cs" />
     <Compile Include="Models\Account\LoginModel.cs" />
     <Compile Include="Models\User\GroupModel.cs" />

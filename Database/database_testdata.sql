@@ -13,7 +13,7 @@ INSERT INTO users (userName, password, realName, admin, email, active, needsAppr
 INSERT INTO eventtypes (eventTypeName) VALUES ("Concert");
 INSERT INTO eventtypefields (eventTypeId, fieldName, fieldDescription, requiredField, fieldType) VALUES (2, "Band-name","Name of the band that's playing",1,0);
 
-CREATE TABLE pksudb.table_1 (
+CREATE TABLE pksudb.table_2 (
 	eventId int NOT NULL,
 	band VARCHAR(50) NOT NULL,
 	PRIMARY KEY (eventId),
@@ -24,16 +24,21 @@ CREATE TABLE pksudb.table_1 (
     ON UPDATE NO ACTION
 );
 
-INSERT INTO events (userId, eventTypeId, eventName, eventStart, eventEnd, visible, state) VALUES (3,2,"Muse","2013-03-19 22:00:00","2013-03-20 02:30:00",true,0);
+INSERT INTO events (userId, eventTypeId, eventName, eventStart, eventEnd, visible, state)
+	VALUES (3,2,"Muse","2013-03-19 22:00:00","2013-03-20 02:30:00",true,0);
+INSERT INTO table_2 (eventId,band) VALUES (1,"muse");
 INSERT INTO eventroomsused (eventId, roomId) VALUES (1,2);
 INSERT INTO eventroomsused (eventId, roomId) VALUES (1,3);
 
-INSERT INTO events (userId, eventTypeId, eventName, eventStart, eventEnd, visible, state) VALUES (1,1,"Poker","2013-03-22 22:00:00","2013-03-24 10:00:00",true,1);
+INSERT INTO events (userId, eventTypeId, eventName, eventStart, eventEnd, visible, state)
+	VALUES (1,1,"Poker","2013-03-22 22:00:00","2013-03-24 10:00:00",true,1);
 INSERT INTO eventroomsused (eventId, roomId) VALUES (2,4);
 
-INSERT INTO events (userId, eventTypeId, eventName, eventStart, eventEnd, visible, state) VALUES (2,1,"Kerbal","2013-03-02 22:00:00","2013-04-20 02:30:00",true,2);
+INSERT INTO events (userId, eventTypeId, eventName, eventStart, eventEnd, visible, state)
+	VALUES (2,1,"Kerbal","2013-03-02 22:00:00","2013-04-20 02:30:00",true,2);
 INSERT INTO eventroomsused (eventId, roomId) VALUES (3,1);
 INSERT INTO eventroomsused (eventId, roomId) VALUES (3,6);
 
-INSERT INTO events (userId, eventTypeId, eventName, eventStart, eventEnd, visible, state) VALUES (2,1,"MineCon 2013","2013-03-02 10:00:00","2013-03-02 18:30:00",true,1);
+INSERT INTO events (userId, eventTypeId, eventName, eventStart, eventEnd, visible, state)
+	VALUES (2,1,"MineCon 2013","2013-03-02 10:00:00","2013-03-02 18:30:00",true,1);
 INSERT INTO eventroomsused (eventId, roomId) VALUES (4,5);
