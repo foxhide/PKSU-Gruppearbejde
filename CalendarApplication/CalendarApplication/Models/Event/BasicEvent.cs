@@ -10,11 +10,12 @@ namespace CalendarApplication.Models.Event
         public int ID { set; get; }
         public string Name { set; get; }
         public string Creator { set; get; }
-        public string Type { set; get; }
+        public int TypeId { set; get; }
+        public string TypeName { set; get; }
         public DateTime Start { set; get; }
         public DateTime End { set; get; }
         public int State { set; get; }
-        public int Visible { set; get; }
+        public bool Visible { set; get; }
         public List<Room> Rooms { set; get; }
 
         public TimeSpan getDuration()

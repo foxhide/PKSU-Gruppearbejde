@@ -15,7 +15,7 @@ namespace CalendarApplication.Controllers
 
         public ActionResult Index(int id)
         {
-            BasicEvent result = new BasicEvent
+            EventWithDetails result = new EventWithDetails
             {
                 ID = id
             };
@@ -32,8 +32,9 @@ namespace CalendarApplication.Controllers
                 result.Start = (DateTime)rows[0]["eventStart"];
                 result.End = (DateTime)rows[0]["eventEnd"];
                 result.State = (int)rows[0]["state"];
-                result.Type = (string)rows[0]["eventTypeName"];
-                //result.Visible = (short)rows[0]["visible"];
+                result.TypeId = (int)rows[0]["eventTypeId"];
+                result.TypeName = (string)rows[0]["eventTypeName"];
+                result.Visible = (bool)rows[0]["visible"];
                 result.Creator = (string)rows[0]["userName"];
                 result.Rooms = new List<Room>();                       
                 for (int i = 0; i < rows.Count; i++)
@@ -41,6 +42,8 @@ namespace CalendarApplication.Controllers
                     Room tmpRoom = new Room { ID = (int)rows[i]["roomId"], Name = (string)rows[i]["roomName"] };
                     result.Rooms.Add(tmpRoom);
                 }
+                string tableName = (string)rows[0]["dbTableName"];
+                result.EventSpecial = con.ExecuteQuery("SELECT * FROM " + tableName + " WHERE eventId = " + id);
             }
             else
             {

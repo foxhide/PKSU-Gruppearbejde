@@ -217,7 +217,7 @@ namespace CalendarApplication.Controllers
                         ID = (int)dataReader["eventId"],
                         Name = (string)dataReader["eventName"],
                         Creator = (string)dataReader["username"],
-                        Type = (string)dataReader["eventTypeName"],
+                        TypeName = (string)dataReader["eventTypeName"],
                         Start = (DateTime)dataReader["eventStart"],
                         End = (DateTime)dataReader["eventEnd"],
                         State = (int)dataReader["state"],

@@ -1,55 +1,86 @@
-﻿@model CalendarApplication.Models.Event.BasicEvent
+﻿@model CalendarApplication.Models.Event.EventWithDetails
 @{
     ViewBag.Title = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 @using CalendarApplication.Models.Event
+@using System.Data
 
 @if (Model.ID < 0) {
     <h2>Error loading event!</h2>
 }
 else {
-<h2>Event Index</h2>
-<table class="gridtable">
+<table>
     <tr>
-        <td>Event Id</td>
-        <td>@Model.ID </td>
+        <td>Event Details</td>
+        <td>Rooms Used</td>
+        @if (@Model.TypeId != 1)
+        {
+            <td>Event type specific</td>
+        }
     </tr>
     <tr>
-        <td>Event Name</td>
-        <td>@Model.Name</td>
-    </tr>
-    <tr>
-        <td>Event Creator</td>
-        <td>@Model.Creator</td>
-    </tr>
-    <tr>
-        <td>Event Type</td>
-        <td>@Model.Type</td>
-    </tr>
-    <tr>
-        <td>Event Start</td>
-        <td>@Model.Start</td>
-    </tr>
-    <tr>
-        <td>Event End</td>
-        <td>@Model.End</td>
-    </tr>
-    <tr>
-        <td>Event State</td>
-        <td>@Model.State</td>
-    </tr>
-    <tr>
-        <td>Event Visible</td>
-        <td>AT Model.Visible</td>
-    </tr>
-            @foreach (Room room in Model.Rooms)
-            {
+        <td>
+            <table class="gridtable">
                 <tr>
-                    <td>Rooms Used</td>
-                    <td>@room.Name</td>
+                    <td>Event Id</td>
+                    <td>@Model.ID </td>
                 </tr>
-            }
+                <tr>
+                    <td>Event Name</td>
+                    <td>@Model.Name</td>
+                </tr>
+                <tr>
+                    <td>Event Creator</td>
+                    <td>@Model.Creator</td>
+                </tr>
+                <tr>
+                    <td>Event Type</td>
+                    <td>@Model.TypeName</td>
+                </tr>
+                <tr>
+                    <td>Event Start</td>
+                    <td>@Model.Start</td>
+                </tr>
+                <tr>
+                    <td>Event End</td>
+                    <td>@Model.End</td>
+                </tr>
+                <tr>
+                    <td>Event State</td>
+                    <td>@Model.State</td>
+                </tr>
+                <tr>
+                    <td>Event Visible</td>
+                    <td>@Model.Visible</td>
+                </tr>
+            </table>
+        </td>
+        <td>
+            <table class="gridtable">
+                @foreach (Room room in Model.Rooms)
+                {
+                    <tr>
+                        <td>@room.Name</td>
+                    </tr>
+                }
+            </table>
+        </td>
+        <td>
+            <table class="gridtable">
+                @if (@Model.TypeId != 1) {
+                    foreach (DataColumn col in Model.EventSpecial.Columns)
+                    {
+                        <tr>
+                            <td>@col.ColumnName</td>
+                            <td>@Model.EventSpecial.Rows[0][col.ColumnName]</td>
+                        </tr>
+                    }
+                }
+
+            </table>
+        </td>
+    </tr>
 </table>
 }
