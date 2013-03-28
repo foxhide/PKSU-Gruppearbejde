@@ -29,8 +29,19 @@ namespace CalendarApplication.Models.Event
             {
                 case 0:     return "red";
                 case 1:     return "yellow";
-                case 2:     return "green";
+                case 2:     return "#40FF00";
                 default:    return "white";
+            }
+        }
+
+        public string getStateText()
+        {
+            switch (State)
+            {
+                case 0: return "Needs Approval";
+                case 1: return "Approved";
+                case 2: return "Finished";
+                default: return "NYI";
             }
         }
     }

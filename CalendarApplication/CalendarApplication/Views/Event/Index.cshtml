@@ -49,7 +49,7 @@ else {
                 </tr>
                 <tr>
                     <td>Event State</td>
-                    <td>@Model.State</td>
+                    <td style="background-color: @Model.getColor()">@Model.getStateText()</td>
                 </tr>
                 <tr>
                     <td>Event Visible</td>
