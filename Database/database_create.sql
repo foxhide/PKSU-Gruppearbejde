@@ -181,6 +181,7 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`groupmembers` (
   `groupId` INT NOT NULL ,
   `userId` INT NOT NULL ,
   `groupLeader` TINYINT(1) NULL DEFAULT 0 ,
+  `approved` TINYINT(1) NULL DEFAULT 0 ,
   PRIMARY KEY (`groupId`, `userId`) ,
   INDEX `membergroupid_idx` (`groupId` ASC) ,
   INDEX `memberuserid_idx` (`userId` ASC) ,
