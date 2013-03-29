@@ -108,6 +108,7 @@
   <ItemGroup>
     <Compile Include="Controllers\CalendarController.cs" />
     <Compile Include="Controllers\EventController.cs" />
+    <Compile Include="Controllers\EventTypeController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\MySqlConnect.cs" />
@@ -137,6 +138,7 @@
     <Content Include="Content\Site.css" />
     <Content Include="Global.asax" />
     <None Include="Scripts\jquery-1.5.1-vsdoc.js" />
+    <Content Include="Scripts\create-eventtype.js" />
     <Content Include="Scripts\jquery-1.5.1.js" />
     <Content Include="Scripts\jquery-1.5.1.min.js" />
     <Content Include="Scripts\jquery-ui-1.8.11.js" />
@@ -166,7 +168,6 @@
     <Content Include="Views\Web.config" />
     <Content Include="Views\Calendar\Index.cshtml" />
     <Content Include="Views\Calendar\List.cshtml" />
-    <Content Include="Views\EventType\CreateEventType.cshtml" />
     <Content Include="Views\EventType\EditEventType.cshtml" />
   </ItemGroup>
   <ItemGroup>
