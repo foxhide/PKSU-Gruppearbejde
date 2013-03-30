@@ -13,19 +13,35 @@
 
 <h2>@(Model.ID == -1 ? "Edit Event Type" : "Create Event Type")</h2>
 
-@using (Html.BeginForm(new { ReturnUrl = ViewBag.ReturnUrl })) {
+@using (Html.BeginForm(new { ReturnUrl = ViewBag.ReturnUrl }))
+{
+    @Html.HiddenFor(model => Model.ID)
     <b>@Html.LabelFor(model => Model.Name)</b><br />
     @Html.EditorFor(model => Model.Name)
     @Html.ValidationMessageFor(model => Model.Name)
-
-    foreach (FieldDataModel field in Model.TypeSpecific)
-    {
-        @field.Name
-    }
+    <br />
+    
+    <!--Styles needed for fields view. Putting it here avoids duplication code-->
+    <style>
+        #fields td {padding:0;padding-left:5px;padding-right:5px}
+        #fields tr {padding:0;}
+        #fields th {padding:0;}
+    </style>
+    
+    <script>setIdCounter(@Model.TypeSpecific.Count)</script>
     
     <div id="fields">
+        @for (int e = 0; e < Model.TypeSpecific.Count && Model.TypeSpecific[e].Name != null; e++)
+        {
+            Model.ID = e;
+            Html.RenderPartial("FieldDetails", Model.TypeSpecific[e]);
+        }
     </div>
-    <button type="button" onclick="addNewField()">Add new field...</button>
     
-    <button type="submit">Submit</button>
+    <input type="button" value="Add New Field" onclick="newField()" />
+    
+    <br />
+    <br />
+    
+    <input type="submit" value="Create Event Type" />
 }

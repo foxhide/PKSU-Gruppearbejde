@@ -1,0 +1,19 @@
+﻿@model CalendarApplication.Models.EventType.FieldDataModel
+
+<table style="border: solid black 1px">
+    <tr>
+        <td><label for='Name_'>Name of field</label></td>
+        <td><label for='Desc_@(Model.ID)'>Description of field</label></td>
+        <td><label for='Type_@(Model.ID)'>Datatype of field</label></td>
+        <td><label for='Req_@(Model.ID)'>Field required</label></td>
+        <th rowspan="2" style="vertical-align:middle"><button type="button" onclick=removeField(@(Model.ID))>Remove</button></th>
+    </tr>
+    <tr>
+        <td><input type='text' id='Name_@(Model.ID)' name='TypeSpecific[@(Model.ID)].Name' value="@(Model.Name)"></td>
+        <td><input type='text' id='Desc_@(Model.ID)' name='TypeSpecific[@(Model.ID)].Description' value="@(Model.Description)"></td>
+        <td><input type='text' id='Type_@(Model.ID)' name='TypeSpecific[@(Model.ID)].Datatype' value="@(Model.Datatype)"></td>
+        <td><input type='checkbox' id='Req_@(Model)' name='TypeSpecific[@(Model.ID)].Required'
+            @(Model.Required?"checked='checked'":"")></td>
+    </tr>
+</table>
+<br />

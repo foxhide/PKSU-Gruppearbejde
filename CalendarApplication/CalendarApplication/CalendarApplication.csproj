@@ -169,6 +169,7 @@
     <Content Include="Views\Calendar\Index.cshtml" />
     <Content Include="Views\Calendar\List.cshtml" />
     <Content Include="Views\EventType\EditEventType.cshtml" />
+    <Content Include="Views\EventType\FieldDetails.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

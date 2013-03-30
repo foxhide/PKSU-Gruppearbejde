@@ -30,5 +30,19 @@ namespace CalendarApplication.Models.EventType
         public bool Required { set; get; }
 
         public int Datatype { set; get; }
+
+        public bool Active { set; get; }
+
+        public static FieldDataModel GetEmptyModel(int id)
+        {
+            return new FieldDataModel
+            {
+                ID = id,
+                Name = "",
+                Description = "",
+                Required = false,
+                Datatype = 0
+            };
+        }
     }
 }
