@@ -433,5 +433,172 @@ namespace CalendarApplication.Controllers
             }
 
         }
+
+        public int CreateEventType(EventTypeModel data)
+        {
+            if (this.OpenConnection() == true)
+            {
+                MySqlTransaction mst = null;
+                MySqlCommand cmd = null;
+                int result = -1;
+
+                //try
+                //{
+                    mst = connection.BeginTransaction();
+                    cmd = new MySqlCommand();
+                    cmd.Connection = connection;
+                    cmd.Transaction = mst;
+
+                    string insert = "INSERT INTO pksudb.eventtypes (eventTypeName) VALUES ('" + data.Name + "'); "
+                                + "SELECT last_insert_id();";
+
+                    cmd.CommandText = insert;
+                    result = Convert.ToInt32(cmd.ExecuteScalar());
+
+                    string createTable = "CREATE TABLE pksudb.table_" + result + "("
+                                            + "eventId int NOT NULL, ";
+
+                    foreach (FieldDataModel fdm in data.TypeSpecific)
+                    {
+                        string insertField = "INSERT INTO pksudb.eventtypefields"
+                                            + "(eventTypeId, fieldName, fieldDescription, requiredField, fieldType)"
+                                            + "VALUES (" + result + ",'" + fdm.Name + "','" + fdm.Description + "',"
+                                            + (fdm.Required ? "1," : "0,") + fdm.Datatype + "); SELECT last_insert_id();";
+
+                        cmd.CommandText = insertField;
+                        int id = Convert.ToInt32(cmd.ExecuteScalar());
+
+                        createTable += "field_" + id + " " + fdm.GetDBType() + ", ";
+                    }
+
+                    createTable += "PRIMARY KEY (eventId), "
+                                 + "CONSTRAINT eventIdCons_" + result + " "
+                                 + "FOREIGN KEY (eventId) REFERENCES pksudb.events (eventId) "
+                                 + "ON DELETE NO ACTION "
+                                 + "ON UPDATE NO ACTION "
+                                 + ");";
+
+                    cmd.CommandText = createTable;
+                    cmd.ExecuteNonQuery();
+
+                    mst.Commit();
+
+                    this.CloseConnection();
+                /*}
+                catch (MySqlException ex0)
+                {
+                    try
+                    {
+                        mst.Rollback();
+                    }
+                    catch (MySqlException ex1)
+                    {
+                    }
+
+                }
+                finally
+                {
+                    this.CloseConnection();
+                }*/
+                return result;
+            }
+            else
+            {
+                return -2;
+            }
+
+        }
+
+        public int EditEventType(EventTypeModel data)
+        {
+            if (this.OpenConnection() == true)
+            {
+                MySqlTransaction mst = null;
+                MySqlCommand cmd = null;
+
+              //  try
+              //  {
+                    mst = connection.BeginTransaction();
+                    cmd = new MySqlCommand();
+                    cmd.Connection = connection;
+                    cmd.Transaction = mst;
+
+                    string updateET = "UPDATE eventtypes SET eventTypeName = '"+data.Name+"' WHERE eventTypeId = "+data.ID;
+
+                    cmd.CommandText = updateET;
+                    cmd.ExecuteNonQuery();
+
+                    
+                    foreach (FieldDataModel fdm in data.TypeSpecific)
+                    {
+                        if (fdm.ViewID == -1)
+                        {
+                            //We have to remove the field, as it was found in the db.
+                            string updateField = "DELETE FROM pksudb.eventtypefields WHERE fieldId = " + fdm.ID;
+                            string alterEventTable = "ALTER TABLE table_" + data.ID + " DROP COLUMN field_" + fdm.ID;
+
+                            cmd.CommandText = alterEventTable;
+                            cmd.ExecuteNonQuery();
+
+                            cmd.CommandText = updateField;
+                            cmd.ExecuteNonQuery();
+                        }
+                        else if(fdm.ViewID == -2)
+                        {
+                            string insertField = "INSERT INTO pksudb.eventtypefields"
+                                                 + "(eventTypeId, fieldName, fieldDescription, requiredField, fieldType)"
+                                                 + "VALUES (" + data.ID + ",'" + fdm.Name + "','" + fdm.Description + "',"
+                                                 + (fdm.Required ? "1," : "0,") + fdm.Datatype + "); SELECT last_insert_id();";
+
+                            cmd.CommandText = insertField;
+                            int id = Convert.ToInt32(cmd.ExecuteScalar());
+
+                            string alterEventTable = "ALTER TABLE table_" + data.ID + " ADD field_" + id + " " + fdm.GetDBType();
+                            cmd.CommandText = alterEventTable;
+                            cmd.ExecuteNonQuery();
+                        }
+                        else
+                        {
+                            string updateField = "UPDATE pksudb.eventtypefields SET "
+                                                    + "fieldName = '" + fdm.Name
+                                                    + "', fieldDescription = '" + fdm.Description
+                                                    + "', requiredField = " + (fdm.Required ? "1" : "0")
+                                                    + ", fieldType = " + fdm.Datatype
+                                                    + " WHERE eventTypeId = " + data.ID
+                                                        + " AND fieldId = " + fdm.ID;
+
+                            cmd.CommandText = updateField;
+                            cmd.ExecuteNonQuery();
+                        }
+
+                    }
+
+                    mst.Commit();
+
+                    this.CloseConnection();
+             /*   }
+                catch (MySqlException ex0)
+                {
+                    try
+                    {
+                        mst.Rollback();
+                    }
+                    catch (MySqlException ex1)
+                    {
+                    }
+
+                }
+                finally
+                {
+                    this.CloseConnection();
+                }*/
+                return 1;
+            }
+            else
+            {
+                return -2;
+            }
+
+        }
     }
 }

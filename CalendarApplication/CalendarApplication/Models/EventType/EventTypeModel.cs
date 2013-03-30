@@ -17,20 +17,8 @@ namespace CalendarApplication.Models.EventType
         //Used for EventViewModel
         public bool Selected { set; get; }
 
+        public int ActiveFields { set; get; }
         public List<FieldDataModel> TypeSpecific { set; get; }
 
-        public int AddField()
-        {
-            FieldDataModel fdm = new FieldDataModel
-            {
-                ID = TypeSpecific.Count,
-                Name = "somename",
-                Datatype = 1,
-                Description = "",
-                Required = true
-            };
-            TypeSpecific.Add(fdm);
-            return TypeSpecific.Count;
-        }
     }
 }

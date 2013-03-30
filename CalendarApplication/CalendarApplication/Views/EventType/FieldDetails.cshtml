@@ -1,19 +1,32 @@
 ﻿@model CalendarApplication.Models.EventType.FieldDataModel
 
+@using CalendarApplication.Models.EventType;
+
 <table style="border: solid black 1px">
     <tr>
         <td><label for='Name_'>Name of field</label></td>
-        <td><label for='Desc_@(Model.ID)'>Description of field</label></td>
-        <td><label for='Type_@(Model.ID)'>Datatype of field</label></td>
-        <td><label for='Req_@(Model.ID)'>Field required</label></td>
-        <th rowspan="2" style="vertical-align:middle"><button type="button" onclick=removeField(@(Model.ID))>Remove</button></th>
+        <td><label for='Desc_@(Model.ViewID)'>Description of field</label></td>
+        <td><label for='Type_@(Model.ViewID)'>Datatype of field</label></td>
+        <td><label for='Req_@(Model.ViewID)'>Field required</label></td>
+        <th rowspan="2" style="vertical-align:middle">
+            <button type="button" onclick=removeField(@(Model.ViewID),@(Model.ID))>Remove</button>
+        </th>
     </tr>
     <tr>
-        <td><input type='text' id='Name_@(Model.ID)' name='TypeSpecific[@(Model.ID)].Name' value="@(Model.Name)"></td>
-        <td><input type='text' id='Desc_@(Model.ID)' name='TypeSpecific[@(Model.ID)].Description' value="@(Model.Description)"></td>
-        <td><input type='text' id='Type_@(Model.ID)' name='TypeSpecific[@(Model.ID)].Datatype' value="@(Model.Datatype)"></td>
-        <td><input type='checkbox' id='Req_@(Model)' name='TypeSpecific[@(Model.ID)].Required'
-            @(Model.Required?"checked='checked'":"")></td>
+        <td><input type='text' id='Name_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].Name' value="@(Model.Name)"></td>
+        <td><input type='text' id='Desc_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].Description' value="@(Model.Description)"></td>
+        <td>
+            <select id='Type_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].Datatype'>
+                @for (int i = 0; i < FieldDataModel.DATA_TYPES.Count; i++)
+                {
+                    <option value="@(i)" @(i == Model.Datatype?"Selected":"")>@FieldDataModel.DATA_TYPES[i]</option>
+                }
+            </select>
+        </td>
+        <td><input type='checkbox' id='Req_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].Required' value="true"
+            @(Model.Required?" checked":"")></td>
     </tr>
 </table>
+<input type="hidden" id="ID_@(Model.ViewID)" name="TypeSpecific[@(Model.ViewID)].ID" value="@Model.ID" />
+<input type="hidden" id="ViewID_@(Model.ViewID)" name="TypeSpecific[@(Model.ViewID)].ViewID" value="@(Model.Name == ""?"-2":"0")" />
 <br />

@@ -11,7 +11,7 @@
 <script src="@Url.Content("~/Scripts/jquery.validate.js")" type="text/javascript"></script>
 <script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.js")" type="text/javascript"></script>
 
-<h2>@(Model.ID == -1 ? "Edit Event Type" : "Create Event Type")</h2>
+<h2>@(Model.ID != -1 ? "Edit Event Type" : "Create Event Type")</h2>
 
 @using (Html.BeginForm(new { ReturnUrl = ViewBag.ReturnUrl }))
 {
@@ -28,13 +28,14 @@
         #fields th {padding:0;}
     </style>
     
-    <script>setIdCounter(@Model.TypeSpecific.Count)</script>
+    <script>setIdCounter(@Model.ActiveFields)</script>
     
     <div id="fields">
-        @for (int e = 0; e < Model.TypeSpecific.Count && Model.TypeSpecific[e].Name != null; e++)
+        @for (int e = 0; e < Model.TypeSpecific.Count && Model.TypeSpecific[e].ID != -1; e++)
         {
-            Model.ID = e;
-            Html.RenderPartial("FieldDetails", Model.TypeSpecific[e]);
+            <div id="field_@(e)">
+                @Html.Partial("FieldDetails", Model.TypeSpecific[e])
+            </div>
         }
     </div>
     

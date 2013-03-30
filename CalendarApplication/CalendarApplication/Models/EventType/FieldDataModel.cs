@@ -8,15 +8,43 @@ namespace CalendarApplication.Models.EventType
 {
     public class FieldDataModel
     {
-        public static List<string> Datatypes
+        public static List<string> DATA_TYPES
             = new List<string>
             {
                 "Integer",
                 "Text",
+                "Date",
+                "Currency",
                 "User",
                 "Group",
                 "File"
             };
+
+        public string GetDBType()
+        {
+            switch (this.Datatype)
+            {
+                case 1: return "varchar(50)";
+                case 0: case 2: case 3: case 4: case 5: return "int";
+                case 6: return "varchar(100)";
+                default: return "int";
+            }
+        }
+
+        public FieldDataModel()
+        {
+            ID = -1;
+        }
+
+        public FieldDataModel(int id)
+        {
+            this.ID = -1;
+            this.Name = "";
+            this.Description = "";
+            this.Required = false;
+            this.Datatype = 0;
+            this.ViewID = id;
+        }
 
         public int ID { set; get; }
 
@@ -31,18 +59,12 @@ namespace CalendarApplication.Models.EventType
 
         public int Datatype { set; get; }
 
-        public bool Active { set; get; }
+        public int ViewID { set; get; }
 
-        public static FieldDataModel GetEmptyModel(int id)
+        public string GetDBName()
         {
-            return new FieldDataModel
-            {
-                ID = id,
-                Name = "",
-                Description = "",
-                Required = false,
-                Datatype = 0
-            };
+            return this.Name.ToLower().Replace(' ','_');
         }
+
     }
 }

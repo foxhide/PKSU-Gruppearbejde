@@ -30,16 +30,20 @@ namespace CalendarApplication.Controllers
                 MySqlConnect msc = new MySqlConnect();
                 DataTable dt = msc.ExecuteQuery("SELECT * FROM (eventtypes NATURAL JOIN eventtypefields) WHERE eventTypeId = " + id);
                 etm.ID = id;
+                etm.ActiveFields = 0;
                 etm.Name = (string)dt.Rows[0]["eventTypeName"];
+                etm.ActiveFields = dt.Rows.Count;
+
                 foreach (DataRow dr in dt.Rows)
                 {
                     FieldDataModel fdm = new FieldDataModel
                     {
-                        ID = etm.TypeSpecific.Count,
+                        ID = (int)dr["fieldId"],
                         Name = (string)dr["fieldName"],
                         Description = (string)dr["fieldDescription"],
                         Required = (bool)dr["requiredField"],
-                        Datatype = (int)dr["fieldType"]
+                        Datatype = (int)dr["fieldType"],
+                        ViewID = etm.TypeSpecific.Count
                     };
                     etm.TypeSpecific.Add(fdm);
                 }
@@ -56,12 +60,21 @@ namespace CalendarApplication.Controllers
         [HttpPost]
         public ActionResult EditEventType(EventTypeModel etm)
         {
+            MySqlConnect msc = new MySqlConnect();
+            if (etm.ID == -1)
+            {
+                msc.CreateEventType(etm);
+            }
+            else
+            {
+                msc.EditEventType(etm);
+            }
             return RedirectToAction("Index","Home",null);
         }
 
         public ActionResult GetPartial(int id)
         {
-            return PartialView("FieldDetails",FieldDataModel.GetEmptyModel(id));
+            return PartialView("FieldDetails",new FieldDataModel(id));
         }
 
     }
