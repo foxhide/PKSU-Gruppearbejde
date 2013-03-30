@@ -30,7 +30,7 @@ function newField() {
             url: "/EventType/GetPartial/",
             type: 'GET',
             data: { id: field_count },
-            dataType: 'html', // <-- to expect an html response
+            dataType: 'html',
             success: function (result) {
                 $('#'+fieldId).html(result);
             }

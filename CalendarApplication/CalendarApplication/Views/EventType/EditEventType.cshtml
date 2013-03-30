@@ -21,6 +21,8 @@
     @Html.ValidationMessageFor(model => Model.Name)
     <br />
     
+    <!--Consider putting some description here!-->
+    
     <!--Styles needed for fields view. Putting it here avoids duplication code-->
     <style>
         #fields td {padding:0;padding-left:5px;padding-right:5px}
@@ -44,5 +46,5 @@
     <br />
     <br />
     
-    <input type="submit" value="Create Event Type" />
+    <input type="submit" value="@(Model.ID != -1 ? "Save changes" : "Create Event Type")"/>
 }
