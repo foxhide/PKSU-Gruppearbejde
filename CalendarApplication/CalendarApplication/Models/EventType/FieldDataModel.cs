@@ -17,19 +17,9 @@ namespace CalendarApplication.Models.EventType
                 "Currency",
                 "User",
                 "Group",
-                "File"
+                "File",
+                "Yes/No"
             };
-
-        public string GetDBType()
-        {
-            switch (this.Datatype)
-            {
-                case 1: return "varchar(50)";
-                case 0: case 2: case 3: case 4: case 5: return "int";
-                case 6: return "varchar(100)";
-                default: return "int";
-            }
-        }
 
         public FieldDataModel()
         {
@@ -58,12 +48,24 @@ namespace CalendarApplication.Models.EventType
         public bool Required { set; get; }
 
         public int Datatype { set; get; }
+        public int VarcharLength { set; get; }
 
         public int ViewID { set; get; }
 
-        public string GetDBName()
+        public string GetDBType()
         {
-            return this.Name.ToLower().Replace(' ','_');
+            switch (this.Datatype)
+            {
+                case 1: return "varchar("+this.VarcharLength+")";
+                case 0:
+                case 2:
+                case 3:
+                case 4:
+                case 5: return "int";
+                case 6: return "varchar(100)";
+                case 7: return "tinyint(1)";
+                default: return "int";
+            }
         }
 
     }
