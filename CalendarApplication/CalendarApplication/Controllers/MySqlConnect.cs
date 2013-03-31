@@ -177,6 +177,7 @@ namespace CalendarApplication.Controllers
                     //Add the table to the set
                     ds.Tables.Add(dt);
                     counter++;
+                    dataReader.Close();
                 }
 
                 //Close the connection

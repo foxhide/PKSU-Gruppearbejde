@@ -44,8 +44,15 @@ namespace CalendarApplication.Controllers
                 }
                 if (result.TypeId != 1)
                 {
-                    string tableName = "table_" + result.TypeId;
-                    result.EventSpecial = con.ExecuteQuery("SELECT * FROM " + tableName + " WHERE eventId = " + id);
+                    DataSet ds = con.ExecuteQuery(new string[] {
+                        "SELECT * FROM table_" + result.TypeId + " WHERE eventId = " + id,
+                        "SELECT * FROM pksudb.eventtypefields WHERE eventTypeId = " + result.TypeId
+                    });
+                    result.EventSpecial = ds.Tables[0];
+                    for (int i = 0; i < ds.Tables[1].Rows.Count; i++)
+                    {
+                        result.EventSpecial.Columns[i+1].ColumnName = (string)ds.Tables[1].Rows[i]["fieldName"];
+                    }
                 }
             }
             else
