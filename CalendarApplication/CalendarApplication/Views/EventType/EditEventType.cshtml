@@ -13,6 +13,8 @@
 
 <h2>@(Model.ID != -1 ? "Edit Event Type" : "Create Event Type")</h2>
 
+<h3 style="color:red">@TempData["errorMsg"]</h3>
+
 @using (Html.BeginForm(new { ReturnUrl = ViewBag.ReturnUrl }))
 {
     @Html.HiddenFor(model => Model.ID)

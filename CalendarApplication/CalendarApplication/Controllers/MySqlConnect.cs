@@ -22,6 +22,8 @@ namespace CalendarApplication.Controllers
         private string uid;
         private string password;
 
+        public string ErrorMessage { set; get; }
+
         /// <summary>
         /// Creates a new MySqlConnection. Open with method OpenConnection().
         /// </summary>
@@ -121,6 +123,7 @@ namespace CalendarApplication.Controllers
                 }
 
                 //Close the connection
+                dataReader.Close();
                 this.CloseConnection();
 
                 return dt;
@@ -399,9 +402,9 @@ namespace CalendarApplication.Controllers
 
                 try
                 {
-                    mst = connection.BeginTransaction();
+                    mst = this.connection.BeginTransaction();
                     cmd = new MySqlCommand();
-                    cmd.Connection = connection;
+                    cmd.Connection = this.connection;
                     cmd.Transaction = mst;
 
                     cmd.CommandText = insert;
@@ -416,26 +419,27 @@ namespace CalendarApplication.Controllers
                     try
                     {
                         mst.Rollback();
+                        this.CloseConnection();
+                        ErrorMessage = "Some databse error occured: Discarded changes, Error message: " + ex0.Message;
+                        return -1;
                     }
                     catch (MySqlException ex1)
                     {
+                        this.CloseConnection();
+                        ErrorMessage = "Some databse error occured: Could not discard changes, DB corrupt, Error message: " + ex1.Message;
+                        return -1;
                     }
-
-                }
-                finally
-                {
-                    this.CloseConnection();
                 }
                 return result;
             }
             else
             {
-                return -2;
+                return -1;
             }
 
         }
 
-        public int CreateEventType(EventTypeModel data)
+        public bool CreateEventType(EventTypeModel data)
         {
             if (this.OpenConnection() == true)
             {
@@ -443,8 +447,8 @@ namespace CalendarApplication.Controllers
                 MySqlCommand cmd = null;
                 int result = -1;
 
-                //try
-                //{
+                try
+                {
                     mst = connection.BeginTransaction();
                     cmd = new MySqlCommand();
                     cmd.Connection = connection;
@@ -485,40 +489,41 @@ namespace CalendarApplication.Controllers
                     mst.Commit();
 
                     this.CloseConnection();
-                /*}
+                }
                 catch (MySqlException ex0)
                 {
                     try
                     {
                         mst.Rollback();
+                        this.CloseConnection();
+                        ErrorMessage = "Some databse error occured: Discarded changes, Error message: " + ex0.Message;
+                        return false;
                     }
                     catch (MySqlException ex1)
                     {
+                        this.CloseConnection();
+                        ErrorMessage = "Some databse error occured: Could not discard changes, DB corrupt, Error message: " + ex1.Message;
+                        return false;
                     }
-
                 }
-                finally
-                {
-                    this.CloseConnection();
-                }*/
-                return result;
+                return true;
             }
             else
             {
-                return -2;
+                ErrorMessage = "Could not open connection to database!";
+                return false;
             }
-
         }
 
-        public int EditEventType(EventTypeModel data)
+        public bool EditEventType(EventTypeModel data)
         {
             if (this.OpenConnection() == true)
             {
                 MySqlTransaction mst = null;
                 MySqlCommand cmd = null;
 
-              //  try
-              //  {
+                try
+                {
                     mst = connection.BeginTransaction();
                     cmd = new MySqlCommand();
                     cmd.Connection = connection;
@@ -532,14 +537,13 @@ namespace CalendarApplication.Controllers
                     
                     foreach (FieldDataModel fdm in data.TypeSpecific)
                     {
+                        string alterEventTable;
+
                         if (fdm.ViewID == -1)
                         {
                             //We have to remove the field, as it was found in the db.
                             string updateField = "DELETE FROM pksudb.eventtypefields WHERE fieldId = " + fdm.ID;
-                            string alterEventTable = "ALTER TABLE table_" + data.ID + " DROP COLUMN field_" + fdm.ID;
-
-                            cmd.CommandText = alterEventTable;
-                            cmd.ExecuteNonQuery();
+                            alterEventTable = "ALTER TABLE table_" + data.ID + " DROP COLUMN field_" + fdm.ID;
 
                             cmd.CommandText = updateField;
                             cmd.ExecuteNonQuery();
@@ -554,9 +558,7 @@ namespace CalendarApplication.Controllers
                             cmd.CommandText = insertField;
                             int id = Convert.ToInt32(cmd.ExecuteScalar());
 
-                            string alterEventTable = "ALTER TABLE table_" + data.ID + " ADD field_" + id + " " + fdm.GetDBType();
-                            cmd.CommandText = alterEventTable;
-                            cmd.ExecuteNonQuery();
+                            alterEventTable = "ALTER TABLE table_" + data.ID + " ADD field_" + id + " " + fdm.GetDBType();
                         }
                         else
                         {
@@ -568,36 +570,46 @@ namespace CalendarApplication.Controllers
                                                     + " WHERE eventTypeId = " + data.ID
                                                         + " AND fieldId = " + fdm.ID;
 
+                            alterEventTable = "ALTER TABLE table_" + data.ID + " MODIFY COLUMN field_" + fdm.ID + " " + fdm.GetDBType();
+
                             cmd.CommandText = updateField;
+                            MessageBox.Show(updateField);
                             cmd.ExecuteNonQuery();
                         }
+
+                        MessageBox.Show(alterEventTable);
+                        cmd.CommandText = alterEventTable;
+                        cmd.ExecuteNonQuery();
 
                     }
 
                     mst.Commit();
 
                     this.CloseConnection();
-             /*   }
+                }
                 catch (MySqlException ex0)
                 {
                     try
                     {
                         mst.Rollback();
+                        this.CloseConnection();
+                        ErrorMessage = "Some databse error occured: Discarded changes, Error message: " + ex0.Message;
+                        return false;
                     }
                     catch (MySqlException ex1)
                     {
+                        this.CloseConnection();
+                        ErrorMessage = "Some databse error occured: Could not discard changes, DB corrupt, Error message: " + ex1.Message;
+                        return false;
                     }
 
                 }
-                finally
-                {
-                    this.CloseConnection();
-                }*/
-                return 1;
+                return true;
             }
             else
             {
-                return -2;
+                ErrorMessage = "Could not open connection to database!";
+                return false;
             }
 
         }

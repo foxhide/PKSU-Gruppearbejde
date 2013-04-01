@@ -61,13 +61,19 @@ namespace CalendarApplication.Controllers
         public ActionResult EditEventType(EventTypeModel etm)
         {
             MySqlConnect msc = new MySqlConnect();
+            bool ok;
             if (etm.ID == -1)
             {
-                msc.CreateEventType(etm);
+                ok = msc.CreateEventType(etm);
             }
             else
             {
-                msc.EditEventType(etm);
+                ok = msc.EditEventType(etm);
+            }
+            if (!ok)
+            {
+                TempData["errorMsg"] = msc.ErrorMessage;
+                return View(etm);
             }
             return RedirectToAction("Index","Home",null);
         }
