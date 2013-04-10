@@ -22,6 +22,8 @@ namespace CalendarApplication.Controllers
         private string uid;
         private string password;
 
+        public string ErrorMessage { set; get; }
+
         /// <summary>
         /// Creates a new MySqlConnection. Open with method OpenConnection().
         /// </summary>
@@ -121,6 +123,7 @@ namespace CalendarApplication.Controllers
                 }
 
                 //Close the connection
+                dataReader.Close();
                 this.CloseConnection();
 
                 return dt;
@@ -177,6 +180,7 @@ namespace CalendarApplication.Controllers
                     //Add the table to the set
                     ds.Tables.Add(dt);
                     counter++;
+                    dataReader.Close();
                 }
 
                 //Close the connection
@@ -398,9 +402,9 @@ namespace CalendarApplication.Controllers
 
                 try
                 {
-                    mst = connection.BeginTransaction();
+                    mst = this.connection.BeginTransaction();
                     cmd = new MySqlCommand();
-                    cmd.Connection = connection;
+                    cmd.Connection = this.connection;
                     cmd.Transaction = mst;
 
                     cmd.CommandText = insert;
@@ -415,21 +419,197 @@ namespace CalendarApplication.Controllers
                     try
                     {
                         mst.Rollback();
+                        this.CloseConnection();
+                        ErrorMessage = "Some databse error occured: Discarded changes, Error message: " + ex0.Message;
+                        return -1;
                     }
                     catch (MySqlException ex1)
                     {
+                        this.CloseConnection();
+                        ErrorMessage = "Some databse error occured: Could not discard changes, DB corrupt, Error message: " + ex1.Message;
+                        return -1;
                     }
-
-                }
-                finally
-                {
-                    this.CloseConnection();
                 }
                 return result;
             }
             else
             {
-                return -2;
+                return -1;
+            }
+
+        }
+
+        public bool CreateEventType(EventTypeModel data)
+        {
+            if (this.OpenConnection() == true)
+            {
+                MySqlTransaction mst = null;
+                MySqlCommand cmd = null;
+                int result = -1;
+
+                try
+                {
+                    mst = connection.BeginTransaction();
+                    cmd = new MySqlCommand();
+                    cmd.Connection = connection;
+                    cmd.Transaction = mst;
+
+                    string insert = "INSERT INTO pksudb.eventtypes (eventTypeName) VALUES ('" + data.Name + "'); "
+                                + "SELECT last_insert_id();";
+
+                    cmd.CommandText = insert;
+                    result = Convert.ToInt32(cmd.ExecuteScalar());
+
+                    string createTable = "CREATE TABLE pksudb.table_" + result + "("
+                                            + "eventId int NOT NULL, ";
+
+                    foreach (FieldDataModel fdm in data.TypeSpecific)
+                    {
+                        string insertField = "INSERT INTO pksudb.eventtypefields"
+                                            + "(eventTypeId, fieldName, fieldDescription, requiredField, fieldType)"
+                                            + "VALUES (" + result + ",'" + fdm.Name + "','" + fdm.Description + "',"
+                                            + (fdm.Required ? "1," : "0,") + fdm.Datatype + "); SELECT last_insert_id();";
+
+                        cmd.CommandText = insertField;
+                        int id = Convert.ToInt32(cmd.ExecuteScalar());
+
+                        createTable += "field_" + id + " " + fdm.GetDBType() + ", ";
+                    }
+
+                    createTable += "PRIMARY KEY (eventId), "
+                                 + "CONSTRAINT eventIdCons_" + result + " "
+                                 + "FOREIGN KEY (eventId) REFERENCES pksudb.events (eventId) "
+                                 + "ON DELETE NO ACTION "
+                                 + "ON UPDATE NO ACTION "
+                                 + ");";
+
+                    cmd.CommandText = createTable;
+                    cmd.ExecuteNonQuery();
+
+                    mst.Commit();
+
+                    this.CloseConnection();
+                }
+                catch (MySqlException ex0)
+                {
+                    try
+                    {
+                        mst.Rollback();
+                        this.CloseConnection();
+                        ErrorMessage = "Some databse error occured: Discarded changes, Error message: " + ex0.Message;
+                        return false;
+                    }
+                    catch (MySqlException ex1)
+                    {
+                        this.CloseConnection();
+                        ErrorMessage = "Some databse error occured: Could not discard changes, DB corrupt, Error message: " + ex1.Message;
+                        return false;
+                    }
+                }
+                return true;
+            }
+            else
+            {
+                ErrorMessage = "Could not open connection to database!";
+                return false;
+            }
+        }
+
+        public bool EditEventType(EventTypeModel data)
+        {
+            if (this.OpenConnection() == true)
+            {
+                MySqlTransaction mst = null;
+                MySqlCommand cmd = null;
+
+                try
+                {
+                    mst = connection.BeginTransaction();
+                    cmd = new MySqlCommand();
+                    cmd.Connection = connection;
+                    cmd.Transaction = mst;
+
+                    string updateET = "UPDATE eventtypes SET eventTypeName = '"+data.Name+"' WHERE eventTypeId = "+data.ID;
+
+                    cmd.CommandText = updateET;
+                    cmd.ExecuteNonQuery();
+
+                    
+                    foreach (FieldDataModel fdm in data.TypeSpecific)
+                    {
+                        string alterEventTable;
+
+                        if (fdm.ViewID == -1)
+                        {
+                            //We have to remove the field, as it was found in the db.
+                            string updateField = "DELETE FROM pksudb.eventtypefields WHERE fieldId = " + fdm.ID;
+                            alterEventTable = "ALTER TABLE table_" + data.ID + " DROP COLUMN field_" + fdm.ID;
+
+                            cmd.CommandText = updateField;
+                            cmd.ExecuteNonQuery();
+                        }
+                        else if(fdm.ViewID == -2)
+                        {
+                            string insertField = "INSERT INTO pksudb.eventtypefields"
+                                                 + "(eventTypeId, fieldName, fieldDescription, requiredField, fieldType)"
+                                                 + "VALUES (" + data.ID + ",'" + fdm.Name + "','" + fdm.Description + "',"
+                                                 + (fdm.Required ? "1," : "0,") + fdm.Datatype + "); SELECT last_insert_id();";
+
+                            cmd.CommandText = insertField;
+                            int id = Convert.ToInt32(cmd.ExecuteScalar());
+
+                            alterEventTable = "ALTER TABLE table_" + data.ID + " ADD field_" + id + " " + fdm.GetDBType();
+                        }
+                        else
+                        {
+                            string updateField = "UPDATE pksudb.eventtypefields SET "
+                                                    + "fieldName = '" + fdm.Name
+                                                    + "', fieldDescription = '" + fdm.Description
+                                                    + "', requiredField = " + (fdm.Required ? "1" : "0")
+                                                    + ", fieldType = " + fdm.Datatype
+                                                    + " WHERE eventTypeId = " + data.ID
+                                                        + " AND fieldId = " + fdm.ID;
+
+                            alterEventTable = "ALTER TABLE table_" + data.ID + " MODIFY COLUMN field_" + fdm.ID + " " + fdm.GetDBType();
+
+                            cmd.CommandText = updateField;
+                            MessageBox.Show(updateField);
+                            cmd.ExecuteNonQuery();
+                        }
+
+                        MessageBox.Show(alterEventTable);
+                        cmd.CommandText = alterEventTable;
+                        cmd.ExecuteNonQuery();
+
+                    }
+
+                    mst.Commit();
+
+                    this.CloseConnection();
+                }
+                catch (MySqlException ex0)
+                {
+                    try
+                    {
+                        mst.Rollback();
+                        this.CloseConnection();
+                        ErrorMessage = "Some databse error occured: Discarded changes, Error message: " + ex0.Message;
+                        return false;
+                    }
+                    catch (MySqlException ex1)
+                    {
+                        this.CloseConnection();
+                        ErrorMessage = "Some databse error occured: Could not discard changes, DB corrupt, Error message: " + ex1.Message;
+                        return false;
+                    }
+
+                }
+                return true;
+            }
+            else
+            {
+                ErrorMessage = "Could not open connection to database!";
+                return false;
             }
 
         }

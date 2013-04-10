@@ -17,6 +17,8 @@ namespace CalendarApplication.Models.EventType
         //Used for EventViewModel
         public bool Selected { set; get; }
 
+        public int ActiveFields { set; get; }
         public List<FieldDataModel> TypeSpecific { set; get; }
+
     }
 }

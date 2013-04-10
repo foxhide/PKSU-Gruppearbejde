@@ -1,0 +1,52 @@
+﻿@model CalendarApplication.Models.EventType.EventTypeModel
+
+@{
+    ViewBag.Title = "EditEventType";
+}
+
+@using CalendarApplication.Models.EventType;
+
+<script src="@Url.Content("~/Scripts/create-eventtype.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.validate.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.js")" type="text/javascript"></script>
+
+<h2>@(Model.ID != -1 ? "Edit Event Type" : "Create Event Type")</h2>
+
+<h3 style="color:red">@TempData["errorMsg"]</h3>
+
+@using (Html.BeginForm(new { ReturnUrl = ViewBag.ReturnUrl }))
+{
+    @Html.HiddenFor(model => Model.ID)
+    <b>@Html.LabelFor(model => Model.Name)</b><br />
+    @Html.EditorFor(model => Model.Name)
+    @Html.ValidationMessageFor(model => Model.Name)
+    <br />
+    
+    <!--Consider putting some description here!-->
+    
+    <!--Styles needed for fields view. Putting it here avoids duplication code-->
+    <style>
+        #fields td {padding:0;padding-left:5px;padding-right:5px}
+        #fields tr {padding:0;}
+        #fields th {padding:0;}
+    </style>
+    
+    <script>setIdCounter(@Model.ActiveFields)</script>
+    
+    <div id="fields">
+        @for (int e = 0; e < Model.TypeSpecific.Count && Model.TypeSpecific[e].ID != -1; e++)
+        {
+            <div id="field_@(e)">
+                @Html.Partial("FieldDetails", Model.TypeSpecific[e])
+            </div>
+        }
+    </div>
+    
+    <input type="button" value="Add New Field" onclick="newField()" />
+    
+    <br />
+    <br />
+    
+    <input type="submit" value="@(Model.ID != -1 ? "Save changes" : "Create Event Type")"/>
+}
