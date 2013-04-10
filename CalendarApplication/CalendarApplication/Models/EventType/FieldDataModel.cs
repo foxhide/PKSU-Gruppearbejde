@@ -14,7 +14,6 @@ namespace CalendarApplication.Models.EventType
                 "Integer",
                 "Text",
                 "Date",
-                "Currency",
                 "User",
                 "Group",
                 "File",
@@ -57,13 +56,12 @@ namespace CalendarApplication.Models.EventType
             switch (this.Datatype)
             {
                 case 1: return "varchar("+this.VarcharLength+")";
+                case 2: return "datetime";
                 case 0:
-                case 2:
                 case 3:
-                case 4:
-                case 5: return "int";
-                case 6: return "varchar(100)";
-                case 7: return "tinyint(1)";
+                case 4: return "int";
+                case 6: return "varchar(100)";  //File
+                case 7: return "tinyint(1)";    //Yes/No
                 default: return "int";
             }
         }
