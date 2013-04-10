@@ -170,6 +170,7 @@
     <Content Include="Views\Calendar\List.cshtml" />
     <Content Include="Views\EventType\EditEventType.cshtml" />
     <Content Include="Views\EventType\FieldDetails.cshtml" />
+    <Content Include="Views\Shared\_MenuPartial.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
