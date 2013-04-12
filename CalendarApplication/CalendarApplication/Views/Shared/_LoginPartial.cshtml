@@ -1,9 +1,7 @@
-﻿@model CalendarApplication.Models.User.UserModel
-
-@using CalendarApplication.Models.User;
+﻿@using CalendarApplication.Models.User;
 
 @if (Request.IsAuthenticated) {
-    <text>You are logged in as: @Model.UserName
+    <text>You are logged in as: @UserModel.GetCurrent().UserName
             | @Html.ActionLink("Log out", "Logout", "Account", null, null)</text>
 } else {
     <text>@Html.ActionLink("Register", "Register", "Account", null, null) |

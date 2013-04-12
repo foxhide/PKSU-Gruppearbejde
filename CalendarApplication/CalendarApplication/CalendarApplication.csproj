@@ -108,7 +108,7 @@
   <ItemGroup>
     <Compile Include="Controllers\CalendarController.cs" />
     <Compile Include="Controllers\EventController.cs" />
-    <Compile Include="Controllers\EventTypeController.cs" />
+    <Compile Include="Controllers\MaintenanceController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\MySqlConnect.cs" />
@@ -127,6 +127,7 @@
     <Compile Include="Models\EventType\FieldDataModel.cs" />
     <Compile Include="Models\Event\Room.cs" />
     <Compile Include="Models\Account\LoginModel.cs" />
+    <Compile Include="Models\Maintenance\MaintenanceModel.cs" />
     <Compile Include="Models\User\GroupModel.cs" />
     <Compile Include="Models\User\UserModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -168,9 +169,10 @@
     <Content Include="Views\Web.config" />
     <Content Include="Views\Calendar\Index.cshtml" />
     <Content Include="Views\Calendar\List.cshtml" />
-    <Content Include="Views\EventType\EditEventType.cshtml" />
-    <Content Include="Views\EventType\FieldDetails.cshtml" />
+    <Content Include="Views\Maintenance\EditEventType.cshtml" />
+    <Content Include="Views\Maintenance\FieldDetails.cshtml" />
     <Content Include="Views\Shared\_MenuPartial.cshtml" />
+    <Content Include="Views\Maintenance\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

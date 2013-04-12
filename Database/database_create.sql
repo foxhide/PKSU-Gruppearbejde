@@ -23,14 +23,14 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`users` (
   PRIMARY KEY (`userId`) ,
   UNIQUE INDEX `userName_UNIQUE` (`userName` ASC) )
 AUTO_INCREMENT = 1
-COMMENT = 'Table for user logins, passwords and information.\n\nuserId: U /* comment truncated */ /* /* comment truncated */ /*nique userid for each user (primary key). 
+COMMENT = 'Table for user logins, passwords and information.\n\nuserId: U /* comment truncated */ /* /* comment truncated */ /* /* comment truncated */ /*nique userid for each user (primary key). 
 userName: Unique login/screen name tied to userId. Required, 45 chars.
 password: Password tied to a userId. Required, 45 chars.
 realname: real name of the user. Required, 45 chars.
 admin: whether or not this user has admin status.
 email: user email address. Not required, 45 chars.
 active: whether the user is active, inactive users cannot login.
-needsApproval: whether the user needs initial approval from an administrator.*/*/';
+needsApproval: whether the user needs initial approval from an administrator.*/*/*/';
 
 
 -- -----------------------------------------------------
@@ -43,8 +43,8 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`eventtypes` (
   `eventTypeName` VARCHAR(45) NOT NULL ,
   PRIMARY KEY (`eventTypeId`) )
 AUTO_INCREMENT = 1
-COMMENT = 'Table for event types with names.\n\neventTypeId: Primary key. /* comment truncated */ /* /* comment truncated */ /*
-eventTypeName: name of a event type*/*/';
+COMMENT = 'Table for event types with names.\n\neventTypeId: Primary key. /* comment truncated */ /* /* comment truncated */ /* /* comment truncated */ /*
+eventTypeName: name of a event type*/*/*/';
 
 
 -- -----------------------------------------------------
@@ -75,14 +75,14 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`events` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 AUTO_INCREMENT = 1
-COMMENT = 'Table for events.\n\neventId: Integer as primary key to identi /* comment truncated */ /* /* comment truncated */ /*fy each event uniquely
+COMMENT = 'Table for events.\n\neventId: Integer as primary key to identi /* comment truncated */ /* /* comment truncated */ /* /* comment truncated */ /*fy each event uniquely
 userId: userId of the creator of the event, references table users (foreign key).
 eventTypeId: id of the eventtype, references table eventtypes (foreign key).
 eventName: Name of the event (max 45 chars)
 eventStart: Time at which the event starts.(format year-month-day hour:min:sec, 0000-00-00 00:00:00)
 eventEnd: Time at which the event ends. (format year-month-day hour:min:sec, 0000-00-00 00:00:00)
 visible: whether the event is visible to all.
-state: current state of the event (not defined in database).*/*/';
+state: current state of the event (not defined in database).*/*/*/';
 
 
 -- -----------------------------------------------------
@@ -96,9 +96,9 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`files` (
   `pathToFile` VARCHAR(150) NOT NULL ,
   PRIMARY KEY (`fileId`) )
 AUTO_INCREMENT = 1
-COMMENT = 'Table for files.\n\nfileId: unique primary key for files.\nfile /* comment truncated */ /* /* comment truncated */ /*Name: name of the file, e.g. mytextfile.txt.
+COMMENT = 'Table for files.\n\nfileId: unique primary key for files.\nfile /* comment truncated */ /* /* comment truncated */ /* /* comment truncated */ /*Name: name of the file, e.g. mytextfile.txt.
 pathToFile: path to file (duh), e.g. /root/myfolder/mytextfile.txt.
-eventId: event that the file is associated with.*/*/';
+eventId: event that the file is associated with.*/*/*/';
 
 
 -- -----------------------------------------------------
@@ -111,8 +111,8 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`groups` (
   `groupName` VARCHAR(45) NOT NULL ,
   PRIMARY KEY (`groupId`) )
 AUTO_INCREMENT = 1
-COMMENT = 'Table for groups.\n\ngroupId: Primary key identifying the grou /* comment truncated */ /* /* comment truncated */ /*p.
-groupName: the name of the group.*/*/';
+COMMENT = 'Table for groups.\n\ngroupId: Primary key identifying the grou /* comment truncated */ /* /* comment truncated */ /* /* comment truncated */ /*p.
+groupName: the name of the group.*/*/*/';
 
 
 -- -----------------------------------------------------
@@ -136,11 +136,11 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`eventvisibility` (
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
-COMMENT = 'A table describing which usergroups can see specific events. /* comment truncated */ /* /* comment truncated */ /*
+COMMENT = 'A table describing which usergroups can see specific events. /* comment truncated */ /* /* comment truncated */ /* /* comment truncated */ /*
 
 eventId: foreign key referencing events table.
 groupId: foreign key referencing groups table.
-primary key is both together.*/*/';
+primary key is both together.*/*/*/';
 
 
 -- -----------------------------------------------------
@@ -165,11 +165,11 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`eventeditorsusers` (
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
-COMMENT = 'A table describing which users can edit specific events.\nTo  /* comment truncated */ /* /* comment truncated */ /*be used sparsely, in conjunction with eventeditorsgroups.
+COMMENT = 'A table describing which users can edit specific events.\nTo  /* comment truncated */ /* /* comment truncated */ /* /* comment truncated */ /*be used sparsely, in conjunction with eventeditorsgroups.
 
 eventId: foreign key referencing events table.
 userId: foreign key referencing users table.
-primary key is both together.*/*/';
+primary key is both together.*/*/*/';
 
 
 -- -----------------------------------------------------
@@ -195,10 +195,10 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`groupmembers` (
     ON DELETE RESTRICT
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
-COMMENT = 'A table describing which users belong to which groups.\n\ngrou /* comment truncated */ /* /* comment truncated */ /*pId: foreign key referencing groups table.
+COMMENT = 'A table describing which users belong to which groups.\n\ngrou /* comment truncated */ /* /* comment truncated */ /* /* comment truncated */ /*pId: foreign key referencing groups table.
 userId: foreign key referencing users table.
 groupLeader: whether this user is one of the group leaders.
-primary key is both together.*/*/';
+primary key is both together.*/*/*/';
 
 
 -- -----------------------------------------------------
@@ -211,7 +211,7 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`rooms` (
   `roomName` VARCHAR(45) NOT NULL ,
   PRIMARY KEY (`roomId`) )
 AUTO_INCREMENT = 1
-COMMENT = 'Table for rooms.\n\nroomId: Primary key identifying the room.\n /* comment truncated */ /* /* comment truncated */ /* /* comment truncated */ /*roomName: the name of the room.*/*/*/';
+COMMENT = 'Table for rooms.\n\nroomId: Primary key identifying the room.\n /* comment truncated */ /* /* comment truncated */ /* /* comment truncated */ /* /* comment truncated */ /*roomName: the name of the room.*/*/*/*/';
 
 
 -- -----------------------------------------------------
@@ -236,11 +236,11 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`eventeditorsgroups` (
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
-COMMENT = 'A table describing which usergroups can edit specific events /* comment truncated */ /* /* comment truncated */ /*.
+COMMENT = 'A table describing which usergroups can edit specific events /* comment truncated */ /* /* comment truncated */ /* /* comment truncated */ /*.
 
 eventId: foreign key referencing events table.
 groupId: foreign key referencing groups table.
-primary key is both together.*/*/';
+primary key is both together.*/*/*/';
 
 
 -- -----------------------------------------------------
@@ -255,6 +255,7 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`eventtypefields` (
   `fieldDescription` VARCHAR(100) NOT NULL ,
   `requiredField` TINYINT(1) NULL DEFAULT 0 ,
   `fieldType` INT NULL DEFAULT NULL ,
+  `varchar_length` INT NULL ,
   PRIMARY KEY (`fieldId`, `eventTypeId`) ,
   INDEX `eventtypenameid_idx` (`eventTypeId` ASC) ,
   CONSTRAINT `eventtypenameid`
@@ -263,7 +264,7 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`eventtypefields` (
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
-COMMENT = 'Table for which fields events use and whether they are requi /* comment truncated */ /* /* comment truncated */ /*red fields.
+COMMENT = 'Table for which fields events use and whether they are requi /* comment truncated */ /* /* comment truncated */ /* /* comment truncated */ /*red fields.
 
 eventTypeId: foreign key referencing eventtypenames. cannot be null.
 fieldId: used for dbnames and identification in c# code
@@ -271,7 +272,7 @@ fieldName: name of the field in the database. cannot be null.
 fieldDescription: description of a field. cannot be null.
 requiredField: whether or not filling this field is required for the event to be created.
 fieldType: 0 for basic type, 1 for user, 2 for group, 3 for file.
-Primary key is eventTypeId and fieldName together.*/*/';
+Primary key is eventTypeId and fieldName together.*/*/*/';
 
 
 -- -----------------------------------------------------
@@ -296,9 +297,9 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`eventroomsused` (
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
-COMMENT = 'Table describing which rooms are used for an event.\n\neventId /* comment truncated */ /* /* comment truncated */ /*: foreign key referencing events table
+COMMENT = 'Table describing which rooms are used for an event.\n\neventId /* comment truncated */ /* /* comment truncated */ /* /* comment truncated */ /*: foreign key referencing events table
 roomId: foreign key referencing rooms table
-primary key is both together.*/*/';
+primary key is both together.*/*/*/';
 
 USE `pksudb` ;
 

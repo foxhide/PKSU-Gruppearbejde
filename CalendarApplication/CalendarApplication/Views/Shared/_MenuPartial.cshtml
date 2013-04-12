@@ -1,6 +1,4 @@
-﻿@model CalendarApplication.Models.User.UserModel
-
-@using CalendarApplication.Models.Calendar;
+﻿@using CalendarApplication.Models.Calendar;
 
 <table class="gridtable">
     @{
@@ -11,10 +9,20 @@
             else { <b>Home</b> }
         </td></tr>
         <tr><td>
-            @if(curActn != "" && curCtrl != "Calendar") {
+            @if(curActn != "" && curCtrl != "calendar") {
                 @Html.ActionLink("Calendar", "Index", "Calendar", Calendar.InitialView, null)
             }
             else { <b>Calendar</b> }
         </td></tr>
+        if(curActn != "" && curCtrl != "maintenance") {
+            <tr>
+                <td>
+                    @Html.ActionLink("Maintenance","Index","Maintenance",null,null)
+                </td>
+            </tr>   
+        }
+        else {
+            <tr><td><b>Maintenance</b></td></tr>
+        }
     }
 </table>

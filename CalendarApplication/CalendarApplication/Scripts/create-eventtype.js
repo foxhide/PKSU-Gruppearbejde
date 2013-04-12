@@ -30,7 +30,7 @@ function newField() {
 
     // Get partial view from server, using ajax
     $.ajax({
-        url: "/EventType/GetPartial/",
+        url: "/Maintenance/GetPartial/",
         type: 'GET',
         data: { id: field_count },
         dataType: 'html',
@@ -50,7 +50,8 @@ function updateVarChar(id) {
     if (value == 1) {
         // It is a text field.
         label.innerHTML = "<label>Max size of input:</label>";
-        input.innerHTML = "<input type='text' id='varchar_size_" + id + "' name='TypeSpecific[" + id + "].VarcharLength'>";
+        input.innerHTML = "<input type='text' id='varchar_size_" + id + "' name='TypeSpecific[" + id + "].VarcharLength'"
+                            + " style='width:50px'>";
     }
     else {
         // It is not a text field

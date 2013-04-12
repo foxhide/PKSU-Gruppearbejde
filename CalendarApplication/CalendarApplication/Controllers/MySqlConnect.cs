@@ -97,36 +97,44 @@ namespace CalendarApplication.Controllers
             //Open connection
             if (this.OpenConnection() == true)
             {
-                //Create the table
-                DataTable dt = new DataTable();
-
-                //Create Command and run it
-                MySqlCommand cmd = new MySqlCommand(query, connection);
-                MySqlDataReader dataReader = cmd.ExecuteReader();
-
-                //Set the table columns
-                int cols = dataReader.FieldCount;
-                for (int i = 0; i < cols; i++)
+                try
                 {
-                    dt.Columns.Add(dataReader.GetName(i), dataReader.GetFieldType(i));
-                }
+                    //Create the table
+                    DataTable dt = new DataTable();
 
-                //Fill the table
-                while (dataReader.Read())
-                {
-                    DataRow dr = dt.NewRow();
+                    //Create Command and run it
+                    MySqlCommand cmd = new MySqlCommand(query, connection);
+                    MySqlDataReader dataReader = cmd.ExecuteReader();
+
+                    //Set the table columns
+                    int cols = dataReader.FieldCount;
                     for (int i = 0; i < cols; i++)
                     {
-                        dr[i] = dataReader[i];
+                        dt.Columns.Add(dataReader.GetName(i), dataReader.GetFieldType(i));
                     }
-                    dt.Rows.Add(dr);
+
+                    //Fill the table
+                    while (dataReader.Read())
+                    {
+                        DataRow dr = dt.NewRow();
+                        for (int i = 0; i < cols; i++)
+                        {
+                            dr[i] = dataReader[i];
+                        }
+                        dt.Rows.Add(dr);
+                    }
+
+                    //Close the connection
+                    dataReader.Close();
+                    this.CloseConnection();
+
+                    return dt;
                 }
-
-                //Close the connection
-                dataReader.Close();
-                this.CloseConnection();
-
-                return dt;
+                catch (MySqlException ex0)
+                {
+                    this.ErrorMessage = "A database error occurred: " + ex0.Message;
+                    return null;
+                }
             }
             else
             {
@@ -356,38 +364,6 @@ namespace CalendarApplication.Controllers
             }
         }
 
-        public List<EventTypeModel> GetEventTypes(string where)
-        {
-            if (this.OpenConnection())
-            {
-
-                MySqlCommand msc = new MySqlCommand("SELECT * FROM pksudb.eventtypes" +
-                                                    (string.IsNullOrEmpty(where) ? "" : " WHERE "+where),
-                                                    connection);
-                MySqlDataReader dataReader = msc.ExecuteReader();
-
-                List<EventTypeModel> result = new List<EventTypeModel>();
-
-                while (dataReader.Read())
-                {
-                    EventTypeModel et = new EventTypeModel
-                    {
-                        ID = (int)dataReader["eventTypeId"],
-                        Name = (string)dataReader["eventTypeName"],
-                        Selected = true
-                    };
-                    result.Add(et);
-                }
-
-                this.CloseConnection();
-                return result;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         public int CreateUser(Register data)
         {
             string insert = "INSERT INTO pksudb.users (userName,password,realName,email,active,needsApproval) VALUES ('"
@@ -466,9 +442,10 @@ namespace CalendarApplication.Controllers
                     foreach (FieldDataModel fdm in data.TypeSpecific)
                     {
                         string insertField = "INSERT INTO pksudb.eventtypefields"
-                                            + "(eventTypeId, fieldName, fieldDescription, requiredField, fieldType)"
+                                            + "(eventTypeId, fieldName, fieldDescription, requiredField, fieldType, varchar_length)"
                                             + "VALUES (" + result + ",'" + fdm.Name + "','" + fdm.Description + "',"
-                                            + (fdm.Required ? "1," : "0,") + fdm.Datatype + "); SELECT last_insert_id();";
+                                            + (fdm.Required ? "1," : "0,") + fdm.Datatype + "," + fdm.VarcharLength
+                                            + "); SELECT last_insert_id();";
 
                         cmd.CommandText = insertField;
                         int id = Convert.ToInt32(cmd.ExecuteScalar());
@@ -551,9 +528,10 @@ namespace CalendarApplication.Controllers
                         else if(fdm.ViewID == -2)
                         {
                             string insertField = "INSERT INTO pksudb.eventtypefields"
-                                                 + "(eventTypeId, fieldName, fieldDescription, requiredField, fieldType)"
+                                                 + "(eventTypeId, fieldName, fieldDescription, requiredField, fieldType, varchar_length)"
                                                  + "VALUES (" + data.ID + ",'" + fdm.Name + "','" + fdm.Description + "',"
-                                                 + (fdm.Required ? "1," : "0,") + fdm.Datatype + "); SELECT last_insert_id();";
+                                                 + (fdm.Required ? "1," : "0,") + fdm.Datatype + ","+ fdm.VarcharLength
+                                                 + "); SELECT last_insert_id();";
 
                             cmd.CommandText = insertField;
                             int id = Convert.ToInt32(cmd.ExecuteScalar());
@@ -573,11 +551,9 @@ namespace CalendarApplication.Controllers
                             alterEventTable = "ALTER TABLE table_" + data.ID + " MODIFY COLUMN field_" + fdm.ID + " " + fdm.GetDBType();
 
                             cmd.CommandText = updateField;
-                            MessageBox.Show(updateField);
                             cmd.ExecuteNonQuery();
                         }
 
-                        MessageBox.Show(alterEventTable);
                         cmd.CommandText = alterEventTable;
                         cmd.ExecuteNonQuery();
 
