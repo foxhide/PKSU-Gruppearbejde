@@ -23,7 +23,7 @@
         </td>
         <td rowspan="3"><div id="desc_count_@(Model.ViewID)">Characters left: 100</div>
             <textarea id='Desc_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].Description'
-               cols="40" rows="4" onkeyup="updateCounter_test(@(Model.ViewID));">@(Model.Description)</textarea></td>
+               cols="40" rows="4" onkeyup="updateCounter(@(Model.ViewID));">@(Model.Description)</textarea></td>
     </tr>
     <tr>
         <td><label for='Req_@(Model.ViewID)'>Field required</label></td>
@@ -39,7 +39,7 @@
     <tr>
         <td style="text-align:center">
             <input type='checkbox' id='Req_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].Required'
-            @(Model.Required?" checked":"")>
+            @(Model.Required?" checked":"") value="true">
         </td>
         <td>
             <div id="varchar_input_@(Model.ViewID)">

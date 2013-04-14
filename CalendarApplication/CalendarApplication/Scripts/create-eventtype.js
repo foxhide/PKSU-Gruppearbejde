@@ -61,7 +61,7 @@ function updateVarChar(id) {
 }
 
 /* Function used for updating the counter for the description text area */
-function updateCounter_test(id) {
+function updateCounter(id) {
     var chars = 99 - document.getElementById('Desc_' + id).value.length;
     var label = document.getElementById('desc_count_' + id);
     var content = "Characters left: ";
