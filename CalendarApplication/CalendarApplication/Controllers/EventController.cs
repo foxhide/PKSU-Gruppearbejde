@@ -62,5 +62,30 @@ namespace CalendarApplication.Controllers
             }
             return View(result);
         }
+
+        public ActionResult CreateEvent()
+        {
+            EventCreateModel ecm = new EventCreateModel
+            {
+                EventTypes = new List<SelectListItem>()
+            };
+
+            MySqlConnect msc = new MySqlConnect();
+            string etquery = "SELECT eventTypeId,eventTypeName FROM pksudb.eventtypes";
+            DataTable dt = msc.ExecuteQuery(etquery);
+            if (dt != null)
+            {
+                foreach (DataRow dr in dt.Rows)
+                {
+                    ecm.EventTypes.Add(new SelectListItem
+                    {
+                        Value = ((int)dr["eventTypeId"]).ToString(),
+                        Text = (string)dr["eventTypeName"]
+                    });
+                }
+            }
+
+            return View(ecm);
+        }
     }
 }

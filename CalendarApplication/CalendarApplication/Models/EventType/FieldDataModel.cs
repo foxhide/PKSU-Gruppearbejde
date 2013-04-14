@@ -60,8 +60,8 @@ namespace CalendarApplication.Models.EventType
                 case 0:
                 case 3:
                 case 4: return "int";
-                case 6: return "varchar(100)";  //File
-                case 7: return "tinyint(1)";    //Yes/No
+                case 5: return "varchar(100)";  //File
+                case 6: return "tinyint(1)";    //Yes/No
                 default: return "int";
             }
         }
