@@ -63,21 +63,48 @@ namespace CalendarApplication.Controllers
             return View(result);
         }
 
-        public ActionResult CreateEvent()
+        public ActionResult EditEvent(int id)
         {
-            EventCreateModel ecm = new EventCreateModel
+            EventEditModel eem = new EventEditModel
             {
-                EventTypes = new List<SelectListItem>()
+                ID = id,
+                EventTypes = new List<SelectListItem>(),
+                SelectedEventType = "1" // Initial value -> Basic event
             };
 
+            if (id == -1) { this.createModel(eem); }
+            else { this.getModel(eem); }
+            
+            return View(eem);
+        }
+
+        [HttpPost]
+        public ActionResult EditEvent(EventEditModel eem)
+        {
+            if (eem.SubmitType == 1)
+            {
+                return RedirectToAction("Index", "Home", null);
+            }
+            else
+            {
+                this.createModel(eem);
+                return View(eem);
+            }
+        }
+
+        public void createModel(EventEditModel eem)
+        {
             MySqlConnect msc = new MySqlConnect();
+
+            // Get list of event types //
+            eem.EventTypes = new List<SelectListItem>();
             string etquery = "SELECT eventTypeId,eventTypeName FROM pksudb.eventtypes";
             DataTable dt = msc.ExecuteQuery(etquery);
             if (dt != null)
             {
                 foreach (DataRow dr in dt.Rows)
                 {
-                    ecm.EventTypes.Add(new SelectListItem
+                    eem.EventTypes.Add(new SelectListItem
                     {
                         Value = ((int)dr["eventTypeId"]).ToString(),
                         Text = (string)dr["eventTypeName"]
@@ -85,7 +112,108 @@ namespace CalendarApplication.Controllers
                 }
             }
 
-            return View(ecm);
+            if (!eem.SelectedEventType.Equals("1")) // Not a basic event, get the specefics
+            {
+                eem.TypeSpecefics = new List<FieldModel>();
+                string specQuery = "SELECT * FROM eventtypefields WHERE eventTypeId = " + eem.SelectedEventType;
+                dt = msc.ExecuteQuery(specQuery);
+                if (dt != null)
+                {
+                    foreach (DataRow dr in dt.Rows)
+                    {
+                        eem.TypeSpecefics.Add(new FieldModel
+                        {
+                            ID = (int)dr["fieldId"],
+                            Name = (string)dr["fieldName"],
+                            Description = (string)dr["fieldDescription"],
+                            Required = (bool)dr["requiredField"],
+                            Datatype = (int)dr["fieldType"],
+                            VarcharLength = (int)dr["varchar_length"]
+                        });
+                    }
+                }
+            }
+        }
+
+        public bool getModel(EventEditModel eem)
+        {
+            if (eem.ID == -1) { return true; }
+
+            MySqlConnect msc = new MySqlConnect();
+
+            // Get list of event types //
+            eem.EventTypes = new List<SelectListItem>();
+            string etquery = "SELECT eventTypeId,eventTypeName FROM pksudb.eventtypes";
+            DataTable dt = msc.ExecuteQuery(etquery);
+            if (dt != null)
+            {
+                foreach (DataRow dr in dt.Rows)
+                {
+                    eem.EventTypes.Add(new SelectListItem
+                    {
+                        Value = ((int)dr["eventTypeId"]).ToString(),
+                        Text = (string)dr["eventTypeName"]
+                    });
+                }
+            }
+
+            string basic = "SELECT eventName,eventTypeId,eventStart,eventEnd,userName "
+                            + "FROM pksudb.events NATURAL JOIN pksudb.users"
+                            + "WHERE eventId == " + eem.ID;
+            dt = msc.ExecuteQuery(basic);
+
+            eem.Name = (string)dt.Rows[0]["eventName"];
+            eem.Start = (DateTime)dt.Rows[0]["eventStart"];
+            eem.End = (DateTime)dt.Rows[0]["eventEnd"];
+            eem.Creator = (string)dt.Rows[0]["userName"];
+            eem.SelectedEventType = ((int)dt.Rows[0]["eventTypeId"]).ToString();
+
+            if (!eem.SelectedEventType.Equals("1"))
+            {
+                eem.TypeSpecefics = new List<FieldModel>();
+                string specQuery = "SELECT * FROM eventtypefields WHERE eventTypeId = " + eem.SelectedEventType;
+                string specData = "SELECT * FROM pksudb.table_" + eem.SelectedEventType
+                                    + " WHERE eventId == " + eem.ID;
+
+                DataSet ds = msc.ExecuteQuery(new[] { specQuery, specData });
+                if (ds != null)
+                {
+                    DataTable fields = ds.Tables[0];
+                    DataRow data = ds.Tables[1].Rows[0];
+                    for (int i = 0; i < fields.Rows.Count; i++)
+                    {
+                        DataRow dr = fields.Rows[i];
+                        FieldModel fm = new FieldModel
+                        {
+                            ID = (int)dr["fieldId"],
+                            Name = (string)dr["fieldName"],
+                            Description = (string)dr["fieldDescription"],
+                            Required = (bool)dr["requiredField"],
+                            Datatype = (int)dr["fieldType"],
+                            VarcharLength = (int)dr["varchar_length"]
+                        };
+
+                        switch (fm.Datatype)
+                        {
+                            case 0:
+                            case 3:
+                            case 4: fm.IntValue = (int)data[i+1]; break; //int
+                            case 1:
+                            case 2:
+                            case 5: fm.StringValue = (string)data[i+1]; break; //string
+                            case 6: fm.BoolValue = (bool)data[i+1]; break; //bool
+                        }
+
+                        eem.TypeSpecefics.Add(fm);
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

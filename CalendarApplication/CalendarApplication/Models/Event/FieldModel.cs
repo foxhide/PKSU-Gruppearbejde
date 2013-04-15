@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
 
@@ -9,6 +10,8 @@ namespace CalendarApplication.Models.Event
 {
     public class FieldModel : FieldDataModel
     {
-        public object Value { get; set; }
+        public string StringValue { get; set; }
+        public int IntValue { get; set; }
+        public bool BoolValue { get; set; }
     }
 }
