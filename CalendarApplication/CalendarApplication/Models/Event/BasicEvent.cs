@@ -48,7 +48,7 @@ namespace CalendarApplication.Models.Event
         {
             switch (state)
             {
-                case 0: return "Needs Approval";
+                case 0: return "Incomplete";
                 case 1: return "Approved";
                 case 2: return "Finished";
                 default: return "NYI";
