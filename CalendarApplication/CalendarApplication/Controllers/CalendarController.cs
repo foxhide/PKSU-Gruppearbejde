@@ -19,7 +19,6 @@ namespace CalendarApplication.Controllers
 
         public ActionResult Index(int mode, int year, int month, int day, int range)
         {
-            MySqlConnect msc = new MySqlConnect();
             EventViewModel evm = new EventViewModel
             {
                 Mode = mode,
@@ -30,8 +29,23 @@ namespace CalendarApplication.Controllers
                 ViewState0 = true,
                 ViewState1 = true,
                 ViewState2 = true,
-                Eventtypes = msc.GetEventTypes("")
+                Eventtypes = new List<EventTypeModel>()
             };
+
+            MySqlConnect msc = new MySqlConnect();
+            string etget = "SELECT eventTypeId, eventTypeName FROM pksudb.eventtypes";
+            DataTable dt = msc.ExecuteQuery(etget);
+            foreach (DataRow dr in dt.Rows)
+            {
+                EventTypeModel etm = new EventTypeModel
+                {
+                    ID = (int)dr["eventTypeId"],
+                    Name = (string)dr["eventTypeName"],
+                    Selected = true
+                };
+                evm.Eventtypes.Add(etm);
+            }
+
 
             switch (mode)
             {

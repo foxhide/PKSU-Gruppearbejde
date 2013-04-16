@@ -1,0 +1,28 @@
+﻿@using CalendarApplication.Models.Calendar;
+
+<table class="gridtable">
+    @{
+        var curActn = ViewContext.Controller.ValueProvider.GetValue("action").RawValue.ToString().ToLowerInvariant();
+        var curCtrl = ViewContext.Controller.ValueProvider.GetValue("controller").RawValue.ToString().ToLowerInvariant();
+        <tr><td>
+            @if(curActn != "" && curCtrl != "home") { @Html.ActionLink("Home", "", "Home") }
+            else { <b>Home</b> }
+        </td></tr>
+        <tr><td>
+            @if(curActn != "" && curCtrl != "calendar") {
+                @Html.ActionLink("Calendar", "Index", "Calendar", Calendar.InitialView, null)
+            }
+            else { <b>Calendar</b> }
+        </td></tr>
+        if(curActn != "" && curCtrl != "maintenance") {
+            <tr>
+                <td>
+                    @Html.ActionLink("Maintenance","Index","Maintenance",null,null)
+                </td>
+            </tr>   
+        }
+        else {
+            <tr><td><b>Maintenance</b></td></tr>
+        }
+    }
+</table>

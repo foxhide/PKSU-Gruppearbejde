@@ -1,0 +1,43 @@
+﻿@model CalendarApplication.Models.Maintenance.MaintenanceModel
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Maintenance page</h2>
+
+<h3 style="color:red">@TempData["errorMsg"]</h3>
+
+<script>
+    function setSubmitValue(subId) {
+        document.getElementById("SubmitValue").value = subId;
+    }
+</script>
+
+@using (Html.BeginForm()) {
+@Html.HiddenFor(m => Model.SubmitValue);
+<fieldset>
+    <legend>Event types</legend>
+    <table>
+        <tr>
+            <td>
+                @Html.DropDownListFor(m => Model.SelectedEventType, new SelectList(Model.EventTypes, "Value", "Text"))
+            </td>
+            <td>
+                <input type="submit" value="Edit" onclick="setSubmitValue(0)" />
+            </td>
+            <td>
+                <input type="submit" value="Create new" onclick="setSubmitValue(1)" />
+            </td>
+        </tr>
+    </table>
+</fieldset>
+
+<fieldset>
+    <legend>Groups</legend>
+</fieldset>
+
+<fieldset>
+    <legend>Users</legend>
+</fieldset>
+}

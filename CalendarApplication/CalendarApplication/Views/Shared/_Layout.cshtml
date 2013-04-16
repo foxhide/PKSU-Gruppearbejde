@@ -2,6 +2,7 @@
 <html>
 
     @using CalendarApplication.Models.Calendar;
+    @using CalendarApplication.Models.User;
 
 <head>
     <meta charset="utf-8" />
@@ -58,28 +59,7 @@
         </tr>
         <tr>
             <td style="width:100px; height:500px; background-color:lightgrey">
-                <table class="gridtable">
-                    @{
-                         var curActn = ViewContext.Controller.ValueProvider.GetValue("action").RawValue.ToString().ToLowerInvariant();
-                         var curCtrl = ViewContext.Controller.ValueProvider.GetValue("controller").RawValue.ToString().ToLowerInvariant();
-                         if(curActn != "" && curCtrl != "home")
-                         {
-                            <tr><td>@Html.ActionLink("Home", "", "Home")</td></tr>
-                         }
-                         else
-                         {
-                            <tr><td><b>Home</b></td></tr>
-                         }
-                        if(curActn != "" && curCtrl != "calendar")
-                        {
-                            <tr><td>@Html.ActionLink("Calendar", "Index", "Calendar", Calendar.InitialView, null)</td></tr>
-                        }
-                        else
-                        {
-                            <tr><td><b>Calendar</b></td></tr>   
-                        }
-                    }
-                </table>
+                @Html.Partial("_MenuPartial")
             </td>
             <td>
                 @RenderBody()
