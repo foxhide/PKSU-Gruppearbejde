@@ -442,7 +442,7 @@ namespace CalendarApplication.Controllers
                     foreach (FieldDataModel fdm in data.TypeSpecific)
                     {
                         string insertField = "INSERT INTO pksudb.eventtypefields"
-                                            + "(eventTypeId, fieldName, fieldDescription, requiredField, fieldType, varchar_length)"
+                                            + "(eventTypeId, fieldName, fieldDescription, requiredField, fieldType, varCharLength)"
                                             + "VALUES (" + result + ",'" + fdm.Name + "','" + fdm.Description + "',"
                                             + (fdm.Required ? "1," : "0,") + fdm.Datatype + "," + fdm.VarcharLength
                                             + "); SELECT last_insert_id();";

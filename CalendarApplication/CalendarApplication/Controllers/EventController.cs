@@ -128,7 +128,7 @@ namespace CalendarApplication.Controllers
                             Description = (string)dr["fieldDescription"],
                             Required = (bool)dr["requiredField"],
                             Datatype = (int)dr["fieldType"],
-                            VarcharLength = (int)dr["varchar_length"]
+                            VarcharLength = (int)dr["varCharLength"]
                         });
                     }
                 }
@@ -190,7 +190,7 @@ namespace CalendarApplication.Controllers
                             Description = (string)dr["fieldDescription"],
                             Required = (bool)dr["requiredField"],
                             Datatype = (int)dr["fieldType"],
-                            VarcharLength = (int)dr["varchar_length"]
+                            VarcharLength = (int)dr["varCharLength"]
                         };
 
                         switch (fm.Datatype)
