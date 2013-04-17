@@ -11,6 +11,7 @@ using CalendarApplication.Models.Event;
 using CalendarApplication.Models.Account;
 using CalendarApplication.Models.User;
 using CalendarApplication.Models.EventType;
+using CalendarApplication.Models.Shared;
 
 namespace CalendarApplication.Controllers
 {
@@ -231,8 +232,8 @@ namespace CalendarApplication.Controllers
                         Name = (string)dataReader["eventName"],
                         Creator = (string)dataReader["username"],
                         TypeName = (string)dataReader["eventTypeName"],
-                        Start = (DateTime)dataReader["eventStart"],
-                        End = (DateTime)dataReader["eventEnd"],
+                        Start = new EditableDateTime((DateTime)dataReader["eventStart"]),
+                        End = new EditableDateTime((DateTime)dataReader["eventEnd"]),
                         State = (int)dataReader["state"],
                         Rooms = rooms ? new List<Room>() : null
                     };
@@ -396,13 +397,15 @@ namespace CalendarApplication.Controllers
                     {
                         mst.Rollback();
                         this.CloseConnection();
-                        ErrorMessage = "Some databse error occured: Discarded changes, Error message: " + ex0.Message;
+                        ErrorMessage = "Some databse error occured: Discarded changes, Error message: " + ex0.Message
+                                        + ", Caused by: "+cmd.CommandText;
                         return -1;
                     }
                     catch (MySqlException ex1)
                     {
                         this.CloseConnection();
-                        ErrorMessage = "Some databse error occured: Could not discard changes, DB corrupt, Error message: " + ex1.Message;
+                        ErrorMessage = "Some databse error occured: Could not discard changes, DB corrupt, Error message: " + ex1.Message
+                                        + ", Caused by: " + cmd.CommandText;
                         return -1;
                     }
                 }
@@ -473,13 +476,15 @@ namespace CalendarApplication.Controllers
                     {
                         mst.Rollback();
                         this.CloseConnection();
-                        ErrorMessage = "Some databse error occured: Discarded changes, Error message: " + ex0.Message;
+                        ErrorMessage = "Some databse error occured: Discarded changes, Error message: " + ex0.Message
+                                        + ", Caused by: " + cmd.CommandText;
                         return false;
                     }
                     catch (MySqlException ex1)
                     {
                         this.CloseConnection();
-                        ErrorMessage = "Some databse error occured: Could not discard changes, DB corrupt, Error message: " + ex1.Message;
+                        ErrorMessage = "Some databse error occured: Could not discard changes, DB corrupt, Error message: " + ex1.Message
+                                        + ", Caused by: " + cmd.CommandText;
                         return false;
                     }
                 }
@@ -569,16 +574,17 @@ namespace CalendarApplication.Controllers
                     {
                         mst.Rollback();
                         this.CloseConnection();
-                        ErrorMessage = "Some databse error occured: Discarded changes, Error message: " + ex0.Message;
+                        ErrorMessage = "Some databse error occured: Discarded changes, Error message: " + ex0.Message
+                                        + ", Caused by: " + cmd.CommandText;
                         return false;
                     }
                     catch (MySqlException ex1)
                     {
                         this.CloseConnection();
-                        ErrorMessage = "Some databse error occured: Could not discard changes, DB corrupt, Error message: " + ex1.Message;
+                        ErrorMessage = "Some databse error occured: Could not discard changes, DB corrupt, Error message: " + ex1.Message
+                                        + ", Caused by: " + cmd.CommandText;
                         return false;
                     }
-
                 }
                 return true;
             }
@@ -588,6 +594,127 @@ namespace CalendarApplication.Controllers
                 return false;
             }
 
+        }
+
+        public bool EditEvent(EventEditModel eem)
+        {
+            if (this.OpenConnection() == true)
+            {
+                MySqlTransaction mst = null;
+                MySqlCommand cmd = null;
+
+                try
+                {
+                    mst = connection.BeginTransaction();
+                    cmd = new MySqlCommand();
+                    cmd.Connection = connection;
+                    cmd.Transaction = mst;
+
+                    string prevType = eem.SelectedEventType;
+                    if (eem.ID != -1)
+                    {
+                        cmd.CommandText = "SELECT eventTypeId FROM pksudb.events WHERE eventId == " + eem.ID;
+                        prevType = "" + (int)cmd.ExecuteScalar();
+                    }
+
+                    string updateEventTable = eem.ID == -1 ?
+                                                "INSERT INTO pksudb.events" +
+                                                "(userId,eventTypeId,eventName,eventStart,eventEnd,visible,state) VALUES " +
+                                                "(" + eem.CreatorID + "," + eem.SelectedEventType + ",'" + eem.Name + "','" +
+                                                eem.Start.GetDBString() + "','" + eem.End.GetDBString() + "'," +
+                                                (eem.Visible ? "1" : "0") + "," + eem.State + ")" :
+                                                "UPDATE pksudb.events SET eventTypeId = " + eem.SelectedEventType +
+                                                ", eventName = '" + eem.Name + "', eventStart = '" + eem.Start.GetDBString() +
+                                                "', eventEnd = '" + eem.End.GetDBString() + "', visible = " +
+                                                (eem.Visible?"1":"0") + ", state = " + eem.State + " WHERE eventId = " + eem.ID;
+
+                    cmd.CommandText = updateEventTable;
+                    cmd.ExecuteNonQuery();
+
+                    // Check if type has changed, clean up if it has...
+                    if (!prevType.Equals(eem.SelectedEventType))
+                    {
+                        cmd.CommandText = "SHOW TABLES LIKE 'table_" + prevType + "'";
+                        MySqlDataReader dataReader = cmd.ExecuteReader();
+                        bool rows = dataReader.HasRows;
+                        dataReader.Close();
+                        if (rows)
+                        {
+                            // The old type has a table with a entry, remove this entry.
+                            string delete = "DELETE FROM table_" + prevType + " WHERE eventId == " + eem.ID;
+                            cmd.CommandText = delete;
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+
+                    // Check if (new) type has a specifics table
+                    if (eem.TypeSpecefics != null)
+                    {
+                        string updateTable;
+                        if (eem.ID == -1 || !prevType.Equals(eem.SelectedEventType))
+                        {
+                            // We have to insert because it is a create, or we have changed the type...
+                            string prologue = "INSERT INTO pksudb.table_" + eem.SelectedEventType + " (";
+                            string epilogue = " VALUES (";
+                            for (int i = 0; i < eem.TypeSpecefics.Count; i++)
+                            {
+                                FieldModel fm = eem.TypeSpecefics[i];
+                                prologue += "field_" + fm.ID;
+                                epilogue += fm.GetDBValue();
+                                if (i < eem.TypeSpecefics.Count - 1)
+                                {
+                                    prologue += ",";
+                                    epilogue += ",";
+                                }
+                            }
+                            updateTable = prologue + ")" + epilogue + ")";
+                        }
+                        else
+                        {
+                            // We only have to update
+                            updateTable = "UPDATE pksudb.table_" + eem.SelectedEventType + " SET ";
+                            for (int i = 0; i < eem.TypeSpecefics.Count; i++)
+                            {
+                                FieldModel fm = eem.TypeSpecefics[i];
+                                updateTable += "field_" + fm.ID + " = " + fm.GetDBValue();
+                                if (i < eem.TypeSpecefics.Count - 1)
+                                {
+                                    updateTable += ",";
+                                }
+                            }
+                            updateTable += " WHERE eventId == " + eem.ID;
+                        }
+                        cmd.CommandText = updateTable;
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    mst.Commit();
+                }
+                catch (MySqlException ex0)
+                {
+                    try
+                    {
+                        mst.Rollback();
+                        this.CloseConnection();
+                        ErrorMessage = "Some databse error occured: Discarded changes, Error message: " + ex0.Message
+                                        + ", Caused by: " + cmd.CommandText;
+                        return false;
+                    }
+                    catch (MySqlException ex1)
+                    {
+                        this.CloseConnection();
+                        ErrorMessage = "Some databse error occured: Could not discard changes, DB corrupt, Error message: " + ex1.Message
+                                        + ", Caused by: " + cmd.CommandText;
+                        return false;
+                    }
+                }
+                return true;
+            }
+            else
+            {
+                ErrorMessage = "Could not open connection to database!";
+                return false;
+            }
         }
     }
 }

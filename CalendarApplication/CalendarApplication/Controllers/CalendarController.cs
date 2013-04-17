@@ -105,8 +105,8 @@ namespace CalendarApplication.Controllers
 
             foreach (BasicEvent ev in events)
             {
-                TimeSpan end = ev.End - first;
-                TimeSpan start = ev.Start - first;
+                TimeSpan end = ev.End.GetDateTime() - first;
+                TimeSpan start = ev.Start.GetDateTime() - first;
                 int startDay = start.Days < 0 ? 0 : start.Days;
 
                 for (int i = startDay; i <= end.Days && i < cdays.Count; i++)
