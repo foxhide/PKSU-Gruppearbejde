@@ -66,15 +66,15 @@ namespace CalendarApplication.Controllers
             return View(result);
         }
 
-        public ActionResult EditEvent(int id)
+        public ActionResult EditEvent(int id, int year, int month, int day)
         {
             EventEditModel eem = new EventEditModel
             {
                 ID = id,
                 EventTypes = new List<SelectListItem>(),
                 SelectedEventType = "1", // Initial value -> Basic event
-                Start = new EditableDateTime(2013, 4, 17, 0, 0),
-                End = new EditableDateTime(2013, 4, 17, 0, 0)
+                Start = new EditableDateTime(year, month, day, 10, 0),
+                End = new EditableDateTime(year, month, day, 18, 0)
             };
 
             if (id == -1) { this.createModel(eem); }

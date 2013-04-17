@@ -1,6 +1,7 @@
 ﻿@model CalendarApplication.Models.Calendar.CalendarDay
 
 @using CalendarApplication.Models.Event;
+@using CalendarApplication.Models.User;
 
 <table style="font-size:20px;width:850px">
     <tr>
@@ -82,4 +83,13 @@
     }
 </table>
 
-@Html.ActionLink("Create event","EditEvent","Event",new { id = -1 },null)
+<br />
+
+@if(UserModel.GetCurrentUserID() != -1) {
+    <text>
+        Would you like to
+        @Html.ActionLink("create a new event on this day", "EditEvent", "Event",
+                            new { id = -1, year = Model.Date.Year, month = Model.Date.Month, day = Model.Date.Day }, null)
+        ?
+    </text>
+}
