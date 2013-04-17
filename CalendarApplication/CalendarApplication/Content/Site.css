@@ -16,6 +16,17 @@ section {
 /* Classes for GUI
 -----------------------------------------------------------*/
 
+/* Table entries in Monthly calender view */
+.calendar-month {
+    background-color:white;
+    border-width:1px;
+    text-align:left;
+    vertical-align:top;
+    padding:0;
+    width:100px;
+    height:80px;
+}
+
 /* Used for the datetime editor */
 .datetime-editor {
     margin-left:0;
@@ -44,11 +55,6 @@ legend
 {
     font-size:1.2em;
     font-weight: bold;
-}
-
-textarea 
-{
-    min-height: 75px;
 }
 
 .editor-label 
