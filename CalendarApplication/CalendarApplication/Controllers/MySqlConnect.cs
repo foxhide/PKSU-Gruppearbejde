@@ -616,7 +616,7 @@ namespace CalendarApplication.Controllers
                     if (eem.ID != -1)
                     {
                         cmd.CommandText = "SELECT eventTypeId FROM pksudb.events WHERE eventId == " + eem.ID;
-                        prevType = "" + (int)cmd.ExecuteScalar();
+                        prevType = "" + Convert.ToInt32(cmd.ExecuteScalar());
                     }
 
                     string updateEventTable = eem.ID == -1 ?
@@ -662,8 +662,8 @@ namespace CalendarApplication.Controllers
                         if (eem.ID == -1 || !prevType.Equals(eem.SelectedEventType))
                         {
                             // We have to insert because it is a create, or we have changed the type...
-                            string prologue = "INSERT INTO pksudb.table_" + eem.SelectedEventType + " (";
-                            string epilogue = " VALUES (";
+                            string prologue = "INSERT INTO pksudb.table_" + eem.SelectedEventType + " (eventId,";
+                            string epilogue = " VALUES (" + newId + ",";
                             for (int i = 0; i < eem.TypeSpecefics.Count; i++)
                             {
                                 FieldModel fm = eem.TypeSpecefics[i];
@@ -676,6 +676,7 @@ namespace CalendarApplication.Controllers
                                 }
                             }
                             updateTable = prologue + ")" + epilogue + ")";
+                            MessageBox.Show(updateTable);
                         }
                         else
                         {

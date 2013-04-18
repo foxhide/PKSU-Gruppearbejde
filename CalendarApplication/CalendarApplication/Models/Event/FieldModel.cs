@@ -23,7 +23,7 @@ namespace CalendarApplication.Models.Event
                 case 4: return this.IntValue.ToString(); //int
                 case 1:
                 case 2:
-                case 5: return this.StringValue; //string
+                case 5: return "'"+this.StringValue+"'"; //string
                 case 6: return (this.BoolValue ? "1" : "0"); //bool
             }
             return "";
