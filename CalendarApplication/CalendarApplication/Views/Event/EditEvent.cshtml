@@ -58,6 +58,10 @@
             }           
         </table>
     }
+    <br />
+    <br />
+
+    @Html.ListEditorFor(m => m.RoomSelectList, "Rooms Selected", "Rooms Available")
 
     <br />
     <input type="submit" value="Create event" onclick="document.getElementById('SubmitType').value = 1" />

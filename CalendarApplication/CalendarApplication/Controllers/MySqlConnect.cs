@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Web.Mvc;
 using System.Data;
 using MySql.Data.MySqlClient;
 using System.Windows.Forms;
@@ -609,6 +610,7 @@ namespace CalendarApplication.Controllers
                     cmd = new MySqlCommand();
                     cmd.Connection = connection;
                     cmd.Transaction = mst;
+                    int newId;
 
                     string prevType = eem.SelectedEventType;
                     if (eem.ID != -1)
@@ -622,14 +624,20 @@ namespace CalendarApplication.Controllers
                                                 "(userId,eventTypeId,eventName,eventStart,eventEnd,visible,state) VALUES " +
                                                 "(" + eem.CreatorID + "," + eem.SelectedEventType + ",'" + eem.Name + "','" +
                                                 eem.Start.GetDBString() + "','" + eem.End.GetDBString() + "'," +
-                                                (eem.Visible ? "1" : "0") + "," + eem.State + ")" :
+                                                (eem.Visible ? "1" : "0") + "," + eem.State + "); SELECT last_insert_id();" :
                                                 "UPDATE pksudb.events SET eventTypeId = " + eem.SelectedEventType +
                                                 ", eventName = '" + eem.Name + "', eventStart = '" + eem.Start.GetDBString() +
                                                 "', eventEnd = '" + eem.End.GetDBString() + "', visible = " +
                                                 (eem.Visible?"1":"0") + ", state = " + eem.State + " WHERE eventId = " + eem.ID;
 
                     cmd.CommandText = updateEventTable;
-                    cmd.ExecuteNonQuery();
+                    if (eem.ID == -1) { newId = Convert.ToInt32(cmd.ExecuteScalar()); }
+                    else
+                    {
+                        cmd.ExecuteNonQuery();
+                        newId = eem.ID;
+                    }
+                    
 
                     // Check if type has changed, clean up if it has...
                     if (!prevType.Equals(eem.SelectedEventType))
@@ -686,6 +694,23 @@ namespace CalendarApplication.Controllers
                         }
                         cmd.CommandText = updateTable;
                         cmd.ExecuteNonQuery();
+                    }
+
+                    if (eem.ID == -1)
+                    {
+                        foreach (SelectListItem room in eem.RoomSelectList)
+                        {
+                            if (room.Selected)
+                            {
+                                cmd.CommandText = "INSERT INTO pksudb.eventroomsused(eventId,roomId) VALUES ("
+                                                    + newId + "," + room.Value + ")";
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //Handle room edit here.
                     }
 
                     mst.Commit();

@@ -42,8 +42,11 @@ namespace CalendarApplication.Controllers
                 result.Rooms = new List<Room>();                       
                 for (int i = 0; i < rows.Count; i++)
                 {
-                    Room tmpRoom = new Room { ID = (int)rows[i]["roomId"], Name = (string)rows[i]["roomName"] };
-                    result.Rooms.Add(tmpRoom);
+                    result.Rooms.Add(new Room
+                    {
+                        ID = (int)rows[i]["roomId"],
+                        Name = (string)rows[i]["roomName"]
+                    });
                 }
                 if (result.TypeId != 1)
                 {
@@ -77,8 +80,8 @@ namespace CalendarApplication.Controllers
                 End = new EditableDateTime(year, month, day, 18, 0)
             };
 
-            if (id == -1) { this.createModel(eem); }
-            else { this.getModel(eem); }
+            if (id == -1) { this.getRooms(eem); this.createModel(eem); }
+            else { this.getRooms(eem); this.getModel(eem); }
             
             return View(eem);
         }
@@ -145,6 +148,28 @@ namespace CalendarApplication.Controllers
                     }
                 }
             }
+        }
+
+        public bool getRooms(EventEditModel eem)
+        {
+            MySqlConnect msc = new MySqlConnect();
+
+            // Get list of rooms //
+            eem.RoomSelectList = new List<SelectListItem>();
+            string roomquery = "SELECT roomId,roomName FROM pksudb.rooms";
+            DataTable dt = msc.ExecuteQuery(roomquery);
+            if (dt != null)
+            {
+                foreach (DataRow dr in dt.Rows)
+                {
+                    eem.RoomSelectList.Add(new SelectListItem
+                    {
+                        Value = ((int)dr["roomId"]).ToString(),
+                        Text = (string)dr["roomName"]
+                    });
+                }
+            }
+            return true;
         }
 
         public bool getModel(EventEditModel eem)
