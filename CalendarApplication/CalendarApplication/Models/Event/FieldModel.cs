@@ -13,6 +13,7 @@ namespace CalendarApplication.Models.Event
         public string StringValue { get; set; }
         public int IntValue { get; set; }
         public bool BoolValue { get; set; }
+        public DateTime DateValue { get; set; }
 
         public string GetDBValue()
         {

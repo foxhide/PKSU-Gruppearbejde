@@ -62,8 +62,8 @@
                     {
                         if (e.Rooms.Contains(room))
                         {
-                            int start = (e.Start.GetDateTime() < Model.Date ? 0 : ((e.Start.Hour * 60 + e.Start.Minute)*100) / 1440);
-                            int end = (e.End.GetDateTime() > Model.Date.AddDays(1) ? 100 : ((e.End.Hour * 60 + e.End.Minute)*100) / 1440);
+                            int start = (e.Start < Model.Date ? 0 : ((e.Start.Hour * 60 + e.Start.Minute)*100) / 1440);
+                            int end = (e.End > Model.Date.AddDays(1) ? 100 : ((e.End.Hour * 60 + e.End.Minute)*100) / 1440);
                     
                     
                     

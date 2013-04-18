@@ -7,7 +7,6 @@ using System.Data;
 
 using CalendarApplication.Models.User;
 using CalendarApplication.Models.Event;
-using CalendarApplication.Models.Shared;
 
 namespace CalendarApplication.Controllers
 {
@@ -32,8 +31,8 @@ namespace CalendarApplication.Controllers
             {
                 DataRowCollection rows = table.Rows;
                 result.Name = (string)rows[0]["eventName"];
-                result.Start = new EditableDateTime((DateTime)rows[0]["eventStart"]);
-                result.End = new EditableDateTime((DateTime)rows[0]["eventEnd"]);
+                result.Start = (DateTime)rows[0]["eventStart"];
+                result.End = (DateTime)rows[0]["eventEnd"];
                 result.State = (int)rows[0]["state"];
                 result.TypeId = (int)rows[0]["eventTypeId"];
                 result.TypeName = (string)rows[0]["eventTypeName"];
@@ -76,8 +75,8 @@ namespace CalendarApplication.Controllers
                 ID = id,
                 EventTypes = new List<SelectListItem>(),
                 SelectedEventType = "1", // Initial value -> Basic event
-                Start = new EditableDateTime(year, month, day, 10, 0),
-                End = new EditableDateTime(year, month, day, 18, 0)
+                Start = new DateTime(year, month, day, 0, 0, 0),
+                End = new DateTime(year, month, day, 0, 0, 0)
             };
 
             if (id == -1) { this.getRooms(eem); this.createModel(eem); }
@@ -200,8 +199,8 @@ namespace CalendarApplication.Controllers
             dt = msc.ExecuteQuery(basic);
 
             eem.Name = (string)dt.Rows[0]["eventName"];
-            eem.Start = new EditableDateTime((DateTime)dt.Rows[0]["eventStart"]);
-            eem.End = new EditableDateTime((DateTime)dt.Rows[0]["eventEnd"]);
+            eem.Start = (DateTime)dt.Rows[0]["eventStart"];
+            eem.End = (DateTime)dt.Rows[0]["eventEnd"];
             eem.Creator = (string)dt.Rows[0]["userName"];
             eem.SelectedEventType = ((int)dt.Rows[0]["eventTypeId"]).ToString();
 

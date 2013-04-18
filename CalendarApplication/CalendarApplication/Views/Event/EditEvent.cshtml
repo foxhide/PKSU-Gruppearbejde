@@ -23,10 +23,10 @@
     <br />
     <br />
     @Html.LabelFor(m => m.Start) <br />
-    @Html.DateTimeEditorFor(m => m.Start, "g.today,l.End")
+    @Html.EditorFor(m => m.Start, "g.today,l.End")
     <br />
     @Html.LabelFor(m => m.End) <br />
-    @Html.DateTimeEditorFor(m => m.End, "g.today,g.Start")
+    @Html.EditorFor(m => m.End, "g.today,g.Start")
     <br />
     @Html.HiddenFor(m => m.SubmitType)
     @Html.HiddenFor(m => m.ID)
