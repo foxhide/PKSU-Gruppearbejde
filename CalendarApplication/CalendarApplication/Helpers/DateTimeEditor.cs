@@ -55,6 +55,11 @@ namespace CalendarApplication.Helpers
             // Get Name
             string name = ExpressionHelper.GetExpressionText(expression).Split('.').Last();
 
+            return DateTimeEditorFor(edt, name, fields, compare);
+        }
+
+        public static MvcHtmlString DateTimeEditorFor(EditableDateTime edt, string name, string[] fields, string compare)
+        {
             StringBuilder builder = new StringBuilder();
 
             // Build validation string.

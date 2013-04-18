@@ -6,6 +6,17 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CalendarApplication.Models.EventType
 {
+    public enum Fieldtype
+    {
+        Integer,
+        Text,
+        Datetime,
+        User,
+        Group,
+        File,
+        Bool
+    }
+
     public class FieldDataModel
     {
         public static List<string> DATA_TYPES
@@ -46,7 +57,7 @@ namespace CalendarApplication.Models.EventType
         [Display(Name = "Required")]
         public bool Required { set; get; }
 
-        public int Datatype { set; get; }
+        public Fieldtype Datatype { set; get; }
         public int VarcharLength { set; get; }
 
         public int ViewID { set; get; }
@@ -55,13 +66,13 @@ namespace CalendarApplication.Models.EventType
         {
             switch (this.Datatype)
             {
-                case 1: return "varchar("+this.VarcharLength+")";
-                case 2: return "datetime";
-                case 0:
-                case 3:
-                case 4: return "int";
-                case 5: return "varchar(100)";  //File
-                case 6: return "tinyint(1)";    //Yes/No
+                case Fieldtype.Text: return "varchar("+this.VarcharLength+")";
+                case Fieldtype.Datetime: return "datetime";
+                case Fieldtype.Integer:
+                case Fieldtype.User:
+                case Fieldtype.Group: return "int";
+                case Fieldtype.File: return "varchar(100)";  //File
+                case Fieldtype.Bool: return "tinyint(1)";    //Yes/No
                 default: return "int";
             }
         }

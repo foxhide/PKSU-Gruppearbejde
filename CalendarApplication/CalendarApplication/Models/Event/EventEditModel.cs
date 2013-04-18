@@ -14,7 +14,7 @@ namespace CalendarApplication.Models.Event
         public string[] SelectedRooms { get; set; }
         public List<SelectListItem> RoomSelectList { get; set; }
 
-        public List<FieldModel> TypeSpecefics { get; set; }
+        public List<FieldModel> TypeSpecifics { get; set; }
 
         public int SubmitType { get; set; }
     }

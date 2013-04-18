@@ -448,7 +448,7 @@ namespace CalendarApplication.Controllers
                         string insertField = "INSERT INTO pksudb.eventtypefields"
                                             + "(eventTypeId, fieldName, fieldDescription, requiredField, fieldType, varCharLength)"
                                             + "VALUES (" + result + ",'" + fdm.Name + "','" + fdm.Description + "',"
-                                            + (fdm.Required ? "1," : "0,") + fdm.Datatype + "," + fdm.VarcharLength
+                                            + (fdm.Required ? "1," : "0,") + (int)fdm.Datatype + "," + fdm.VarcharLength
                                             + "); SELECT last_insert_id();";
 
                         cmd.CommandText = insertField;
@@ -536,7 +536,7 @@ namespace CalendarApplication.Controllers
                             string insertField = "INSERT INTO pksudb.eventtypefields"
                                                  + "(eventTypeId, fieldName, fieldDescription, requiredField, fieldType, varchar_length)"
                                                  + "VALUES (" + data.ID + ",'" + fdm.Name + "','" + fdm.Description + "',"
-                                                 + (fdm.Required ? "1," : "0,") + fdm.Datatype + ","+ fdm.VarcharLength
+                                                 + (fdm.Required ? "1," : "0,") + (int)fdm.Datatype + ","+ fdm.VarcharLength
                                                  + "); SELECT last_insert_id();";
 
                             cmd.CommandText = insertField;
@@ -550,7 +550,7 @@ namespace CalendarApplication.Controllers
                                                     + "fieldName = '" + fdm.Name
                                                     + "', fieldDescription = '" + fdm.Description
                                                     + "', requiredField = " + (fdm.Required ? "1" : "0")
-                                                    + ", fieldType = " + fdm.Datatype
+                                                    + ", fieldType = " + (int)fdm.Datatype
                                                     + " WHERE eventTypeId = " + data.ID
                                                         + " AND fieldId = " + fdm.ID;
 
@@ -656,7 +656,7 @@ namespace CalendarApplication.Controllers
                     }
 
                     // Check if (new) type has a specifics table
-                    if (eem.TypeSpecefics != null)
+                    if (eem.TypeSpecifics != null)
                     {
                         string updateTable;
                         if (eem.ID == -1 || !prevType.Equals(eem.SelectedEventType))
@@ -664,12 +664,12 @@ namespace CalendarApplication.Controllers
                             // We have to insert because it is a create, or we have changed the type...
                             string prologue = "INSERT INTO pksudb.table_" + eem.SelectedEventType + " (eventId,";
                             string epilogue = " VALUES (" + newId + ",";
-                            for (int i = 0; i < eem.TypeSpecefics.Count; i++)
+                            for (int i = 0; i < eem.TypeSpecifics.Count; i++)
                             {
-                                FieldModel fm = eem.TypeSpecefics[i];
+                                FieldModel fm = eem.TypeSpecifics[i];
                                 prologue += "field_" + fm.ID;
                                 epilogue += fm.GetDBValue();
-                                if (i < eem.TypeSpecefics.Count - 1)
+                                if (i < eem.TypeSpecifics.Count - 1)
                                 {
                                     prologue += ",";
                                     epilogue += ",";
@@ -682,11 +682,11 @@ namespace CalendarApplication.Controllers
                         {
                             // We only have to update
                             updateTable = "UPDATE pksudb.table_" + eem.SelectedEventType + " SET ";
-                            for (int i = 0; i < eem.TypeSpecefics.Count; i++)
+                            for (int i = 0; i < eem.TypeSpecifics.Count; i++)
                             {
-                                FieldModel fm = eem.TypeSpecefics[i];
+                                FieldModel fm = eem.TypeSpecifics[i];
                                 updateTable += "field_" + fm.ID + " = " + fm.GetDBValue();
-                                if (i < eem.TypeSpecefics.Count - 1)
+                                if (i < eem.TypeSpecifics.Count - 1)
                                 {
                                     updateTable += ",";
                                 }
