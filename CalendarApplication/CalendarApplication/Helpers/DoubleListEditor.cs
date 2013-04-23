@@ -47,7 +47,7 @@ namespace CalendarApplication.Helpers
                                     "[" + i + "].Selected' value=" + (list[i].Selected ? "true" : "false") + ">");
             }
 
-            builder.AppendLine("<table class='datetime-editor'><tr>");
+            builder.AppendLine("<table class='custom-style-1'><tr>");
 
             builder.AppendLine("<td>" + labelList1 + "</td><td></td><td>" + labelList2 + "</td>");
 

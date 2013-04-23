@@ -67,7 +67,7 @@ namespace CalendarApplication.Helpers
             string validateStr = "onchange=validateDate('" + name + "','" + compare + "')";
 
             builder.AppendLine("<span style='color:grey;font-size:80%;text-align:left'>");
-            builder.AppendLine("<table class='datetime-editor'>");
+            builder.AppendLine("<table class='custom-style-1'>");
 
             // Create headers
             builder.AppendLine("<tr>");
