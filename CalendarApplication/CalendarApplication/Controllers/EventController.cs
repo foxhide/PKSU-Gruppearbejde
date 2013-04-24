@@ -48,16 +48,16 @@ namespace CalendarApplication.Controllers
                         Name = (string)rows[i]["roomName"]
                     });
                 }
-                if (result.TypeId != 1)
+                DataSet ds = con.ExecuteQuery(new string[] {
+                    "SELECT * FROM table_" + result.TypeId + " WHERE eventId = " + id,
+                    "SELECT * FROM pksudb.eventtypefields WHERE eventTypeId = " + result.TypeId
+                });
+                if (ds != null)
                 {
-                    DataSet ds = con.ExecuteQuery(new string[] {
-                        "SELECT * FROM table_" + result.TypeId + " WHERE eventId = " + id,
-                        "SELECT * FROM pksudb.eventtypefields WHERE eventTypeId = " + result.TypeId
-                    });
                     result.EventSpecial = ds.Tables[0];
                     for (int i = 0; i < ds.Tables[1].Rows.Count; i++)
                     {
-                        result.EventSpecial.Columns[i+1].ColumnName = (string)ds.Tables[1].Rows[i]["fieldName"];
+                        result.EventSpecial.Columns[i + 1].ColumnName = (string)ds.Tables[1].Rows[i]["fieldName"];
                     }
                 }
             }

@@ -69,7 +69,8 @@ else {
         </td>
         <td>
             <table class="gridtable">
-                @if (@Model.TypeId != 1) {
+                @if (Model.EventSpecial != null)
+                {
                     foreach (DataColumn col in Model.EventSpecial.Columns)
                     {
                         <tr>

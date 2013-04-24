@@ -155,47 +155,56 @@ namespace CalendarApplication.Controllers
             //Open connection
             if (this.OpenConnection() == true)
             {
-                //Initialise naming counter and create set
-                int counter = 0;
-                DataSet ds = new DataSet();
-
-                foreach (string query in queries)
+                try
                 {
-                    //Create the table
-                    DataTable dt = new DataTable("table_"+counter);
+                    //Initialise naming counter and create set
+                    int counter = 0;
+                    DataSet ds = new DataSet();
 
-                    //Create Command and run it
-                    MySqlCommand cmd = new MySqlCommand(query, connection);
-                    MySqlDataReader dataReader = cmd.ExecuteReader();
-
-                    //Set the table columns
-                    int cols = dataReader.FieldCount;
-                    for (int i = 0; i < cols; i++)
+                    foreach (string query in queries)
                     {
-                        dt.Columns.Add(dataReader.GetName(i), dataReader.GetFieldType(i));
-                    }
+                        //Create the table
+                        DataTable dt = new DataTable("table_"+counter);
 
-                    //Fill the table
-                    while (dataReader.Read())
-                    {
-                        DataRow dr = dt.NewRow();
+                        //Create Command and run it
+                        MySqlCommand cmd = new MySqlCommand(query, connection);
+                        MySqlDataReader dataReader = cmd.ExecuteReader();
+
+                        //Set the table columns
+                        int cols = dataReader.FieldCount;
                         for (int i = 0; i < cols; i++)
                         {
-                            dr[i] = dataReader[i];
+                            dt.Columns.Add(dataReader.GetName(i), dataReader.GetFieldType(i));
                         }
-                        dt.Rows.Add(dr);
+
+                        //Fill the table
+                        while (dataReader.Read())
+                        {
+                            DataRow dr = dt.NewRow();
+                            for (int i = 0; i < cols; i++)
+                            {
+                                dr[i] = dataReader[i];
+                            }
+                            dt.Rows.Add(dr);
+                        }
+
+                        //Add the table to the set
+                        ds.Tables.Add(dt);
+                        counter++;
+                        dataReader.Close();
                     }
 
-                    //Add the table to the set
-                    ds.Tables.Add(dt);
-                    counter++;
-                    dataReader.Close();
+                    //Close the connection
+                    this.CloseConnection();
+
+                    return ds;
+
                 }
-
-                //Close the connection
-                this.CloseConnection();
-
-                return ds;
+                catch (MySqlException ex0)
+                {
+                    this.ErrorMessage = "A database error occurred: " + ex0.Message;
+                    return null;
+                }
             }
             else
             {
@@ -439,32 +448,35 @@ namespace CalendarApplication.Controllers
                     cmd.CommandText = insert;
                     result = Convert.ToInt32(cmd.ExecuteScalar());
 
-                    string createTable = "CREATE TABLE pksudb.table_" + result + "("
-                                            + "eventId int NOT NULL, ";
-
-                    foreach (FieldDataModel fdm in data.TypeSpecific)
+                    if (data.TypeSpecific != null)
                     {
-                        string insertField = "INSERT INTO pksudb.eventtypefields"
-                                            + "(eventTypeId, fieldName, fieldDescription, requiredField, fieldType, varCharLength)"
-                                            + "VALUES (" + result + ",'" + fdm.Name + "','" + fdm.Description + "',"
-                                            + (fdm.Required ? "1," : "0,") + (int)fdm.Datatype + "," + fdm.VarcharLength
-                                            + "); SELECT last_insert_id();";
+                        string createTable = "CREATE TABLE pksudb.table_" + result + "("
+                                                + "eventId int NOT NULL, ";
 
-                        cmd.CommandText = insertField;
-                        int id = Convert.ToInt32(cmd.ExecuteScalar());
+                        foreach (FieldDataModel fdm in data.TypeSpecific)
+                        {
+                            string insertField = "INSERT INTO pksudb.eventtypefields"
+                                                + "(eventTypeId, fieldName, fieldDescription, requiredField, fieldType, varCharLength)"
+                                                + "VALUES (" + result + ",'" + fdm.Name + "','" + fdm.Description + "',"
+                                                + (fdm.Required ? "1," : "0,") + (int)fdm.Datatype + "," + fdm.VarcharLength
+                                                + "); SELECT last_insert_id();";
 
-                        createTable += "field_" + id + " " + fdm.GetDBType() + ", ";
+                            cmd.CommandText = insertField;
+                            int id = Convert.ToInt32(cmd.ExecuteScalar());
+
+                            createTable += "field_" + id + " " + fdm.GetDBType() + ", ";
+                        }
+
+                        createTable += "PRIMARY KEY (eventId), "
+                                     + "CONSTRAINT eventIdCons_" + result + " "
+                                     + "FOREIGN KEY (eventId) REFERENCES pksudb.events (eventId) "
+                                     + "ON DELETE NO ACTION "
+                                     + "ON UPDATE NO ACTION "
+                                     + ");";
+
+                        cmd.CommandText = createTable;
+                        cmd.ExecuteNonQuery();
                     }
-
-                    createTable += "PRIMARY KEY (eventId), "
-                                 + "CONSTRAINT eventIdCons_" + result + " "
-                                 + "FOREIGN KEY (eventId) REFERENCES pksudb.events (eventId) "
-                                 + "ON DELETE NO ACTION "
-                                 + "ON UPDATE NO ACTION "
-                                 + ");";
-
-                    cmd.CommandText = createTable;
-                    cmd.ExecuteNonQuery();
 
                     mst.Commit();
 
