@@ -8,7 +8,6 @@ using System.Text;
 
 using CalendarApplication.Models.Event;
 using CalendarApplication.Models.EventType;
-using CalendarApplication.Models.Shared;
 using CalendarApplication.Helpers;
 
 namespace CalendarApplication.Helpers
@@ -35,27 +34,27 @@ namespace CalendarApplication.Helpers
             
             if (model.Datatype == Fieldtype.Integer)
             {
-                builder.AppendLine("<input type='number' name='" + name + ".Value' value='" + (int)model.Value + "'>");
+                builder.AppendLine("<input type='number' name='" + name + ".IntValue' value='" + model.IntValue + "'>");
             }
             else if (model.Datatype == Fieldtype.Text)
             {
                 if (model.VarcharLength < 50)
                 {
-                    builder.AppendLine("<input type='text' name='" + name + ".Value' value='" + (string)model.Value + "'>");
+                    builder.AppendLine("<input type='text' name='" + name + ".StringValue' value='" + model.StringValue + "'>");
                 }
                 else
                 {
-                    builder.AppendLine("<textarea type='text' name='" + name + ".Value' cols='40' rows='");
-                    builder.Append((model.VarcharLength/40+1) + "'>" + (string)model.Value + "</textarea>");
+                    builder.AppendLine("<textarea type='text' name='" + name + ".StringValue' cols='40' rows='");
+                    builder.Append((model.VarcharLength/40+1) + "'>" + model.StringValue + "</textarea>");
                 }
             }
             else if (model.Datatype == Fieldtype.Bool)
             {
-                builder.AppendLine("<input type='checkbox' name='" + name + ".Value' value='true'"+(model.Required?" selected>":">"));
+                builder.AppendLine("<input type='checkbox' name='" + name + ".BoolValue' value='true'"+(model.BoolValue?" selected>":">"));
             }
             else if (model.Datatype == Fieldtype.Datetime)
             {
-                builder.AppendLine(DateTimeEditor.DateTimeEditorFor((EditableDateTime)model.Value, name + ".Value",
+                builder.AppendLine(DateTimeEditor.DateTimeEditorFor(model.DateValue, name + ".DateValue",
                                                         DateTimeEditor.DATE_TIME_ALL_FIELDS, "").ToString());
             }
             else

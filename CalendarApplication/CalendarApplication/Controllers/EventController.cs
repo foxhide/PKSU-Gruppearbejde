@@ -8,7 +8,6 @@ using System.Data;
 using CalendarApplication.Models.User;
 using CalendarApplication.Models.Event;
 using CalendarApplication.Models.EventType;
-using CalendarApplication.Models.Shared;
 
 namespace CalendarApplication.Controllers
 {
@@ -33,8 +32,8 @@ namespace CalendarApplication.Controllers
             {
                 DataRowCollection rows = table.Rows;
                 result.Name = (string)rows[0]["eventName"];
-                result.Start = new EditableDateTime((DateTime)rows[0]["eventStart"]);
-                result.End = new EditableDateTime((DateTime)rows[0]["eventEnd"]);
+                result.Start = (DateTime)rows[0]["eventStart"];
+                result.End = (DateTime)rows[0]["eventEnd"];
                 result.State = (int)rows[0]["state"];
                 result.TypeId = (int)rows[0]["eventTypeId"];
                 result.TypeName = (string)rows[0]["eventTypeName"];
@@ -77,8 +76,8 @@ namespace CalendarApplication.Controllers
                 ID = id,
                 EventTypes = new List<SelectListItem>(),
                 SelectedEventType = "1", // Initial value -> Basic event
-                Start = new EditableDateTime(year, month, day, 10, 0),
-                End = new EditableDateTime(year, month, day, 18, 0)
+                Start = new DateTime(year, month, day, 10, 0, 0),
+                End = new DateTime(year, month, day, 18, 0, 0)
             };
 
             if (id == -1) { this.getRooms(eem); this.createModel(eem); }
@@ -149,11 +148,11 @@ namespace CalendarApplication.Controllers
                     {
                         case Fieldtype.Integer:
                         case Fieldtype.User:
-                        case Fieldtype.Group: fm.Value = 0; break; //int
+                        case Fieldtype.Group: fm.IntValue = 0; break; //int
                         case Fieldtype.Text:
-                        case Fieldtype.File: fm.Value = ""; break; //string
-                        case Fieldtype.Datetime: fm.Value = new EditableDateTime(DateTime.Now); break;
-                        case Fieldtype.Bool: fm.Value = false; break; //bool
+                        case Fieldtype.File: fm.StringValue = ""; break; //string
+                        case Fieldtype.Datetime: fm.DateValue = DateTime.Now; break;
+                        case Fieldtype.Bool: fm.BoolValue = false; break; //bool
                     }
                     eem.TypeSpecifics.Add(fm);
                 }
@@ -210,8 +209,8 @@ namespace CalendarApplication.Controllers
             dt = msc.ExecuteQuery(basic);
 
             eem.Name = (string)dt.Rows[0]["eventName"];
-            eem.Start = new EditableDateTime((DateTime)dt.Rows[0]["eventStart"]);
-            eem.End = new EditableDateTime((DateTime)dt.Rows[0]["eventEnd"]);
+            eem.Start = (DateTime)dt.Rows[0]["eventStart"];
+            eem.End = (DateTime)dt.Rows[0]["eventEnd"];
             eem.Creator = (string)dt.Rows[0]["userName"];
             eem.SelectedEventType = ((int)dt.Rows[0]["eventTypeId"]).ToString();
 
@@ -244,11 +243,11 @@ namespace CalendarApplication.Controllers
                         {
                             case Fieldtype.Integer:
                             case Fieldtype.User:
-                            case Fieldtype.Group: fm.Value = (int)data[i + 1]; break; //int
+                            case Fieldtype.Group: fm.IntValue = (int)data[i + 1]; break; //int
                             case Fieldtype.Text:
-                            case Fieldtype.File: fm.Value = (string)data[i + 1]; break; //string
-                            case Fieldtype.Datetime: fm.Value = new EditableDateTime((DateTime)data[i + 1]); break;
-                            case Fieldtype.Bool: fm.Value = (bool)data[i + 1]; break; //bool
+                            case Fieldtype.File: fm.StringValue = (string)data[i + 1]; break; //string
+                            case Fieldtype.Datetime: fm.DateValue = (DateTime)data[i + 1]; break;
+                            case Fieldtype.Bool: fm.BoolValue = (bool)data[i + 1]; break; //bool
                         }
 
                         eem.TypeSpecifics.Add(fm);

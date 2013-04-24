@@ -28,6 +28,7 @@
     @Html.LabelFor(m => m.End) <br />
     @Html.DateTimeEditorFor(m => m.End, "g.today,g.Start")
     <br />
+
     @Html.HiddenFor(m => m.SubmitType)
     @Html.HiddenFor(m => m.ID)
     @Html.DropDownListFor(m => Model.SelectedEventType,

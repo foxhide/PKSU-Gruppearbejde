@@ -12,7 +12,6 @@ using CalendarApplication.Models.Event;
 using CalendarApplication.Models.Account;
 using CalendarApplication.Models.User;
 using CalendarApplication.Models.EventType;
-using CalendarApplication.Models.Shared;
 
 namespace CalendarApplication.Controllers
 {
@@ -233,8 +232,8 @@ namespace CalendarApplication.Controllers
                         Name = (string)dataReader["eventName"],
                         Creator = (string)dataReader["username"],
                         TypeName = (string)dataReader["eventTypeName"],
-                        Start = new EditableDateTime((DateTime)dataReader["eventStart"]),
-                        End = new EditableDateTime((DateTime)dataReader["eventEnd"]),
+                        Start = (DateTime)dataReader["eventStart"],
+                        End = (DateTime)dataReader["eventEnd"],
                         State = (int)dataReader["state"],
                         Rooms = rooms ? new List<Room>() : null
                     };
@@ -623,11 +622,11 @@ namespace CalendarApplication.Controllers
                                                 "INSERT INTO pksudb.events" +
                                                 "(userId,eventTypeId,eventName,eventStart,eventEnd,visible,state) VALUES " +
                                                 "(" + eem.CreatorID + "," + eem.SelectedEventType + ",'" + eem.Name + "','" +
-                                                eem.Start.GetDBString() + "','" + eem.End.GetDBString() + "'," +
+                                                eem.Start.ToString("yyyy-MM-dd hh:mm:ss") + "','" + eem.End.ToString("yyyy-MM-dd hh:mm:ss") + "'," +
                                                 (eem.Visible ? "1" : "0") + "," + eem.State + "); SELECT last_insert_id();" :
                                                 "UPDATE pksudb.events SET eventTypeId = " + eem.SelectedEventType +
-                                                ", eventName = '" + eem.Name + "', eventStart = '" + eem.Start.GetDBString() +
-                                                "', eventEnd = '" + eem.End.GetDBString() + "', visible = " +
+                                                ", eventName = '" + eem.Name + "', eventStart = '" + eem.Start.ToString("yyyy-MM-dd hh:mm:ss") +
+                                                "', eventEnd = '" + eem.End.ToString("yyyy-MM-dd hh:mm:ss") + "', visible = " +
                                                 (eem.Visible?"1":"0") + ", state = " + eem.State + " WHERE eventId = " + eem.ID;
 
                     cmd.CommandText = updateEventTable;
