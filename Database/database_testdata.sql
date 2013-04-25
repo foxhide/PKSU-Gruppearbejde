@@ -15,18 +15,18 @@ INSERT INTO eventtypefields (eventTypeId, fieldName, fieldDescription, requiredF
 
 CREATE TABLE pksudb.table_2 (
 	eventId int NOT NULL,
-	band VARCHAR(50) NOT NULL,
+	field_1 VARCHAR(50) NOT NULL,
 	PRIMARY KEY (eventId),
     CONSTRAINT table_1eventid
     FOREIGN KEY (eventId)
     REFERENCES pksudb.events (eventId)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE NO ACTION
 );
 
 INSERT INTO events (userId, eventTypeId, eventName, eventStart, eventEnd, visible, state)
 	VALUES (3,2,"Muse","2013-03-19 22:00:00","2013-03-20 02:30:00",true,0);
-INSERT INTO table_2 (eventId,band) VALUES (1,"muse");
+INSERT INTO table_2 (eventId,field_1) VALUES (1,"muse");
 INSERT INTO eventroomsused (eventId, roomId) VALUES (1,2);
 INSERT INTO eventroomsused (eventId, roomId) VALUES (1,3);
 
