@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using CalendarApplication.Models.Event;
 using System.Data;
+
+using CalendarApplication.Models.User;
+using CalendarApplication.Models.Event;
+using CalendarApplication.Models.Shared;
 
 namespace CalendarApplication.Controllers
 {
@@ -29,8 +32,8 @@ namespace CalendarApplication.Controllers
             {
                 DataRowCollection rows = table.Rows;
                 result.Name = (string)rows[0]["eventName"];
-                result.Start = (DateTime)rows[0]["eventStart"];
-                result.End = (DateTime)rows[0]["eventEnd"];
+                result.Start = new EditableDateTime((DateTime)rows[0]["eventStart"]);
+                result.End = new EditableDateTime((DateTime)rows[0]["eventEnd"]);
                 result.State = (int)rows[0]["state"];
                 result.TypeId = (int)rows[0]["eventTypeId"];
                 result.TypeName = (string)rows[0]["eventTypeName"];
@@ -70,7 +73,9 @@ namespace CalendarApplication.Controllers
             {
                 ID = id,
                 EventTypes = new List<SelectListItem>(),
-                SelectedEventType = "1" // Initial value -> Basic event
+                SelectedEventType = "1", // Initial value -> Basic event
+                Start = new EditableDateTime(2013, 4, 17, 0, 0),
+                End = new EditableDateTime(2013, 4, 17, 0, 0)
             };
 
             if (id == -1) { this.createModel(eem); }
@@ -84,7 +89,14 @@ namespace CalendarApplication.Controllers
         {
             if (eem.SubmitType == 1)
             {
-                return RedirectToAction("Index", "Home", null);
+                MySqlConnect msc = new MySqlConnect();
+                eem.CreatorID = UserModel.GetCurrentUserID();
+                if (msc.EditEvent(eem)) { return RedirectToAction("Index", "Home", null); }
+                else {
+                    TempData["errorMsg"] = msc.ErrorMessage;
+                    this.createModel(eem);
+                    return View(eem);
+                }
             }
             else
             {
@@ -113,7 +125,7 @@ namespace CalendarApplication.Controllers
                 }
             }
 
-            if (!eem.SelectedEventType.Equals("1")) // Not a basic event, get the specefics
+            if (!eem.SelectedEventType.Equals("1")) // Not a basic event, get the specifics
             {
                 eem.TypeSpecefics = new List<FieldModel>();
                 string specQuery = "SELECT * FROM eventtypefields WHERE eventTypeId = " + eem.SelectedEventType;
@@ -164,8 +176,8 @@ namespace CalendarApplication.Controllers
             dt = msc.ExecuteQuery(basic);
 
             eem.Name = (string)dt.Rows[0]["eventName"];
-            eem.Start = (DateTime)dt.Rows[0]["eventStart"];
-            eem.End = (DateTime)dt.Rows[0]["eventEnd"];
+            eem.Start = new EditableDateTime((DateTime)dt.Rows[0]["eventStart"]);
+            eem.End = new EditableDateTime((DateTime)dt.Rows[0]["eventEnd"]);
             eem.Creator = (string)dt.Rows[0]["userName"];
             eem.SelectedEventType = ((int)dt.Rows[0]["eventTypeId"]).ToString();
 

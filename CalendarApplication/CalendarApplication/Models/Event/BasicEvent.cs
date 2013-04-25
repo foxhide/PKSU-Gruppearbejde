@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
+
+using CalendarApplication.Models.Shared;
 
 namespace CalendarApplication.Models.Event
 {
@@ -13,15 +16,19 @@ namespace CalendarApplication.Models.Event
         public int CreatorId { set; get; }
         public int TypeId { set; get; }
         public string TypeName { set; get; }
-        public DateTime Start { set; get; }
-        public DateTime End { set; get; }
+
+        [Display(Name = "Starting date")]
+        public EditableDateTime Start { set; get; }
+        [Display(Name = "Ending date")]
+        public EditableDateTime End { set; get; }
+
         public int State { set; get; }
         public bool Visible { set; get; }
         public List<Room> Rooms { set; get; }
 
         public TimeSpan getDuration()
         {
-            return End - Start;
+            return End.GetDateTime() - Start.GetDateTime();
         }
 
         public string getColor()

@@ -116,6 +116,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\DateTimeEditor.cs" />
     <Compile Include="Models\Account\Register.cs" />
     <Compile Include="Models\Calendar\Calendar.cs" />
     <Compile Include="Models\Calendar\CalendarDay.cs" />
@@ -131,6 +132,7 @@
     <Compile Include="Models\Event\Room.cs" />
     <Compile Include="Models\Account\LoginModel.cs" />
     <Compile Include="Models\Maintenance\MaintenanceModel.cs" />
+    <Compile Include="Models\Shared\EditableDateTime.cs" />
     <Compile Include="Models\User\GroupModel.cs" />
     <Compile Include="Models\User\UserModel.cs" />
     <Compile Include="Models\User\UserViewModel.cs" />
@@ -144,6 +146,7 @@
     <Content Include="Global.asax" />
     <None Include="Scripts\jquery-1.5.1-vsdoc.js" />
     <Content Include="Scripts\create-eventtype.js" />
+    <Content Include="Scripts\date-picker-validator.js" />
     <Content Include="Scripts\jquery-1.5.1.js" />
     <Content Include="Scripts\jquery-1.5.1.min.js" />
     <Content Include="Scripts\jquery-ui-1.8.11.js" />

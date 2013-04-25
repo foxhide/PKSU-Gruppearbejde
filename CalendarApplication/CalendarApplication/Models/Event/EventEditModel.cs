@@ -8,6 +8,8 @@ namespace CalendarApplication.Models.Event
 {
     public class EventEditModel : BasicEvent
     {
+        public int CreatorID { get; set; }
+
         public string SelectedEventType { get; set; }
         public List<SelectListItem> EventTypes { get; set; }
 
