@@ -116,7 +116,6 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Helpers\ListEditor.cs" />
     <Compile Include="Helpers\DateTimeEditor.cs" />
     <Compile Include="Helpers\FieldEditor.cs" />
     <Compile Include="Helpers\DoubleListEditor.cs" />
@@ -148,6 +147,7 @@
     <Content Include="Global.asax" />
     <None Include="Scripts\jquery-1.5.1-vsdoc.js" />
     <Content Include="Scripts\create-eventtype.js" />
+    <Content Include="Scripts\date-picker-validator.js" />
     <Content Include="Scripts\jquery-1.5.1.js" />
     <Content Include="Scripts\jquery-1.5.1.min.js" />
     <Content Include="Scripts\jquery-ui-1.8.11.js" />

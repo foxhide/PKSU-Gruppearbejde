@@ -633,7 +633,7 @@ namespace CalendarApplication.Controllers
                     string updateEventTable = eem.ID == -1 ?
                                                 "INSERT INTO pksudb.events" +
                                                 "(userId,eventTypeId,eventName,eventStart,eventEnd,visible,state) VALUES " +
-                                                "(" + eem.CreatorID + "," + eem.SelectedEventType + ",'" + eem.Name + "','" +
+                                                "(" + eem.CreatorId + "," + eem.SelectedEventType + ",'" + eem.Name + "','" +
                                                 eem.Start.ToString("yyyy-MM-dd hh:mm:ss") + "','" + eem.End.ToString("yyyy-MM-dd hh:mm:ss") + "'," +
                                                 (eem.Visible ? "1" : "0") + "," + eem.State + "); SELECT last_insert_id();" :
                                                 "UPDATE pksudb.events SET eventTypeId = " + eem.SelectedEventType +
