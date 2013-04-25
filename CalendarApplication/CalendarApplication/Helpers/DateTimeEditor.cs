@@ -83,7 +83,7 @@ namespace CalendarApplication.Helpers
             builder.AppendLine("<tr>");
             foreach (string f in fields)
             {
-                builder.Append("<td>");
+                builder.AppendLine("<td>");
                 int w = f.Equals("Year") ? 60 : 40;  // Size
                 int val = f.Equals("Year") ? edt.Year :
                     f.Equals("Month") ? edt.Month :
@@ -93,6 +93,8 @@ namespace CalendarApplication.Helpers
                 AddField(builder, name, f, val, w, validateStr); // Add the field
                 builder.Append("</td>");
             }
+            builder.AppendLine("<td><script>$(function() { $(\"#" + name + "\").datepicker();});</script>");
+            builder.Append("<input type='button' onclick=showDatePicker('" + name + "')></td>");
             builder.AppendLine("</tr></table>");
             builder.AppendLine("</span>");
 

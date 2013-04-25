@@ -99,3 +99,7 @@ function validateCompare(name,other,compGreater) {
     }
 }
 
+function showDatePicker(name) {
+    alert("try now "+name);
+    $(name).datepicker('show');
+}

@@ -26,11 +26,11 @@ namespace CalendarApplication.Helpers
 
 
             StringBuilder builder = new StringBuilder();
+            builder.AppendLine("<input type='hidden' name='" + name + ".Datatype' value='" + model.Datatype + "'>");
+            builder.AppendLine("<input type='hidden' name='" + name + ".ID' value='" + model.ID + "'>");
 
-            builder.AppendLine("<label for='"+name+"'>"+model.Name+"</label>");
-            builder.AppendLine("<input type='hidden' name='"+name+".Datatype' value='" + model.Datatype + "'>");
-            builder.AppendLine("<input type='hidden' name='"+name+".ID' value='" + model.ID + "'>");
-            builder.AppendLine("<br>");
+            builder.AppendLine("<label for='"+name+"'>"+model.Name+"</label><br>");
+            builder.AppendLine("<span style='color:grey;font-size:80%;text-align:left'>"+model.Description+"</span><br>");
             
             if (model.Datatype == Fieldtype.Integer)
             {
@@ -61,6 +61,7 @@ namespace CalendarApplication.Helpers
             {
                 builder.AppendLine("<span style='color:red'>Error. Could not create input field. Not implemented...</span>");
             }
+
             return MvcHtmlString.Create(builder.ToString());
         }
     }
