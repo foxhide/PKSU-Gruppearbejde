@@ -50,10 +50,22 @@ namespace CalendarApplication.Controllers
                         Name = (string)rows[i]["roomName"]
                     });
                 }
+                CustomQuery query0 = new CustomQuery();
+                query0.Cmd = "SELECT * FROM table_" + result.TypeId + " WHERE eventId = @eventId";
+                query0.ArgNames = new string[] { "@eventId" };
+                query0.Args = new object[] { id };
+                CustomQuery query1 = new CustomQuery();
+                query1.Cmd = "SELECT * FROM pksudb.eventtypefields WHERE eventTypeId = @eventTypeId";
+                query1.ArgNames = new string[] { "@eventTypeId" };
+                query1.Args = new object[] { result.TypeId };
+                DataSet ds = con.ExecuteQuery(new CustomQuery[] { query0, query1 });
+
+                /*
                 DataSet ds = con.ExecuteQuery(new string[] {
                     "SELECT * FROM table_" + result.TypeId + " WHERE eventId = " + id,
                     "SELECT * FROM pksudb.eventtypefields WHERE eventTypeId = " + result.TypeId
-                });
+                });*/
+
                 if (ds != null)
                 {
                     result.EventSpecial = ds.Tables[0];

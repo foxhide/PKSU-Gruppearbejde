@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using CalendarApplication.Models.User;
 using System.Data;
+using MySql.Data.MySqlClient;
 
 namespace CalendarApplication.Controllers
 {
@@ -16,9 +17,14 @@ namespace CalendarApplication.Controllers
         public ActionResult Index(int userId)
         {
             UserViewModel result = new UserViewModel { ID = userId };
-            string userinfo = "SELECT * FROM pksudb.users WHERE userId = " + userId;
+            string userinfo = "SELECT * FROM pksudb.users WHERE userId = @userId";
+
             MySqlConnect con = new MySqlConnect();
-            DataTable table = con.ExecuteQuery(userinfo);
+            CustomQuery query = new CustomQuery();
+            query.Cmd = userinfo;
+            query.ArgNames = new string[] { "@userId" };
+            query.Args = new object[] { userId };
+            DataTable table = con.ExecuteQuery(query);
 
             if (table != null)
             {

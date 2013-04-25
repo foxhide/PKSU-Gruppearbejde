@@ -88,11 +88,74 @@ namespace CalendarApplication.Controllers
             }
         }
 
+        public DataTable ExecuteQuery(CustomQuery query)
+        {
+            //Open connection
+            if (this.OpenConnection() == true)
+            {
+                try
+                {
+                    //Create the table
+                    DataTable dt = new DataTable();
+
+                    //Create Command and run it
+
+                    MySqlCommand cmd = new MySqlCommand(query.Cmd, connection);
+                    if (query.ArgNames.Length > 0 && query.Args.Length > 0)
+                    {
+                        for (int i = 0; i < query.ArgNames.Length; i++)
+                            {
+                                cmd.Parameters.AddWithValue(query.ArgNames[i], query.Args[i]);
+                            }
+                        cmd.Prepare();
+                    }
+                    MySqlDataReader dataReader = cmd.ExecuteReader();
+
+                
+                    //Set the table columns
+                    int cols = dataReader.FieldCount;
+                    for (int i = 0; i < cols; i++)
+                    {
+                        dt.Columns.Add(dataReader.GetName(i), dataReader.GetFieldType(i));
+                    }
+
+                    //Fill the table
+                    while (dataReader.Read())
+                    {
+                        DataRow dr = dt.NewRow();
+                        for (int i = 0; i < cols; i++)
+                        {
+                            dr[i] = dataReader[i];
+                        }
+                        dt.Rows.Add(dr);
+                    }
+
+                    //Close the connection
+                    dataReader.Close();
+                    this.CloseConnection();
+
+                    return dt;
+                }
+                catch (MySqlException ex0)
+                {
+                    this.ErrorMessage = "A database error occurred: " + ex0.Message;
+                    return null;
+                }
+            }
+            else
+            {
+                //This is an error!
+                return null;
+            }
+
+        }
+
         /// <summary>
         /// Executes a query and returns the result in a datatable
         /// </summary>
         /// <param name="query">is the query to be executed</param>
         /// <returns>A datatable with the result, null on error</returns>
+        
         public DataTable ExecuteQuery(string query)
         {
             //Open connection
@@ -150,6 +213,79 @@ namespace CalendarApplication.Controllers
         /// </summary>
         /// <param name="queries">is the queries to be executed</param>
         /// <returns>A dataset with the resulting datatables, or null on error</returns>
+ 
+        public DataSet ExecuteQuery(CustomQuery[] queries)
+        {
+            //Open connection
+            if (this.OpenConnection() == true)
+            {
+                try
+                {
+                    //Initialise naming counter and create set
+                    int counter = 0;
+                    DataSet ds = new DataSet();
+
+                    foreach (CustomQuery query in queries)
+                    {
+                        //Create the table
+                        DataTable dt = new DataTable("table_" + counter);
+
+                        //Create Command and run it
+
+                        MySqlCommand cmd = new MySqlCommand(query.Cmd, connection);
+                        if (query.ArgNames.Length > 0 && query.Args.Length > 0)
+                        {
+                            for (int i = 0; i < query.ArgNames.Length; i++)
+                            {
+                                cmd.Parameters.AddWithValue(query.ArgNames[i], query.Args[i]);
+                            }
+                            cmd.Prepare();
+                        }
+                        MySqlDataReader dataReader = cmd.ExecuteReader();
+                        //Set the table columns
+                        int cols = dataReader.FieldCount;
+                        for (int i = 0; i < cols; i++)
+                        {
+                            dt.Columns.Add(dataReader.GetName(i), dataReader.GetFieldType(i));
+                        }
+
+                        //Fill the table
+                        while (dataReader.Read())
+                        {
+                            DataRow dr = dt.NewRow();
+                            for (int i = 0; i < cols; i++)
+                            {
+                                dr[i] = dataReader[i];
+                            }
+                            dt.Rows.Add(dr);
+                        }
+
+                        //Add table to set
+                        ds.Tables.Add(dt);
+                        counter++;
+                        dataReader.Close();
+                    }
+
+                    //Close the connection
+                    this.CloseConnection();
+
+                    return ds;
+
+                }
+                catch (MySqlException ex0)
+                {
+                    this.ErrorMessage = "A database error occurred: " + ex0.Message;
+                    return null;
+                }
+            }
+            else
+            {
+                //This is an error!
+                return null;
+            }
+
+        }
+
         public DataSet ExecuteQuery(string[] queries)
         {
             //Open connection
