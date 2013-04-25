@@ -6,7 +6,7 @@
 
 @using CalendarApplication.Models.User
 
-@if (Model.UserId < 0) {
+@if (Model.ID < 0) {
     <h2>Error loading user!</h2>
 }
 else {
@@ -15,7 +15,7 @@ else {
     <table class="gridtable">
         <tr>
             <td>User Id</td>
-            <td>@Model.UserId</td>
+            <td>@Model.ID</td>
         </tr>
         <tr>
             <td>User Name</td>

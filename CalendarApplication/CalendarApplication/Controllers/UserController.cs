@@ -15,7 +15,7 @@ namespace CalendarApplication.Controllers
 
         public ActionResult Index(int userId)
         {
-            UserViewModel result = new UserViewModel { UserId = userId };
+            UserViewModel result = new UserViewModel { ID = userId };
             string userinfo = "SELECT * FROM pksudb.users WHERE userId = " + userId;
             MySqlConnect con = new MySqlConnect();
             DataTable table = con.ExecuteQuery(userinfo);
@@ -34,7 +34,7 @@ namespace CalendarApplication.Controllers
             else
             {
                 //negative user id upon error
-                result.UserId = -1;
+                result.ID = -1;
             }
             return View(result);
         }
