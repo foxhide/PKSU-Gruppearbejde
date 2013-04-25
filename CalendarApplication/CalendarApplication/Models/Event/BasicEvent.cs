@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
-
-using CalendarApplication.Models.Shared;
+using System.Web.Mvc;
 
 namespace CalendarApplication.Models.Event
 {
@@ -12,15 +11,16 @@ namespace CalendarApplication.Models.Event
     {
         public int ID { set; get; }
         public string Name { set; get; }
+        public int CreatorID { get; set; }
         public string Creator { set; get; }
         public int CreatorId { set; get; }
         public int TypeId { set; get; }
         public string TypeName { set; get; }
 
         [Display(Name = "Starting date")]
-        public EditableDateTime Start { set; get; }
+        public DateTime Start { set; get; }
         [Display(Name = "Ending date")]
-        public EditableDateTime End { set; get; }
+        public DateTime End { set; get; }
 
         public int State { set; get; }
         public bool Visible { set; get; }
@@ -28,7 +28,7 @@ namespace CalendarApplication.Models.Event
 
         public TimeSpan getDuration()
         {
-            return End.GetDateTime() - Start.GetDateTime();
+            return End - Start;
         }
 
         public string getColor()

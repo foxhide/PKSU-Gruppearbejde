@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Web.Mvc;
 using System.Data;
 using MySql.Data.MySqlClient;
 using System.Windows.Forms;
@@ -11,7 +12,6 @@ using CalendarApplication.Models.Event;
 using CalendarApplication.Models.Account;
 using CalendarApplication.Models.User;
 using CalendarApplication.Models.EventType;
-using CalendarApplication.Models.Shared;
 
 namespace CalendarApplication.Controllers
 {
@@ -155,47 +155,56 @@ namespace CalendarApplication.Controllers
             //Open connection
             if (this.OpenConnection() == true)
             {
-                //Initialise naming counter and create set
-                int counter = 0;
-                DataSet ds = new DataSet();
-
-                foreach (string query in queries)
+                try
                 {
-                    //Create the table
-                    DataTable dt = new DataTable("table_"+counter);
+                    //Initialise naming counter and create set
+                    int counter = 0;
+                    DataSet ds = new DataSet();
 
-                    //Create Command and run it
-                    MySqlCommand cmd = new MySqlCommand(query, connection);
-                    MySqlDataReader dataReader = cmd.ExecuteReader();
-
-                    //Set the table columns
-                    int cols = dataReader.FieldCount;
-                    for (int i = 0; i < cols; i++)
+                    foreach (string query in queries)
                     {
-                        dt.Columns.Add(dataReader.GetName(i), dataReader.GetFieldType(i));
-                    }
+                        //Create the table
+                        DataTable dt = new DataTable("table_"+counter);
 
-                    //Fill the table
-                    while (dataReader.Read())
-                    {
-                        DataRow dr = dt.NewRow();
+                        //Create Command and run it
+                        MySqlCommand cmd = new MySqlCommand(query, connection);
+                        MySqlDataReader dataReader = cmd.ExecuteReader();
+
+                        //Set the table columns
+                        int cols = dataReader.FieldCount;
                         for (int i = 0; i < cols; i++)
                         {
-                            dr[i] = dataReader[i];
+                            dt.Columns.Add(dataReader.GetName(i), dataReader.GetFieldType(i));
                         }
-                        dt.Rows.Add(dr);
+
+                        //Fill the table
+                        while (dataReader.Read())
+                        {
+                            DataRow dr = dt.NewRow();
+                            for (int i = 0; i < cols; i++)
+                            {
+                                dr[i] = dataReader[i];
+                            }
+                            dt.Rows.Add(dr);
+                        }
+
+                        //Add the table to the set
+                        ds.Tables.Add(dt);
+                        counter++;
+                        dataReader.Close();
                     }
 
-                    //Add the table to the set
-                    ds.Tables.Add(dt);
-                    counter++;
-                    dataReader.Close();
+                    //Close the connection
+                    this.CloseConnection();
+
+                    return ds;
+
                 }
-
-                //Close the connection
-                this.CloseConnection();
-
-                return ds;
+                catch (MySqlException ex0)
+                {
+                    this.ErrorMessage = "A database error occurred: " + ex0.Message;
+                    return null;
+                }
             }
             else
             {
@@ -232,8 +241,8 @@ namespace CalendarApplication.Controllers
                         Name = (string)dataReader["eventName"],
                         Creator = (string)dataReader["username"],
                         TypeName = (string)dataReader["eventTypeName"],
-                        Start = new EditableDateTime((DateTime)dataReader["eventStart"]),
-                        End = new EditableDateTime((DateTime)dataReader["eventEnd"]),
+                        Start = (DateTime)dataReader["eventStart"],
+                        End = (DateTime)dataReader["eventEnd"],
                         State = (int)dataReader["state"],
                         Rooms = rooms ? new List<Room>() : null
                     };
@@ -439,32 +448,35 @@ namespace CalendarApplication.Controllers
                     cmd.CommandText = insert;
                     result = Convert.ToInt32(cmd.ExecuteScalar());
 
-                    string createTable = "CREATE TABLE pksudb.table_" + result + "("
-                                            + "eventId int NOT NULL, ";
-
-                    foreach (FieldDataModel fdm in data.TypeSpecific)
+                    if (data.TypeSpecific != null)
                     {
-                        string insertField = "INSERT INTO pksudb.eventtypefields"
-                                            + "(eventTypeId, fieldName, fieldDescription, requiredField, fieldType, varCharLength)"
-                                            + "VALUES (" + result + ",'" + fdm.Name + "','" + fdm.Description + "',"
-                                            + (fdm.Required ? "1," : "0,") + fdm.Datatype + "," + fdm.VarcharLength
-                                            + "); SELECT last_insert_id();";
+                        string createTable = "CREATE TABLE pksudb.table_" + result + "("
+                                                + "eventId int NOT NULL, ";
 
-                        cmd.CommandText = insertField;
-                        int id = Convert.ToInt32(cmd.ExecuteScalar());
+                        foreach (FieldDataModel fdm in data.TypeSpecific)
+                        {
+                            string insertField = "INSERT INTO pksudb.eventtypefields"
+                                                + "(eventTypeId, fieldName, fieldDescription, requiredField, fieldType, varCharLength)"
+                                                + "VALUES (" + result + ",'" + fdm.Name + "','" + fdm.Description + "',"
+                                                + (fdm.Required ? "1," : "0,") + (int)fdm.Datatype + "," + fdm.VarcharLength
+                                                + "); SELECT last_insert_id();";
 
-                        createTable += "field_" + id + " " + fdm.GetDBType() + ", ";
+                            cmd.CommandText = insertField;
+                            int id = Convert.ToInt32(cmd.ExecuteScalar());
+
+                            createTable += "field_" + id + " " + fdm.GetDBType() + ", ";
+                        }
+
+                        createTable += "PRIMARY KEY (eventId), "
+                                     + "CONSTRAINT eventIdCons_" + result + " "
+                                     + "FOREIGN KEY (eventId) REFERENCES pksudb.events (eventId) "
+                                     + "ON DELETE NO ACTION "
+                                     + "ON UPDATE NO ACTION "
+                                     + ");";
+
+                        cmd.CommandText = createTable;
+                        cmd.ExecuteNonQuery();
                     }
-
-                    createTable += "PRIMARY KEY (eventId), "
-                                 + "CONSTRAINT eventIdCons_" + result + " "
-                                 + "FOREIGN KEY (eventId) REFERENCES pksudb.events (eventId) "
-                                 + "ON DELETE NO ACTION "
-                                 + "ON UPDATE NO ACTION "
-                                 + ");";
-
-                    cmd.CommandText = createTable;
-                    cmd.ExecuteNonQuery();
 
                     mst.Commit();
 
@@ -535,7 +547,7 @@ namespace CalendarApplication.Controllers
                             string insertField = "INSERT INTO pksudb.eventtypefields"
                                                  + "(eventTypeId, fieldName, fieldDescription, requiredField, fieldType, varchar_length)"
                                                  + "VALUES (" + data.ID + ",'" + fdm.Name + "','" + fdm.Description + "',"
-                                                 + (fdm.Required ? "1," : "0,") + fdm.Datatype + ","+ fdm.VarcharLength
+                                                 + (fdm.Required ? "1," : "0,") + (int)fdm.Datatype + ","+ fdm.VarcharLength
                                                  + "); SELECT last_insert_id();";
 
                             cmd.CommandText = insertField;
@@ -549,7 +561,7 @@ namespace CalendarApplication.Controllers
                                                     + "fieldName = '" + fdm.Name
                                                     + "', fieldDescription = '" + fdm.Description
                                                     + "', requiredField = " + (fdm.Required ? "1" : "0")
-                                                    + ", fieldType = " + fdm.Datatype
+                                                    + ", fieldType = " + (int)fdm.Datatype
                                                     + " WHERE eventTypeId = " + data.ID
                                                         + " AND fieldId = " + fdm.ID;
 
@@ -609,27 +621,34 @@ namespace CalendarApplication.Controllers
                     cmd = new MySqlCommand();
                     cmd.Connection = connection;
                     cmd.Transaction = mst;
+                    int newId;
 
                     string prevType = eem.SelectedEventType;
                     if (eem.ID != -1)
                     {
                         cmd.CommandText = "SELECT eventTypeId FROM pksudb.events WHERE eventId == " + eem.ID;
-                        prevType = "" + (int)cmd.ExecuteScalar();
+                        prevType = "" + Convert.ToInt32(cmd.ExecuteScalar());
                     }
 
                     string updateEventTable = eem.ID == -1 ?
                                                 "INSERT INTO pksudb.events" +
                                                 "(userId,eventTypeId,eventName,eventStart,eventEnd,visible,state) VALUES " +
                                                 "(" + eem.CreatorID + "," + eem.SelectedEventType + ",'" + eem.Name + "','" +
-                                                eem.Start.GetDBString() + "','" + eem.End.GetDBString() + "'," +
-                                                (eem.Visible ? "1" : "0") + "," + eem.State + ")" :
+                                                eem.Start.ToString("yyyy-MM-dd hh:mm:ss") + "','" + eem.End.ToString("yyyy-MM-dd hh:mm:ss") + "'," +
+                                                (eem.Visible ? "1" : "0") + "," + eem.State + "); SELECT last_insert_id();" :
                                                 "UPDATE pksudb.events SET eventTypeId = " + eem.SelectedEventType +
-                                                ", eventName = '" + eem.Name + "', eventStart = '" + eem.Start.GetDBString() +
-                                                "', eventEnd = '" + eem.End.GetDBString() + "', visible = " +
+                                                ", eventName = '" + eem.Name + "', eventStart = '" + eem.Start.ToString("yyyy-MM-dd hh:mm:ss") +
+                                                "', eventEnd = '" + eem.End.ToString("yyyy-MM-dd hh:mm:ss") + "', visible = " +
                                                 (eem.Visible?"1":"0") + ", state = " + eem.State + " WHERE eventId = " + eem.ID;
 
                     cmd.CommandText = updateEventTable;
-                    cmd.ExecuteNonQuery();
+                    if (eem.ID == -1) { newId = Convert.ToInt32(cmd.ExecuteScalar()); }
+                    else
+                    {
+                        cmd.ExecuteNonQuery();
+                        newId = eem.ID;
+                    }
+                    
 
                     // Check if type has changed, clean up if it has...
                     if (!prevType.Equals(eem.SelectedEventType))
@@ -648,20 +667,20 @@ namespace CalendarApplication.Controllers
                     }
 
                     // Check if (new) type has a specifics table
-                    if (eem.TypeSpecefics != null)
+                    if (eem.TypeSpecifics != null)
                     {
                         string updateTable;
                         if (eem.ID == -1 || !prevType.Equals(eem.SelectedEventType))
                         {
                             // We have to insert because it is a create, or we have changed the type...
-                            string prologue = "INSERT INTO pksudb.table_" + eem.SelectedEventType + " (";
-                            string epilogue = " VALUES (";
-                            for (int i = 0; i < eem.TypeSpecefics.Count; i++)
+                            string prologue = "INSERT INTO pksudb.table_" + eem.SelectedEventType + " (eventId,";
+                            string epilogue = " VALUES (" + newId + ",";
+                            for (int i = 0; i < eem.TypeSpecifics.Count; i++)
                             {
-                                FieldModel fm = eem.TypeSpecefics[i];
+                                FieldModel fm = eem.TypeSpecifics[i];
                                 prologue += "field_" + fm.ID;
                                 epilogue += fm.GetDBValue();
-                                if (i < eem.TypeSpecefics.Count - 1)
+                                if (i < eem.TypeSpecifics.Count - 1)
                                 {
                                     prologue += ",";
                                     epilogue += ",";
@@ -673,11 +692,11 @@ namespace CalendarApplication.Controllers
                         {
                             // We only have to update
                             updateTable = "UPDATE pksudb.table_" + eem.SelectedEventType + " SET ";
-                            for (int i = 0; i < eem.TypeSpecefics.Count; i++)
+                            for (int i = 0; i < eem.TypeSpecifics.Count; i++)
                             {
-                                FieldModel fm = eem.TypeSpecefics[i];
+                                FieldModel fm = eem.TypeSpecifics[i];
                                 updateTable += "field_" + fm.ID + " = " + fm.GetDBValue();
-                                if (i < eem.TypeSpecefics.Count - 1)
+                                if (i < eem.TypeSpecifics.Count - 1)
                                 {
                                     updateTable += ",";
                                 }
@@ -686,6 +705,23 @@ namespace CalendarApplication.Controllers
                         }
                         cmd.CommandText = updateTable;
                         cmd.ExecuteNonQuery();
+                    }
+
+                    if (eem.ID == -1)
+                    {
+                        foreach (SelectListItem room in eem.RoomSelectList)
+                        {
+                            if (room.Selected)
+                            {
+                                cmd.CommandText = "INSERT INTO pksudb.eventroomsused(eventId,roomId) VALUES ("
+                                                    + newId + "," + room.Value + ")";
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //Handle room edit here.
                     }
 
                     mst.Commit();

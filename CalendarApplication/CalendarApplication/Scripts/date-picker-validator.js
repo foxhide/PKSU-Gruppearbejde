@@ -30,6 +30,14 @@
             validateCompare(name, compareArr[i].substring(2), true);
         }
     }
+
+    //Writeback to the hidden field:
+    var date_hidden = document.getElementById(name);
+    var month_string = month.value < 10 ? "0" + month.value : ""+month.value;
+    var day_string = day.value < 10 ? "0" + day.value : ""+day.value;
+    var hour_string = hour.value < 10 ? "0" + hour.value : "" + hour.value;
+    var minute_string = minute.value < 10 ? "0" + minute.value : "" + minute.value;
+    date_hidden.value = day_string + "-" + month_string + "-" + year.value + " " + hour_string + ":" + minute_string + ":00";
 }
 
 function validateCompare(name,other,compGreater) {
@@ -91,3 +99,7 @@ function validateCompare(name,other,compGreater) {
     }
 }
 
+function showDatePicker(name) {
+    alert("try now "+name);
+    $(name).datepicker('show');
+}

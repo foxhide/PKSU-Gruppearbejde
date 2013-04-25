@@ -84,7 +84,7 @@ namespace CalendarApplication.Controllers
                         Name = (string)dr["fieldName"],
                         Description = (string)dr["fieldDescription"],
                         Required = (bool)dr["requiredField"],
-                        Datatype = (int)dr["fieldType"],
+                        Datatype = (Fieldtype)dr["fieldType"],
                         ViewID = etm.TypeSpecific.Count,
                         VarcharLength = (int)dr["varchar_length"]
                     };

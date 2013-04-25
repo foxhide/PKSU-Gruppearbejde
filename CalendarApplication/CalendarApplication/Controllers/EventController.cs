@@ -7,7 +7,7 @@ using System.Data;
 
 using CalendarApplication.Models.User;
 using CalendarApplication.Models.Event;
-using CalendarApplication.Models.Shared;
+using CalendarApplication.Models.EventType;
 
 namespace CalendarApplication.Controllers
 {
@@ -32,8 +32,8 @@ namespace CalendarApplication.Controllers
             {
                 DataRowCollection rows = table.Rows;
                 result.Name = (string)rows[0]["eventName"];
-                result.Start = new EditableDateTime((DateTime)rows[0]["eventStart"]);
-                result.End = new EditableDateTime((DateTime)rows[0]["eventEnd"]);
+                result.Start = (DateTime)rows[0]["eventStart"];
+                result.End = (DateTime)rows[0]["eventEnd"];
                 result.State = (int)rows[0]["state"];
                 result.TypeId = (int)rows[0]["eventTypeId"];
                 result.TypeName = (string)rows[0]["eventTypeName"];
@@ -43,19 +43,22 @@ namespace CalendarApplication.Controllers
                 result.Rooms = new List<Room>();                       
                 for (int i = 0; i < rows.Count; i++)
                 {
-                    Room tmpRoom = new Room { ID = (int)rows[i]["roomId"], Name = (string)rows[i]["roomName"] };
-                    result.Rooms.Add(tmpRoom);
-                }
-                if (result.TypeId != 1)
-                {
-                    DataSet ds = con.ExecuteQuery(new string[] {
-                        "SELECT * FROM table_" + result.TypeId + " WHERE eventId = " + id,
-                        "SELECT * FROM pksudb.eventtypefields WHERE eventTypeId = " + result.TypeId
+                    result.Rooms.Add(new Room
+                    {
+                        ID = (int)rows[i]["roomId"],
+                        Name = (string)rows[i]["roomName"]
                     });
+                }
+                DataSet ds = con.ExecuteQuery(new string[] {
+                    "SELECT * FROM table_" + result.TypeId + " WHERE eventId = " + id,
+                    "SELECT * FROM pksudb.eventtypefields WHERE eventTypeId = " + result.TypeId
+                });
+                if (ds != null)
+                {
                     result.EventSpecial = ds.Tables[0];
                     for (int i = 0; i < ds.Tables[1].Rows.Count; i++)
                     {
-                        result.EventSpecial.Columns[i+1].ColumnName = (string)ds.Tables[1].Rows[i]["fieldName"];
+                        result.EventSpecial.Columns[i + 1].ColumnName = (string)ds.Tables[1].Rows[i]["fieldName"];
                     }
                 }
             }
@@ -67,19 +70,19 @@ namespace CalendarApplication.Controllers
             return View(result);
         }
 
-        public ActionResult EditEvent(int id)
+        public ActionResult EditEvent(int id, int year, int month, int day)
         {
             EventEditModel eem = new EventEditModel
             {
                 ID = id,
                 EventTypes = new List<SelectListItem>(),
                 SelectedEventType = "1", // Initial value -> Basic event
-                Start = new EditableDateTime(2013, 4, 17, 0, 0),
-                End = new EditableDateTime(2013, 4, 17, 0, 0)
+                Start = new DateTime(year, month, day, 10, 0, 0),
+                End = new DateTime(year, month, day, 18, 0, 0)
             };
 
-            if (id == -1) { this.createModel(eem); }
-            else { this.getModel(eem); }
+            if (id == -1) { this.getRooms(eem); this.createModel(eem); }
+            else { this.getRooms(eem); this.getModel(eem); }
             
             return View(eem);
         }
@@ -125,27 +128,58 @@ namespace CalendarApplication.Controllers
                 }
             }
 
-            if (!eem.SelectedEventType.Equals("1")) // Not a basic event, get the specifics
+            
+            eem.TypeSpecifics = new List<FieldModel>();
+            string specQuery = "SELECT * FROM eventtypefields WHERE eventTypeId = " + eem.SelectedEventType;
+            dt = msc.ExecuteQuery(specQuery);
+            if (dt != null)
             {
-                eem.TypeSpecefics = new List<FieldModel>();
-                string specQuery = "SELECT * FROM eventtypefields WHERE eventTypeId = " + eem.SelectedEventType;
-                dt = msc.ExecuteQuery(specQuery);
-                if (dt != null)
+                foreach (DataRow dr in dt.Rows)
                 {
-                    foreach (DataRow dr in dt.Rows)
+                    FieldModel fm = new FieldModel
                     {
-                        eem.TypeSpecefics.Add(new FieldModel
-                        {
-                            ID = (int)dr["fieldId"],
-                            Name = (string)dr["fieldName"],
-                            Description = (string)dr["fieldDescription"],
-                            Required = (bool)dr["requiredField"],
-                            Datatype = (int)dr["fieldType"],
-                            VarcharLength = (int)dr["varCharLength"]
-                        });
+                        ID = (int)dr["fieldId"],
+                        Name = (string)dr["fieldName"],
+                        Description = (string)dr["fieldDescription"],
+                        Required = (bool)dr["requiredField"],
+                        Datatype = (Fieldtype)dr["fieldType"],
+                        VarcharLength = (int)dr["varCharLength"]
+                    };
+                    switch (fm.Datatype)
+                    {
+                        case Fieldtype.Integer:
+                        case Fieldtype.User:
+                        case Fieldtype.Group: fm.IntValue = 0; break; //int
+                        case Fieldtype.Text:
+                        case Fieldtype.File: fm.StringValue = ""; break; //string
+                        case Fieldtype.Datetime: fm.DateValue = DateTime.Now; break;
+                        case Fieldtype.Bool: fm.BoolValue = false; break; //bool
                     }
+                    eem.TypeSpecifics.Add(fm);
                 }
             }
+        }
+
+        public bool getRooms(EventEditModel eem)
+        {
+            MySqlConnect msc = new MySqlConnect();
+
+            // Get list of rooms //
+            eem.RoomSelectList = new List<SelectListItem>();
+            string roomquery = "SELECT roomId,roomName FROM pksudb.rooms";
+            DataTable dt = msc.ExecuteQuery(roomquery);
+            if (dt != null)
+            {
+                foreach (DataRow dr in dt.Rows)
+                {
+                    eem.RoomSelectList.Add(new SelectListItem
+                    {
+                        Value = ((int)dr["roomId"]).ToString(),
+                        Text = (string)dr["roomName"]
+                    });
+                }
+            }
+            return true;
         }
 
         public bool getModel(EventEditModel eem)
@@ -176,14 +210,14 @@ namespace CalendarApplication.Controllers
             dt = msc.ExecuteQuery(basic);
 
             eem.Name = (string)dt.Rows[0]["eventName"];
-            eem.Start = new EditableDateTime((DateTime)dt.Rows[0]["eventStart"]);
-            eem.End = new EditableDateTime((DateTime)dt.Rows[0]["eventEnd"]);
+            eem.Start = (DateTime)dt.Rows[0]["eventStart"];
+            eem.End = (DateTime)dt.Rows[0]["eventEnd"];
             eem.Creator = (string)dt.Rows[0]["userName"];
             eem.SelectedEventType = ((int)dt.Rows[0]["eventTypeId"]).ToString();
 
             if (!eem.SelectedEventType.Equals("1"))
             {
-                eem.TypeSpecefics = new List<FieldModel>();
+                eem.TypeSpecifics = new List<FieldModel>();
                 string specQuery = "SELECT * FROM eventtypefields WHERE eventTypeId = " + eem.SelectedEventType;
                 string specData = "SELECT * FROM pksudb.table_" + eem.SelectedEventType
                                     + " WHERE eventId == " + eem.ID;
@@ -202,22 +236,22 @@ namespace CalendarApplication.Controllers
                             Name = (string)dr["fieldName"],
                             Description = (string)dr["fieldDescription"],
                             Required = (bool)dr["requiredField"],
-                            Datatype = (int)dr["fieldType"],
+                            Datatype = (Fieldtype)dr["fieldType"],
                             VarcharLength = (int)dr["varCharLength"]
                         };
 
                         switch (fm.Datatype)
                         {
-                            case 0:
-                            case 3:
-                            case 4: fm.IntValue = (int)data[i+1]; break; //int
-                            case 1:
-                            case 2:
-                            case 5: fm.StringValue = (string)data[i+1]; break; //string
-                            case 6: fm.BoolValue = (bool)data[i+1]; break; //bool
+                            case Fieldtype.Integer:
+                            case Fieldtype.User:
+                            case Fieldtype.Group: fm.IntValue = (int)data[i + 1]; break; //int
+                            case Fieldtype.Text:
+                            case Fieldtype.File: fm.StringValue = (string)data[i + 1]; break; //string
+                            case Fieldtype.Datetime: fm.DateValue = (DateTime)data[i + 1]; break;
+                            case Fieldtype.Bool: fm.BoolValue = (bool)data[i + 1]; break; //bool
                         }
 
-                        eem.TypeSpecefics.Add(fm);
+                        eem.TypeSpecifics.Add(fm);
                     }
                 }
                 else

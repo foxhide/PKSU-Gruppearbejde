@@ -6,8 +6,6 @@ using System.Web;
 using System.Web.Mvc;
 using System.Text;
 
-using CalendarApplication.Models.Shared;
-
 namespace CalendarApplication.Helpers
 {
     public static class DateTimeEditor
@@ -50,11 +48,16 @@ namespace CalendarApplication.Helpers
         {
             // Get model
             ModelMetadata metadata = ModelMetadata.FromLambdaExpression(expression, helper.ViewData);
-            EditableDateTime edt = (EditableDateTime)metadata.Model;
+            DateTime edt = (DateTime)metadata.Model;
 
             // Get Name
             string name = ExpressionHelper.GetExpressionText(expression).Split('.').Last();
 
+            return DateTimeEditorFor(edt, name, fields, compare);
+        }
+
+        public static MvcHtmlString DateTimeEditorFor(DateTime edt, string name, string[] fields, string compare)
+        {
             StringBuilder builder = new StringBuilder();
 
             // Build validation string.
@@ -62,7 +65,9 @@ namespace CalendarApplication.Helpers
             string validateStr = "onchange=validateDate('" + name + "','" + compare + "')";
 
             builder.AppendLine("<span style='color:grey;font-size:80%;text-align:left'>");
-            builder.AppendLine("<table class='datetime-editor'>");
+            builder.AppendLine("<input type='hidden' name='" + name + "' id='" + name + "' value='"
+                                + edt.ToString("dd-MM-yyyy hh:mm:ss") + "'>");
+            builder.AppendLine("<table class='custom-style-1'>");
 
             // Create headers
             builder.AppendLine("<tr>");
@@ -78,7 +83,7 @@ namespace CalendarApplication.Helpers
             builder.AppendLine("<tr>");
             foreach (string f in fields)
             {
-                builder.Append("<td>");
+                builder.AppendLine("<td>");
                 int w = f.Equals("Year") ? 60 : 40;  // Size
                 int val = f.Equals("Year") ? edt.Year :
                     f.Equals("Month") ? edt.Month :
@@ -88,6 +93,8 @@ namespace CalendarApplication.Helpers
                 AddField(builder, name, f, val, w, validateStr); // Add the field
                 builder.Append("</td>");
             }
+            builder.AppendLine("<td><script>$(function() { $(\"#" + name + "\").datepicker();});</script>");
+            builder.Append("<input type='button' onclick=showDatePicker('" + name + "')></td>");
             builder.AppendLine("</tr></table>");
             builder.AppendLine("</span>");
 
@@ -99,7 +106,7 @@ namespace CalendarApplication.Helpers
         {
             builder.Append("<input class='text-box single-line' type='number' name='");
             builder.Append(name);    //
-            builder.Append(".");     // name='name.field'
+            builder.Append("_");     // name='name_field'
             builder.Append(field);   //
             builder.Append("' id='");
             builder.Append(name);    //

@@ -1,6 +1,7 @@
 ﻿@model CalendarApplication.Models.Calendar.CalendarDay
 
 @using CalendarApplication.Models.Event;
+@using CalendarApplication.Models.User;
 
 <table style="font-size:20px;width:850px">
     <tr>
@@ -61,8 +62,8 @@
                     {
                         if (e.Rooms.Contains(room))
                         {
-                            int start = (e.Start.GetDateTime() < Model.Date ? 0 : ((e.Start.Hour * 60 + e.Start.Minute)*100) / 1440);
-                            int end = (e.End.GetDateTime() > Model.Date.AddDays(1) ? 100 : ((e.End.Hour * 60 + e.End.Minute)*100) / 1440);
+                            int start = (e.Start < Model.Date ? 0 : ((e.Start.Hour * 60 + e.Start.Minute)*100) / 1440);
+                            int end = (e.End > Model.Date.AddDays(1) ? 100 : ((e.End.Hour * 60 + e.End.Minute)*100) / 1440);
                     
                     
                     
@@ -82,4 +83,13 @@
     }
 </table>
 
-@Html.ActionLink("Create event","EditEvent","Event",new { id = -1 },null)
+<br />
+
+@if(UserModel.GetCurrentUserID() != -1) {
+    <text>
+        Would you like to
+        @Html.ActionLink("create a new event on this day", "EditEvent", "Event",
+                            new { id = -1, year = Model.Date.Year, month = Model.Date.Month, day = Model.Date.Day }, null)
+        ?
+    </text>
+}
