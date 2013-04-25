@@ -6,17 +6,14 @@ using System.Web.Mvc;
 
 namespace CalendarApplication.Models.User
 {
-    public class UserViewModel
+    public class UserViewModel : UserModel
     {
         //
         // GET: /UserViewModel/
 
-        public int UserId { set; get; }
-        public string UserName { set; get; }
         public string Password { set; get; }
-        public string RealName { set; get; }
         public bool Admin { set; get; }
-        public string Email { set; get; }
+        //TODO remove when implemented in usermodel
         public bool Active { set; get; }
         public bool NeedsApproval { set; get; }
     }
