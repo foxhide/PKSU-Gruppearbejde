@@ -344,36 +344,6 @@ namespace CalendarApplication.Controllers
             }
         }
 
-        public UserModel GetUser(int ID)
-        {
-            if (this.OpenConnection())
-            {
-
-                MySqlCommand msc = new MySqlCommand("SELECT * FROM pksudb.users WHERE userId = "+ID,connection);
-                MySqlDataReader dataReader = msc.ExecuteReader();
-
-                if (!dataReader.Read())
-                {
-                    return null;
-                }
-
-                UserModel result = new UserModel
-                {
-                    ID = ID,
-                    UserName = (string)dataReader["userName"],
-                    RealName = (string)dataReader["realName"],
-                    Email = (string)dataReader["email"]
-                };
-
-                this.CloseConnection();
-                return result;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         public int CreateUser(Register data)
         {
             string insert = "INSERT INTO pksudb.users (userName,password,realName,email,active,needsApproval) VALUES ('"
