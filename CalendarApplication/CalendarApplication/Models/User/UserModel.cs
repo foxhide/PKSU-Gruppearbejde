@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 
 using CalendarApplication.Controllers;
 using CalendarApplication.Models.Event;
@@ -25,6 +26,8 @@ namespace CalendarApplication.Models.User
         [Display(Name = "E-mail")]
         public string Email { set; get; }
 
+        public bool Admin { set; get; }
+
         /// <summary>
         /// Gets the data for the user specified by the user ID
         /// </summary>
@@ -33,7 +36,19 @@ namespace CalendarApplication.Models.User
         public static UserModel GetUser(int ID)
         {
             MySqlConnect msc = new MySqlConnect();
-            return msc.GetUser(ID);
+            DataTable dt = msc.ExecuteQuery("SELECT userId,userName,realName,email,admin FROM pksudb.users WHERE userId = " + ID);
+            if(dt == null) { return null; }
+
+            UserModel result = new UserModel
+            {
+                ID = ID,
+                UserName = (string)dt.Rows[0]["userName"],
+                RealName = (string)dt.Rows[0]["realName"],
+                Email = (string)dt.Rows[0]["email"],
+                Admin = (bool)dt.Rows[0]["admin"]
+            };
+
+            return result;
         }
 
         /// <summary>

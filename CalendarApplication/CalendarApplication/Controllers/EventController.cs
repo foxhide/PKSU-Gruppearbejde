@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.Data;
+using System.Windows.Forms;
 
 using CalendarApplication.Models.User;
 using CalendarApplication.Models.Event;
@@ -93,7 +94,7 @@ namespace CalendarApplication.Controllers
             if (eem.SubmitType == 1)
             {
                 MySqlConnect msc = new MySqlConnect();
-                eem.CreatorID = UserModel.GetCurrentUserID();
+                eem.CreatorId = UserModel.GetCurrentUserID();
                 if (msc.EditEvent(eem)) { return RedirectToAction("Index", "Home", null); }
                 else {
                     TempData["errorMsg"] = msc.ErrorMessage;
@@ -127,7 +128,6 @@ namespace CalendarApplication.Controllers
                     });
                 }
             }
-
             
             eem.TypeSpecifics = new List<FieldModel>();
             string specQuery = "SELECT * FROM eventtypefields WHERE eventTypeId = " + eem.SelectedEventType;

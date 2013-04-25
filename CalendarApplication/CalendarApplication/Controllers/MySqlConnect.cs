@@ -344,36 +344,6 @@ namespace CalendarApplication.Controllers
             }
         }
 
-        public UserModel GetUser(int ID)
-        {
-            if (this.OpenConnection())
-            {
-
-                MySqlCommand msc = new MySqlCommand("SELECT * FROM pksudb.users WHERE userId = "+ID,connection);
-                MySqlDataReader dataReader = msc.ExecuteReader();
-
-                if (!dataReader.Read())
-                {
-                    return null;
-                }
-
-                UserModel result = new UserModel
-                {
-                    ID = ID,
-                    UserName = (string)dataReader["userName"],
-                    RealName = (string)dataReader["realName"],
-                    Email = (string)dataReader["email"]
-                };
-
-                this.CloseConnection();
-                return result;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         public int CreateUser(Register data)
         {
             string insert = "INSERT INTO pksudb.users (userName,password,realName,email,active,needsApproval) VALUES ('"
@@ -545,7 +515,7 @@ namespace CalendarApplication.Controllers
                         else if(fdm.ViewID == -2)
                         {
                             string insertField = "INSERT INTO pksudb.eventtypefields"
-                                                 + "(eventTypeId, fieldName, fieldDescription, requiredField, fieldType, varchar_length)"
+                                                 + "(eventTypeId, fieldName, fieldDescription, requiredField, fieldType, varCharLength)"
                                                  + "VALUES (" + data.ID + ",'" + fdm.Name + "','" + fdm.Description + "',"
                                                  + (fdm.Required ? "1," : "0,") + (int)fdm.Datatype + ","+ fdm.VarcharLength
                                                  + "); SELECT last_insert_id();";
@@ -633,7 +603,7 @@ namespace CalendarApplication.Controllers
                     string updateEventTable = eem.ID == -1 ?
                                                 "INSERT INTO pksudb.events" +
                                                 "(userId,eventTypeId,eventName,eventStart,eventEnd,visible,state) VALUES " +
-                                                "(" + eem.CreatorID + "," + eem.SelectedEventType + ",'" + eem.Name + "','" +
+                                                "(" + eem.CreatorId + "," + eem.SelectedEventType + ",'" + eem.Name + "','" +
                                                 eem.Start.ToString("yyyy-MM-dd hh:mm:ss") + "','" + eem.End.ToString("yyyy-MM-dd hh:mm:ss") + "'," +
                                                 (eem.Visible ? "1" : "0") + "," + eem.State + "); SELECT last_insert_id();" :
                                                 "UPDATE pksudb.events SET eventTypeId = " + eem.SelectedEventType +

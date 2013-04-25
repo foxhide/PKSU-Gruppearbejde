@@ -11,7 +11,6 @@ namespace CalendarApplication.Models.Event
     {
         public int ID { set; get; }
         public string Name { set; get; }
-        public int CreatorID { get; set; }
         public string Creator { set; get; }
         public int CreatorId { set; get; }
         public int TypeId { set; get; }

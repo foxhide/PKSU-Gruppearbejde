@@ -272,7 +272,7 @@ eventTypeId: foreign key referencing eventtypenames. cannot be null.
 fieldName: name of the field in the database. cannot be null.
 fieldDescription: description of a field. cannot be null.
 requiredField: whether or not filling this field is required.
-fieldType: 0 for basic type, 1 for user, 2 for group, 3 for file.
+fieldType: 0 for int, 1 for text, 2 for date, 3 for user, 4 for group, 5 for file, 6 for boolean.
 varCharLength: length of string if type is string, 0 if not string.*/';
 
 
@@ -301,6 +301,33 @@ ENGINE = InnoDB
 COMMENT = 'Table describing which rooms are used for an event.\n\neventId /* comment truncated */ /*: foreign key referencing events table
 roomId: foreign key referencing rooms table
 primary key is both together.*/';
+
+
+-- -----------------------------------------------------
+-- Table `pksudb`.`eventcreationgroups`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `pksudb`.`eventcreationgroups` ;
+
+CREATE  TABLE IF NOT EXISTS `pksudb`.`eventcreationgroups` (
+  `eventTypeId` INT NOT NULL ,
+  `groupId` INT NOT NULL ,
+  PRIMARY KEY (`eventTypeId`, `groupId`) ,
+  INDEX `creationeventtypeid_idx` (`eventTypeId` ASC) ,
+  INDEX `creationgroupid_idx` (`groupId` ASC) ,
+  CONSTRAINT `creationeventtypeid`
+    FOREIGN KEY (`eventTypeId` )
+    REFERENCES `pksudb`.`eventtypes` (`eventTypeId` )
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION,
+  CONSTRAINT `creationgroupid`
+    FOREIGN KEY (`groupId` )
+    REFERENCES `pksudb`.`groups` (`groupId` )
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+COMMENT = 'Table describing which groups can create which event types.\n /* comment truncated */ /*
+eventTypeId: Foreign and primary key, not null.
+groupId: Foreign and primary key, not null.*/';
 
 USE `pksudb` ;
 

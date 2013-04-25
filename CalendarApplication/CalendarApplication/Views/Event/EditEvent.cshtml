@@ -28,10 +28,10 @@
     <br />
     <br />
     @Html.LabelFor(m => m.Start) <br />
-    @Html.EditorFor(m => m.Start, "g.today,l.End")
+    @Html.DateTimeEditorFor(m => m.Start, "g.today,l.End")
     <br />
     @Html.LabelFor(m => m.End) <br />
-    @Html.EditorFor(m => m.End, "g.today,g.Start")
+    @Html.DateTimeEditorFor(m => m.End, "g.today,g.Start")
     <br />
 
     @Html.LabelFor(m => m.SelectedEventType)

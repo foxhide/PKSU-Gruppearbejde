@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using CalendarApplication.Models.EventType;
 using CalendarApplication.Models.Maintenance;
 using CalendarApplication.Controllers;
+using CalendarApplication.Models.User;
 
 namespace CalendarApplication.Controllers
 {
@@ -21,6 +22,15 @@ namespace CalendarApplication.Controllers
 
         public ActionResult Index()
         {
+            if (UserModel.GetCurrentUserID() == -1)
+            {
+                return RedirectToAction("Login", "Account", null);
+            }
+            else if (!UserModel.GetCurrent().Admin)
+            {
+                return RedirectToAction("Index", "Home", null);
+            }
+
             MaintenanceModel mm = new MaintenanceModel
             {
                 EventTypes = new List<SelectListItem>(),
@@ -86,7 +96,7 @@ namespace CalendarApplication.Controllers
                         Required = (bool)dr["requiredField"],
                         Datatype = (Fieldtype)dr["fieldType"],
                         ViewID = etm.TypeSpecific.Count,
-                        VarcharLength = (int)dr["varchar_length"]
+                        VarcharLength = (int)dr["varCharLength"]
                     };
                     etm.TypeSpecific.Add(fdm);
                 }
