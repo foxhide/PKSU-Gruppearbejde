@@ -33,7 +33,7 @@ else {
                 </tr>
                 <tr>
                     <td>Event Creator</td>
-                    <td>@Model.Creator</td>
+                    <td>@Html.ActionLink(Model.Creator, "Index", "User", new { UserId = Model.CreatorId }, null);</td>
                 </tr>
                 <tr>
                     <td>Event Type</td>

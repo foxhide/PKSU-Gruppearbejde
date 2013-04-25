@@ -10,6 +10,7 @@ namespace CalendarApplication.Models.Event
         public int ID { set; get; }
         public string Name { set; get; }
         public string Creator { set; get; }
+        public int CreatorId { set; get; }
         public int TypeId { set; get; }
         public string TypeName { set; get; }
         public DateTime Start { set; get; }
