@@ -1,4 +1,5 @@
 ﻿@using CalendarApplication.Models.Calendar;
+@using CalendarApplication.Models.User;
 
 <table class="gridtable">
     @{
@@ -14,15 +15,34 @@
             }
             else { <b>Calendar</b> }
         </td></tr>
-        if(curActn != "" && curCtrl != "maintenance") {
+        if(UserModel.GetCurrentUserID() != -1)
+        {
             <tr>
                 <td>
-                    @Html.ActionLink("Maintenance","Index","Maintenance",null,null)
+                    @if (curActn != "" && curCtrl != "user")
+                    {
+                        @Html.ActionLink("Profile", "Index", "User", new { userId = UserModel.GetCurrentUserID() }, null)
+                    }
+                    else
+                    {
+                        <b>Profile</b>
+                    }
                 </td>
-            </tr>   
-        }
-        else {
-            <tr><td><b>Maintenance</b></td></tr>
+            </tr>
+            
+            if(UserModel.GetCurrent().Admin) //Only admins may access the maintenance page
+            {
+                if(curActn != "" && curCtrl != "maintenance") {
+                    <tr>
+                        <td>
+                            @Html.ActionLink("Maintenance","Index","Maintenance",null,null)
+                        </td>
+                    </tr>   
+                }
+                else {
+                    <tr><td><b>Maintenance</b></td></tr>
+                }
+            }
         }
     }
 </table>
