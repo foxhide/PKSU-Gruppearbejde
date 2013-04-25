@@ -687,7 +687,6 @@ namespace CalendarApplication.Controllers
                                 }
                             }
                             updateTable = prologue + ")" + epilogue + ")";
-                            MessageBox.Show(updateTable);
                         }
                         else
                         {
