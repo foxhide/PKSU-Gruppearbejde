@@ -15,7 +15,7 @@ INSERT INTO eventtypefields (eventTypeId, fieldName, fieldDescription, requiredF
 
 CREATE TABLE pksudb.table_2 (
 	eventId int NOT NULL,
-	band VARCHAR(50) NOT NULL,
+	field_1 VARCHAR(50) NOT NULL,
 	PRIMARY KEY (eventId),
     CONSTRAINT table_1eventid
     FOREIGN KEY (eventId)
