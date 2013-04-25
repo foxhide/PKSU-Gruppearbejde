@@ -17,7 +17,7 @@
             <select id='Type_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].Datatype' onchange="updateVarChar(@(Model.ViewID));">
                 @for (int i = 0; i < FieldDataModel.DATA_TYPES.Count; i++)
                 {
-                    <option value="@(i)" @(i == Model.Datatype?"Selected":"")>@FieldDataModel.DATA_TYPES[i]</option>
+                    <option value="@(i)" @(i == (int)Model.Datatype?"Selected":"")>@FieldDataModel.DATA_TYPES[i]</option>
                 }
             </select>
         </td>
@@ -29,7 +29,7 @@
         <td><label for='Req_@(Model.ViewID)'>Field required</label></td>
         <td>
             <div id="varchar_label_@(Model.ViewID)">
-                @if (Model.Datatype == 1)
+                @if (Model.Datatype == Fieldtype.Text)
                 {
                     <label>Max size of input:</label>
                 }
@@ -43,7 +43,7 @@
         </td>
         <td>
             <div id="varchar_input_@(Model.ViewID)">
-                @if (Model.Datatype == 1)
+                @if (Model.Datatype == Fieldtype.Text)
                 {
                     <input type='text' id='varchar_size_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].VarcharLength'
                         value="@Model.VarcharLength" style="width:50px">

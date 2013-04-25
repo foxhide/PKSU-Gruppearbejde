@@ -8,7 +8,7 @@ using System.Text;
 
 namespace CalendarApplication.Helpers
 {
-    public static class ListEditor
+    public static class DoubleListEditor
     {
         public static readonly string SCRIPT = "<script>function moveSelected(name, add) {" +
                                                 "var name1 = add ? name + '_select' : name + '_available';" +
@@ -35,7 +35,7 @@ namespace CalendarApplication.Helpers
 
             StringBuilder builder = new StringBuilder();
 
-            builder.AppendLine(ListEditor.SCRIPT);
+            builder.AppendLine(DoubleListEditor.SCRIPT);
 
             builder.AppendLine("<span style='color:grey;font-size:80%;text-align:left'>");
 
@@ -47,7 +47,7 @@ namespace CalendarApplication.Helpers
                                     "[" + i + "].Selected' value=" + (list[i].Selected ? "true" : "false") + ">");
             }
 
-            builder.AppendLine("<table class='datetime-editor'><tr>");
+            builder.AppendLine("<table class='custom-style-1'><tr>");
 
             builder.AppendLine("<td>" + labelList1 + "</td><td></td><td>" + labelList2 + "</td>");
 

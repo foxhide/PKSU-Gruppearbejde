@@ -117,6 +117,9 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Helpers\ListEditor.cs" />
+    <Compile Include="Helpers\DateTimeEditor.cs" />
+    <Compile Include="Helpers\FieldEditor.cs" />
+    <Compile Include="Helpers\DoubleListEditor.cs" />
     <Compile Include="Models\Account\Register.cs" />
     <Compile Include="Models\Calendar\Calendar.cs" />
     <Compile Include="Models\Calendar\CalendarDay.cs" />

@@ -10,13 +10,18 @@
 
 <h3 style="color:red">@TempData["errorMsg"]</h3>
 
+<link type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/base/jquery-ui.css" rel="stylesheet" />
 <script src="@Url.Content("~/Scripts/jquery.validate.min.js")" type="text/javascript"></script>
 <script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery-ui-1.8.11.min.js")" type="text/javascript"></script>
 <script src="@Url.Content("~/Scripts/date-picker-validator.js")" type="text/javascript"></script>
 
 @using (Html.BeginForm()) {
 <fieldset>
     <legend>Create New Event</legend>
+    @Html.HiddenFor(m => m.SubmitType)
+    @Html.HiddenFor(m => m.ID)
+
     <h3>Basic event details:</h3>
     @Html.LabelFor(m => m.Name)
     @Html.TextBoxFor(m => m.Name)
@@ -28,37 +33,20 @@
     @Html.LabelFor(m => m.End) <br />
     @Html.EditorFor(m => m.End, "g.today,g.Start")
     <br />
-    @Html.HiddenFor(m => m.SubmitType)
-    @Html.HiddenFor(m => m.ID)
+
+    @Html.LabelFor(m => m.SelectedEventType)
     @Html.DropDownListFor(m => Model.SelectedEventType,
                             new SelectList(Model.EventTypes, "Value", "Text"),
                             new { onchange="this.form.submit()" })
 
-    @if (Model.TypeSpecefics != null)
+    @if (Model.TypeSpecifics != null)
     {
-        <table>
-            @for (int i = 0; i < Model.TypeSpecefics.Count; i++)
+        <table style="margin-left:0;margin-right:auto">
+            @for (int i = 0; i < Model.TypeSpecifics.Count; i++)
             {
                 <tr>
-                    <td>@Model.TypeSpecefics[i].Name</td>
                     <td>
-                        @Html.HiddenFor(m => Model.TypeSpecefics[i].ID)
-                        @Html.HiddenFor(m => Model.TypeSpecefics[i].Datatype)
-                        @switch (Model.TypeSpecefics[i].Datatype)
-                        {
-                            case 0:
-                            case 3:
-                            case 4: @Html.TextBoxFor(m => Model.TypeSpecefics[i].IntValue);
-                                    @Html.ValidationMessageFor(m => Model.TypeSpecefics[i].IntValue) break;
-                            case 1:
-                            case 2:
-                            case 5: @Html.TextBoxFor(m => Model.TypeSpecefics[i].StringValue);
-                                    @Html.ValidationMessageFor(m => Model.TypeSpecefics[i].StringValue) break;
-                            case 6: @Html.CheckBoxFor(m => Model.TypeSpecefics[i].BoolValue);
-                                    @Html.ValidationMessageFor(m => Model.TypeSpecefics[i].BoolValue) break;
-                        }
-                        @if (Model.TypeSpecefics[i].Required)
-                        { <span style='color:red'>*</span> }
+                        @Html.FieldEditorFor(m => m.TypeSpecifics[i])
                     </td>
                 </tr>
             }           

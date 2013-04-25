@@ -7,6 +7,7 @@ using System.Data;
 
 using CalendarApplication.Models.User;
 using CalendarApplication.Models.Event;
+using CalendarApplication.Models.EventType;
 
 namespace CalendarApplication.Controllers
 {
@@ -48,16 +49,16 @@ namespace CalendarApplication.Controllers
                         Name = (string)rows[i]["roomName"]
                     });
                 }
-                if (result.TypeId != 1)
+                DataSet ds = con.ExecuteQuery(new string[] {
+                    "SELECT * FROM table_" + result.TypeId + " WHERE eventId = " + id,
+                    "SELECT * FROM pksudb.eventtypefields WHERE eventTypeId = " + result.TypeId
+                });
+                if (ds != null)
                 {
-                    DataSet ds = con.ExecuteQuery(new string[] {
-                        "SELECT * FROM table_" + result.TypeId + " WHERE eventId = " + id,
-                        "SELECT * FROM pksudb.eventtypefields WHERE eventTypeId = " + result.TypeId
-                    });
                     result.EventSpecial = ds.Tables[0];
                     for (int i = 0; i < ds.Tables[1].Rows.Count; i++)
                     {
-                        result.EventSpecial.Columns[i+1].ColumnName = (string)ds.Tables[1].Rows[i]["fieldName"];
+                        result.EventSpecial.Columns[i + 1].ColumnName = (string)ds.Tables[1].Rows[i]["fieldName"];
                     }
                 }
             }
@@ -76,8 +77,8 @@ namespace CalendarApplication.Controllers
                 ID = id,
                 EventTypes = new List<SelectListItem>(),
                 SelectedEventType = "1", // Initial value -> Basic event
-                Start = new DateTime(year, month, day, 0, 0, 0),
-                End = new DateTime(year, month, day, 0, 0, 0)
+                Start = new DateTime(year, month, day, 10, 0, 0),
+                End = new DateTime(year, month, day, 18, 0, 0)
             };
 
             if (id == -1) { this.getRooms(eem); this.createModel(eem); }
@@ -127,25 +128,34 @@ namespace CalendarApplication.Controllers
                 }
             }
 
-            if (!eem.SelectedEventType.Equals("1")) // Not a basic event, get the specifics
+            
+            eem.TypeSpecifics = new List<FieldModel>();
+            string specQuery = "SELECT * FROM eventtypefields WHERE eventTypeId = " + eem.SelectedEventType;
+            dt = msc.ExecuteQuery(specQuery);
+            if (dt != null)
             {
-                eem.TypeSpecefics = new List<FieldModel>();
-                string specQuery = "SELECT * FROM eventtypefields WHERE eventTypeId = " + eem.SelectedEventType;
-                dt = msc.ExecuteQuery(specQuery);
-                if (dt != null)
+                foreach (DataRow dr in dt.Rows)
                 {
-                    foreach (DataRow dr in dt.Rows)
+                    FieldModel fm = new FieldModel
                     {
-                        eem.TypeSpecefics.Add(new FieldModel
-                        {
-                            ID = (int)dr["fieldId"],
-                            Name = (string)dr["fieldName"],
-                            Description = (string)dr["fieldDescription"],
-                            Required = (bool)dr["requiredField"],
-                            Datatype = (int)dr["fieldType"],
-                            VarcharLength = (int)dr["varCharLength"]
-                        });
+                        ID = (int)dr["fieldId"],
+                        Name = (string)dr["fieldName"],
+                        Description = (string)dr["fieldDescription"],
+                        Required = (bool)dr["requiredField"],
+                        Datatype = (Fieldtype)dr["fieldType"],
+                        VarcharLength = (int)dr["varCharLength"]
+                    };
+                    switch (fm.Datatype)
+                    {
+                        case Fieldtype.Integer:
+                        case Fieldtype.User:
+                        case Fieldtype.Group: fm.IntValue = 0; break; //int
+                        case Fieldtype.Text:
+                        case Fieldtype.File: fm.StringValue = ""; break; //string
+                        case Fieldtype.Datetime: fm.DateValue = DateTime.Now; break;
+                        case Fieldtype.Bool: fm.BoolValue = false; break; //bool
                     }
+                    eem.TypeSpecifics.Add(fm);
                 }
             }
         }
@@ -207,7 +217,7 @@ namespace CalendarApplication.Controllers
 
             if (!eem.SelectedEventType.Equals("1"))
             {
-                eem.TypeSpecefics = new List<FieldModel>();
+                eem.TypeSpecifics = new List<FieldModel>();
                 string specQuery = "SELECT * FROM eventtypefields WHERE eventTypeId = " + eem.SelectedEventType;
                 string specData = "SELECT * FROM pksudb.table_" + eem.SelectedEventType
                                     + " WHERE eventId == " + eem.ID;
@@ -226,22 +236,22 @@ namespace CalendarApplication.Controllers
                             Name = (string)dr["fieldName"],
                             Description = (string)dr["fieldDescription"],
                             Required = (bool)dr["requiredField"],
-                            Datatype = (int)dr["fieldType"],
+                            Datatype = (Fieldtype)dr["fieldType"],
                             VarcharLength = (int)dr["varCharLength"]
                         };
 
                         switch (fm.Datatype)
                         {
-                            case 0:
-                            case 3:
-                            case 4: fm.IntValue = (int)data[i+1]; break; //int
-                            case 1:
-                            case 2:
-                            case 5: fm.StringValue = (string)data[i+1]; break; //string
-                            case 6: fm.BoolValue = (bool)data[i+1]; break; //bool
+                            case Fieldtype.Integer:
+                            case Fieldtype.User:
+                            case Fieldtype.Group: fm.IntValue = (int)data[i + 1]; break; //int
+                            case Fieldtype.Text:
+                            case Fieldtype.File: fm.StringValue = (string)data[i + 1]; break; //string
+                            case Fieldtype.Datetime: fm.DateValue = (DateTime)data[i + 1]; break;
+                            case Fieldtype.Bool: fm.BoolValue = (bool)data[i + 1]; break; //bool
                         }
 
-                        eem.TypeSpecefics.Add(fm);
+                        eem.TypeSpecifics.Add(fm);
                     }
                 }
                 else

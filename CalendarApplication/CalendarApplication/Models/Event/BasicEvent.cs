@@ -18,11 +18,8 @@ namespace CalendarApplication.Models.Event
         public string TypeName { set; get; }
 
         [Display(Name = "Starting date")]
-        [DataType(DataType.Date)]
         public DateTime Start { set; get; }
-
         [Display(Name = "Ending date")]
-        [DataType(DataType.Date)]
         public DateTime End { set; get; }
 
         public int State { set; get; }
