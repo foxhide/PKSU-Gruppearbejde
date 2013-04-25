@@ -11,7 +11,7 @@ INSERT INTO users (userName, password, realName, admin, email, active, needsAppr
 INSERT INTO users (userName, password, realName, admin, email, active, needsApproval) VALUES ("stephan_kerbal","kerbaltillinux","Stephan", 1,"stephan@stengade.dk",1,0);
 
 INSERT INTO eventtypes (eventTypeName) VALUES ("Concert");
-INSERT INTO eventtypefields (eventTypeId, fieldName, fieldDescription, requiredField, fieldType, varCharLength) VALUES (2, "Band-name","Name of the band that's playing",1,0,50);
+INSERT INTO eventtypefields (eventTypeId, fieldName, fieldDescription, requiredField, fieldType, varCharLength) VALUES (2, "Band-name","Name of the band that's playing",1,1,50);
 
 CREATE TABLE pksudb.table_2 (
 	eventId int NOT NULL,
