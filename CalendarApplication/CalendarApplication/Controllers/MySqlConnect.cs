@@ -545,7 +545,7 @@ namespace CalendarApplication.Controllers
                         else if(fdm.ViewID == -2)
                         {
                             string insertField = "INSERT INTO pksudb.eventtypefields"
-                                                 + "(eventTypeId, fieldName, fieldDescription, requiredField, fieldType, varchar_length)"
+                                                 + "(eventTypeId, fieldName, fieldDescription, requiredField, fieldType, varCharLength)"
                                                  + "VALUES (" + data.ID + ",'" + fdm.Name + "','" + fdm.Description + "',"
                                                  + (fdm.Required ? "1," : "0,") + (int)fdm.Datatype + ","+ fdm.VarcharLength
                                                  + "); SELECT last_insert_id();";
