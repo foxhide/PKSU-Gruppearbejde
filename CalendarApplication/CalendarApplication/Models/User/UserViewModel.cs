@@ -12,7 +12,6 @@ namespace CalendarApplication.Models.User
         // GET: /UserViewModel/
 
         public string Password { set; get; }
-        public bool Admin { set; get; }
         //TODO remove when implemented in usermodel
         public bool Active { set; get; }
         public bool NeedsApproval { set; get; }
