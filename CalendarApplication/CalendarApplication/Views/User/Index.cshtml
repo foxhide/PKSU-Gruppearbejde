@@ -6,12 +6,40 @@
 
 @using CalendarApplication.Models.User
 
-<h2>User Info</h2>
+@if (Model.UserId < 0) {
+    <h2>Error loading user!</h2>
+}
+else {
+    <h2>User Info</h2>
 
-<table>
-    <tr>
-        <td>Name</td>
-        <td>@Model.UserName</td>
-    </tr>
-
-</table>
+    <table class="gridtable">
+        <tr>
+            <td>User Id</td>
+            <td>@Model.UserId</td>
+        </tr>
+        <tr>
+            <td>User Name</td>
+            <td>@Model.UserName</td>
+        </tr>
+        <tr>
+            <td>Real Name</td>
+            <td>@Model.RealName</td>
+        </tr>
+        <tr>
+            <td>Is Admin</td>
+            <td>@Model.Admin</td>
+        </tr>
+        <tr>
+            <td>Email</td>
+            <td>@Model.Email</td>
+        </tr>
+        <tr>
+            <td>Is Active</td>
+            <td>@Model.Active</td>
+        </tr>
+        <tr>
+            <td>Needs Approval</td>
+            <td>@Model.NeedsApproval</td>
+        </tr>
+    </table>
+}
