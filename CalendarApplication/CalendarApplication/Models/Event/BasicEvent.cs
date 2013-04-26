@@ -10,7 +10,10 @@ namespace CalendarApplication.Models.Event
     public class BasicEvent
     {
         public int ID { set; get; }
+
+        [Required]
         public string Name { set; get; }
+
         public string Creator { set; get; }
         public int CreatorId { set; get; }
         public int TypeId { set; get; }

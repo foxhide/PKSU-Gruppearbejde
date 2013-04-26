@@ -44,7 +44,7 @@ namespace CalendarApplication.Models.User
                 ID = ID,
                 UserName = (string)dt.Rows[0]["userName"],
                 RealName = (string)dt.Rows[0]["realName"],
-                Email = (string)dt.Rows[0]["email"],
+                Email = dt.Rows[0]["email"] as string,
                 Admin = (bool)dt.Rows[0]["admin"]
             };
 

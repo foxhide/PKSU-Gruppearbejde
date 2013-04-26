@@ -88,6 +88,11 @@ namespace CalendarApplication.Controllers
             }
         }
 
+        /// <summary>
+        /// Executes a query and returns the result in a datatable
+        /// </summary>
+        /// <param name="query">is the query to be executed</param>
+        /// <returns>A datatable with the result, null on error</returns>
         public DataTable ExecuteQuery(CustomQuery query)
         {
             //Open connection
@@ -213,8 +218,7 @@ namespace CalendarApplication.Controllers
         /// </summary>
         /// <param name="queries">is the queries to be executed</param>
         /// <returns>A dataset with the resulting datatables, or null on error</returns>
- 
-        public DataSet ExecuteQuery(CustomQuery[] queries)
+         public DataSet ExecuteQuery(CustomQuery[] queries)
         {
             //Open connection
             if (this.OpenConnection() == true)
@@ -242,6 +246,7 @@ namespace CalendarApplication.Controllers
                             cmd.Prepare();
                         }
                         MySqlDataReader dataReader = cmd.ExecuteReader();
+
                         //Set the table columns
                         int cols = dataReader.FieldCount;
                         for (int i = 0; i < cols; i++)
@@ -286,6 +291,11 @@ namespace CalendarApplication.Controllers
 
         }
 
+         /// <summary>
+         /// Executes several queries and returns the result in a dataset with several tables.
+         /// </summary>
+         /// <param name="queries">is the queries to be executed</param>
+         /// <returns>A dataset with the resulting datatables, or null on error</returns>
         public DataSet ExecuteQuery(string[] queries)
         {
             //Open connection
@@ -482,8 +492,8 @@ namespace CalendarApplication.Controllers
 
         public int CreateUser(Register data)
         {
-            string insert = "INSERT INTO pksudb.users (userName,password,realName,email,active,needsApproval) VALUES ('"
-                            + data.UserName + "','" + data.Password + "','" + data.RealName + "','" + data.Email + "',1,1);"
+            string insert = "INSERT INTO pksudb.users (userName,password,realName,email,active,needsApproval) " +
+                            "VALUES (@username, @password, @realname, @email, 1, 1);"
                             + " SELECT last_insert_id();";
 
             if (this.OpenConnection() == true)
@@ -500,6 +510,11 @@ namespace CalendarApplication.Controllers
                     cmd.Transaction = mst;
 
                     cmd.CommandText = insert;
+                    cmd.Parameters.AddWithValue("@username", data.UserName);
+                    cmd.Parameters.AddWithValue("@password", data.Password);
+                    cmd.Parameters.AddWithValue("@realname", data.RealName);
+                    cmd.Parameters.AddWithValue("@email", data.Email);
+                    cmd.Prepare();
                     result = Convert.ToInt32(cmd.ExecuteScalar());
 
                     mst.Commit();
@@ -548,10 +563,14 @@ namespace CalendarApplication.Controllers
                     cmd.Connection = connection;
                     cmd.Transaction = mst;
 
-                    string insert = "INSERT INTO pksudb.eventtypes (eventTypeName) VALUES ('" + data.Name + "'); "
+                    string insert = "INSERT INTO pksudb.eventtypes (eventTypeName) VALUES (@name); "
                                 + "SELECT last_insert_id();";
 
+                    string foreignkeys = "";
+
                     cmd.CommandText = insert;
+                    cmd.Parameters.AddWithValue("@name", data.Name);
+                    cmd.Prepare();
                     result = Convert.ToInt32(cmd.ExecuteScalar());
 
                     if (data.TypeSpecific != null)
@@ -563,24 +582,56 @@ namespace CalendarApplication.Controllers
                         {
                             string insertField = "INSERT INTO pksudb.eventtypefields"
                                                 + "(eventTypeId, fieldName, fieldDescription, requiredField, fieldType, varCharLength)"
-                                                + "VALUES (" + result + ",'" + fdm.Name + "','" + fdm.Description + "',"
-                                                + (fdm.Required ? "1," : "0,") + (int)fdm.Datatype + "," + fdm.VarcharLength
-                                                + "); SELECT last_insert_id();";
+                                                + "VALUES (@typeid, @name, @descr, @req, @datatype, @varch);"
+                                                + "SELECT last_insert_id();";
 
                             cmd.CommandText = insertField;
-                            int id = Convert.ToInt32(cmd.ExecuteScalar());
+                            cmd.Parameters.AddWithValue("@typeid", result);
+                            cmd.Parameters.AddWithValue("@name", fdm.Name);
+                            cmd.Parameters.AddWithValue("@descr", fdm.Description);
+                            cmd.Parameters.AddWithValue("@req", fdm.Required);
+                            cmd.Parameters.AddWithValue("@datatype", fdm.Datatype);
+                            cmd.Parameters.AddWithValue("@varch", fdm.VarcharLength);
+                            cmd.Prepare();
 
+                            int id = Convert.ToInt32(cmd.ExecuteScalar());
                             createTable += "field_" + id + " " + fdm.GetDBType() + ", ";
+                            switch(fdm.Datatype)
+                            {
+                                case Fieldtype.User:
+                                    foreignkeys += ", "
+                                     + "CONSTRAINT fieldIdCons_" + id
+                                     + " FOREIGN KEY (field_" + id + ") REFERENCES pksudb.users (userId) "
+                                     + "ON DELETE SET NULL "
+                                     + "ON UPDATE NO ACTION ";
+                                     break;
+                                case Fieldtype.Group:
+                                    foreignkeys += ", "
+                                     + "CONSTRAINT fieldIdCons_" + id
+                                     + " FOREIGN KEY (field_" + id + ") REFERENCES pksudb.groups (groupId) "
+                                     + "ON DELETE SET NULL "
+                                     + "ON UPDATE NO ACTION ";
+                                     break;
+                                case Fieldtype.File: 
+                                    foreignkeys += ", "
+                                     + "CONSTRAINT fieldIdCons_" + id
+                                     + " FOREIGN KEY (field_" + id + ") REFERENCES pksudb.files (fileId) "
+                                     + "ON DELETE SET NULL "
+                                     + "ON UPDATE NO ACTION ";
+                                     break;
+                                default: break;
+                            }
                         }
 
                         createTable += "PRIMARY KEY (eventId), "
                                      + "CONSTRAINT eventIdCons_" + result + " "
                                      + "FOREIGN KEY (eventId) REFERENCES pksudb.events (eventId) "
-                                     + "ON DELETE NO ACTION "
-                                     + "ON UPDATE NO ACTION "
+                                     + "ON DELETE CASCADE "
+                                     + "ON UPDATE NO ACTION " + foreignkeys
                                      + ");";
 
                         cmd.CommandText = createTable;
+                        cmd.Prepare();
                         cmd.ExecuteNonQuery();
                     }
 

@@ -68,8 +68,8 @@ namespace CalendarApplication.Models.EventType
             {
                 case Fieldtype.Text: return "varchar("+this.VarcharLength+")";
                 case Fieldtype.Datetime: return "datetime";
-                case Fieldtype.Integer:
-                case Fieldtype.User:
+                case Fieldtype.Integer: return "int";
+                case Fieldtype.User: return "int";
                 case Fieldtype.Group: return "int";
                 case Fieldtype.File: return "varchar(100)";  //File
                 case Fieldtype.Bool: return "tinyint(1)";    //Yes/No
