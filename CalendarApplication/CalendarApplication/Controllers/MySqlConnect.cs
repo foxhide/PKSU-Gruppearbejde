@@ -640,7 +640,6 @@ namespace CalendarApplication.Controllers
                                      + ");";
 
                         cmd.CommandText = createTable;
-                        cmd.Prepare();
                         cmd.ExecuteNonQuery();
                     }
 
@@ -809,22 +808,30 @@ namespace CalendarApplication.Controllers
                     string prevType = eem.SelectedEventType;
                     if (eem.ID != -1)
                     {
-                        cmd.CommandText = "SELECT eventTypeId FROM pksudb.events WHERE eventId == " + eem.ID;
+                        cmd.CommandText = "SELECT eventTypeId FROM pksudb.events WHERE eventId = @eid";
+                        cmd.Parameters.AddWithValue("@eid", eem.ID);
+                        cmd.Prepare();
                         prevType = "" + Convert.ToInt32(cmd.ExecuteScalar());
                     }
 
-                    string updateEventTable = eem.ID == -1 ?
+                    string updateEventTable = eem.ID == -1 ? (
                                                 "INSERT INTO pksudb.events" +
                                                 "(userId,eventTypeId,eventName,eventStart,eventEnd,visible,state) VALUES " +
-                                                "(" + eem.CreatorId + "," + eem.SelectedEventType + ",'" + eem.Name + "','" +
-                                                eem.Start.ToString("yyyy-MM-dd hh:mm:ss") + "','" + eem.End.ToString("yyyy-MM-dd hh:mm:ss") + "'," +
-                                                (eem.Visible ? "1" : "0") + "," + eem.State + "); SELECT last_insert_id();" :
-                                                "UPDATE pksudb.events SET eventTypeId = " + eem.SelectedEventType +
-                                                ", eventName = '" + eem.Name + "', eventStart = '" + eem.Start.ToString("yyyy-MM-dd hh:mm:ss") +
-                                                "', eventEnd = '" + eem.End.ToString("yyyy-MM-dd hh:mm:ss") + "', visible = " +
-                                                (eem.Visible?"1":"0") + ", state = " + eem.State + " WHERE eventId = " + eem.ID;
+                                                "( @ecreatorid , @eselectet , @ename , @estart , @eend , @evisible , @estate );"
+                                                + "SELECT last_insert_id();") : (
+                                                "UPDATE pksudb.events SET eventTypeId = @eselectet , eventName = @ename , "
+                                                + "eventStart = @estart , eventEnd = @eend , visible = @evisible , "
+                                                + " state = @estate WHERE eventId = @eid;");
 
                     cmd.CommandText = updateEventTable;
+                    cmd.Parameters.AddWithValue("@ecreatorid", eem.CreatorId);
+                    cmd.Parameters.AddWithValue("@eselectet", eem.SelectedEventType);
+                    cmd.Parameters.AddWithValue("@ename", eem.Name);
+                    cmd.Parameters.AddWithValue("@estart", eem.Start);
+                    cmd.Parameters.AddWithValue("@eend", eem.End);
+                    cmd.Parameters.AddWithValue("@evisible", eem.Visible);
+                    cmd.Parameters.AddWithValue("@estate", eem.State);
+                    cmd.Prepare();
                     if (eem.ID == -1) { newId = Convert.ToInt32(cmd.ExecuteScalar()); }
                     else
                     {
@@ -834,7 +841,8 @@ namespace CalendarApplication.Controllers
                     
 
                     // Check if type has changed, clean up if it has...
-                    if (!prevType.Equals(eem.SelectedEventType))
+                    bool changed = !String.IsNullOrEmpty(prevType) && !prevType.Equals(eem.SelectedEventType);
+                    if (changed)
                     {
                         cmd.CommandText = "SHOW TABLES LIKE 'table_" + prevType + "'";
                         MySqlDataReader dataReader = cmd.ExecuteReader();
@@ -843,8 +851,9 @@ namespace CalendarApplication.Controllers
                         if (rows)
                         {
                             // The old type has a table with a entry, remove this entry.
-                            string delete = "DELETE FROM table_" + prevType + " WHERE eventId == " + eem.ID;
+                            string delete = "DELETE FROM table_" + prevType + " WHERE eventId = @eid";
                             cmd.CommandText = delete;
+                            cmd.Prepare();
                             cmd.ExecuteNonQuery();
                         }
                     }
@@ -853,20 +862,23 @@ namespace CalendarApplication.Controllers
                     if (eem.TypeSpecifics != null)
                     {
                         string updateTable;
-                        if (eem.ID == -1 || !prevType.Equals(eem.SelectedEventType))
+                        if (eem.ID == -1 || changed)
                         {
                             // We have to insert because it is a create, or we have changed the type...
-                            string prologue = "INSERT INTO pksudb.table_" + eem.SelectedEventType + " (eventId,";
-                            string epilogue = " VALUES (" + newId + ",";
+                            string prologue = "INSERT INTO pksudb.table_" + eem.SelectedEventType + " ( eventId , ";
+                            string epilogue = " VALUES ( @nid , ";
+                            cmd.Parameters.AddWithValue("@nid", newId);
                             for (int i = 0; i < eem.TypeSpecifics.Count; i++)
                             {
                                 FieldModel fm = eem.TypeSpecifics[i];
                                 prologue += "field_" + fm.ID;
-                                epilogue += fm.GetDBValue();
+                                string value = "@fieldval" + i;
+                                epilogue += value;
+                                cmd.Parameters.AddWithValue(value, fm.GetDBValue());
                                 if (i < eem.TypeSpecifics.Count - 1)
                                 {
-                                    prologue += ",";
-                                    epilogue += ",";
+                                    prologue += " , ";
+                                    epilogue += " , ";
                                 }
                             }
                             updateTable = prologue + ")" + epilogue + ")";
@@ -878,33 +890,57 @@ namespace CalendarApplication.Controllers
                             for (int i = 0; i < eem.TypeSpecifics.Count; i++)
                             {
                                 FieldModel fm = eem.TypeSpecifics[i];
-                                updateTable += "field_" + fm.ID + " = " + fm.GetDBValue();
+                                string value = "@fieldvalue" + i;
+                                updateTable += "field_" + fm.ID + " = " + value;
+                                cmd.Parameters.AddWithValue(value, fm.GetDBValue());
                                 if (i < eem.TypeSpecifics.Count - 1)
                                 {
-                                    updateTable += ",";
+                                    updateTable += " , ";
                                 }
                             }
-                            updateTable += " WHERE eventId == " + eem.ID;
+                            updateTable += " WHERE eventId = @eid;";
                         }
                         cmd.CommandText = updateTable;
+                        cmd.Prepare();
                         cmd.ExecuteNonQuery();
                     }
 
                     if (eem.ID == -1)
                     {
+                        int i = 0;
                         foreach (SelectListItem room in eem.RoomSelectList)
                         {
                             if (room.Selected)
                             {
-                                cmd.CommandText = "INSERT INTO pksudb.eventroomsused(eventId,roomId) VALUES ("
-                                                    + newId + "," + room.Value + ")";
+                                cmd.CommandText = "INSERT INTO pksudb.eventroomsused(eventId,roomId) VALUES ( @nid , @rmval" + i + " );";
+                                cmd.Parameters.AddWithValue("@rmval" + i, room.Value);
+                                cmd.Prepare();
                                 cmd.ExecuteNonQuery();
+                                i++;
                             }
                         }
                     }
                     else
                     {
                         //Handle room edit here.
+                        //Currently deletes everything and inserts again, even if unchanged.
+                        //Could probably be handled better.
+                        cmd.CommandText = "DELETE FROM pksudb.eventroomsused WHERE eventId = @eid;";
+                        cmd.Prepare();
+                        cmd.ExecuteNonQuery();
+                        int i = 0;
+                        foreach (SelectListItem room in eem.RoomSelectList)
+                        {
+                            if (room.Selected)
+                            {
+                                cmd.CommandText = "INSERT INTO pksudb.eventroomsused(eventId,roomId)"
+                                                  + " VALUES ( @eid , @rmval" + i + " );";
+                                cmd.Parameters.AddWithValue("@rmval" + i, room.Value);
+                                cmd.Prepare();
+                                cmd.ExecuteNonQuery();
+                                i++;
+                            }
+                        }
                     }
 
                     mst.Commit();

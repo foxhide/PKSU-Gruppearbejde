@@ -15,17 +15,17 @@ namespace CalendarApplication.Models.Event
         public bool BoolValue { get; set; }
         public DateTime DateValue { get; set; }
 
-        public string GetDBValue()
+        public object GetDBValue()
         {
             switch (this.Datatype)
             {
-                case Fieldtype.Integer:
-                case Fieldtype.User:
-                case Fieldtype.Group: return this.IntValue.ToString(); //int
-                case Fieldtype.Text:
-                case Fieldtype.File: return "'" + this.StringValue + "'"; //string
-                case Fieldtype.Datetime: return "'" + DateValue.ToString("yyyy-MM-dd hh:mm:ss") + "'";
-                case Fieldtype.Bool: return (this.BoolValue ? "1" : "0"); //bool
+                case Fieldtype.Integer: return this.IntValue;
+                case Fieldtype.User: return this.IntValue; //int, userId
+                case Fieldtype.Group: return this.IntValue; //int, groupId
+                case Fieldtype.Text: return this.StringValue;
+                case Fieldtype.File: return this.IntValue; //int, fileId
+                case Fieldtype.Datetime: return DateValue;
+                case Fieldtype.Bool: return this.BoolValue; //bool
             }
             return "";
         }
