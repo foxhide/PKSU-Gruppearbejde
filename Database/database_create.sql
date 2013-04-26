@@ -253,7 +253,7 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`eventtypefields` (
   `fieldId` INT NOT NULL AUTO_INCREMENT ,
   `eventTypeId` INT NOT NULL ,
   `fieldName` VARCHAR(45) NOT NULL ,
-  `fieldDescription` VARCHAR(100) NOT NULL ,
+  `fieldDescription` VARCHAR(100) NULL ,
   `requiredField` TINYINT(1) NULL DEFAULT 0 ,
   `fieldType` INT NULL ,
   `varCharLength` INT NULL DEFAULT 0 ,

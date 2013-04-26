@@ -527,14 +527,14 @@ namespace CalendarApplication.Controllers
                     {
                         mst.Rollback();
                         this.CloseConnection();
-                        ErrorMessage = "Some databse error occured: Discarded changes, Error message: " + ex0.Message
+                        ErrorMessage = "Some database error occured: Discarded changes, Error message: " + ex0.Message
                                         + ", Caused by: "+cmd.CommandText;
                         return -1;
                     }
                     catch (MySqlException ex1)
                     {
                         this.CloseConnection();
-                        ErrorMessage = "Some databse error occured: Could not discard changes, DB corrupt, Error message: " + ex1.Message
+                        ErrorMessage = "Some database error occured: Could not discard changes, DB corrupt, Error message: " + ex1.Message
                                         + ", Caused by: " + cmd.CommandText;
                         return -1;
                     }
@@ -578,23 +578,32 @@ namespace CalendarApplication.Controllers
                         string createTable = "CREATE TABLE pksudb.table_" + result + "("
                                                 + "eventId int NOT NULL, ";
 
+
+                        int i = 0;
+                        cmd.Parameters.AddWithValue("@typeid", result);
                         foreach (FieldDataModel fdm in data.TypeSpecific)
                         {
-                            string insertField = "INSERT INTO pksudb.eventtypefields"
-                                                + "(eventTypeId, fieldName, fieldDescription, requiredField, fieldType, varCharLength)"
-                                                + "VALUES (@typeid, @name, @descr, @req, @datatype, @varch);"
+                            string insertField = "INSERT INTO pksudb.eventtypefields "
+                                                + "(eventTypeId, fieldName, fieldDescription, requiredField, fieldType, varCharLength) "
+                                                + "VALUES (@typeid" + " , @fieldname" + i + " , @descr" + i + " , @req" + i + " , @datatype" + i + " , @varch" + i + " ); "
                                                 + "SELECT last_insert_id();";
-
+                            
+                            //cmd = new MySqlCommand();
+                            //cmd.Connection = connection;
+                            //cmd.Transaction = mst;
                             cmd.CommandText = insertField;
-                            cmd.Parameters.AddWithValue("@typeid", result);
-                            cmd.Parameters.AddWithValue("@name", fdm.Name);
-                            cmd.Parameters.AddWithValue("@descr", fdm.Description);
-                            cmd.Parameters.AddWithValue("@req", fdm.Required);
-                            cmd.Parameters.AddWithValue("@datatype", fdm.Datatype);
-                            cmd.Parameters.AddWithValue("@varch", fdm.VarcharLength);
+                            
+                            cmd.Parameters.AddWithValue("@fieldname" + i, fdm.Name);
+                            cmd.Parameters.AddWithValue("@descr" + i, fdm.Description);
+                            cmd.Parameters.AddWithValue("@req" + i, fdm.Required);
+                            cmd.Parameters.AddWithValue("@datatype" + i, fdm.GetTypeAsInt());
+                            cmd.Parameters.AddWithValue("@varch" + i, fdm.VarcharLength);
+
                             cmd.Prepare();
 
                             int id = Convert.ToInt32(cmd.ExecuteScalar());
+                            i++;
+
                             createTable += "field_" + id + " " + fdm.GetDBType() + ", ";
                             switch(fdm.Datatype)
                             {
@@ -645,14 +654,14 @@ namespace CalendarApplication.Controllers
                     {
                         mst.Rollback();
                         this.CloseConnection();
-                        ErrorMessage = "Some databse error occured: Discarded changes, Error message: " + ex0.Message
+                        ErrorMessage = "Some database error occured: Discarded changes, Error message: " + ex0.Message
                                         + ", Caused by: " + cmd.CommandText;
                         return false;
                     }
                     catch (MySqlException ex1)
                     {
                         this.CloseConnection();
-                        ErrorMessage = "Some databse error occured: Could not discard changes, DB corrupt, Error message: " + ex1.Message
+                        ErrorMessage = "Some database error occured: Could not discard changes, DB corrupt, Error message: " + ex1.Message
                                         + ", Caused by: " + cmd.CommandText;
                         return false;
                     }
@@ -680,12 +689,15 @@ namespace CalendarApplication.Controllers
                     cmd.Connection = connection;
                     cmd.Transaction = mst;
 
-                    string updateET = "UPDATE eventtypes SET eventTypeName = '"+data.Name+"' WHERE eventTypeId = "+data.ID;
+                    string updateET = "UPDATE eventtypes SET eventTypeName = @etname WHERE eventTypeId = @etid";
 
                     cmd.CommandText = updateET;
+                    cmd.Parameters.AddWithValue("@etname", data.Name);
+                    cmd.Parameters.AddWithValue("@etid", data.ID);
+                    cmd.Prepare();
                     cmd.ExecuteNonQuery();
 
-                    
+                    int i = 0;
                     foreach (FieldDataModel fdm in data.TypeSpecific)
                     {
                         string alterEventTable;
@@ -693,21 +705,29 @@ namespace CalendarApplication.Controllers
                         if (fdm.ViewID == -1)
                         {
                             //We have to remove the field, as it was found in the db.
-                            string updateField = "DELETE FROM pksudb.eventtypefields WHERE fieldId = " + fdm.ID;
+                            string updateField = "DELETE FROM pksudb.eventtypefields WHERE fieldId = @fid" + i;
                             alterEventTable = "ALTER TABLE table_" + data.ID + " DROP COLUMN field_" + fdm.ID;
 
                             cmd.CommandText = updateField;
+                            cmd.Parameters.AddWithValue("@fid" + i, fdm.ID);
+                            cmd.Prepare();
                             cmd.ExecuteNonQuery();
                         }
                         else if(fdm.ViewID == -2)
                         {
                             string insertField = "INSERT INTO pksudb.eventtypefields"
-                                                 + "(eventTypeId, fieldName, fieldDescription, requiredField, fieldType, varCharLength)"
-                                                 + "VALUES (" + data.ID + ",'" + fdm.Name + "','" + fdm.Description + "',"
-                                                 + (fdm.Required ? "1," : "0,") + (int)fdm.Datatype + ","+ fdm.VarcharLength
-                                                 + "); SELECT last_insert_id();";
+                                                 + " (eventTypeId, fieldName, fieldDescription, requiredField, fieldType, varCharLength)"
+                                                 + " VALUES ( @etid , @fname" + i + " , @fdescr" + i + " , @freq" + i
+                                                 + " , @fdattyp" + i + " , @fvarchr" + i 
+                                                 + " ); SELECT last_insert_id();";
 
                             cmd.CommandText = insertField;
+                            cmd.Parameters.AddWithValue("@fname" + i, fdm.Name);
+                            cmd.Parameters.AddWithValue("@fdescr" + i, fdm.Description);
+                            cmd.Parameters.AddWithValue("@freq" + i, fdm.Required);
+                            cmd.Parameters.AddWithValue("@fdattyp" + i, fdm.GetTypeAsInt());
+                            cmd.Parameters.AddWithValue("@fvarchr" + i, fdm.VarcharLength);
+                            cmd.Prepare();
                             int id = Convert.ToInt32(cmd.ExecuteScalar());
 
                             alterEventTable = "ALTER TABLE table_" + data.ID + " ADD field_" + id + " " + fdm.GetDBType();
@@ -715,22 +735,28 @@ namespace CalendarApplication.Controllers
                         else
                         {
                             string updateField = "UPDATE pksudb.eventtypefields SET "
-                                                    + "fieldName = '" + fdm.Name
-                                                    + "', fieldDescription = '" + fdm.Description
-                                                    + "', requiredField = " + (fdm.Required ? "1" : "0")
-                                                    + ", fieldType = " + (int)fdm.Datatype
-                                                    + " WHERE eventTypeId = " + data.ID
-                                                        + " AND fieldId = " + fdm.ID;
+                                                    + "fieldName = @fname" + i
+                                                    + " , fieldDescription = @fdescr" + i
+                                                    + " , requiredField = @freq" + i
+                                                    + " , fieldType = @fdattyp" + i
+                                                    + " WHERE eventTypeId = @etid "
+                                                        + " AND fieldId = @fid" + i;
 
                             alterEventTable = "ALTER TABLE table_" + data.ID + " MODIFY COLUMN field_" + fdm.ID + " " + fdm.GetDBType();
 
                             cmd.CommandText = updateField;
+                            cmd.Parameters.AddWithValue("@fname" + i, fdm.Name);
+                            cmd.Parameters.AddWithValue("@fdescr" + i, fdm.Description);
+                            cmd.Parameters.AddWithValue("@freq" + i, fdm.Required);
+                            cmd.Parameters.AddWithValue("@fdattyp" + i, fdm.GetTypeAsInt());
+                            cmd.Parameters.AddWithValue("@fid" + i, fdm.ID);
+                            cmd.Prepare();
                             cmd.ExecuteNonQuery();
                         }
-
+                        
                         cmd.CommandText = alterEventTable;
                         cmd.ExecuteNonQuery();
-
+                        i++;
                     }
 
                     mst.Commit();
@@ -743,14 +769,14 @@ namespace CalendarApplication.Controllers
                     {
                         mst.Rollback();
                         this.CloseConnection();
-                        ErrorMessage = "Some databse error occured: Discarded changes, Error message: " + ex0.Message
+                        ErrorMessage = "Some database error occured: Discarded changes, Error message: " + ex0.Message
                                         + ", Caused by: " + cmd.CommandText;
                         return false;
                     }
                     catch (MySqlException ex1)
                     {
                         this.CloseConnection();
-                        ErrorMessage = "Some databse error occured: Could not discard changes, DB corrupt, Error message: " + ex1.Message
+                        ErrorMessage = "Some database error occured: Could not discard changes, DB corrupt, Error message: " + ex1.Message
                                         + ", Caused by: " + cmd.CommandText;
                         return false;
                     }
@@ -889,14 +915,14 @@ namespace CalendarApplication.Controllers
                     {
                         mst.Rollback();
                         this.CloseConnection();
-                        ErrorMessage = "Some databse error occured: Discarded changes, Error message: " + ex0.Message
+                        ErrorMessage = "Some database error occured: Discarded changes, Error message: " + ex0.Message
                                         + ", Caused by: " + cmd.CommandText;
                         return false;
                     }
                     catch (MySqlException ex1)
                     {
                         this.CloseConnection();
-                        ErrorMessage = "Some databse error occured: Could not discard changes, DB corrupt, Error message: " + ex1.Message
+                        ErrorMessage = "Some database error occured: Could not discard changes, DB corrupt, Error message: " + ex1.Message
                                         + ", Caused by: " + cmd.CommandText;
                         return false;
                     }

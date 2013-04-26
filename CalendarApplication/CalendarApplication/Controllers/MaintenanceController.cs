@@ -74,7 +74,7 @@ namespace CalendarApplication.Controllers
             if (id == -1)
             {
                 etm.ID = -1;
-                etm.Name = "Event type name here";
+                //etm.Name = "Event type name here";
             }
             else
             {
@@ -92,7 +92,7 @@ namespace CalendarApplication.Controllers
                     {
                         ID = (int)dr["fieldId"],
                         Name = (string)dr["fieldName"],
-                        Description = (string)dr["fieldDescription"],
+                        Description = dr["fieldDescription"] as string,
                         Required = (bool)dr["requiredField"],
                         Datatype = (Fieldtype)dr["fieldType"],
                         ViewID = etm.TypeSpecific.Count,

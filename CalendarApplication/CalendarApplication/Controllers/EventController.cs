@@ -152,7 +152,7 @@ namespace CalendarApplication.Controllers
                     {
                         ID = (int)dr["fieldId"],
                         Name = (string)dr["fieldName"],
-                        Description = (string)dr["fieldDescription"],
+                        Description = dr["fieldDescription"] as string,
                         Required = (bool)dr["requiredField"],
                         Datatype = (Fieldtype)dr["fieldType"],
                         VarcharLength = (int)dr["varCharLength"]

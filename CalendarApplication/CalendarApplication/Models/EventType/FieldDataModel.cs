@@ -69,11 +69,26 @@ namespace CalendarApplication.Models.EventType
                 case Fieldtype.Text: return "varchar("+this.VarcharLength+")";
                 case Fieldtype.Datetime: return "datetime";
                 case Fieldtype.Integer: return "int";
-                case Fieldtype.User: return "int";
-                case Fieldtype.Group: return "int";
-                case Fieldtype.File: return "varchar(100)";  //File
+                case Fieldtype.User: return "int"; //userId
+                case Fieldtype.Group: return "int"; //groupId
+                case Fieldtype.File: return "int";  //fileId
                 case Fieldtype.Bool: return "tinyint(1)";    //Yes/No
                 default: return "int";
+            }
+        }
+
+        public int GetTypeAsInt()
+        {
+            switch (this.Datatype)
+            {
+                case Fieldtype.Integer: return 0;
+                case Fieldtype.Text: return 1;
+                case Fieldtype.Datetime: return 2;
+                case Fieldtype.User: return 3;
+                case Fieldtype.Group: return 4;
+                case Fieldtype.File: return 5;
+                case Fieldtype.Bool: return 6;
+                default: return -1;
             }
         }
 
