@@ -25,7 +25,8 @@
                 @Html.DisplayFor(modelItem => ev.End)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => ev.Creator)
+                <!-- Html.DisplayFor(modelItem => ev.Creator) -->
+                @Html.ActionLink(ev.Creator, "Index", "User", new { UserId = ev.CreatorId }, null)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => ev.TypeName)
