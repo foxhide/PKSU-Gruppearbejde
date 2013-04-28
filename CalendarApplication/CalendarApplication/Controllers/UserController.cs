@@ -30,12 +30,14 @@ namespace CalendarApplication.Controllers
             {
                 DataRow row = table.Rows[0];
                 result.UserName = (string)row["userName"];
-                result.Password = (string)row["password"];
+                //result.Password = (string)row["password"];
                 result.RealName = (string)row["realName"];
                 result.Admin = (bool)row["admin"];
                 result.Email = (string)row["email"];
-                result.Active = (bool)row["active"];
-                result.NeedsApproval = (bool)row["needsApproval"];
+                //result.Active = (bool)row["active"];
+                //result.NeedsApproval = (bool)row["needsApproval"];
+                result.Groups = UserModel.GetGroups(userId);
+                result.Events = UserModel.GetEvents(userId);
             }
             else
             {

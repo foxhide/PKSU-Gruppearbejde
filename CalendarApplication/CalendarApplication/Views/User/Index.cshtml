@@ -11,7 +11,7 @@
 }
 else {
     <h2>User Info</h2>
-
+<table><tr><td>
     <table class="gridtable">
         <tr>
             <td>User Id</td>
@@ -33,13 +33,35 @@ else {
             <td>Email</td>
             <td>@Model.Email</td>
         </tr>
-        <tr>
-            <td>Is Active</td>
-            <td>@Model.Active</td>
-        </tr>
-        <tr>
-            <td>Needs Approval</td>
-            <td>@Model.NeedsApproval</td>
-        </tr>
     </table>
+</td>
+<td>
+    <table class="gridtable">
+        <tr>
+            <td>User Groups</td>
+        </tr>
+        @for (int i = 0; i < Model.Groups.Count; i++)
+        {
+            <tr>
+                <!-- Add Html.ActionLink when Group view is implemented -->
+                <td>@Model.Groups[i].Name</td>
+            </tr>
+        }
+    </table>
+</td>
+<td>
+    <table class="gridtable">
+        <tr>
+            <td>Events created by user</td>
+        </tr>
+        @for (int i = 0; i < Model.Events.Count; i++)
+        {
+            <tr>
+                <td style="background-color:@(Model.Events[i].getColor())">@Html.ActionLink(Model.Events[i].Name, "Index", "Event", new { id = Model.Events[i].ID }, null)
+            </tr>
+        }
+    </table>
+</td>
+</tr>
+</table>
 }

@@ -83,6 +83,14 @@ namespace CalendarApplication.Models.User
         /// <returns>List of groups</returns>
         public List<GroupModel> GetGroups()
         {
+            //MySqlConnect msc = new MySqlConnect();
+            //return msc.GetGroups("groups NATURAL JOIN groupmembers NATURAL JOIN users","userId = "+ID);
+
+            return GetGroups(this.ID);
+        }
+
+        public static List<GroupModel> GetGroups(int ID)
+        {
             MySqlConnect msc = new MySqlConnect();
             return msc.GetGroups("groups NATURAL JOIN groupmembers NATURAL JOIN users","userId = "+ID);
         }
@@ -93,8 +101,15 @@ namespace CalendarApplication.Models.User
         /// <returns>List of basic events created by this user</returns>
         public List<BasicEvent> GetEvents()
         {
+            //MySqlConnect msc = new MySqlConnect();
+            //return msc.GetEvents(false,"userId = "+ID,"eventStart");
+
+            return GetEvents(this.ID);
+        }
+        public static List<BasicEvent> GetEvents(int ID)
+        {
             MySqlConnect msc = new MySqlConnect();
-            return msc.GetEvents(false,"userId = "+ID,"eventStart");
+            return msc.GetEvents(false, "userId = " + ID, "eventStart");
         }
     }
 }
