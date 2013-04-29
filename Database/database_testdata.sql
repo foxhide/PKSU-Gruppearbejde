@@ -12,6 +12,21 @@ INSERT INTO users (userName, password, realName, admin, email, active, needsAppr
 INSERT INTO users (userName, password, realName, admin, email, active, needsApproval) VALUES ("andreas_PKSU","andreasercool","Andreas", 1,"andreas@stengade.dk",1,0);
 INSERT INTO users (userName, password, realName, admin, email, active, needsApproval) VALUES ("stephan_kerbal","kerbaltillinux","Stephan", 1,"stephan@stengade.dk",1,0);
 
+-- Groups
+INSERT INTO groups (groupName) VALUES ("Poker players");
+INSERT INTO groups (groupName) VALUES ("Bartenders");
+INSERT INTO groups (groupName) VALUES ("Minecraft Gurus");
+INSERT INTO groups (groupName) VALUES ("L04");
+
+-- Groupmembers
+INSERT INTO groupmembers(groupId,userId,approved) VALUES (4,1,1);
+INSERT INTO groupmembers(groupId,userId,approved) VALUES (4,2,1);
+INSERT INTO groupmembers(groupId,userId,approved) VALUES (4,3,1);
+INSERT INTO groupmembers(groupId,userId,approved) VALUES (3,2,1);
+INSERT INTO groupmembers(groupId,userId,approved) VALUES (2,1,1);
+INSERT INTO groupmembers(groupId,userId,approved) VALUES (1,3,1);
+INSERT INTO groupmembers(groupId,userId,approved) VALUES (1,1,1);
+
 -- Event types
 	-- Basic event (no fields)
 INSERT INTO eventtypes (eventTypeName) VALUES ("Basic Event");

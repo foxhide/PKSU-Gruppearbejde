@@ -98,6 +98,8 @@ namespace CalendarApplication.Controllers
             //Open connection
             if (this.OpenConnection() == true)
             {
+                MySqlCommand cmd = null;
+
                 try
                 {
                     //Create the table
@@ -105,7 +107,7 @@ namespace CalendarApplication.Controllers
 
                     //Create Command and run it
 
-                    MySqlCommand cmd = new MySqlCommand(query.Cmd, connection);
+                    cmd = new MySqlCommand(query.Cmd, connection);
                     if (query.ArgNames.Length > 0 && query.Args.Length > 0)
                     {
                         for (int i = 0; i < query.ArgNames.Length; i++)
@@ -143,7 +145,8 @@ namespace CalendarApplication.Controllers
                 }
                 catch (MySqlException ex0)
                 {
-                    this.ErrorMessage = "A database error occurred: " + ex0.Message;
+                    this.ErrorMessage = "Database error -> Error message: " + ex0.Message + ", Caused by: " + cmd.CommandText;
+                    this.CloseConnection();
                     return null;
                 }
             }
@@ -166,13 +169,15 @@ namespace CalendarApplication.Controllers
             //Open connection
             if (this.OpenConnection() == true)
             {
+                MySqlCommand cmd = null;
+
                 try
                 {
                     //Create the table
                     DataTable dt = new DataTable();
 
                     //Create Command and run it
-                    MySqlCommand cmd = new MySqlCommand(query, connection);
+                    cmd = new MySqlCommand(query, connection);
                     MySqlDataReader dataReader = cmd.ExecuteReader();
 
                     //Set the table columns
@@ -201,7 +206,8 @@ namespace CalendarApplication.Controllers
                 }
                 catch (MySqlException ex0)
                 {
-                    this.ErrorMessage = "A database error occurred: " + ex0.Message;
+                    this.ErrorMessage = "Database error -> Error message: " + ex0.Message + ", Caused by: " + cmd.CommandText;
+                    this.CloseConnection();
                     return null;
                 }
             }
@@ -223,6 +229,8 @@ namespace CalendarApplication.Controllers
             //Open connection
             if (this.OpenConnection() == true)
             {
+                MySqlCommand cmd = null;
+
                 try
                 {
                     //Initialise naming counter and create set
@@ -236,7 +244,7 @@ namespace CalendarApplication.Controllers
 
                         //Create Command and run it
 
-                        MySqlCommand cmd = new MySqlCommand(query.Cmd, connection);
+                        cmd = new MySqlCommand(query.Cmd, connection);
                         if (query.ArgNames.Length > 0 && query.Args.Length > 0)
                         {
                             for (int i = 0; i < query.ArgNames.Length; i++)
@@ -279,7 +287,8 @@ namespace CalendarApplication.Controllers
                 }
                 catch (MySqlException ex0)
                 {
-                    this.ErrorMessage = "A database error occurred: " + ex0.Message;
+                    this.ErrorMessage = "Database error -> Error message: " + ex0.Message + ", Caused by: " + cmd.CommandText;
+                    this.CloseConnection();
                     return null;
                 }
             }
@@ -301,6 +310,8 @@ namespace CalendarApplication.Controllers
             //Open connection
             if (this.OpenConnection() == true)
             {
+                MySqlCommand cmd = null;
+
                 try
                 {
                     //Initialise naming counter and create set
@@ -313,7 +324,7 @@ namespace CalendarApplication.Controllers
                         DataTable dt = new DataTable("table_"+counter);
 
                         //Create Command and run it
-                        MySqlCommand cmd = new MySqlCommand(query, connection);
+                        cmd = new MySqlCommand(query, connection);
                         MySqlDataReader dataReader = cmd.ExecuteReader();
 
                         //Set the table columns
@@ -348,7 +359,8 @@ namespace CalendarApplication.Controllers
                 }
                 catch (MySqlException ex0)
                 {
-                    this.ErrorMessage = "A database error occurred: " + ex0.Message;
+                    this.ErrorMessage = "Database error -> Error message: " + ex0.Message + ", Caused by: " + cmd.CommandText;
+                    this.CloseConnection();
                     return null;
                 }
             }

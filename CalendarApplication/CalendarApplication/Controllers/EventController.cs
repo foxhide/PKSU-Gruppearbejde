@@ -94,8 +94,65 @@ namespace CalendarApplication.Controllers
                 End = new DateTime(year, month, day, 18, 0, 0)
             };
 
-            if (id == -1) { this.getRooms(eem); this.createModel(eem); }
-            else { this.getRooms(eem); this.getModel(eem); }
+            MySqlConnect msc = new MySqlConnect();
+
+            // Get list of rooms //
+            eem.RoomSelectList = new List<SelectListItem>();
+            string roomquery = "SELECT roomId,roomName FROM pksudb.rooms";
+            DataTable dt = msc.ExecuteQuery(roomquery);
+            if (dt != null)
+            {
+                foreach (DataRow dr in dt.Rows)
+                {
+                    eem.RoomSelectList.Add(new SelectListItem
+                    {
+                        Value = ((int)dr["roomId"]).ToString(),
+                        Text = (string)dr["roomName"]
+                    });
+                }
+            }
+
+            // Get list of users
+            eem.UserEditorList = new List<SelectListItem>();
+            string userquery = "SELECT userId,userName FROM pksudb.users";
+            dt = msc.ExecuteQuery(userquery);
+            if (dt != null)
+            {
+                foreach (DataRow dr in dt.Rows)
+                {
+                    eem.UserEditorList.Add(new SelectListItem
+                    {
+                        Value = ((int)dr["userId"]).ToString(),
+                        Text = (string)dr["userName"]
+                    });
+                }
+            }
+
+            // Get list of groups
+            eem.GroupEditorList = new List<SelectListItem>();
+            eem.GroupVisibleList = new List<SelectListItem>();
+            string groupquery = "SELECT groupId,groupName FROM pksudb.groups";
+            dt = msc.ExecuteQuery(groupquery);
+            if (dt != null)
+            {
+                foreach (DataRow dr in dt.Rows)
+                {
+                    eem.GroupEditorList.Add(new SelectListItem
+                    {
+                        Value = ((int)dr["groupId"]).ToString(),
+                        Text = (string)dr["groupName"]
+                    });
+                    eem.GroupVisibleList.Add(new SelectListItem
+                    {
+                        Value = ((int)dr["groupId"]).ToString(),
+                        Text = (string)dr["groupName"]
+                    });
+                }
+            }
+
+            TempData["errorMsg"] = msc.ErrorMessage;
+            if (id == -1) { this.createModel(eem); }
+            else { this.getModel(eem); }
             
             return View(eem);
         }
@@ -159,9 +216,9 @@ namespace CalendarApplication.Controllers
                     };
                     switch (fm.Datatype)
                     {
-                        case Fieldtype.Integer:
-                        case Fieldtype.User:
-                        case Fieldtype.Group: fm.IntValue = 0; break; //int
+                        case Fieldtype.Integer: fm.IntValue = 0; break; //int
+                        case Fieldtype.User: fm.List = eem.UserEditorList; fm.IntValue = 0; break;
+                        case Fieldtype.Group: fm.List = eem.GroupEditorList; fm.IntValue = 0; break;
                         case Fieldtype.Text:
                         case Fieldtype.File: fm.StringValue = ""; break; //string
                         case Fieldtype.Datetime: fm.DateValue = DateTime.Now; break;
@@ -170,28 +227,6 @@ namespace CalendarApplication.Controllers
                     eem.TypeSpecifics.Add(fm);
                 }
             }
-        }
-
-        public bool getRooms(EventEditModel eem)
-        {
-            MySqlConnect msc = new MySqlConnect();
-
-            // Get list of rooms //
-            eem.RoomSelectList = new List<SelectListItem>();
-            string roomquery = "SELECT roomId,roomName FROM pksudb.rooms";
-            DataTable dt = msc.ExecuteQuery(roomquery);
-            if (dt != null)
-            {
-                foreach (DataRow dr in dt.Rows)
-                {
-                    eem.RoomSelectList.Add(new SelectListItem
-                    {
-                        Value = ((int)dr["roomId"]).ToString(),
-                        Text = (string)dr["roomName"]
-                    });
-                }
-            }
-            return true;
         }
 
         public bool getModel(EventEditModel eem)

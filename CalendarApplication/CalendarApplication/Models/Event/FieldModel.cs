@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
+using System.Web.Mvc;
 
 using CalendarApplication.Models.EventType;
 
@@ -14,6 +15,8 @@ namespace CalendarApplication.Models.Event
         public string StringValue { get; set; }
         public bool BoolValue { get; set; }
         public DateTime DateValue { get; set; }
+
+        public List<SelectListItem> List { get; set; }
 
         public object GetDBValue()
         {
