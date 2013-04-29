@@ -108,6 +108,7 @@ namespace CalendarApplication.Models.User
         }
         public static List<BasicEvent> GetEvents(int ID)
         {
+
             MySqlConnect msc = new MySqlConnect();
             return msc.GetEvents(false, "userId = " + ID, "eventStart");
         }

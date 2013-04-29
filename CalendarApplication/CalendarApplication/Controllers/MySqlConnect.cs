@@ -913,7 +913,7 @@ namespace CalendarApplication.Controllers
                         {
                             if (room.Selected)
                             {
-                                cmd.CommandText = "INSERT INTO pksudb.eventroomsused(eventId,roomId) VALUES ( @nid , @rmval" + i + " );";
+                                cmd.CommandText = "INSERT INTO pksudb.eventroomsused(eventId,roomId) VALUES ( "+ newId +" , @rmval" + i + " );";
                                 cmd.Parameters.AddWithValue("@rmval" + i, room.Value);
                                 cmd.Prepare();
                                 cmd.ExecuteNonQuery();
