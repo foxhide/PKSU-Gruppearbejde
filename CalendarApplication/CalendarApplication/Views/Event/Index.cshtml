@@ -69,7 +69,7 @@ else {
         </td>
         <td>
             <table class="gridtable">
-                @if (Model.EventSpecial != null)
+                @if (Model.EventSpecial != null && Model.EventSpecial.Rows.Count != 0)
                 {
                     foreach (DataColumn col in Model.EventSpecial.Columns)
                     {

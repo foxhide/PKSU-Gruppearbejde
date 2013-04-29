@@ -78,27 +78,30 @@ namespace CalendarApplication.Controllers
             }
             else
             {
-                string getType = "SELECT * FROM (eventtypes NATURAL JOIN eventtypefields) WHERE eventTypeId = " + id;
+                string getType = "SELECT * FROM (eventtypes NATURAL LEFT JOIN eventtypefields) WHERE eventTypeId = " + id;
                 MySqlConnect msc = new MySqlConnect();
                 DataTable dt = msc.ExecuteQuery(getType);
                 etm.ID = id;
-                etm.ActiveFields = 0;
                 etm.Name = (string)dt.Rows[0]["eventTypeName"];
-                etm.ActiveFields = dt.Rows.Count;
+                etm.ActiveFields = 0;
 
-                foreach (DataRow dr in dt.Rows)
+                if (dt.Rows[0]["fieldName"] as string != null)
                 {
-                    FieldDataModel fdm = new FieldDataModel
+                    etm.ActiveFields = dt.Rows.Count;
+                    foreach (DataRow dr in dt.Rows)
                     {
-                        ID = (int)dr["fieldId"],
-                        Name = (string)dr["fieldName"],
-                        Description = dr["fieldDescription"] as string,
-                        Required = (bool)dr["requiredField"],
-                        Datatype = (Fieldtype)dr["fieldType"],
-                        ViewID = etm.TypeSpecific.Count,
-                        VarcharLength = (int)dr["varCharLength"]
-                    };
-                    etm.TypeSpecific.Add(fdm);
+                        FieldDataModel fdm = new FieldDataModel
+                        {
+                            ID = (int)dr["fieldId"],
+                            Name = (string)dr["fieldName"],
+                            Description = dr["fieldDescription"] as string,
+                            Required = (bool)dr["requiredField"],
+                            Datatype = (Fieldtype)dr["fieldType"],
+                            ViewID = etm.TypeSpecific.Count,
+                            VarcharLength = (int)dr["varCharLength"]
+                        };
+                        etm.TypeSpecific.Add(fdm);
+                    }
                 }
             }
 
@@ -126,6 +129,7 @@ namespace CalendarApplication.Controllers
             if (!ok)
             {
                 TempData["errorMsg"] = msc.ErrorMessage;
+                etm.TypeSpecific = new List<FieldDataModel>();
                 return View(etm);
             }
             return RedirectToAction("Index","Maintenance",null);

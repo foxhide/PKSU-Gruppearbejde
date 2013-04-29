@@ -574,12 +574,11 @@ namespace CalendarApplication.Controllers
                     cmd.Prepare();
                     result = Convert.ToInt32(cmd.ExecuteScalar());
 
-                    if (data.TypeSpecific != null)
-                    {
-                        string createTable = "CREATE TABLE pksudb.table_" + result + "("
+                    string createTable = "CREATE TABLE pksudb.table_" + result + "("
                                                 + "eventId int NOT NULL, ";
 
-
+                    if (data.TypeSpecific != null)
+                    {
                         int i = 0;
                         cmd.Parameters.AddWithValue("@typeid", result);
                         foreach (FieldDataModel fdm in data.TypeSpecific)
@@ -632,17 +631,17 @@ namespace CalendarApplication.Controllers
                                 default: break;
                             }
                         }
+                    }
 
-                        createTable += "PRIMARY KEY (eventId), "
+                    createTable += "PRIMARY KEY (eventId), "
                                      + "CONSTRAINT eventIdCons_" + result + " "
                                      + "FOREIGN KEY (eventId) REFERENCES pksudb.events (eventId) "
                                      + "ON DELETE CASCADE "
                                      + "ON UPDATE NO ACTION " + foreignkeys
                                      + ");";
 
-                        cmd.CommandText = createTable;
-                        cmd.ExecuteNonQuery();
-                    }
+                    cmd.CommandText = createTable;
+                    cmd.ExecuteNonQuery();
 
                     mst.Commit();
 
@@ -697,66 +696,69 @@ namespace CalendarApplication.Controllers
                     cmd.Prepare();
                     cmd.ExecuteNonQuery();
 
-                    int i = 0;
-                    foreach (FieldDataModel fdm in data.TypeSpecific)
+                    if (data.TypeSpecific != null)
                     {
-                        string alterEventTable;
-
-                        if (fdm.ViewID == -1)
+                        int i = 0;
+                        foreach (FieldDataModel fdm in data.TypeSpecific)
                         {
-                            //We have to remove the field, as it was found in the db.
-                            string updateField = "DELETE FROM pksudb.eventtypefields WHERE fieldId = @fid" + i;
-                            alterEventTable = "ALTER TABLE table_" + data.ID + " DROP COLUMN field_" + fdm.ID;
+                            string alterEventTable;
 
-                            cmd.CommandText = updateField;
-                            cmd.Parameters.AddWithValue("@fid" + i, fdm.ID);
-                            cmd.Prepare();
+                            if (fdm.ViewID == -1)
+                            {
+                                //We have to remove the field, as it was found in the db.
+                                string updateField = "DELETE FROM pksudb.eventtypefields WHERE fieldId = @fid" + i;
+                                alterEventTable = "ALTER TABLE table_" + data.ID + " DROP COLUMN field_" + fdm.ID;
+
+                                cmd.CommandText = updateField;
+                                cmd.Parameters.AddWithValue("@fid" + i, fdm.ID);
+                                cmd.Prepare();
+                                cmd.ExecuteNonQuery();
+                            }
+                            else if (fdm.ViewID == -2)
+                            {
+                                string insertField = "INSERT INTO pksudb.eventtypefields"
+                                                     + " (eventTypeId, fieldName, fieldDescription, requiredField, fieldType, varCharLength)"
+                                                     + " VALUES ( @etid , @fname" + i + " , @fdescr" + i + " , @freq" + i
+                                                     + " , @fdattyp" + i + " , @fvarchr" + i
+                                                     + " ); SELECT last_insert_id();";
+
+                                cmd.CommandText = insertField;
+                                cmd.Parameters.AddWithValue("@fname" + i, fdm.Name);
+                                cmd.Parameters.AddWithValue("@fdescr" + i, fdm.Description);
+                                cmd.Parameters.AddWithValue("@freq" + i, fdm.Required);
+                                cmd.Parameters.AddWithValue("@fdattyp" + i, fdm.GetTypeAsInt());
+                                cmd.Parameters.AddWithValue("@fvarchr" + i, fdm.VarcharLength);
+                                cmd.Prepare();
+                                int id = Convert.ToInt32(cmd.ExecuteScalar());
+
+                                alterEventTable = "ALTER TABLE table_" + data.ID + " ADD field_" + id + " " + fdm.GetDBType();
+                            }
+                            else
+                            {
+                                string updateField = "UPDATE pksudb.eventtypefields SET "
+                                                        + "fieldName = @fname" + i
+                                                        + " , fieldDescription = @fdescr" + i
+                                                        + " , requiredField = @freq" + i
+                                                        + " , fieldType = @fdattyp" + i
+                                                        + " WHERE eventTypeId = @etid "
+                                                            + " AND fieldId = @fid" + i;
+
+                                alterEventTable = "ALTER TABLE table_" + data.ID + " MODIFY COLUMN field_" + fdm.ID + " " + fdm.GetDBType();
+
+                                cmd.CommandText = updateField;
+                                cmd.Parameters.AddWithValue("@fname" + i, fdm.Name);
+                                cmd.Parameters.AddWithValue("@fdescr" + i, fdm.Description);
+                                cmd.Parameters.AddWithValue("@freq" + i, fdm.Required);
+                                cmd.Parameters.AddWithValue("@fdattyp" + i, fdm.GetTypeAsInt());
+                                cmd.Parameters.AddWithValue("@fid" + i, fdm.ID);
+                                cmd.Prepare();
+                                cmd.ExecuteNonQuery();
+                            }
+
+                            cmd.CommandText = alterEventTable;
                             cmd.ExecuteNonQuery();
+                            i++;
                         }
-                        else if(fdm.ViewID == -2)
-                        {
-                            string insertField = "INSERT INTO pksudb.eventtypefields"
-                                                 + " (eventTypeId, fieldName, fieldDescription, requiredField, fieldType, varCharLength)"
-                                                 + " VALUES ( @etid , @fname" + i + " , @fdescr" + i + " , @freq" + i
-                                                 + " , @fdattyp" + i + " , @fvarchr" + i 
-                                                 + " ); SELECT last_insert_id();";
-
-                            cmd.CommandText = insertField;
-                            cmd.Parameters.AddWithValue("@fname" + i, fdm.Name);
-                            cmd.Parameters.AddWithValue("@fdescr" + i, fdm.Description);
-                            cmd.Parameters.AddWithValue("@freq" + i, fdm.Required);
-                            cmd.Parameters.AddWithValue("@fdattyp" + i, fdm.GetTypeAsInt());
-                            cmd.Parameters.AddWithValue("@fvarchr" + i, fdm.VarcharLength);
-                            cmd.Prepare();
-                            int id = Convert.ToInt32(cmd.ExecuteScalar());
-
-                            alterEventTable = "ALTER TABLE table_" + data.ID + " ADD field_" + id + " " + fdm.GetDBType();
-                        }
-                        else
-                        {
-                            string updateField = "UPDATE pksudb.eventtypefields SET "
-                                                    + "fieldName = @fname" + i
-                                                    + " , fieldDescription = @fdescr" + i
-                                                    + " , requiredField = @freq" + i
-                                                    + " , fieldType = @fdattyp" + i
-                                                    + " WHERE eventTypeId = @etid "
-                                                        + " AND fieldId = @fid" + i;
-
-                            alterEventTable = "ALTER TABLE table_" + data.ID + " MODIFY COLUMN field_" + fdm.ID + " " + fdm.GetDBType();
-
-                            cmd.CommandText = updateField;
-                            cmd.Parameters.AddWithValue("@fname" + i, fdm.Name);
-                            cmd.Parameters.AddWithValue("@fdescr" + i, fdm.Description);
-                            cmd.Parameters.AddWithValue("@freq" + i, fdm.Required);
-                            cmd.Parameters.AddWithValue("@fdattyp" + i, fdm.GetTypeAsInt());
-                            cmd.Parameters.AddWithValue("@fid" + i, fdm.ID);
-                            cmd.Prepare();
-                            cmd.ExecuteNonQuery();
-                        }
-                        
-                        cmd.CommandText = alterEventTable;
-                        cmd.ExecuteNonQuery();
-                        i++;
                     }
 
                     mst.Commit();
