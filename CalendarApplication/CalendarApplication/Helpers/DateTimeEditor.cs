@@ -66,7 +66,7 @@ namespace CalendarApplication.Helpers
 
             builder.AppendLine("<span style='color:grey;font-size:80%;text-align:left'>");
             builder.AppendLine("<input type='hidden' name='" + name + "' id='" + name + "' value='"
-                                + edt.ToString("dd-MM-yyyy hh:mm:ss") + "'>");
+                                + edt.ToString("dd-MM-yyyy HH:mm:ss") + "'>");
             builder.AppendLine("<table class='custom-style-1'>");
 
             // Create headers

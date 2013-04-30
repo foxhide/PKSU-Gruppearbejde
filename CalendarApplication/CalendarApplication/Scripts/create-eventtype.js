@@ -1,4 +1,10 @@
-﻿var field_count = 0;
+﻿/*
+ *  This script is used for the event type creation page. It adds the html for each
+ *  field when the user presses the 'Add field'-button by using ajax
+ */
+
+// Counter for naming the added fields.
+var field_count = 0;
 
 /* Sets the counter */
 function setIdCounter(counter) {
@@ -58,19 +64,4 @@ function updateVarChar(id) {
         label.innerHTML = "";
         input.innerHTML = "";
     }
-}
-
-/* Function used for updating the counter for the description text area */
-function updateCounter(id) {
-    var chars = 99 - document.getElementById('Desc_' + id).value.length;
-    var label = document.getElementById('desc_count_' + id);
-    var content = "Characters left: ";
-    if (chars < 0) {
-        // If there are too many chars, make a red number
-        content += '<span style="color:red">'+chars+'</span>';
-    }
-    else {
-        content += chars;
-    }
-    label.innerHTML = content;
 }

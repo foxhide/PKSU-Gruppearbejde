@@ -10,19 +10,6 @@ namespace CalendarApplication.Helpers
 {
     public static class DoubleListEditor
     {
-        public static readonly string SCRIPT = "<script>function moveSelected(name, add) {" +
-                                                "var name1 = add ? name + '_select' : name + '_available';" +
-                                                "var name2 = add ? name + '_available' : name + '_select';" +
-                                                "var list1 = document.getElementById(name1);" +
-                                                "var list2 = document.getElementById(name2);" +
-                                                "for (var i = 0; i < list1.length; i++) {" +
-                                                "if(list1.options[i].selected) {" +
-                                                "var id = list1.options[i].value; var roomName = list1.options[i].innerHTML;" +
-                                                "list1.remove(i); list2.options[list2.length] = new Option(roomName,id);" +
-                                                "document.getElementById(name + '_' + id).value = add; break; }" +
-                                                "}" +
-                                                "}</script>";
-
         public static MvcHtmlString ListEditorFor<TModel, TValue>(this HtmlHelper<TModel> helper,
             Expression<Func<TModel, TValue>> expression, string labelList1, string labelList2)
         {
@@ -34,8 +21,6 @@ namespace CalendarApplication.Helpers
             string name = ExpressionHelper.GetExpressionText(expression).Split('.').Last();
 
             StringBuilder builder = new StringBuilder();
-
-            builder.AppendLine(DoubleListEditor.SCRIPT);
 
             builder.AppendLine("<span style='color:grey;font-size:80%;text-align:left'>");
 
@@ -62,8 +47,8 @@ namespace CalendarApplication.Helpers
             builder.AppendLine("</td>");
 
             builder.AppendLine("<td style='vertical-align:middle'>");
-            builder.Append("<input type='button' value='<--' onclick=moveSelected('" + name + "',true)><br>");
-            builder.Append("<input type='button' value='-->' onclick=moveSelected('" + name + "',false)>");
+            builder.Append("<input type='button' id='" + name + "_add_button' value='<--' onclick=moveSelected('" + name + "',true)><br>");
+            builder.Append("<input type='button' id='" + name + "_rem_button' value='-->' onclick=moveSelected('" + name + "',false)>");
             builder.AppendLine("</td>");
 
             builder.AppendLine("<td>");

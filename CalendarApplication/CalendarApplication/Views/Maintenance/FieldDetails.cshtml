@@ -21,9 +21,9 @@
                 }
             </select>
         </td>
-        <td rowspan="3"><div id="desc_count_@(Model.ViewID)">Characters left: 100</div>
+        <td rowspan="3"><div id="Desc_@(Model.ViewID)_char_counter">Characters left: 100</div>
             <textarea id='Desc_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].Description'
-               cols="40" rows="4" onkeyup="updateCounter(@(Model.ViewID));">@(Model.Description)</textarea></td>
+               cols="40" rows="4" onkeyup="updateCounter('Desc_@(Model.ViewID)',100);">@(Model.Description)</textarea></td>
     </tr>
     <tr>
         <td><label for='Req_@(Model.ViewID)'>Field required</label></td>

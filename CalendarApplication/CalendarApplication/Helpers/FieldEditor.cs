@@ -38,14 +38,19 @@ namespace CalendarApplication.Helpers
             }
             else if (model.Datatype == Fieldtype.Text)
             {
+                builder.AppendLine("<div id='" + name + "_StringValue_char_counter'>Characters left: " + model.VarcharLength + "</div>");
+                string counterInc = "onkeyup=updateCounter('" + name + "_StringValue'," + model.VarcharLength + ");";
                 if (model.VarcharLength < 50)
                 {
-                    builder.AppendLine("<input type='text' name='" + name + ".StringValue' value='" + model.StringValue + "'>");
+                    builder.AppendLine("<input type='text' id='" + name + "_StringValue' name='" + name +
+                                        ".StringValue' value='" + model.StringValue);
+                    builder.AppendLine("' " + counterInc + ">");
                 }
                 else
                 {
-                    builder.AppendLine("<textarea type='text' name='" + name + ".StringValue' cols='40' rows='");
-                    builder.Append((model.VarcharLength/40+1) + "'>" + model.StringValue + "</textarea>");
+                    builder.AppendLine("<textarea type='text' id='" + name + "_StringValue' name='" + name +
+                                        ".StringValue' cols='40' rows='");
+                    builder.Append((model.VarcharLength/40+1) + "' " + counterInc + ">" + model.StringValue + "</textarea>");
                 }
             }
             else if (model.Datatype == Fieldtype.Bool)

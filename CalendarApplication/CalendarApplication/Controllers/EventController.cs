@@ -91,7 +91,8 @@ namespace CalendarApplication.Controllers
                 EventTypes = new List<SelectListItem>(),
                 SelectedEventType = "1", // Initial value -> Basic event
                 Start = new DateTime(year, month, day, 10, 0, 0),
-                End = new DateTime(year, month, day, 18, 0, 0)
+                End = new DateTime(year, month, day, 18, 0, 0),
+                Visible = true
             };
 
             MySqlConnect msc = new MySqlConnect();
