@@ -27,7 +27,7 @@ namespace CalendarApplication.Models.Event
                 case Fieldtype.Group: return this.IntValue; //int, groupId
                 case Fieldtype.Text: return this.StringValue;
                 case Fieldtype.File: return this.IntValue; //int, fileId
-                case Fieldtype.Datetime: return DateValue;
+                case Fieldtype.Datetime: return this.DateValue;
                 case Fieldtype.Bool: return this.BoolValue; //bool
             }
             return "";

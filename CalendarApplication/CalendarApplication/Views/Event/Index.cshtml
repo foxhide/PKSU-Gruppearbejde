@@ -15,7 +15,7 @@ else {
     <tr>
         <td>Event Details</td>
         <td>Rooms Used</td>
-        @if (@Model.TypeId != 1)
+        @if (Model.EventSpecial != null && Model.EventSpecial.Rows.Count != 0)
         {
             <td>Event type specific</td>
         }
