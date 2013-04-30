@@ -65,7 +65,7 @@ namespace CalendarApplication.Controllers
 
                 return RedirectToAction("Index", "Home", null);
             }
-            TempData["message"] = "This user name is all ready taken, please choose a new one...";
+            TempData["message"] = "There was an error processing your information. Please try again.";
             return View();
         }
     }

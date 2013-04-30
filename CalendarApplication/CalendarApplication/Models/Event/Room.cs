@@ -14,7 +14,7 @@ namespace CalendarApplication.Models.Event
         {
             if (object.ReferenceEquals(this, obj)) return true;
 
-            if (obj == null) return false;
+            if (!(obj is Room)) return false;
 
             Room otherRoom = (Room)obj;
             return otherRoom.ID == ID;

@@ -20,7 +20,7 @@ namespace CalendarApplication.Models.User
         {
             if (object.ReferenceEquals(this, obj)) return true;
 
-            if (obj == null) return false;
+            if (!(obj is GroupModel)) return false;
 
             GroupModel otherGroup = (GroupModel)obj;
             return otherGroup.ID == ID;
