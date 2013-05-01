@@ -83,11 +83,8 @@ namespace CalendarApplication.Controllers
             int before = (int)first.DayOfWeek == 0 ? 6 : (int)first.DayOfWeek - 1;
             int days = DateTime.DaysInMonth(evm.Year, evm.Month) + before;
             days = days % 7 > 0 ? days + (7 - days % 7) : days;
-
-            string where = this.GetFilter(evm,first,first.AddDays(days-1));
             
-            MySqlConnect msc = new MySqlConnect();
-            List<BasicEvent> events = msc.GetEvents(false,where,"eventStart");
+            List<BasicEvent> events = this.GetEvents(evm, first, first.AddDays(days - 1));
 
             first = first.AddDays(-before);
 
@@ -122,9 +119,8 @@ namespace CalendarApplication.Controllers
         {
             MySqlConnect msc = new MySqlConnect();
             DateTime date = new DateTime(evm.Year, evm.Month, evm.Day);
-            string where = this.GetFilter(evm, date, date);
 
-            List<BasicEvent> events = msc.GetEvents(true, where, "eventStart");
+            List<BasicEvent> events = this.GetEvents(evm, date, date);
 
             CalendarDay result = new CalendarDay
             {
@@ -142,8 +138,7 @@ namespace CalendarApplication.Controllers
             DateTime end = start.AddDays(evm.Range);
             string where = this.GetFilter(evm, start, end);
 
-            MySqlConnect msc = new MySqlConnect();
-            List<BasicEvent> events = msc.GetEvents(false, where, "eventStart");
+            List<BasicEvent> events = this.GetEvents(evm,start,end);
 
             CalendarList model = new CalendarList
             {
@@ -156,7 +151,98 @@ namespace CalendarApplication.Controllers
         }
 
         /// <summary>
+        /// Gets a list of events. evm is the current EventViewModel (filter), start is the starting date,
+        /// end is the ending date. User authentication is also applied:
+        ///     - If no user, visible events are returned
+        ///     - If admin, all events are returned
+        ///     - If non-admin user, eventvisibility/editor rights/creator is checked
+        /// </summary>
+        /// <param name="evm">EventViewModel containing the filter</param>
+        /// <param name="start">Starting date</param>
+        /// <param name="end">Ending date</param>
+        /// <returns>List of events</returns>
+        private List<BasicEvent> GetEvents(EventViewModel evm, DateTime start, DateTime end)
+        {
+            string select = "SELECT DISTINCT(e.eventId),e.userId,u.userName,e.eventTypeId,e.eventName,e.eventStart,"
+                            + "e.eventEnd,e.state,et.eventTypeName";
+            string from = "FROM pksudb.events AS e NATURAL JOIN pksudb.users AS u NATURAL JOIN pksudb.eventtypes AS et";
+
+            // Build the where string
+            //   - Input from filter:
+            string morning = start.ToString("yyyy-MM-dd 00:00:00");
+            string night = end.ToString("yyyy-MM-dd 23:59:59");
+            string where = "WHERE ((eventStart <= '" + night + "' AND eventStart >= '" + morning
+                            + "') OR (eventEnd <= '" + night + "' AND eventEnd >= '" + morning
+                            + "') OR (eventEnd >= '" + night + "' AND eventStart <= '" + morning + "'))";
+
+            foreach (EventTypeModel etm in evm.Eventtypes)
+            {
+                if (!etm.Selected)
+                {
+                    where += " AND ";
+                    where += "(eventTypeId != " + etm.ID + ")";
+                }
+            }
+
+            where += (evm.ViewState0 ? "" : " AND (state != 0)");
+            where += (evm.ViewState1 ? "" : " AND (state != 1)");
+            where += (evm.ViewState2 ? "" : " AND (state != 2)");
+
+            //   User authentication
+            UserModel cur = UserModel.GetCurrent();
+            if(cur == null)
+            {
+                // no user -> show visible events
+                where += " AND (visible = 1)";
+            }
+            else if (!cur.Admin)
+            {
+                // A user, that is not an admin -> get events that are authenticated.
+                from += " LEFT JOIN eventvisibility ON e.eventId = eventvisibility.eventId"
+                        + " LEFT JOIN groupmembers AS vis_group ON vis_group.groupId = eventvisibility.groupId"
+                        + " LEFT JOIN eventeditorsusers AS edt_user ON e.eventId = edt_user.eventId"
+                        + " LEFT JOIN eventeditorsgroups ON e.eventId = eventeditorsgroups.eventId"
+                        + " LEFT JOIN groupmembers AS edt_group ON edt_group.groupId = eventeditorsgroups.groupId";
+                where += " AND (e.userId = " + cur.ID + " OR e.visible = 1 OR vis_group.userId = " + cur.ID
+                            + " OR edt_group.userId = " + cur.ID + " OR edt_user.userId = " + cur.ID + ")";
+            }
+            //If admin, show all events.
+
+            string query = select + " " + from + " " + where + " ORDER BY e.eventStart";
+
+            List<BasicEvent> events = new List<BasicEvent>();
+
+            MySqlConnect msc = new MySqlConnect();
+            DataTable dt = msc.ExecuteQuery(query);
+            if (dt != null)
+            {
+                foreach (DataRow dr in dt.Rows)
+                {
+                    events.Add(new BasicEvent
+                    {
+                        ID = (int)dr["eventId"],
+                        Name = (string)dr["eventName"],
+                        CreatorId = (int)dr["userId"],
+                        Creator = (string)dr["userName"],
+                        Start = (DateTime)dr["eventStart"],
+                        End = (DateTime)dr["eventEnd"],
+                        State = (int)dr["state"],
+                        TypeId = (int)dr["eventTypeId"],
+                        TypeName = (string)dr["eventTypeName"]
+                    });
+                }
+            }
+            else
+            {
+                TempData["errorMsg"] = msc.ErrorMessage;
+            }
+
+            return events;
+        }
+
+        /// <summary>
         /// Helper function: gets the string needed to filter events based on EventTypes, Dates and States
+        /// Note: Deprecated in favor of the above method.
         /// </summary>
         /// <param name="evm">EventViewModel</param>
         /// <param name="start">Start date</param>

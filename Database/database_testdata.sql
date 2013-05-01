@@ -8,9 +8,14 @@ INSERT INTO rooms (roomName) VALUES ("Room 6");
 INSERT INTO rooms (roomName) VALUES ("Room 7");
 
 -- Users
-INSERT INTO users (userName, password, realName, admin, email, active, needsApproval) VALUES ("johan_the_man","johanersej","Johan", 1,"johan@stengade.dk",1,0);
-INSERT INTO users (userName, password, realName, admin, email, active, needsApproval) VALUES ("andreas_PKSU","andreasercool","Andreas", 1,"andreas@stengade.dk",1,0);
-INSERT INTO users (userName, password, realName, admin, email, active, needsApproval) VALUES ("stephan_kerbal","kerbaltillinux","Stephan", 1,"stephan@stengade.dk",1,0);
+INSERT INTO users (userName, password, realName, admin, email, active, needsApproval)
+	VALUES ("johan_the_man","johanersej","Johan", 1,"johan@stengade.dk",1,0);
+INSERT INTO users (userName, password, realName, admin, email, active, needsApproval)
+	VALUES ("andreas_PKSU","andreasercool","Andreas", 1,"andreas@stengade.dk",1,0);
+INSERT INTO users (userName, password, realName, admin, email, active, needsApproval)
+	VALUES ("stephan_kerbal","kerbaltillinux","Stephan", 1,"stephan@stengade.dk",1,0);
+INSERT INTO users (userName, password, realName, admin, email, active, needsApproval)
+	VALUES ("bill123","kerbal","Bill", 0,"bill@kerbal.kb",1,0);
 
 -- Groups
 INSERT INTO groups (groupName) VALUES ("Poker players");
@@ -26,6 +31,7 @@ INSERT INTO groupmembers(groupId,userId,approved) VALUES (3,2,1);
 INSERT INTO groupmembers(groupId,userId,approved) VALUES (2,1,1);
 INSERT INTO groupmembers(groupId,userId,approved) VALUES (1,3,1);
 INSERT INTO groupmembers(groupId,userId,approved) VALUES (1,1,1);
+INSERT INTO groupmembers(groupId,userId,approved) VALUES (4,4,1);
 
 -- Event types
 	-- Basic event (no fields)
@@ -79,5 +85,26 @@ INSERT INTO eventroomsused (eventId, roomId) VALUES (3,6);
 INSERT INTO events (userId, eventTypeId, eventName, eventStart, eventEnd, visible, state)
 	VALUES (2,1,"MineCon 2013","2013-03-02 10:00:00","2013-03-02 18:30:00",true,1);
 INSERT INTO eventroomsused (eventId, roomId) VALUES (4,5);
+   
+    -- Visible event
+INSERT INTO events (userId, eventTypeId, eventName, eventStart, eventEnd, visible, state)
+	VALUES (1,1,"Visible","2013-05-10 10:00:00","2013-05-12 10:00:00",true,1);
+INSERT INTO eventroomsused (eventId, roomId) VALUES (5,1);
+INSERT INTO eventroomsused (eventId, roomId) VALUES (5,2);
+
+    -- VisibleToL04 event
+INSERT INTO events (userId, eventTypeId, eventName, eventStart, eventEnd, visible, state)
+	VALUES (1,1,"L04 event","2013-05-12 10:00:00","2013-05-13 10:00:00",false,2);
+INSERT INTO eventroomsused (eventId, roomId) VALUES (6,1);
+INSERT INTO eventroomsused (eventId, roomId) VALUES (6,3);
+INSERT INTO eventvisibility (eventId, groupId) VALUES (6,4);
+
+    -- VisibleToMinecraftGurus event
+INSERT INTO events (userId, eventTypeId, eventName, eventStart, eventEnd, visible, state)
+	VALUES (3,1,"Minecraft1337","2013-05-13 10:00:00","2013-05-16 10:00:00",false,0);
+INSERT INTO eventroomsused (eventId, roomId) VALUES (7,4);
+INSERT INTO eventroomsused (eventId, roomId) VALUES (7,5);
+INSERT INTO eventvisibility (eventId, groupId) VALUES (7,3);
+
 
 COMMIT;
