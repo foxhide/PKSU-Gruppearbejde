@@ -958,6 +958,72 @@ namespace CalendarApplication.Controllers
                         }
                     }
 
+                    cmd.Parameters.Clear();
+
+                    // Handle the editor rights. The below is a primitive implementation. Simply deletes
+                    // all date previously there and inserts the new data. Works for creation and edit
+                    int id = eem.ID == -1 ? newId : eem.ID;
+                    cmd.CommandText = "DELETE FROM pksudb.eventeditorsusers WHERE eventId = @eid";
+                    cmd.Parameters.AddWithValue("@eid", id);
+                    cmd.Prepare();
+                    cmd.ExecuteNonQuery();
+                    cmd.Parameters.Clear();
+                    foreach (SelectListItem edtusr in eem.UserEditorList)
+                    {
+                        if (edtusr.Selected)
+                        {
+                            cmd.CommandText = "INSERT INTO pksudb.eventeditorsusers(eventId,userId)"
+                                                  + " VALUES ( @eid , @usrid );";
+                            cmd.Parameters.AddWithValue("@eid", id);
+                            cmd.Parameters.AddWithValue("@usrid", edtusr.Value);
+                            cmd.Prepare();
+                            cmd.ExecuteNonQuery();
+                            cmd.Parameters.Clear();
+                        }
+                    }
+
+                    cmd.CommandText = "DELETE FROM pksudb.eventeditorsgroups WHERE eventId = @eid";
+                    cmd.Parameters.AddWithValue("@eid", id);
+                    cmd.Prepare();
+                    cmd.ExecuteNonQuery();
+                    cmd.Parameters.Clear();
+                    foreach (SelectListItem edtgrp in eem.GroupEditorList)
+                    {
+                        if (edtgrp.Selected)
+                        {
+                            cmd.CommandText = "INSERT INTO pksudb.eventeditorsgroups(eventId,groupId)"
+                                                  + " VALUES ( @eid , @grpid );";
+                            cmd.Parameters.AddWithValue("@eid", id);
+                            cmd.Parameters.AddWithValue("@grpid", edtgrp.Value);
+                            cmd.Prepare();
+                            cmd.ExecuteNonQuery();
+                            cmd.Parameters.Clear();
+                        }
+                    }
+
+                    // Handle visibility, same way as above, except that we check if the event has global visibility
+                    cmd.CommandText = "DELETE FROM pksudb.eventvisibility WHERE eventId = @eid";
+                    cmd.Parameters.AddWithValue("@eid", id);
+                    cmd.Prepare();
+                    cmd.ExecuteNonQuery();
+                    cmd.Parameters.Clear();
+                    if (!eem.Visible)
+                    {
+                        foreach (SelectListItem edtgrp in eem.GroupVisibleList)
+                        {
+                            if (edtgrp.Selected)
+                            {
+                                cmd.CommandText = "INSERT INTO pksudb.eventvisibility(eventId,groupId)"
+                                                      + " VALUES ( @eid , @grpid );";
+                                cmd.Parameters.AddWithValue("@eid", id);
+                                cmd.Parameters.AddWithValue("@grpid", edtgrp.Value);
+                                cmd.Prepare();
+                                cmd.ExecuteNonQuery();
+                                cmd.Parameters.Clear();
+                            }
+                        }
+                    }
+
                     mst.Commit();
                 }
                 catch (MySqlException ex0)
