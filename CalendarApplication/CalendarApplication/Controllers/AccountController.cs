@@ -21,10 +21,12 @@ namespace CalendarApplication.Controllers
         [HttpPost]
         public ActionResult Login(LoginModel login)
         {
-            string userinf = "SELECT userId FROM pksudb.users WHERE userName = '" + login.UserName
-                           + "' AND password = '" + login.Password+"'";
+            CustomQuery query = new CustomQuery();
+            query.Cmd = "SELECT userId FROM pksudb.users WHERE userName = @usrnam AND password = @passw";
+            query.ArgNames = new string[] { "@usrnam" , "@passw" };
+            query.Args = new object[] { login.UserName , login.Password };
             MySqlConnect con = new MySqlConnect();
-            DataTable table = con.ExecuteQuery(userinf);
+            DataTable table = con.ExecuteQuery(query);
 
             if (table != null)
             {
