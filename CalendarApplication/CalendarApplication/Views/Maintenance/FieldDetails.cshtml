@@ -8,26 +8,26 @@
         <td><label for='Type_@(Model.ViewID)'>Datatype of field</label></td>
         <td><label for='Desc_@(Model.ViewID)'>Description of field</label></td>
         <th rowspan="4" style="vertical-align:middle">
-            <button type="button" onclick=removeField(@(Model.ViewID),@(Model.ID))>Remove</button>
+            <button type="button" onclick=removeField(@(Model.ViewID),@(Model.ID),@((int)Model.Datatype))>Remove</button>
         </th>
     </tr>
     <tr>
         <td><input type='text' id='Name_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].Name' value="@(Model.Name)"></td>
         <td>
-         <select id='Type_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].Datatype' onchange="updateVarChar(@(Model.ViewID));">
+        @if(Model.ID == -1)
+        {
+            <select id='Type_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].Datatype' onchange="updateVarChar(@(Model.ViewID));">
                 @for (int i = 0; i < FieldDataModel.DATA_TYPES.Count; i++)
                 {
-                    if(Model.ID == -1)
-                    {   
                     <option value="@(i)" @(i == (int)Model.Datatype?"Selected":"")>@FieldDataModel.DATA_TYPES[i]</option>
-                    }
-                    else
-                    {
-                          if(i==(int)Model.Datatype){<option value="@(i)" @("Selected")>@FieldDataModel.DATA_TYPES[i]</option>}
-                    }
                 }
             </select>
-         
+        }
+        else
+        {
+            @FieldDataModel.DATA_TYPES[(int)Model.Datatype]
+            <input type="hidden" name='TypeSpecific[@(Model.ViewID)].Datatype' value="@((int)Model.Datatype)" />
+        }
         </td>
         <td rowspan="3"><div id="Desc_@(Model.ViewID)_char_counter">Characters left: 100</div>
             <textarea id='Desc_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].Description'
@@ -54,7 +54,7 @@
                 @if (Model.Datatype == Fieldtype.Text)
                 {
                     <input type='text' id='varchar_size_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].VarcharLength'
-                        value="@Model.VarcharLength" style="width:50px">
+                        value="@Model.VarcharLength" style="width:50px" onchange="varCharLimit(@(Model.ViewID),@Model.VarcharLength)">
                 }
             </div>
         </td>

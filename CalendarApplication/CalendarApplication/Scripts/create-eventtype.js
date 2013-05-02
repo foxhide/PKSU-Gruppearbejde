@@ -12,7 +12,7 @@ function setIdCounter(counter) {
 }
 
 /* Removes field */
-function removeField(id,mid) {
+function removeField(id,mid,datatype) {
     var field = document.getElementById("field_" + id);
     field.parentElement.removeChild(field);
     if (mid != -1) {
@@ -21,7 +21,8 @@ function removeField(id,mid) {
         var fieldId = 'field_' + id;
         newField.id = fieldId;
         newField.innerHTML = "<input type='hidden' id='viewid_rem_" + id + "' name='TypeSpecific[" + id + "].ViewID' value='-1' />"
-                                + "<input type='hidden' id='id_rem_" + id + "' name='TypeSpecific[" + id + "].ID' value='"+mid+"'/>";
+                                + "<input type='hidden' id='id_rem_" + id + "' name='TypeSpecific[" + id + "].ID' value='" + mid + "'/>"
+                                + "<input type='hidden' id='id_rem_" + id + "' name='TypeSpecific[" + id + "].Datatype' value='" + datatype + "'/>";
         list.appendChild(newField);
     }
 }
@@ -63,5 +64,14 @@ function updateVarChar(id) {
         // It is not a text field
         label.innerHTML = "";
         input.innerHTML = "";
+    }
+}
+
+// Limit the varchar -> a varchar must never be changed to something less than it is now..
+function varCharLimit(id, limit) {
+    var input = document.getElementById('varchar_size_' + id);
+    var value = input.value;
+    if (value < limit) {
+        input.value = limit;
     }
 }
