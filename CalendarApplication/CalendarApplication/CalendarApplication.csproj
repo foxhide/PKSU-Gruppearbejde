@@ -135,7 +135,7 @@
     <Compile Include="Models\Event\Room.cs" />
     <Compile Include="Models\Account\LoginModel.cs" />
     <Compile Include="Models\Maintenance\MaintenanceModel.cs" />
-    <Compile Include="Models\User\GroupModel.cs" />
+    <Compile Include="Models\Group\GroupModel.cs" />
     <Compile Include="Models\User\UserModel.cs" />
     <Compile Include="Models\User\UserViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -185,9 +185,11 @@
     <Content Include="Views\Maintenance\Index.cshtml" />
     <Content Include="Views\Event\EditEvent.cshtml" />
     <Content Include="Views\User\Index.cshtml" />
+    <Content Include="Views\Maintenance\EditGroup.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Views\Group\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />

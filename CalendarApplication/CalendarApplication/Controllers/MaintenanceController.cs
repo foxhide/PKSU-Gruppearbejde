@@ -10,6 +10,7 @@ using CalendarApplication.Models.EventType;
 using CalendarApplication.Models.Maintenance;
 using CalendarApplication.Controllers;
 using CalendarApplication.Models.User;
+using CalendarApplication.Models.Group;
 
 namespace CalendarApplication.Controllers
 {
@@ -34,19 +35,36 @@ namespace CalendarApplication.Controllers
             MaintenanceModel mm = new MaintenanceModel
             {
                 EventTypes = new List<SelectListItem>(),
-                SelectedEventType = "0"
+                SelectedEventType = "0",
+                Groups = new List<SelectListItem>(),
+                SelectedGroup = "0"
             };
+
             MySqlConnect msc = new MySqlConnect();
-            string etquery = "SELECT eventTypeId,eventTypeName FROM pksudb.eventtypes";
-            DataTable dt = msc.ExecuteQuery(etquery);
-            if (dt != null)
+            string etcmd = "SELECT eventTypeId,eventTypeName FROM pksudb.eventtypes";
+            CustomQuery etquery = new CustomQuery { Cmd = etcmd };
+            string grcmd = "SELECT * FROM pksudb.groups";
+            CustomQuery grquery = new CustomQuery { Cmd = grcmd, ArgNames = { }, Args = { } };
+            CustomQuery[] queries = { etquery, grquery };
+            DataSet ds = msc.ExecuteQuery(queries);
+            DataTable dt0 = ds.Tables[0];
+            DataTable dt1 = ds.Tables[1];
+            if (dt0 != null)
             {
-                foreach (DataRow dr in dt.Rows)
+                foreach (DataRow dr in dt0.Rows)
                 {
                     mm.EventTypes.Add(new SelectListItem
                     {
                         Value = ((int)dr["eventTypeId"]).ToString(),
                         Text = (string)dr["eventTypeName"]
+                    });
+                }
+                foreach (DataRow dr in dt1.Rows)
+                {
+                    mm.Groups.Add(new SelectListItem
+                    {
+                        Value = ((int)dr["groupId"]).ToString(),
+                        Text = (string)dr["groupName"]
                     });
                 }
                 return View(mm);
@@ -64,6 +82,10 @@ namespace CalendarApplication.Controllers
                 case 0: return RedirectToAction("EditEventType", new { id = int.Parse(mm.SelectedEventType) });
                 //Create event
                 case 1: return RedirectToAction("EditEventType", new { id = -1 });
+                //Edit group
+                case 2: return RedirectToAction("EditGroup", new { groupId = int.Parse(mm.SelectedGroup) });
+                //Create group
+                case 3: return RedirectToAction("EditGroup", new { groupId = -1 });
             }
             return View(mm);
         }
@@ -141,5 +163,63 @@ namespace CalendarApplication.Controllers
             return PartialView("FieldDetails", new FieldDataModel(id));
         }
 
+        public ActionResult EditGroup(int groupId)
+        {
+            GroupModel result = new GroupModel { ID = groupId };
+
+            string cmd = "SELECT * FROM groups NATURAL JOIN groupmembers NATURAL JOIN users WHERE groupId = @groupId";
+            string[] argnames = { "@groupId" };
+            object[] args = { groupId };
+            CustomQuery query = new CustomQuery { Cmd = cmd, ArgNames = argnames, Args = args };
+            MySqlConnect msc = new MySqlConnect();
+            DataTable dt = msc.ExecuteQuery(query);
+
+            result.Name = (string)dt.Rows[0]["groupName"];
+
+            List<UserModel> members = new List<UserModel>();
+            List<UserModel> leaders = new List<UserModel>();
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                UserModel tmp = new UserModel();
+                tmp.ID = (int)dt.Rows[i]["userId"];
+                tmp.UserName = (string)dt.Rows[i]["userName"];
+                tmp.RealName = (string)dt.Rows[i]["realName"];
+                tmp.Admin = (bool)dt.Rows[i]["admin"];
+                tmp.Email = (string)dt.Rows[i]["email"];
+                members.Add(tmp);
+                if ((bool)dt.Rows[i]["groupLeader"])
+                {
+                    leaders.Add(tmp);
+                }
+            }
+
+            result.groupMembers = members;
+            result.groupLeaders = leaders;
+
+            return View(result);
+        }
+
+        [HttpPost]
+        public ActionResult EditGroup(GroupModel grm)
+        {
+            MySqlConnect msc = new MySqlConnect();
+            bool ok;
+            if (grm.ID == -1)
+            {
+                ok = msc.CreateGroup(grm);
+            }
+            else
+            {
+                ok = msc.EditGroup(grm);
+            }
+            if (!ok)
+            {
+                TempData["errorMsg"] = msc.ErrorMessage;
+                return View(grm);
+            }
+            return RedirectToAction("Index", "Maintenance", null);
+        }
+
     }
+
 }

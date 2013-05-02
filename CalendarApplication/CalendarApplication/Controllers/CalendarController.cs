@@ -84,7 +84,7 @@ namespace CalendarApplication.Controllers
             int days = DateTime.DaysInMonth(evm.Year, evm.Month) + before;
             days = days % 7 > 0 ? days + (7 - days % 7) : days;
             
-            List<BasicEvent> events = this.GetEvents(evm, first, first.AddDays(days - 1));
+            List<BasicEvent> events = this.GetEvents(evm, first, first.AddDays(days - 1),false);
 
             first = first.AddDays(-before);
 
@@ -120,7 +120,7 @@ namespace CalendarApplication.Controllers
             MySqlConnect msc = new MySqlConnect();
             DateTime date = new DateTime(evm.Year, evm.Month, evm.Day);
 
-            List<BasicEvent> events = this.GetEvents(evm, date, date);
+            List<BasicEvent> events = this.GetEvents(evm, date, date,true);
 
             CalendarDay result = new CalendarDay
             {
@@ -137,7 +137,7 @@ namespace CalendarApplication.Controllers
             DateTime start = new DateTime(evm.Year, evm.Month, evm.Day);
             DateTime end = start.AddDays(evm.Range);
 
-            List<BasicEvent> events = this.GetEvents(evm,start,end);
+            List<BasicEvent> events = this.GetEvents(evm,start,end,false);
 
             CalendarList model = new CalendarList
             {
@@ -160,10 +160,10 @@ namespace CalendarApplication.Controllers
         /// <param name="start">Starting date</param>
         /// <param name="end">Ending date</param>
         /// <returns>List of events</returns>
-        private List<BasicEvent> GetEvents(EventViewModel evm, DateTime start, DateTime end)
+        private List<BasicEvent> GetEvents(EventViewModel evm, DateTime start, DateTime end, bool day)
         {
-            string select = "SELECT DISTINCT(e.eventId),e.userId,u.userName,e.eventTypeId,e.eventName,e.eventStart,"
-                            + "e.eventEnd,e.state,et.eventTypeName";
+            string select = "SELECT e.eventId,e.userId,u.userName,e.eventTypeId,e.eventName,e.eventStart,"
+                            + "e.eventEnd,e.state,e.visible,et.eventTypeName";
             string from = "FROM pksudb.events AS e NATURAL JOIN pksudb.users AS u NATURAL JOIN pksudb.eventtypes AS et";
 
             // Build the where string
@@ -187,6 +187,13 @@ namespace CalendarApplication.Controllers
             where += (evm.ViewState1 ? "" : " AND (state != 1)");
             where += (evm.ViewState2 ? "" : " AND (state != 2)");
 
+            // If it is a day, we want the rooms too.
+            if (day)
+            {
+                select += ",r.roomId,r.roomName";
+                from += " NATURAL JOIN pksudb.eventroomsused AS eru NATURAL JOIN pksudb.rooms AS r";
+            }
+
             //   User authentication
             UserModel cur = UserModel.GetCurrent();
             if(cur == null)
@@ -197,13 +204,17 @@ namespace CalendarApplication.Controllers
             else if (!cur.Admin)
             {
                 // A user, that is not an admin -> get events that are authenticated.
-                from += " LEFT JOIN eventvisibility ON e.eventId = eventvisibility.eventId"
-                        + " LEFT JOIN groupmembers AS vis_group ON vis_group.groupId = eventvisibility.groupId"
-                        + " LEFT JOIN eventeditorsusers AS edt_user ON e.eventId = edt_user.eventId"
-                        + " LEFT JOIN eventeditorsgroups ON e.eventId = eventeditorsgroups.eventId"
-                        + " LEFT JOIN groupmembers AS edt_group ON edt_group.groupId = eventeditorsgroups.groupId";
-                where += " AND (e.userId = " + cur.ID + " OR e.visible = 1 OR vis_group.userId = " + cur.ID
-                            + " OR edt_group.userId = " + cur.ID + " OR edt_user.userId = " + cur.ID + ")";
+                from += " LEFT JOIN (SELECT eventId,userId"
+                        + " FROM eventeditorsusers"
+                        + " WHERE userId = 1) AS edt_user ON e.eventId = edt_user.eventId"
+                        + " LEFT JOIN (SELECT eventId,userId"
+                        + " FROM eventvisibility NATURAL JOIN groupmembers"
+                        + " WHERE userId = 1) AS vis_group ON e.eventId = vis_group.eventId"
+                        + "	LEFT JOIN (SELECT eventId,userId"
+                        + " FROM eventeditorsgroups NATURAL JOIN groupmembers"
+                        + "	WHERE userId = 1) AS edt_group ON e.eventId = edt_group.eventId";
+                // Add extra fields for view authentication
+                select += ",vis_group.userId AS group_vis,edt_group.userId AS group_edt, edt_user.userId AS user_edt";
             }
             //If admin, show all events.
 
@@ -215,9 +226,11 @@ namespace CalendarApplication.Controllers
             DataTable dt = msc.ExecuteQuery(query);
             if (dt != null)
             {
-                foreach (DataRow dr in dt.Rows)
+                int r = 0;
+                while (r < dt.Rows.Count)
                 {
-                    events.Add(new BasicEvent
+                    DataRow dr = dt.Rows[r];
+                    BasicEvent e = new BasicEvent
                     {
                         ID = (int)dr["eventId"],
                         Name = (string)dr["eventName"],
@@ -227,8 +240,33 @@ namespace CalendarApplication.Controllers
                         End = (DateTime)dr["eventEnd"],
                         State = (int)dr["state"],
                         TypeId = (int)dr["eventTypeId"],
-                        TypeName = (string)dr["eventTypeName"]
-                    });
+                        TypeName = (string)dr["eventTypeName"],
+                        Visible = (bool)dr["visible"]
+                    };
+                    // If no user and invisible event, do not add
+                    if (cur == null && !e.Visible) { continue; }
+                    // If not admin and invisible event and not creator, perform check:
+                    if (cur != null && !cur.Admin && !e.Visible && cur.ID != e.CreatorId)
+                    {
+                        bool isEdtUser = !(dr["user_edt"] is DBNull);
+                        bool isEdtGroup = !(dr["group_edt"] is DBNull);
+                        bool isVisGroup = !(dr["group_vis"] is DBNull);
+                        e.Visible = isEdtUser && isEdtGroup && isVisGroup;
+                    }
+                    // If day: get rooms and add, if visible, only add, else don't add the event
+                    if (day)
+                    {
+                        e.Rooms = new List<Room>();
+                        while (r < dt.Rows.Count && (int)dt.Rows[r]["eventId"] == e.ID)
+                        {
+                            e.Rooms.Add(new Room { ID = (int)dt.Rows[r]["roomId"], Name = (string)dt.Rows[r]["roomName"] });
+                            r++;
+                        }
+                        events.Add(e);
+                        continue;
+                    }
+                    else if(e.Visible) { events.Add(e); }
+                    r++;
                 }
             }
             else

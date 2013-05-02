@@ -6,6 +6,8 @@
 
 @using CalendarApplication.Models.User
 
+<h3 style="color:red">@TempData["errorMsg"]</h3>
+
 @if (Model.ID < 0) {
     <h2>Error loading user!</h2>
 }

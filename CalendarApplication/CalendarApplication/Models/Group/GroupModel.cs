@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.ComponentModel.DataAnnotations;
+using CalendarApplication.Models.User;
 
-namespace CalendarApplication.Models.User
+namespace CalendarApplication.Models.Group
 {
     /// <summary>
     /// Class GroupModel contains data for a group
@@ -12,8 +14,11 @@ namespace CalendarApplication.Models.User
     {
         public int ID { set; get; }
 
+        [Display(Name = "Group name:")]
         public string Name { set; get; }
         public bool Selected { set; get; }
+        public List<UserModel> groupMembers { set; get; }
+        public List<UserModel> groupLeaders { set; get; }
 
         //Override Equals
         public override bool Equals(object obj)

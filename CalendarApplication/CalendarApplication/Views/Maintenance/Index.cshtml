@@ -35,6 +35,19 @@
 
 <fieldset>
     <legend>Groups</legend>
+    <table>
+        <tr>
+            <td>
+                @Html.DropDownListFor(m => Model.SelectedGroup, new SelectList(Model.Groups, "Value", "Text"))
+            </td>
+            <td>
+                <input type="submit" value="Edit" onclick="setSubmitValue(2)" />
+            </td>
+            <td>
+                <input type="submit" value="Create new" onclick="setSubmitValue(3)" />
+            </td>
+        </tr>
+    </table>
 </fieldset>
 
 <fieldset>

@@ -7,6 +7,7 @@ using System.Data;
 
 using CalendarApplication.Controllers;
 using CalendarApplication.Models.Event;
+using CalendarApplication.Models.Group;
 
 namespace CalendarApplication.Models.User
 {
