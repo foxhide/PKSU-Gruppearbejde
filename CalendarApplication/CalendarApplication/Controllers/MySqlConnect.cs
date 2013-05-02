@@ -743,8 +743,8 @@ namespace CalendarApplication.Controllers
 
                                 
                                 //since the fdm is just a dummy when deleting, and thus has no relevant Datatype, this does not work.
-                                //bool keyDel = false;
-                                /*switch (fdm.Datatype)
+                                bool keyDel = false;
+                                switch (fdm.Datatype)
                                 {
                                     case Fieldtype.User:
                                         alterEventTable = "ALTER TABLE table_" + data.ID + " DROP FOREIGN KEY fieldIdCons_" + fdm.ID
@@ -764,9 +764,9 @@ namespace CalendarApplication.Controllers
                                     default: break;
                                 }
                                 if (!keyDel) { alterEventTable = "ALTER TABLE table_" + data.ID + " DROP COLUMN field_" + fdm.ID; }
-                                 */
+                                
 
-                                try
+                                /*try
                                 {
                                     cmd.CommandText = "ALTER TABLE table_" + data.ID + " DROP FOREIGN KEY fieldIdCons_" + fdm.ID
                                                       + " , DROP INDEX fieldIdCons_" + fdm.ID;
@@ -780,7 +780,8 @@ namespace CalendarApplication.Controllers
                                 finally
                                 {
                                     alterEventTable = "ALTER TABLE table_" + data.ID + " DROP COLUMN field_" + fdm.ID;
-                                }
+                                }*/
+
                                 //We have to remove the field, as it was found in the db.
                                 cmd.CommandText = removeField;
                                 cmd.Parameters["@fid"].Value = fdm.ID;
