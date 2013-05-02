@@ -136,7 +136,6 @@ namespace CalendarApplication.Controllers
         {
             DateTime start = new DateTime(evm.Year, evm.Month, evm.Day);
             DateTime end = start.AddDays(evm.Range);
-            string where = this.GetFilter(evm, start, end);
 
             List<BasicEvent> events = this.GetEvents(evm,start,end);
 
@@ -238,38 +237,6 @@ namespace CalendarApplication.Controllers
             }
 
             return events;
-        }
-
-        /// <summary>
-        /// Helper function: gets the string needed to filter events based on EventTypes, Dates and States
-        /// Note: Deprecated in favor of the above method.
-        /// </summary>
-        /// <param name="evm">EventViewModel</param>
-        /// <param name="start">Start date</param>
-        /// <param name="end">End date</param>
-        /// <returns>A string used in the where part of a </returns>
-        private string GetFilter(EventViewModel evm, DateTime start, DateTime end)
-        {
-            string morning = start.ToString("yyyy-MM-dd 00:00:00");
-            string night = end.ToString("yyyy-MM-dd 23:59:59");
-            string result = "((eventStart <= '" + night + "' AND eventStart >= '" + morning
-                            + "') OR (eventEnd <= '" + night + "' AND eventEnd >= '" + morning
-                            + "') OR (eventEnd >= '" + night + "' AND eventStart <= '" + morning + "'))";
-
-            foreach (EventTypeModel etm in evm.Eventtypes)
-            {
-                if (!etm.Selected)
-                {
-                    result += " AND ";
-                    result += "(eventTypeId != " + etm.ID + ")";
-                }
-            }
-
-            result += (evm.ViewState0 ? "" : " AND (state != 0)");
-            result += (evm.ViewState1 ? "" : " AND (state != 1)");
-            result += (evm.ViewState2 ? "" : " AND (state != 2)");
-
-            return "("+result+")";
         }
     }
 }
