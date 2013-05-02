@@ -13,5 +13,8 @@ namespace CalendarApplication.Models.Maintenance
 
         public string SelectedEventType { get; set; }
         public List<SelectListItem> EventTypes { get; set; }
+
+        public string SelectedGroup { get; set; }
+        public List<SelectListItem> Groups { get; set; }
     }
 }

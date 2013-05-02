@@ -11,6 +11,7 @@ using CalendarApplication.Models.Calendar;
 using CalendarApplication.Models.Event;
 using CalendarApplication.Models.Account;
 using CalendarApplication.Models.User;
+using CalendarApplication.Models.Group;
 using CalendarApplication.Models.EventType;
 
 namespace CalendarApplication.Controllers
@@ -1052,6 +1053,35 @@ namespace CalendarApplication.Controllers
                 ErrorMessage = "Could not open connection to database!";
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Create a new group -WIP
+        /// </summary>
+        /// <param name="groupmodel">Model with data to be stored</param>
+        /// <returns>bool indicating success or failure</returns>
+        public bool CreateGroup(GroupModel groupmodel)
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// Edit an existing group -WIP
+        /// </summary>
+        /// <param name="groupmodel"></param>
+        /// <returns>bool indicating success or failure</returns>
+        public bool EditGroup(GroupModel groupmodel)
+        {
+            //NOT FINISHED
+            string cmd = "UPDATE groups SET groupName = @groupName WHERE groupId = @groupId";
+            string[] argnames = { "@groupName", "@groupId" };
+            object[] args = { groupmodel.Name, groupmodel.ID };
+            CustomQuery query = new CustomQuery { Cmd = cmd, ArgNames = argnames, Args = args };
+            MySqlConnect msc = new MySqlConnect();
+            msc.ExecuteQuery(query);
+            
+            
+            return false;
         }
     }
 }
