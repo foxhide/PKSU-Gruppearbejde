@@ -83,16 +83,30 @@ namespace CalendarApplication.Models.User
         /// <returns>List of groups</returns>
         public List<GroupModel> GetGroups()
         {
-            //MySqlConnect msc = new MySqlConnect();
-            //return msc.GetGroups("groups NATURAL JOIN groupmembers NATURAL JOIN users","userId = "+ID);
-
             return GetGroups(this.ID);
         }
 
         public static List<GroupModel> GetGroups(int ID)
         {
+            List<GroupModel> result = new List<GroupModel>();
+            string[] argnames = { "@userId" };
+            object[] args = { ID };
+            CustomQuery query = new CustomQuery
+            {
+                Cmd = "SELECT * FROM groups NATURAL JOIN groupmembers NATURAL JOIN users WHERE userId = @userId ORDER BY groupId DESC", 
+                ArgNames = argnames,
+                Args = args
+            };
             MySqlConnect msc = new MySqlConnect();
-            return msc.GetGroups("groups NATURAL JOIN groupmembers NATURAL JOIN users","userId = "+ID);
+            DataTable table = msc.ExecuteQuery(query);
+            if (table != null)
+            {
+                foreach (DataRow dt in table.Rows)
+                {
+                    result.Add(new GroupModel { ID = (int)dt["groupId"], Name = (string)dt["groupName"] });
+                }
+            }
+            return result;
         }
 
         /// <summary>
@@ -108,9 +122,36 @@ namespace CalendarApplication.Models.User
         }
         public static List<BasicEvent> GetEvents(int ID)
         {
-
+            List<BasicEvent> result = new List<BasicEvent>();
+            string[] argnames = { "@userId" };
+            object[] args = { ID };
+            CustomQuery query = new CustomQuery
+            {
+                Cmd = "SELECT * FROM (events NATURAL JOIN users NATURAL JOIN eventtypes) " +
+                      "WHERE userId = @userId ORDER BY eventStart",
+                ArgNames = argnames,
+                Args = args
+            };
             MySqlConnect msc = new MySqlConnect();
-            return msc.GetEvents(false, "userId = " + ID, "eventStart");
+            DataTable table = msc.ExecuteQuery(query);
+            if (table != null)
+            {
+                foreach (DataRow dt in table.Rows)
+                {
+                    result.Add(new BasicEvent
+                        {
+                            ID = (int)dt["eventId"],
+                            Name = (string)dt["eventName"],
+                            Creator = (string)dt["username"],
+                            CreatorId = (int)dt["userId"],
+                            TypeName = (string)dt["eventTypeName"],
+                            Start = (DateTime)dt["eventStart"],
+                            End = (DateTime)dt["eventEnd"],
+                            State = (int)dt["state"]
+                        });
+                }
+            }
+            return result;
         }
     }
 }
