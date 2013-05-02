@@ -60,7 +60,7 @@
                     @{int curEnd = 0;}
                     @foreach (BasicEvent e in Model.Events)
                     {
-                        if (e.Rooms.Contains(room))
+                        if (e.Rooms != null && e.Rooms.Contains(room))
                         {
                             int start = (e.Start < Model.Date ? 0 : ((e.Start.Hour * 60 + e.Start.Minute)*100) / 1440);
                             int end = (e.End > Model.Date.AddDays(1) ? 100 : ((e.End.Hour * 60 + e.End.Minute)*100) / 1440);
@@ -70,7 +70,14 @@
                             <td style="width:@(start-curEnd)%;height:100%;padding:0"></td>
                             <td style="width:@(end-start)%;max-width:@(end-start)%;
                                 background-color:@(e.getColor());word-wrap:break-word;overflow:hidden">
-                                @Html.ActionLink((e.Name.Length > 10 ? e.Name.Substring(0,8)+"..." : e.Name), "Index", "Event", new { id = e.ID }, null)
+                                @if(e.Visible)
+                                {
+                                    @Html.ActionLink((e.Name.Length > 10 ? e.Name.Substring(0,8)+"..." : e.Name), "Index", "Event", new { id = e.ID }, null)
+                                }
+                                else
+                                {
+                                    @:Event not visible
+                                }
                             </td>
                     
                             curEnd = end;
@@ -85,7 +92,7 @@
 
 <br />
 
-@if(UserModel.GetCurrentUserID() != -1) {
+@if(UserModel.GetCurrentUserID() != -1 && DateTime.Today <= Model.Date) {
     <text>
         Would you like to
         @Html.ActionLink("create a new event on this day", "EditEvent", "Event",
