@@ -739,8 +739,12 @@ namespace CalendarApplication.Controllers
                             {
                                 //field was removed
                                 //remove foreign keys before dropping column if necessary
-                                bool keyDel = false;
-                                switch (fdm.Datatype)
+
+
+                                
+                                //since the fdm is just a dummy when deleting, and thus has no relevant Datatype, this does not work.
+                                //bool keyDel = false;
+                                /*switch (fdm.Datatype)
                                 {
                                     case Fieldtype.User:
                                         alterEventTable = "ALTER TABLE table_" + data.ID + " DROP FOREIGN KEY fieldIdCons_" + fdm.ID
@@ -760,6 +764,23 @@ namespace CalendarApplication.Controllers
                                     default: break;
                                 }
                                 if (!keyDel) { alterEventTable = "ALTER TABLE table_" + data.ID + " DROP COLUMN field_" + fdm.ID; }
+                                 */
+
+                                try
+                                {
+                                    cmd.CommandText = "ALTER TABLE table_" + data.ID + " DROP FOREIGN KEY fieldIdCons_" + fdm.ID
+                                                      + " , DROP INDEX fieldIdCons_" + fdm.ID;
+                                    cmd.Prepare();
+                                    cmd.ExecuteNonQuery();
+                                }
+                                catch (MySqlException ex0)
+                                {
+                                    //this just means there was no foreign key attached
+                                }
+                                finally
+                                {
+                                    alterEventTable = "ALTER TABLE table_" + data.ID + " DROP COLUMN field_" + fdm.ID;
+                                }
                                 //We have to remove the field, as it was found in the db.
                                 cmd.CommandText = removeField;
                                 cmd.Parameters["@fid"].Value = fdm.ID;
