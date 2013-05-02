@@ -5,17 +5,19 @@
 }
 
 @using CalendarApplication.Models.Event
+@using CalendarApplication.Models.EventType
 @using System.Data
 
 @if (Model.ID < 0) {
     <h2>Error loading event!</h2>
+    <h3 style="color:red">@TempData["errorMsg"]</h3>
 }
 else {
 <table>
     <tr>
         <td>Event Details</td>
         <td>Rooms Used</td>
-        @if (Model.EventSpecial != null && Model.EventSpecial.Rows.Count != 0)
+        @if (Model.TypeSpecifics != null && Model.TypeSpecifics.Count != 0)
         {
             <td>Event type specific</td>
         }
@@ -69,13 +71,24 @@ else {
         </td>
         <td>
             <table class="gridtable">
-                @if (Model.EventSpecial != null && Model.EventSpecial.Rows.Count != 0)
+                @if (Model.TypeSpecifics != null && Model.TypeSpecifics.Count != 0)
                 {
-                    foreach (DataColumn col in Model.EventSpecial.Columns)
+                    foreach (FieldModel fm in Model.TypeSpecifics)
                     {
                         <tr>
-                            <td>@col.ColumnName</td>
-                            <td>@Model.EventSpecial.Rows[0][col.ColumnName]</td>
+                            <td>@fm.Name</td>
+                            <td>
+                                @switch(fm.Datatype)
+                                {
+                                    case Fieldtype.Integer:     @fm.IntValue break;
+                                    case Fieldtype.User:        @Html.ActionLink(fm.StringValue, "Index", "User", new { UserId = fm.IntValue }, null) break;
+                                    case Fieldtype.Group:       @fm.StringValue break;
+                                    case Fieldtype.Text:        @fm.StringValue break;
+                                    case Fieldtype.File:        @fm.IntValue break;
+                                    case Fieldtype.Datetime:    @fm.DateValue break;
+                                    case Fieldtype.Bool:        @(fm.BoolValue ? "Yes" : "No") break;
+                                }
+                            </td>
                         </tr>
                     }
                 }

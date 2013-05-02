@@ -60,24 +60,36 @@ namespace CalendarApplication.Controllers
                 query1.Args = new object[] { result.TypeId };
                 DataSet ds = con.ExecuteQuery(new CustomQuery[] { query0, query1 });
 
-                /*
-                DataSet ds = con.ExecuteQuery(new string[] {
-                    "SELECT * FROM table_" + result.TypeId + " WHERE eventId = " + id,
-                    "SELECT * FROM pksudb.eventtypefields WHERE eventTypeId = " + result.TypeId
-                });*/
-
+                result.TypeSpecifics = new List<FieldModel>();
                 if (ds != null)
                 {
-                    result.EventSpecial = ds.Tables[0];
                     for (int i = 0; i < ds.Tables[1].Rows.Count; i++)
                     {
-                        result.EventSpecial.Columns[i + 1].ColumnName = (string)ds.Tables[1].Rows[i]["fieldName"];
+                        FieldModel fm = new FieldModel
+                        {
+                            ID = (int)ds.Tables[1].Rows[i]["fieldId"],
+                            Name = (string)ds.Tables[1].Rows[i]["fieldName"],
+                            Datatype = (Fieldtype)ds.Tables[1].Rows[i]["fieldType"]
+                        };
+                        switch(fm.Datatype)
+                        {
+                            case Fieldtype.Integer: fm.IntValue = (int)ds.Tables[0].Rows[0]["field_" + fm.ID]; break;
+                            case Fieldtype.File:
+                            case Fieldtype.Text: fm.StringValue = (string)ds.Tables[0].Rows[0]["field_" + fm.ID]; break;
+                            case Fieldtype.Bool: fm.BoolValue = (bool)ds.Tables[0].Rows[0]["field_" + fm.ID]; break;
+                            case Fieldtype.Datetime: fm.DateValue = (DateTime)ds.Tables[0].Rows[0]["field_" + fm.ID]; break;
+                            case Fieldtype.User: fm.IntValue = (int)ds.Tables[0].Rows[0]["field_" + fm.ID];
+                                                 fm.StringValue = UserModel.GetUser(fm.IntValue).UserName; break;
+                            case Fieldtype.Group: fm.IntValue = (int)ds.Tables[0].Rows[0]["field_" + fm.ID];
+                                                  fm.StringValue = "Group name not implemented until Andreas has made a GetGroup function..."; break;
+                        }
+                        result.TypeSpecifics.Add(fm);
                     }
                 }
             }
             else
             {
-                //negative event id upon error
+                TempData["errorMsg"] = con.ErrorMessage;
                 result.ID = -1;
             }
             return View(result);
@@ -254,7 +266,7 @@ namespace CalendarApplication.Controllers
 
             string basic = "SELECT eventName,eventTypeId,eventStart,eventEnd,userName "
                             + "FROM pksudb.events NATURAL JOIN pksudb.users"
-                            + "WHERE eventId == " + eem.ID;
+                            + "WHERE eventId = " + eem.ID;
             dt = msc.ExecuteQuery(basic);
 
             eem.Name = (string)dt.Rows[0]["eventName"];
@@ -268,7 +280,7 @@ namespace CalendarApplication.Controllers
                 eem.TypeSpecifics = new List<FieldModel>();
                 string specQuery = "SELECT * FROM eventtypefields WHERE eventTypeId = " + eem.SelectedEventType;
                 string specData = "SELECT * FROM pksudb.table_" + eem.SelectedEventType
-                                    + " WHERE eventId == " + eem.ID;
+                                    + " WHERE eventId = " + eem.ID;
 
                 DataSet ds = msc.ExecuteQuery(new[] { specQuery, specData });
                 if (ds != null)
