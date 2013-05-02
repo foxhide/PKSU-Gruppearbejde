@@ -8,6 +8,6 @@ namespace CalendarApplication.Models.Event
 {
     public class EventWithDetails : BasicEvent
     {
-        public DataTable EventSpecial { set; get; }
+        public List<FieldModel> TypeSpecifics { get; set; }
     }
 }
