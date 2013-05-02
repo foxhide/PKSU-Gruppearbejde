@@ -245,14 +245,14 @@ namespace CalendarApplication.Controllers
                         //Create Command and run it
 
                         cmd = new MySqlCommand(query.Cmd, connection);
-                        if (query.ArgNames.Length > 0 && query.Args.Length > 0)
+                        if (query.ArgNames != null && query.Args != null)
                         {
                             for (int i = 0; i < query.ArgNames.Length; i++)
                             {
                                 cmd.Parameters.AddWithValue(query.ArgNames[i], query.Args[i]);
                             }
-                            cmd.Prepare();
                         }
+                        cmd.Prepare();
                         MySqlDataReader dataReader = cmd.ExecuteReader();
 
                         //Set the table columns
@@ -372,6 +372,7 @@ namespace CalendarApplication.Controllers
 
         }
 
+        /*
         public List<BasicEvent> GetEvents(bool rooms, string whereStatement, string orderBy)
         {
             //Open connection
@@ -437,7 +438,7 @@ namespace CalendarApplication.Controllers
                 return null;
             }
 
-        }
+        }*/
 
         public List<Room> GetRooms()
         {
