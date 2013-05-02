@@ -23,10 +23,10 @@ namespace CalendarApplication.Models.Event
             switch (this.Datatype)
             {
                 case Fieldtype.Integer: return this.IntValue;
-                case Fieldtype.User: return this.IntValue; //int, userId
-                case Fieldtype.Group: return this.IntValue; //int, groupId
+                case Fieldtype.User: if (this.IntValue < 1) { return null; } else { return this.IntValue; } //int or null, userId
+                case Fieldtype.Group: if (this.IntValue < 1) { return null; } else { return this.IntValue; } //int or null, groupId
                 case Fieldtype.Text: return this.StringValue;
-                case Fieldtype.File: return this.IntValue; //int, fileId
+                case Fieldtype.File: if (this.IntValue < 1) { return null; } else { return this.IntValue; } //int or null, fileId
                 case Fieldtype.Datetime: return this.DateValue;
                 case Fieldtype.Bool: return this.BoolValue; //bool
             }

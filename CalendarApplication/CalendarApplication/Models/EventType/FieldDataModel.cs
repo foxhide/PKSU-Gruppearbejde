@@ -48,6 +48,7 @@ namespace CalendarApplication.Models.EventType
 
         public int ID { set; get; }
 
+        [Required]
         [Display(Name = "Field name")]
         public string Name { set; get; }
 

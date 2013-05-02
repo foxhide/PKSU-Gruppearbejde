@@ -720,7 +720,7 @@ namespace CalendarApplication.Controllers
                         cmd.Parameters.AddWithValue("@fvarchr", null);
 
                         string updateField = "UPDATE pksudb.eventtypefields SET fieldName = @fname , fieldDescription = @fdescr"
-                                             + " , requiredField = @freq , fieldType = @fdattyp WHERE eventTypeId = @etid"
+                                             + " , requiredField = @freq , varCharLength = @fvarchr WHERE eventTypeId = @etid"
                                              + " AND fieldId = @fid;";
 
                         string insertField = "INSERT INTO pksudb.eventtypefields"
@@ -732,21 +732,43 @@ namespace CalendarApplication.Controllers
 
                         foreach (FieldDataModel fdm in data.TypeSpecific)
                         {
-                            string alterEventTable;
-
+                            string alterEventTable = "";
+                            bool altered = false;
                             if (fdm.ViewID == -1)
                             {
-                                alterEventTable = "ALTER TABLE table_" + data.ID + " DROP COLUMN field_" + fdm.ID;
-
+                                //field was removed
+                                //remove foreign keys before dropping column if necessary
+                                bool keyDel = false;
+                                switch (fdm.Datatype)
+                                {
+                                    case Fieldtype.User:
+                                        alterEventTable = "ALTER TABLE table_" + data.ID + " DROP FOREIGN KEY fieldIdCons_" + fdm.ID
+                                                          + " , DROP INDEX fieldIdCons_" + fdm.ID + " , DROP COLUMN field_" + fdm.ID + " ;";
+                                        keyDel = true;
+                                        break;
+                                    case Fieldtype.Group:
+                                        alterEventTable = "ALTER TABLE table_" + data.ID + " DROP FOREIGN KEY fieldIdCons_" + fdm.ID
+                                                          + " , DROP INDEX fieldIdCons_" + fdm.ID + " , DROP COLUMN field_" + fdm.ID + " ;";
+                                        keyDel = true;
+                                        break;
+                                    case Fieldtype.File:
+                                        alterEventTable = "ALTER TABLE table_" + data.ID + " DROP FOREIGN KEY fieldIdCons_" + fdm.ID
+                                                          + " , DROP INDEX fieldIdCons_" + fdm.ID + " , DROP COLUMN field_" + fdm.ID + " ;";
+                                        keyDel = true;
+                                        break;
+                                    default: break;
+                                }
+                                if (!keyDel) { alterEventTable = "ALTER TABLE table_" + data.ID + " DROP COLUMN field_" + fdm.ID; }
                                 //We have to remove the field, as it was found in the db.
                                 cmd.CommandText = removeField;
                                 cmd.Parameters["@fid"].Value = fdm.ID;
                                 cmd.Prepare();
                                 cmd.ExecuteNonQuery();
+                                altered = true;
                             }
                             else if (fdm.ViewID == -2)
                             {
-
+                                //new field was added
                                 cmd.CommandText = insertField;
                                 cmd.Parameters["@fname"].Value = fdm.Name;
                                 cmd.Parameters["@fdescr"].Value = fdm.Description;
@@ -756,25 +778,61 @@ namespace CalendarApplication.Controllers
                                 cmd.Prepare();
                                 int id = Convert.ToInt32(cmd.ExecuteScalar());
 
-                                alterEventTable = "ALTER TABLE table_" + data.ID + " ADD field_" + id + " " + fdm.GetDBType();
+                                alterEventTable = "ALTER TABLE table_" + data.ID + " ADD COLUMN field_" + id + " " + fdm.GetDBType();
+
+                                //add foreign keys after adding column if necessary
+                                switch (fdm.Datatype)
+                                {
+                                    case Fieldtype.User:
+                                        alterEventTable += " , ADD CONSTRAINT "
+                                                           + "fieldIdCons_" + id
+                                                           + " FOREIGN KEY (field_" + id + ") REFERENCES pksudb.users (userId) "
+                                                           + "ON DELETE SET NULL "
+                                                           + "ON UPDATE NO ACTION ;";
+                                        break;
+                                    case Fieldtype.Group:
+                                        alterEventTable += " , ADD CONSTRAINT "
+                                                           + "fieldIdCons_" + id
+                                                           + " FOREIGN KEY (field_" + id + ") REFERENCES pksudb.groups (groupId) "
+                                                           + "ON DELETE SET NULL "
+                                                           + "ON UPDATE NO ACTION ;";
+                                        break;
+                                    case Fieldtype.File:
+                                        alterEventTable += " , ADD CONSTRAINT "
+                                                           + "fieldIdCons_" + id
+                                                           + " FOREIGN KEY (field_" + id + ") REFERENCES pksudb.files (fileId) "
+                                                           + "ON DELETE SET NULL "
+                                                           + "ON UPDATE NO ACTION ;";
+                                        break;
+                                    default: break;
+                                }
+
+                                altered = true;
                             }
                             else
                             {
-
-                                alterEventTable = "ALTER TABLE table_" + data.ID + " MODIFY COLUMN field_" + fdm.ID + " " + fdm.GetDBType();
+                                //field MIGHT have been changed
+                                //don't allow datatype to be changed
+                                //alterEventTable = "ALTER TABLE table_" + data.ID + " MODIFY COLUMN field_" + fdm.ID + " " + fdm.GetDBType();
 
                                 cmd.CommandText = updateField;
                                 cmd.Parameters["@fname"].Value = fdm.Name;
                                 cmd.Parameters["@fdescr"].Value = fdm.Description;
                                 cmd.Parameters["@freq"].Value = fdm.Required;
-                                cmd.Parameters["@fdattyp"].Value = fdm.GetTypeAsInt();
+                                cmd.Parameters["@fvarchr"].Value = fdm.VarcharLength;
+                                //cmd.Parameters["@fdattyp"].Value = fdm.GetTypeAsInt();
                                 cmd.Parameters["@fid"].Value = fdm.ID;
                                 cmd.Prepare();
                                 cmd.ExecuteNonQuery();
                             }
 
-                            cmd.CommandText = alterEventTable;
-                            cmd.ExecuteNonQuery();
+                            if(altered)
+                            {
+                                cmd.CommandText = alterEventTable;
+                                cmd.Prepare();
+                                cmd.ExecuteNonQuery();
+                            }
+
                         }
                     }
 
@@ -978,7 +1036,7 @@ namespace CalendarApplication.Controllers
                     {
                         if (edtgrp.Selected)
                         {
-                            cmd.Parameters["@grpid"].Value = edtgrp.Value;
+                            cmd.Parameters["@edtgrpid"].Value = edtgrp.Value;
                             cmd.ExecuteNonQuery();
                         }
                     }
@@ -990,14 +1048,14 @@ namespace CalendarApplication.Controllers
                     if (!eem.Visible)
                     {
                         cmd.CommandText = "INSERT INTO pksudb.eventvisibility(eventId,groupId)"
-                                                      + " VALUES ( @nid , @grpid );";
-                        cmd.Parameters.AddWithValue("@grpid", null);
+                                                      + " VALUES ( @nid , @visgrpid );";
+                        cmd.Parameters.AddWithValue("@visgrpid", null);
                         cmd.Prepare();
                         foreach (SelectListItem edtgrp in eem.GroupVisibleList)
                         {
                             if (edtgrp.Selected)
                             {
-                                cmd.Parameters["@grpid"].Value = edtgrp.Value;
+                                cmd.Parameters["@visgrpid"].Value = edtgrp.Value;
                                 cmd.ExecuteNonQuery();
                             }
                         }

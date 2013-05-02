@@ -14,12 +14,20 @@
     <tr>
         <td><input type='text' id='Name_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].Name' value="@(Model.Name)"></td>
         <td>
-            <select id='Type_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].Datatype' onchange="updateVarChar(@(Model.ViewID));">
+         <select id='Type_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].Datatype' onchange="updateVarChar(@(Model.ViewID));">
                 @for (int i = 0; i < FieldDataModel.DATA_TYPES.Count; i++)
                 {
+                    if(Model.ID == -1)
+                    {   
                     <option value="@(i)" @(i == (int)Model.Datatype?"Selected":"")>@FieldDataModel.DATA_TYPES[i]</option>
+                    }
+                    else
+                    {
+                          if(i==(int)Model.Datatype){<option value="@(i)" @("Selected")>@FieldDataModel.DATA_TYPES[i]</option>}
+                    }
                 }
             </select>
+         
         </td>
         <td rowspan="3"><div id="Desc_@(Model.ViewID)_char_counter">Characters left: 100</div>
             <textarea id='Desc_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].Description'
