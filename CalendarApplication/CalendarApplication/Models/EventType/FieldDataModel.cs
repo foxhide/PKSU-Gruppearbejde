@@ -8,7 +8,7 @@ namespace CalendarApplication.Models.EventType
 {
     public enum Fieldtype
     {
-        Integer,
+        Float,
         Text,
         Datetime,
         User,
@@ -22,13 +22,13 @@ namespace CalendarApplication.Models.EventType
         public static List<string> DATA_TYPES
             = new List<string>
             {
-                "Integer",
+                "Number",
                 "Text",
                 "Date",
                 "User",
                 "Group",
                 "File",
-                "Yes/No"
+                "Checkbox"
             };
 
         public FieldDataModel()
@@ -41,7 +41,8 @@ namespace CalendarApplication.Models.EventType
             this.ID = -1;
             this.Name = "";
             this.Description = "";
-            this.Required = false;
+            this.RequiredCreate = false;
+            this.RequiredApprove = false;
             this.Datatype = 0;
             this.ViewID = id;
         }
@@ -55,8 +56,11 @@ namespace CalendarApplication.Models.EventType
         [Display(Name = "Description (max 100 characters)")]
         public string Description { set; get; }
 
-        [Display(Name = "Required")]
-        public bool Required { set; get; }
+        [Display(Name = "Required For Creation")]
+        public bool RequiredCreate { set; get; }
+
+        [Display(Name = "Required For Approval")]
+        public bool RequiredApprove { set; get; }
 
         public Fieldtype Datatype { set; get; }
         public int VarcharLength { set; get; }
@@ -69,7 +73,7 @@ namespace CalendarApplication.Models.EventType
             {
                 case Fieldtype.Text: return "varchar("+this.VarcharLength+")";
                 case Fieldtype.Datetime: return "datetime";
-                case Fieldtype.Integer: return "int";
+                case Fieldtype.Float: return "float";
                 case Fieldtype.User: return "int"; //userId
                 case Fieldtype.Group: return "int"; //groupId
                 case Fieldtype.File: return "int";  //fileId
@@ -82,7 +86,7 @@ namespace CalendarApplication.Models.EventType
         {
             switch (this.Datatype)
             {
-                case Fieldtype.Integer: return 0;
+                case Fieldtype.Float: return 0;
                 case Fieldtype.Text: return 1;
                 case Fieldtype.Datetime: return 2;
                 case Fieldtype.User: return 3;

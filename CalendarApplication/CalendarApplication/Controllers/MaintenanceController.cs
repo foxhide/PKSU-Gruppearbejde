@@ -117,7 +117,8 @@ namespace CalendarApplication.Controllers
                             ID = (int)dr["fieldId"],
                             Name = (string)dr["fieldName"],
                             Description = dr["fieldDescription"] as string,
-                            Required = (bool)dr["requiredField"],
+                            RequiredCreate = (bool)dr["requiredCreation"],
+                            RequiredApprove = (bool)dr["requiredApproval"],
                             Datatype = (Fieldtype)dr["fieldType"],
                             ViewID = etm.TypeSpecific.Count,
                             VarcharLength = (int)dr["varCharLength"]

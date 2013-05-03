@@ -12,6 +12,7 @@ namespace CalendarApplication.Models.Event
     public class FieldModel : FieldDataModel
     {
         public int IntValue { get; set; }
+        public float FloatValue { get; set; }
         public string StringValue { get; set; }
         public bool BoolValue { get; set; }
         public DateTime DateValue { get; set; }
@@ -22,7 +23,7 @@ namespace CalendarApplication.Models.Event
         {
             switch (this.Datatype)
             {
-                case Fieldtype.Integer: return this.IntValue;
+                case Fieldtype.Float: return this.FloatValue;
                 case Fieldtype.User: if (this.IntValue < 1) { return null; } else { return this.IntValue; } //int or null, userId
                 case Fieldtype.Group: if (this.IntValue < 1) { return null; } else { return this.IntValue; } //int or null, groupId
                 case Fieldtype.Text: return this.StringValue;

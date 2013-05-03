@@ -181,7 +181,7 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`groupmembers` (
   `groupId` INT NOT NULL ,
   `userId` INT NOT NULL ,
   `groupLeader` TINYINT(1) NULL DEFAULT 0 ,
-  `approved` TINYINT(1) NULL DEFAULT 0 ,
+  `canCreate` TINYINT(1) NULL DEFAULT 0 ,
   PRIMARY KEY (`groupId`, `userId`) ,
   INDEX `membergroupid_idx` (`groupId` ASC) ,
   INDEX `memberuserid_idx` (`userId` ASC) ,
@@ -199,6 +199,7 @@ ENGINE = InnoDB
 COMMENT = 'A table describing which users belong to which groups.\n\ngrou /* comment truncated */ /*pId: foreign key referencing groups table.
 userId: foreign key referencing users table.
 groupLeader: whether this user is one of the group leaders.
+canCreate: whether this user can create events of the types allowed in this group. irrelevant if group leader.
 primary key is both together.*/';
 
 
@@ -254,7 +255,8 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`eventtypefields` (
   `eventTypeId` INT NOT NULL ,
   `fieldName` VARCHAR(45) NOT NULL ,
   `fieldDescription` VARCHAR(100) NULL ,
-  `requiredField` TINYINT(1) NULL DEFAULT 0 ,
+  `requiredCreation` TINYINT(1) NULL DEFAULT 0 ,
+  `requiredApproval` TINYINT(1) NULL DEFAULT 0 ,
   `fieldType` INT NULL ,
   `varCharLength` INT NULL DEFAULT 0 ,
   PRIMARY KEY (`fieldId`) ,
@@ -271,8 +273,9 @@ fieldId: Primary key. Auto incremented.
 eventTypeId: foreign key referencing eventtypenames. cannot be null.
 fieldName: name of the field in the database. cannot be null.
 fieldDescription: description of a field. cannot be null.
-requiredField: whether or not filling this field is required.
-fieldType: 0 for int, 1 for text, 2 for date, 3 for user, 4 for group, 5 for file, 6 for boolean.
+requiredCreation: whether or not filling this field is required to create an event of this type.
+requiredApproval: whether or not filling this field is required for full approval of an event of this type.
+fieldType: 0 for float, 1 for text, 2 for date, 3 for user, 4 for group, 5 for file, 6 for boolean.
 varCharLength: length of string if type is string, 0 if not string.*/';
 
 
@@ -335,5 +338,3 @@ USE `pksudb` ;
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
-
-COMMIT;

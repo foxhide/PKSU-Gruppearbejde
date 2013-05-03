@@ -25,6 +25,11 @@
                 @Html.LabelFor(m => m.Name)
                 @Html.TextBoxFor(m => m.Name)
                 <br />
+                @Html.LabelFor(m => m.SelectedEventType)
+                @Html.DropDownListFor(m => Model.SelectedEventType,
+                                        new SelectList(Model.EventTypes, "Value", "Text"),
+                                        new { onchange="this.form.submit()" })
+
                 <br />
                 @Html.LabelFor(m => m.Start) <br />
                 @Html.DateTimeEditorFor(m => m.Start, "g.today,l.End")
@@ -37,11 +42,7 @@
                 @Html.ListEditorFor(m => m.RoomSelectList, "Rooms Selected", "Rooms Available")
                 <br />
 
-                @Html.LabelFor(m => m.SelectedEventType)
-                @Html.DropDownListFor(m => Model.SelectedEventType,
-                                        new SelectList(Model.EventTypes, "Value", "Text"),
-                                        new { onchange="this.form.submit()" })
-
+ 
                 @if (Model.TypeSpecifics != null && Model.TypeSpecifics.Count > 0)
                 {
                     <h3>Event Type Specifics:</h3>

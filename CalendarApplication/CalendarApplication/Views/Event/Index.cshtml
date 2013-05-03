@@ -80,7 +80,7 @@ else {
                             <td>
                                 @switch(fm.Datatype)
                                 {
-                                    case Fieldtype.Integer:     @fm.IntValue break;
+                                    case Fieldtype.Float:       @fm.FloatValue break;
                                     case Fieldtype.User:        @Html.ActionLink(fm.StringValue, "Index", "User", new { UserId = fm.IntValue }, null) break;
                                     case Fieldtype.Group:       @fm.StringValue break;
                                     case Fieldtype.Text:        @fm.StringValue break;

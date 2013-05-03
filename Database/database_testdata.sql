@@ -24,14 +24,14 @@ INSERT INTO groups (groupName) VALUES ("Minecraft Gurus");
 INSERT INTO groups (groupName) VALUES ("L04");
 
 -- Groupmembers
-INSERT INTO groupmembers(groupId,userId,approved) VALUES (4,1,1);
-INSERT INTO groupmembers(groupId,userId,approved) VALUES (4,2,1);
-INSERT INTO groupmembers(groupId,userId,approved) VALUES (4,3,1);
-INSERT INTO groupmembers(groupId,userId,approved) VALUES (3,2,1);
-INSERT INTO groupmembers(groupId,userId,approved) VALUES (2,1,1);
-INSERT INTO groupmembers(groupId,userId,approved) VALUES (1,3,1);
-INSERT INTO groupmembers(groupId,userId,approved) VALUES (1,1,1);
-INSERT INTO groupmembers(groupId,userId,approved) VALUES (4,4,1);
+INSERT INTO groupmembers(groupId,userId,groupLeader,canCreate) VALUES (4,1,1,1);
+INSERT INTO groupmembers(groupId,userId,groupLeader,canCreate) VALUES (4,2,1,1);
+INSERT INTO groupmembers(groupId,userId,groupLeader,canCreate) VALUES (4,3,1,1);
+INSERT INTO groupmembers(groupId,userId,groupLeader,canCreate) VALUES (3,2,1,1);
+INSERT INTO groupmembers(groupId,userId,groupLeader,canCreate) VALUES (2,1,1,1);
+INSERT INTO groupmembers(groupId,userId,groupLeader,canCreate) VALUES (1,3,1,1);
+INSERT INTO groupmembers(groupId,userId,groupLeader,canCreate) VALUES (1,1,1,1);
+INSERT INTO groupmembers(groupId,userId,groupLeader,canCreate) VALUES (4,4,0,0);
 
 -- Event types
 	-- Basic event (no fields)
@@ -49,7 +49,7 @@ CREATE TABLE pksudb.table_1 (
 
 	-- Concert event
 INSERT INTO eventtypes (eventTypeName) VALUES ("Concert");
-INSERT INTO eventtypefields (eventTypeId, fieldName, fieldDescription, requiredField, fieldType, varCharLength) VALUES (2, "Band-name","Name of the band that's playing",1,1,50);
+INSERT INTO eventtypefields (eventTypeId, fieldName, fieldDescription, requiredCreation, requiredApproval, fieldType, varCharLength) VALUES (2, "Band-name","Name of the band that's playing",1,1,1,50);
 
 CREATE TABLE pksudb.table_2 (
 	eventId int NOT NULL,
