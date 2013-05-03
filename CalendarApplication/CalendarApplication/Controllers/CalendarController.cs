@@ -9,6 +9,7 @@ using CalendarApplication.Models.Calendar;
 using CalendarApplication.Models.Event;
 using CalendarApplication.Models.User;
 using CalendarApplication.Models.EventType;
+using CalendarApplication.Models.Maintenance;
 
 namespace CalendarApplication.Controllers
 {
@@ -83,10 +84,9 @@ namespace CalendarApplication.Controllers
             int before = (int)first.DayOfWeek == 0 ? 6 : (int)first.DayOfWeek - 1;
             int days = DateTime.DaysInMonth(evm.Year, evm.Month) + before;
             days = days % 7 > 0 ? days + (7 - days % 7) : days;
-            
-            List<BasicEvent> events = this.GetEvents(evm, first, first.AddDays(days - 1),false);
-
             first = first.AddDays(-before);
+            
+            List<BasicEvent> events = this.GetEvents(evm, first, first.AddDays(days),false);
 
             for (int i = 0; i < days; i++)
             {
@@ -100,6 +100,7 @@ namespace CalendarApplication.Controllers
                 cdays.Add(cd);
             }
 
+            first = first.AddHours(Config.GetStartingHourOfDay());
             foreach (BasicEvent ev in events)
             {
                 TimeSpan end = ev.End - first;
@@ -120,11 +121,11 @@ namespace CalendarApplication.Controllers
             MySqlConnect msc = new MySqlConnect();
             DateTime date = new DateTime(evm.Year, evm.Month, evm.Day);
 
-            List<BasicEvent> events = this.GetEvents(evm, date, date,true);
+            List<BasicEvent> events = this.GetEvents(evm, date, date.AddDays(1),true);
 
             CalendarDay result = new CalendarDay
             {
-                Date = date,
+                Date = date.AddHours(Config.GetStartingHourOfDay()),
                 Rooms = msc.GetRooms(),
                 Events = events
             };
@@ -168,8 +169,15 @@ namespace CalendarApplication.Controllers
 
             // Build the where string
             //   - Input from filter:
-            string morning = start.ToString("yyyy-MM-dd 00:00:00");
-            string night = end.ToString("yyyy-MM-dd 23:59:59");
+
+            // Sanitize:
+            start = start.Date;
+            end = end.Date;
+
+            //     Calculate offset
+            int offset = Config.GetStartingHourOfDay();
+            string morning = start.AddHours(offset).ToString("yyyy-MM-dd HH:00:00");
+            string night = end.AddHours(offset).ToString("yyyy-MM-dd HH:00:00");
             string where = "WHERE ((eventStart <= '" + night + "' AND eventStart >= '" + morning
                             + "') OR (eventEnd <= '" + night + "' AND eventEnd >= '" + morning
                             + "') OR (eventEnd >= '" + night + "' AND eventStart <= '" + morning + "'))";

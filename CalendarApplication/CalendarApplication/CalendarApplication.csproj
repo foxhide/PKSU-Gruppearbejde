@@ -134,6 +134,7 @@
     <Compile Include="Models\Event\FieldModel.cs" />
     <Compile Include="Models\Event\Room.cs" />
     <Compile Include="Models\Account\LoginModel.cs" />
+    <Compile Include="Models\Maintenance\Config.cs" />
     <Compile Include="Models\Maintenance\MaintenanceModel.cs" />
     <Compile Include="Models\Group\GroupModel.cs" />
     <Compile Include="Models\Maintenance\ManageUserModel.cs" />
