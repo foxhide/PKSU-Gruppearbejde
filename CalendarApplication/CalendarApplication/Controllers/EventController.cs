@@ -74,13 +74,23 @@ namespace CalendarApplication.Controllers
                         switch(fm.Datatype)
                         {
                             case Fieldtype.Integer: fm.IntValue = (int)ds.Tables[0].Rows[0]["field_" + fm.ID]; break;
-                            case Fieldtype.File:
-                            case Fieldtype.Text: fm.StringValue = (string)ds.Tables[0].Rows[0]["field_" + fm.ID]; break;
+
+                            case Fieldtype.File: if (DBNull.Value.Equals(ds.Tables[0].Rows[0]["field_" + fm.ID])) { fm.IntValue = 0; }
+                                                 else { fm.IntValue = (int)ds.Tables[0].Rows[0]["field_" + fm.ID]; }
+                                                 fm.StringValue = "File system not yet implemented."; break;
+
+                            case Fieldtype.Text: fm.StringValue = ds.Tables[0].Rows[0]["field_" + fm.ID] as string; break;
+
                             case Fieldtype.Bool: fm.BoolValue = (bool)ds.Tables[0].Rows[0]["field_" + fm.ID]; break;
+
                             case Fieldtype.Datetime: fm.DateValue = (DateTime)ds.Tables[0].Rows[0]["field_" + fm.ID]; break;
-                            case Fieldtype.User: fm.IntValue = (int)ds.Tables[0].Rows[0]["field_" + fm.ID];
+
+                            case Fieldtype.User: if (DBNull.Value.Equals(ds.Tables[0].Rows[0]["field_" + fm.ID])) { fm.IntValue = 0; }
+                                                 else { fm.IntValue = (int)ds.Tables[0].Rows[0]["field_" + fm.ID]; }
                                                  fm.StringValue = UserModel.GetUser(fm.IntValue).UserName; break;
-                            case Fieldtype.Group: fm.IntValue = (int)ds.Tables[0].Rows[0]["field_" + fm.ID];
+
+                            case Fieldtype.Group: if (DBNull.Value.Equals(ds.Tables[0].Rows[0]["field_" + fm.ID])) { fm.IntValue = 0; }
+                                                  else { fm.IntValue = (int)ds.Tables[0].Rows[0]["field_" + fm.ID]; }
                                                   fm.StringValue = "Group name not implemented until Andreas has made a GetGroup function..."; break;
                         }
                         result.TypeSpecifics.Add(fm);

@@ -29,6 +29,16 @@
         #fields th {padding:0;}
     </style>
     
+    <fieldset>
+        <legend>Group Management</legend>
+        Group Leaders
+        @Html.ListEditorFor(m => m.groupLeaders, "Group Leaders", "Group Members")
+        <br />
+
+        Group Members
+        @Html.ListEditorFor(m => m.groupMembers, "Group Members", "Approved Users")
+        <br />
+    </fieldset>
     
     <input type="submit" value="@(Model.ID != -1 ? "Save changes" : "Create Group")"/>
 }
