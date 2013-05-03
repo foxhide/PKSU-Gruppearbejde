@@ -109,7 +109,7 @@ namespace CalendarApplication.Controllers
                     //Create Command and run it
 
                     cmd = new MySqlCommand(query.Cmd, connection);
-                    if (query.ArgNames.Length > 0 && query.Args.Length > 0)
+                    if (query.ArgNames != null && query.Args != null)
                     {
                         for (int i = 0; i < query.ArgNames.Length; i++)
                             {

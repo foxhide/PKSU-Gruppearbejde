@@ -127,7 +127,7 @@ namespace CalendarApplication.Controllers
 
             // Get list of users
             eem.UserEditorList = new List<SelectListItem>();
-            string userquery = "SELECT userId,userName FROM pksudb.users";
+            string userquery = "SELECT userId,userName FROM pksudb.users ORDER BY userName";
             dt = msc.ExecuteQuery(userquery);
             if (dt != null)
             {
@@ -144,7 +144,7 @@ namespace CalendarApplication.Controllers
             // Get list of groups
             eem.GroupEditorList = new List<SelectListItem>();
             eem.GroupVisibleList = new List<SelectListItem>();
-            string groupquery = "SELECT groupId,groupName FROM pksudb.groups";
+            string groupquery = "SELECT groupId,groupName FROM pksudb.groups ORDER BY groupName";
             dt = msc.ExecuteQuery(groupquery);
             if (dt != null)
             {

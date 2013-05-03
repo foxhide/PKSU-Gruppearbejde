@@ -220,6 +220,33 @@ namespace CalendarApplication.Controllers
             return RedirectToAction("Index", "Maintenance", null);
         }
 
+        public ActionResult ManageUsers()
+        {
+            ManageUserModel mum = new ManageUserModel
+            {
+                UASelect = 0,
+                UsersApproved = new List<SelectListItem>(),
+                UNASelect = 0,
+                UsersNotApproved = new List<SelectListItem>(),
+                UISelect = 0,
+                UsersInactive = new List<SelectListItem>()
+            };
+
+            MySqlConnect msc = new MySqlConnect();
+            CustomQuery query = new CustomQuery { Cmd = "SELECT userId,userName,needsApproval,active FROM pksudb.users ORDER BY userName" };
+            DataTable dt = msc.ExecuteQuery(query);
+
+            foreach (DataRow dr in dt.Rows)
+            {
+                SelectListItem sli = new SelectListItem { Value = ((int)dr["userId"]).ToString(), Text = (string)dr["userName"] };
+                if (!((bool)dr["active"])) { mum.UsersInactive.Add(sli); }
+                else if ((bool)dr["needsApproval"]) { mum.UsersNotApproved.Add(sli); }
+                else { mum.UsersApproved.Add(sli); }
+            }
+            
+            return View(mum);
+        }
+
     }
 
 }

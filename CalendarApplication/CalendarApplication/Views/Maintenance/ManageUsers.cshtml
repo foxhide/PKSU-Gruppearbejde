@@ -1,0 +1,16 @@
+﻿@model CalendarApplication.Models.Maintenance.ManageUserModel
+
+@{
+    ViewBag.Title = "ManageUsers";
+}
+
+<h2>Manage Users</h2>
+
+<h3>Users currently active: <span style="color:green">@Model.UsersApproved.Count</span></h3>
+@Html.DropDownListFor(m => Model.UASelect, new SelectList(Model.UsersApproved, "Value", "Text"), new { size="4" })
+
+<h3>Users awaiting approval: <span style="color:yellow">@Model.UsersNotApproved.Count</span></h3>
+@Html.DropDownListFor(m => Model.UNASelect, new SelectList(Model.UsersNotApproved, "Value", "Text"), new { size="4" })
+
+<h3>Inactive users: <span style="color:red">@Model.UsersInactive.Count</span></h3>
+@Html.DropDownListFor(m => Model.UISelect, new SelectList(Model.UsersInactive, "Value", "Text"), new { size="4" })
