@@ -187,7 +187,11 @@ namespace CalendarApplication.Controllers
             {
                 MySqlConnect msc = new MySqlConnect();
                 eem.CreatorId = UserModel.GetCurrentUserID();
-                if (msc.EditEvent(eem)) { return RedirectToAction("Index", "Home", null); }
+                int id = msc.EditEvent(eem);
+                if (id > 0)
+                {
+                    return RedirectToAction("Index", "Event", new { id = id });
+                }
                 else {
                     TempData["errorMsg"] = msc.ErrorMessage;
                     this.createModel(eem);

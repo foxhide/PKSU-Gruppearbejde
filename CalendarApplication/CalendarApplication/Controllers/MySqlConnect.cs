@@ -881,12 +881,13 @@ namespace CalendarApplication.Controllers
 
         }
 
-        public bool EditEvent(EventEditModel eem)
+        public int EditEvent(EventEditModel eem)
         {
             if (this.OpenConnection() == true)
             {
                 MySqlTransaction mst = null;
                 MySqlCommand cmd = null;
+                int newId = -1;
 
                 try
                 {
@@ -894,7 +895,6 @@ namespace CalendarApplication.Controllers
                     cmd = new MySqlCommand();
                     cmd.Connection = connection;
                     cmd.Transaction = mst;
-                    int newId;
 
                     string prevType = eem.SelectedEventType;
                     if (eem.ID != -1)
@@ -1084,22 +1084,22 @@ namespace CalendarApplication.Controllers
                         this.CloseConnection();
                         ErrorMessage = "Some database error occured: Discarded changes, Error message: " + ex0.Message
                                         + ", Caused by: " + cmd.CommandText;
-                        return false;
+                        return -1;
                     }
                     catch (MySqlException ex1)
                     {
                         this.CloseConnection();
                         ErrorMessage = "Some database error occured: Could not discard changes, DB corrupt, Error message: " + ex1.Message
                                         + ", Caused by: " + cmd.CommandText;
-                        return false;
+                        return -1;
                     }
                 }
-                return true;
+                return newId;
             }
             else
             {
                 ErrorMessage = "Could not open connection to database!";
-                return false;
+                return -1;
             }
         }
 
