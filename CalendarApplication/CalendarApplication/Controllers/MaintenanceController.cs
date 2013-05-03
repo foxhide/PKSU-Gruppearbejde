@@ -166,31 +166,48 @@ namespace CalendarApplication.Controllers
         public ActionResult EditGroup(int groupId)
         {
             GroupModel result = new GroupModel { ID = groupId };
-
-            string cmd = "SELECT * FROM groups NATURAL JOIN groupmembers NATURAL JOIN users WHERE groupId = @groupId";
-            string[] argnames = { "@groupId" };
-            object[] args = { groupId };
-            CustomQuery query = new CustomQuery { Cmd = cmd, ArgNames = argnames, Args = args };
+        
+            string cmd0 = "SELECT * FROM users WHERE needsApproval = @needsApproval";
+            string[] argnames0 = { "@needsApproval" };
+            object[] args0 = { 0 };
+            CustomQuery query0 = new CustomQuery { Cmd = cmd0, ArgNames = argnames0, Args = args0 };
+            string cmd1 = "SELECT * FROM groups NATURAL JOIN groupmembers NATURAL JOIN users WHERE groupId = @groupId";
+            string[] argnames1 = { "@groupId" };
+            object[] args1 = { groupId };
+            CustomQuery query1 = new CustomQuery { Cmd = cmd1, ArgNames = argnames1, Args = args1 };
+            CustomQuery[] queries = new CustomQuery[] { query0, query1 };
             MySqlConnect msc = new MySqlConnect();
-            DataTable dt = msc.ExecuteQuery(query);
+            DataSet ds = msc.ExecuteQuery(queries);
 
-            result.Name = (string)dt.Rows[0]["groupName"];
+            DataTable dt0 = ds.Tables[0];
+            DataTable dt1 = ds.Tables[1];
 
-            List<UserModel> members = new List<UserModel>();
-            List<UserModel> leaders = new List<UserModel>();
-            for (int i = 0; i < dt.Rows.Count; i++)
+            List<SelectListItem> members = new List<SelectListItem>();
+            List<SelectListItem> leaders = new List<SelectListItem>();
+
+            List<int> groupMembers = new List<int>();
+            for (int i = 0; i < dt1.Rows.Count; i++)
             {
-                UserModel tmp = new UserModel();
-                tmp.ID = (int)dt.Rows[i]["userId"];
-                tmp.UserName = (string)dt.Rows[i]["userName"];
-                tmp.RealName = (string)dt.Rows[i]["realName"];
-                tmp.Admin = (bool)dt.Rows[i]["admin"];
-                tmp.Email = (string)dt.Rows[i]["email"];
-                members.Add(tmp);
-                if ((bool)dt.Rows[i]["groupLeader"])
+                groupMembers.Add((int)dt1.Rows[i]["userId"]);
+                leaders.Add(new SelectListItem
                 {
-                    leaders.Add(tmp);
-                }
+                    Value = ((int)dt1.Rows[i]["userId"]).ToString(),
+                    Text = (string)dt1.Rows[i]["userName"],
+                    Selected = (bool)dt1.Rows[i]["groupLeader"]
+                });
+            }
+
+            result.Name = (string)dt1.Rows[0]["groupName"];
+
+            for (int i = 0; i < dt0.Rows.Count; i++)
+            {
+                members.Add(new SelectListItem
+                    {
+                        Value = ((int)dt0.Rows[i]["userId"]).ToString(),
+                        Text = (string)dt0.Rows[i]["userName"],
+                        Selected = groupMembers.Contains((int)dt0.Rows[i]["userId"])
+                    });
+
             }
 
             result.groupMembers = members;

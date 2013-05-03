@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.ComponentModel.DataAnnotations;
+using System.Web.Mvc;
+
+
 using CalendarApplication.Models.User;
 
 namespace CalendarApplication.Models.Group
@@ -17,8 +20,8 @@ namespace CalendarApplication.Models.Group
         [Display(Name = "Group name:")]
         public string Name { set; get; }
         public bool Selected { set; get; }
-        public List<UserModel> groupMembers { set; get; }
-        public List<UserModel> groupLeaders { set; get; }
+        public List<SelectListItem> groupMembers { set; get; }
+        public List<SelectListItem> groupLeaders { set; get; }
 
         //Override Equals
         public override bool Equals(object obj)

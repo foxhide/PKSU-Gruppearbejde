@@ -1109,12 +1109,14 @@ namespace CalendarApplication.Controllers
         public bool EditGroup(GroupModel groupmodel)
         {
             //NOT FINISHED
-            string cmd = "UPDATE groups SET groupName = @groupName WHERE groupId = @groupId";
-            string[] argnames = { "@groupName", "@groupId" };
-            object[] args = { groupmodel.Name, groupmodel.ID };
-            CustomQuery query = new CustomQuery { Cmd = cmd, ArgNames = argnames, Args = args };
+            string cmd0 = "UPDATE groups SET groupName = @groupName WHERE groupId = @groupId";
+            string[] argnames0 = { "@groupName", "@groupId" };
+            object[] args0 = { groupmodel.Name, groupmodel.ID };
+            CustomQuery query0 = new CustomQuery { Cmd = cmd0, ArgNames = argnames0, Args = args0 };
+
+            CustomQuery[] queries = new CustomQuery[] { query0 };
             MySqlConnect msc = new MySqlConnect();
-            msc.ExecuteQuery(query);
+            msc.ExecuteQuery(queries);
             
             
             return false;
