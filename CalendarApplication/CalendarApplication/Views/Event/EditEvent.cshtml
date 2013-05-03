@@ -25,11 +25,12 @@
                 @Html.LabelFor(m => m.Name)
                 @Html.TextBoxFor(m => m.Name)
                 <br />
+                <br />
                 @Html.LabelFor(m => m.SelectedEventType)
                 @Html.DropDownListFor(m => Model.SelectedEventType,
                                         new SelectList(Model.EventTypes, "Value", "Text"),
                                         new { onchange="this.form.submit()" })
-
+                <br />
                 <br />
                 @Html.LabelFor(m => m.Start) <br />
                 @Html.DateTimeEditorFor(m => m.Start, "g.today,l.End")
@@ -57,8 +58,6 @@
                         }           
                     </table>
                 }
-                <br />
-                <br />
                 <input type="submit" value="Create event" onclick="document.getElementById('SubmitType').value = 1" />
             </td>
             <td>
