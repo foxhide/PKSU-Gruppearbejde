@@ -241,19 +241,20 @@ namespace CalendarApplication.Controllers
                         State = (int)dr["state"],
                         TypeId = (int)dr["eventTypeId"],
                         TypeName = (string)dr["eventTypeName"],
-                        Visible = (bool)dr["visible"]
+                        Visible = (bool)dr["visible"],
                     };
                     // If no user and invisible event, do not add
                     if (cur == null && !e.Visible) { continue; }
-                    // If not admin and invisible event and not creator, perform check:
-                    if (cur != null && !cur.Admin && !e.Visible && cur.ID != e.CreatorId)
-                    {
-                        bool isEdtUser = !(dr["user_edt"] is DBNull);
-                        bool isEdtGroup = !(dr["group_edt"] is DBNull);
-                        bool isVisGroup = !(dr["group_vis"] is DBNull);
-                        e.Visible = isEdtUser && isEdtGroup && isVisGroup;
-                    }
-                    // If day: get rooms and add, if visible, only add, else don't add the event
+                    // Set ViewVisble
+                    e.ViewVisible = e.Visible || (cur != null &&
+                                                   (   cur.Admin 
+                                                    || cur.ID == e.CreatorId
+                                                    || !(dr["user_edt"] is DBNull)
+                                                    || !(dr["group_edt"] is DBNull)
+                                                    || !(dr["group_vis"] is DBNull)
+                                                   )
+                                                 );
+                    // If day: get rooms
                     if (day)
                     {
                         e.Rooms = new List<Room>();
@@ -262,10 +263,10 @@ namespace CalendarApplication.Controllers
                             e.Rooms.Add(new Room { ID = (int)dt.Rows[r]["roomId"], Name = (string)dt.Rows[r]["roomName"] });
                             r++;
                         }
-                        events.Add(e);
-                        continue;
+                        
                     }
-                    else if(e.Visible) { events.Add(e); }
+                    // If ViewVisible or day, add the event
+                    if (e.ViewVisible || day) { events.Add(e); }
                     r++;
                 }
             }
@@ -273,7 +274,6 @@ namespace CalendarApplication.Controllers
             {
                 TempData["errorMsg"] = msc.ErrorMessage;
             }
-
             return events;
         }
     }

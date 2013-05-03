@@ -9,6 +9,12 @@ namespace CalendarApplication.Models.Event
 {
     public class BasicEvent
     {
+        // Std. constructor: ViewVisble is enabled. This way event getters don't have to set it
+        public BasicEvent()
+        {
+            this.ViewVisible = true;
+        }
+
         public int ID { set; get; }
 
         [Required]
@@ -28,6 +34,9 @@ namespace CalendarApplication.Models.Event
         public bool Visible { set; get; }
         public List<Room> Rooms { set; get; }
 
+        // Used in CalendarView to display grey events
+        public bool ViewVisible { set; get; }
+
         public TimeSpan getDuration()
         {
             return End - Start;
@@ -35,7 +44,7 @@ namespace CalendarApplication.Models.Event
 
         public string getColor()
         {
-            if (!this.Visible) { return "lightgrey"; }
+            if (!this.ViewVisible) { return "lightgrey"; }
             return BasicEvent.getColor(this.State);
         }
 
