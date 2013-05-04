@@ -138,6 +138,7 @@
     <Compile Include="Models\Maintenance\MaintenanceModel.cs" />
     <Compile Include="Models\Group\GroupModel.cs" />
     <Compile Include="Models\Maintenance\ManageUserModel.cs" />
+    <Compile Include="Models\User\UserEditModel.cs" />
     <Compile Include="Models\User\UserModel.cs" />
     <Compile Include="Models\User\UserViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -189,6 +190,7 @@
     <Content Include="Views\User\Index.cshtml" />
     <Content Include="Views\Maintenance\EditGroup.cshtml" />
     <Content Include="Views\Maintenance\ManageUsers.cshtml" />
+    <Content Include="Views\User\EditUser.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

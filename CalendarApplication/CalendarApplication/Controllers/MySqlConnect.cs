@@ -560,7 +560,59 @@ namespace CalendarApplication.Controllers
             {
                 return -1;
             }
+        }
 
+        public bool EditUser(int id, object newValue, string change)
+        {
+            if (this.OpenConnection() == true)
+            {
+                MySqlTransaction mst = null;
+                MySqlCommand cmd = null;
+
+                try
+                {
+                    mst = this.connection.BeginTransaction();
+                    cmd = new MySqlCommand();
+                    cmd.Connection = this.connection;
+                    cmd.Transaction = mst;
+
+                    string update = "UPDATE pksudb.users SET " + change + " = @value WHERE userId = @uid";
+                    cmd.Parameters.AddWithValue("@value", newValue);
+                    cmd.Parameters.AddWithValue("@uid", id);
+
+                    cmd.CommandText = update;
+                    cmd.Prepare();
+
+                    cmd.ExecuteNonQuery();
+
+                    mst.Commit();
+
+                    this.CloseConnection();
+                }
+                catch (MySqlException ex0)
+                {
+                    try
+                    {
+                        mst.Rollback();
+                        this.CloseConnection();
+                        ErrorMessage = "Some database error occured: Discarded changes, Error message: " + ex0.Message
+                                        + ", Caused by: " + cmd.CommandText;
+                        return false;
+                    }
+                    catch (MySqlException ex1)
+                    {
+                        this.CloseConnection();
+                        ErrorMessage = "Some database error occured: Could not discard changes, DB corrupt, Error message: " + ex1.Message
+                                        + ", Caused by: " + cmd.CommandText;
+                        return false;
+                    }
+                }
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public bool CreateEventType(EventTypeModel data)

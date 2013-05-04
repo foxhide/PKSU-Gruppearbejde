@@ -6,95 +6,95 @@
 
 @using CalendarApplication.Models.Event
 @using CalendarApplication.Models.EventType
-@using System.Data
+@using CalendarApplication.Models.User
 
 @if (Model.ID < 0) {
     <h2>Error loading event!</h2>
     <h3 style="color:red">@TempData["errorMsg"]</h3>
 }
 else {
-<table>
-    <tr>
-        <td>Event Details</td>
-        <td>Rooms Used</td>
-        @if (Model.TypeSpecifics != null && Model.TypeSpecifics.Count != 0)
-        {
-            <td>Event type specific</td>
-        }
-    </tr>
-    <tr>
-        <td>
-            <table class="gridtable">
-                <tr>
-                    <td>Event Id</td>
-                    <td>@Model.ID </td>
-                </tr>
-                <tr>
-                    <td>Event Name</td>
-                    <td>@Model.Name</td>
-                </tr>
-                <tr>
-                    <td>Event Creator</td>
-                    <td>@Html.ActionLink(Model.Creator, "Index", "User", new { UserId = Model.CreatorId }, null)</td>
-                </tr>
-                <tr>
-                    <td>Event Type</td>
-                    <td>@Model.TypeName</td>
-                </tr>
-                <tr>
-                    <td>Event Start</td>
-                    <td>@Model.Start</td>
-                </tr>
-                <tr>
-                    <td>Event End</td>
-                    <td>@Model.End</td>
-                </tr>
-                <tr>
-                    <td>Event State</td>
-                    <td style="background-color: @Model.getColor()">@Model.getStateText()</td>
-                </tr>
-                <tr>
-                    <td>Event Visible</td>
-                    <td>@Model.Visible</td>
-                </tr>
-            </table>
-        </td>
-        <td>
-            <table class="gridtable">
-                @foreach (Room room in Model.Rooms)
-                {
+    <table>
+        <tr>
+            <td>Event Details</td>
+            <td>Rooms Used</td>
+            @if (Model.TypeSpecifics != null && Model.TypeSpecifics.Count != 0)
+            {
+                <td>Event type specific</td>
+            }
+        </tr>
+        <tr>
+            <td>
+                <table class="gridtable">
                     <tr>
-                        <td>@room.Name</td>
+                        <td>Event Id</td>
+                        <td>@Model.ID </td>
                     </tr>
-                }
-            </table>
-        </td>
-        <td>
-            <table class="gridtable">
-                @if (Model.TypeSpecifics != null && Model.TypeSpecifics.Count != 0)
-                {
-                    foreach (FieldModel fm in Model.TypeSpecifics)
+                    <tr>
+                        <td>Event Name</td>
+                        <td>@Model.Name</td>
+                    </tr>
+                    <tr>
+                        <td>Event Creator</td>
+                        <td>@Html.ActionLink(Model.Creator, "Index", "User", new { UserId = Model.CreatorId }, null)</td>
+                    </tr>
+                    <tr>
+                        <td>Event Type</td>
+                        <td>@Model.TypeName</td>
+                    </tr>
+                    <tr>
+                        <td>Event Start</td>
+                        <td>@Model.Start</td>
+                    </tr>
+                    <tr>
+                        <td>Event End</td>
+                        <td>@Model.End</td>
+                    </tr>
+                    <tr>
+                        <td>Event State</td>
+                        <td style="background-color: @Model.getColor()">@Model.getStateText()</td>
+                    </tr>
+                    <tr>
+                        <td>Event Visible</td>
+                        <td>@Model.Visible</td>
+                    </tr>
+                </table>
+            </td>
+            <td>
+                <table class="gridtable">
+                    @foreach (Room room in Model.Rooms)
                     {
                         <tr>
-                            <td>@fm.Name</td>
-                            <td>
-                                @switch(fm.Datatype)
-                                {
-                                    case Fieldtype.Float:       @fm.FloatValue break;
-                                    case Fieldtype.User:        @Html.ActionLink(fm.StringValue, "Index", "User", new { UserId = fm.IntValue }, null) break;
-                                    case Fieldtype.Group:       @fm.StringValue break;
-                                    case Fieldtype.Text:        @fm.StringValue break;
-                                    case Fieldtype.File:        @fm.IntValue break;
-                                    case Fieldtype.Datetime:    @fm.DateValue break;
-                                    case Fieldtype.Bool:        @(fm.BoolValue ? "Yes" : "No") break;
-                                }
-                            </td>
+                            <td>@room.Name</td>
                         </tr>
                     }
-                }
+                </table>
+            </td>
+            <td>
+                <table class="gridtable">
+                    @if (Model.TypeSpecifics != null && Model.TypeSpecifics.Count != 0)
+                    {
+                        foreach (FieldModel fm in Model.TypeSpecifics)
+                        {
+                            <tr>
+                                <td>@fm.Name</td>
+                                <td>
+                                    @switch(fm.Datatype)
+                                    {
+                                        case Fieldtype.Float:       @fm.FloatValue break;
+                                        case Fieldtype.User:        @Html.ActionLink(fm.StringValue, "Index", "User", new { UserId = fm.IntValue }, null) break;
+                                        case Fieldtype.Group:       @fm.StringValue break;
+                                        case Fieldtype.Text:        @fm.StringValue break;
+                                        case Fieldtype.File:        @fm.IntValue break;
+                                        case Fieldtype.Datetime:    @fm.DateValue break;
+                                        case Fieldtype.Bool:        @(fm.BoolValue ? "Yes" : "No") break;
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
 
-            </table>
-        </td>
-    </tr>
-</table>
+                </table>
+            </td>
+        </tr>
+    </table>
 }
