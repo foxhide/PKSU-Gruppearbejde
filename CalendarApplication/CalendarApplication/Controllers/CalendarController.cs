@@ -271,10 +271,14 @@ namespace CalendarApplication.Controllers
                             e.Rooms.Add(new Room { ID = (int)dt.Rows[r]["roomId"], Name = (string)dt.Rows[r]["roomName"] });
                             r++;
                         }
-                        
+                        events.Add(e);
+                        continue;
                     }
                     // If ViewVisible or day, add the event
-                    if (e.ViewVisible || day) { events.Add(e); }
+                    else if (e.ViewVisible)
+                    {
+                        events.Add(e);
+                    }
                     r++;
                 }
             }

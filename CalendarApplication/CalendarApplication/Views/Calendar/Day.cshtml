@@ -41,10 +41,12 @@
         <td style="padding:0">
             <table style="border-collapse:collapse;width:100%;padding:0">
                 <tr>
-                    @{ int offset = Config.GetStartingHourOfDay(); }
-                    @for (int i = offset; i < 24+offset; i+=2)
-                    {
-                        <td style="width:@(100/12)%;border-left:solid;padding:0">@(i % 24)</td>
+                    @{
+                        int offset = Config.GetStartingHourOfDay();
+                        for (int i = offset; i < 24+offset; i+=2)
+                        {
+                            <td style="width:@(100/12)%;border-left:solid;padding:0">@(i % 24)</td>
+                        }
                     }
                 </tr>
             </table>
@@ -59,30 +61,32 @@
             </td>
             <td style="padding:0;border-spacing:0">
                 <table style="border-collapse:collapse;width:100%"><tr style="border-spacing:0">
-                    @{ int curEnd = 0; }
-                    @foreach (BasicEvent e in Model.Events)
-                    {
-                        if (e.Rooms != null && e.Rooms.Contains(room))
+                    @{
+                        int curEnd = 0;
+                        foreach (BasicEvent e in Model.Events)
                         {
-                            int start = (e.Start < Model.Date ? 0 : ((((24+e.Start.Hour-offset) % 24) * 60 + e.Start.Minute)*100) / 1440);
-                            int end = (e.End > Model.Date.AddDays(1) ? 100 : ((((24+e.End.Hour-offset) % 24) * 60 + e.End.Minute)*100) / 1440);
+                            if (e.Rooms != null && e.Rooms.Contains(room))
+                            {
+                                int start = (e.Start < Model.Date ? 0 : ((((24+e.Start.Hour-offset) % 24) * 60 + e.Start.Minute)*100) / 1440);
+                                int end = (e.End > Model.Date.AddDays(1) ? 100 : ((((24+e.End.Hour-offset) % 24) * 60 + e.End.Minute)*100) / 1440);
                     
                     
                     
-                            <td style="width:@(start-curEnd)%;height:100%;padding:0"></td>
-                            <td style="width:@(end-start)%;max-width:@(end-start)%;
-                                background-color:@(e.getColor());word-wrap:break-word;overflow:hidden">
-                                @if(e.ViewVisible)
-                                {
-                                    @Html.ActionLink((e.Name.Length > 10 ? e.Name.Substring(0,8)+"..." : e.Name), "Index", "Event", new { id = e.ID }, null)
-                                }
-                                else
-                                {
-                                    @:Event not visible
-                                }
-                            </td>
+                                <td style="width:@(start-curEnd)%;height:100%;padding:0"></td>
+                                <td style="width:@(end-start)%;max-width:@(end-start)%;
+                                    background-color:@(e.getColor());word-wrap:break-word;overflow:hidden">
+                                    @if(e.ViewVisible)
+                                    {
+                                        @Html.ActionLink((e.Name.Length > 10 ? e.Name.Substring(0,8)+"..." : e.Name), "Index", "Event", new { id = e.ID }, null)
+                                    }
+                                    else
+                                    {
+                                        @:Event not visible
+                                    }
+                                </td>
                     
-                            curEnd = end;
+                                curEnd = end;
+                            }
                         }
                     }
                     <td style="width:@(100-curEnd)%;height:100%;padding:0"></td>

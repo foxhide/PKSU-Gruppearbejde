@@ -22,7 +22,7 @@ namespace CalendarApplication.Controllers
         public ActionResult Login(LoginModel login)
         {
             CustomQuery query = new CustomQuery();
-            query.Cmd = "SELECT userId,needsApproval FROM pksudb.users WHERE userName = @usrnam AND password = @passw";
+            query.Cmd = "SELECT userId,needsApproval,active FROM pksudb.users WHERE userName = @usrnam AND password = @passw";
             query.ArgNames = new string[] { "@usrnam" , "@passw" };
             query.Args = new object[] { login.UserName , login.Password };
             MySqlConnect con = new MySqlConnect();
@@ -37,7 +37,12 @@ namespace CalendarApplication.Controllers
                     if ((bool)rows[0]["needsApproval"])
                     {
                         // User not approved
-                        TempData["message"] = "Account found, but not yet approved. Contact your admin.";
+                        TempData["message"] = "Account found, but is has not yet been approved. Contact your admin.";
+                    }
+                    else if (!(bool)rows[0]["active"])
+                    {
+                        // User not active
+                        TempData["message"] = "The found account has been deactivated. Contact your admin.";
                     }
                     else
                     {
