@@ -214,13 +214,13 @@ namespace CalendarApplication.Controllers
                 // A user, that is not an admin -> get events that are authenticated.
                 from += " LEFT JOIN (SELECT eventId,userId"
                         + " FROM eventeditorsusers"
-                        + " WHERE userId = 1) AS edt_user ON e.eventId = edt_user.eventId"
+                        + " WHERE userId = " + cur.ID + ") AS edt_user ON e.eventId = edt_user.eventId"
                         + " LEFT JOIN (SELECT eventId,userId"
                         + " FROM eventvisibility NATURAL JOIN groupmembers"
-                        + " WHERE userId = 1) AS vis_group ON e.eventId = vis_group.eventId"
+                        + " WHERE userId = " + cur.ID + ") AS vis_group ON e.eventId = vis_group.eventId"
                         + "	LEFT JOIN (SELECT eventId,userId"
                         + " FROM eventeditorsgroups NATURAL JOIN groupmembers"
-                        + "	WHERE userId = 1) AS edt_group ON e.eventId = edt_group.eventId";
+                        + "	WHERE userId = " + cur.ID + ") AS edt_group ON e.eventId = edt_group.eventId";
                 // Add extra fields for view authentication
                 select += ",vis_group.userId AS group_vis,edt_group.userId AS group_edt, edt_user.userId AS user_edt";
             }

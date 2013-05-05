@@ -10,20 +10,19 @@
         toList = "UISelect";
     }
     else if (type == "approval") {
-        fromList = "UANSelect";
+        fromList = "UNASelect";
         toList = "UASelect";
     }
     var list = document.getElementById(fromList);
     var id = list.options[list.selectedIndex].value;
-    moveList(fromList, toList, id);
-/*    $.ajax({
+    $.ajax({
         url: "/Maintenance/EditUser",
         type: 'POST',
         data: { type: type, userId: id },
         success: function () {
             moveList(fromList, toList, id);
         }
-    });*/
+    });
 }
 
 function moveList(list1,list2,id) {

@@ -266,9 +266,21 @@ namespace CalendarApplication.Controllers
         }
 
         [HttpPost]
-        public void EditUser(int type, int userId)
+        public void EditUser(string type, int userId)
         {
-            return;
+            MySqlConnect msc = new MySqlConnect();
+            if (type == "active-add")
+            {
+                msc.EditUser(userId, true, "active");
+            }
+            else if (type == "active-rem")
+            {
+                msc.EditUser(userId, false, "active");
+            }
+            else if (type == "approval")
+            {
+                msc.EditUser(userId, false, "needsApproval");
+            }
         }
 
     }
