@@ -265,6 +265,12 @@ namespace CalendarApplication.Controllers
             return View(mum);
         }
 
+        [HttpPost]
+        public void EditUser(int type, int userId)
+        {
+            return;
+        }
+
     }
 
 }

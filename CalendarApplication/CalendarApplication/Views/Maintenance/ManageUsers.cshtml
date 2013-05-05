@@ -4,13 +4,103 @@
     ViewBag.Title = "ManageUsers";
 }
 
+<script src="@Url.Content("~/Scripts/edit-user.js")" type="text/javascript"></script>
+
 <h2>Manage Users</h2>
 
-<h3>Users currently active: <span style="color:green">@Model.UsersApproved.Count</span></h3>
-@Html.DropDownListFor(m => Model.UASelect, new SelectList(Model.UsersApproved, "Value", "Text"), new { size="4" })
+<style type="text/css">
+    .counter {
+        width:40px;
+        border:none;
+        font-size:18px;
+    }
 
-<h3>Users awaiting approval: <span style="color:yellow">@Model.UsersNotApproved.Count</span></h3>
-@Html.DropDownListFor(m => Model.UNASelect, new SelectList(Model.UsersNotApproved, "Value", "Text"), new { size="4" })
+    .custom-select {
+        width:200px
+    }
+    .custom-select option {
+        width:190px
+    }
 
-<h3>Inactive users: <span style="color:red">@Model.UsersInactive.Count</span></h3>
-@Html.DropDownListFor(m => Model.UISelect, new SelectList(Model.UsersInactive, "Value", "Text"), new { size="4" })
+    .no-pad-table {
+        margin-left:0;
+        margin-right:auto;
+        border-collapse:collapse;
+    }
+    .no-pad-table td {
+        padding:2px;
+        padding-right:5px;
+    }
+</style>
+
+<h3>Users currently active: <input type="text" class="counter" id="UASelect_counter" style="color:green"
+                                value="@Model.UsersApproved.Count" readonly="readonly"></h3>
+<table class="no-pad-table">
+    <tr>
+        <td rowspan="3">
+            @Html.DropDownListFor(m => Model.UASelect, new SelectList(Model.UsersApproved, "Value", "Text"),
+                                        new { @class="custom-select", size="6" })
+        </td>
+        <td>
+            <input type="button" value="View" />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <input type="button" value="Edit" />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <input type="button" value="Deactivate" onclick="sendData('active-rem')" />
+        </td>
+    </tr>
+</table>
+
+<h3>Users awaiting approval: <input type="text" class="counter" id="UANSelect_counter" style="color:yellow"
+                                    value="@Model.UsersNotApproved.Count" readonly="readonly"></h3>
+<table class="no-pad-table">
+    <tr>
+        <td rowspan="3">
+            @Html.DropDownListFor(m => Model.UNASelect, new SelectList(Model.UsersNotApproved, "Value", "Text"),
+                                        new { @class="custom-select", size="6" })
+        </td>
+        <td>
+            <input type="button" value="View" />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <input type="button" value="Edit" />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <input type="button" value="Approve" onclick="sendData('approval')" />
+        </td>
+    </tr>
+</table>
+
+<h3>Inactive users: <input type="text" class="counter" id="UISelect_counter" style="color:red"
+                        value="@Model.UsersInactive.Count" readonly="readonly"></h3>
+<table class="no-pad-table">
+    <tr>
+        <td rowspan="3">
+            @Html.DropDownListFor(m => Model.UISelect, new SelectList(Model.UsersInactive, "Value", "Text"),
+                                        new { @class="custom-select", size="6" })
+        </td>
+        <td>
+            <input type="button" value="View" />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <input type="button" value="Edit" />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <input type="button" value="Activate" onclick="sendData('active-add')" />
+        </td>
+    </tr>
+</table>
