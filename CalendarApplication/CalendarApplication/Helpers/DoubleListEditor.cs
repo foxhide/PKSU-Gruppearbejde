@@ -10,8 +10,36 @@ namespace CalendarApplication.Helpers
 {
     public static class DoubleListEditor
     {
+        /// <summary>
+        /// Create a DoubleListEditor for the given list of SelectListItems
+        /// </summary>
+        /// <typeparam name="TModel"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="helper"></param>
+        /// <param name="expression">The list as a lambda expression</param>
+        /// <param name="labelList1">Label of the selected list</param>
+        /// <param name="labelList2">Label of the available list</param>
+        /// <returns>A MvcHtmlString with the html for the editor</returns>
         public static MvcHtmlString ListEditorFor<TModel, TValue>(this HtmlHelper<TModel> helper,
             Expression<Func<TModel, TValue>> expression, string labelList1, string labelList2)
+        {
+            return DoubleListEditor.ListEditorFor(helper, expression, labelList1, labelList2, "", "");
+        }
+
+        /// <summary>
+        /// Create a DoubleListEditor for the given list of SelectListItems (with onaction js-functions)
+        /// </summary>
+        /// <typeparam name="TModel"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="helper"></param>
+        /// <param name="expression">The list as a lambda expression</param>
+        /// <param name="labelList1">Label of the selected list</param>
+        /// <param name="labelList2">Label of the available list</param>
+        /// <param name="onAdd">JS-function to be called on add</param>
+        /// <param name="onRem">JS-function to be called on remove</param>
+        /// <returns>A MvcHtmlString with the html for the editor</returns>
+        public static MvcHtmlString ListEditorFor<TModel, TValue>(this HtmlHelper<TModel> helper,
+            Expression<Func<TModel, TValue>> expression, string labelList1, string labelList2, string onAdd, string onRem)
         {
             // Get model
             ModelMetadata metadata = ModelMetadata.FromLambdaExpression(expression, helper.ViewData);
@@ -47,8 +75,10 @@ namespace CalendarApplication.Helpers
             builder.AppendLine("</td>");
 
             builder.AppendLine("<td style='vertical-align:middle'>");
-            builder.Append("<input type='button' id='" + name + "_add_button' value='<--' onclick=moveSelected('" + name + "',true)><br>");
-            builder.Append("<input type='button' id='" + name + "_rem_button' value='-->' onclick=moveSelected('" + name + "',false)>");
+            builder.Append("<input type='button' id='" + name + "_add_button' value='<--' onclick=\"moveSelected('" + name + "',true);");
+            builder.Append(onAdd + "\" ><br>");
+            builder.Append("<input type='button' id='" + name + "_rem_button' value='-->' onclick=\"moveSelected('" + name + "',false);");
+            builder.Append(onRem + "\" >");
             builder.AppendLine("</td>");
 
             builder.AppendLine("<td>");
