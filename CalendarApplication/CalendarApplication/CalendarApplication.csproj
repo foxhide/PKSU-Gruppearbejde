@@ -134,8 +134,11 @@
     <Compile Include="Models\Event\FieldModel.cs" />
     <Compile Include="Models\Event\Room.cs" />
     <Compile Include="Models\Account\LoginModel.cs" />
+    <Compile Include="Models\Maintenance\Config.cs" />
     <Compile Include="Models\Maintenance\MaintenanceModel.cs" />
     <Compile Include="Models\Group\GroupModel.cs" />
+    <Compile Include="Models\Maintenance\ManageUserModel.cs" />
+    <Compile Include="Models\User\UserEditModel.cs" />
     <Compile Include="Models\User\UserModel.cs" />
     <Compile Include="Models\User\UserViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -149,6 +152,7 @@
     <None Include="Scripts\jquery-1.5.1-vsdoc.js" />
     <Content Include="Scripts\create-eventtype.js" />
     <Content Include="Scripts\date-picker-validator.js" />
+    <Content Include="Scripts\edit-user.js" />
     <Content Include="Scripts\jquery-1.5.1.js" />
     <Content Include="Scripts\jquery-1.5.1.min.js" />
     <Content Include="Scripts\jquery-ui-1.8.11.js" />
@@ -186,6 +190,8 @@
     <Content Include="Views\Event\EditEvent.cshtml" />
     <Content Include="Views\User\Index.cshtml" />
     <Content Include="Views\Maintenance\EditGroup.cshtml" />
+    <Content Include="Views\Maintenance\ManageUsers.cshtml" />
+    <Content Include="Views\User\EditUser.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

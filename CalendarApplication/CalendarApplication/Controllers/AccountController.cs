@@ -22,7 +22,7 @@ namespace CalendarApplication.Controllers
         public ActionResult Login(LoginModel login)
         {
             CustomQuery query = new CustomQuery();
-            query.Cmd = "SELECT userId FROM pksudb.users WHERE userName = @usrnam AND password = @passw";
+            query.Cmd = "SELECT userId,needsApproval,active FROM pksudb.users WHERE userName = @usrnam AND password = @passw";
             query.ArgNames = new string[] { "@usrnam" , "@passw" };
             query.Args = new object[] { login.UserName , login.Password };
             MySqlConnect con = new MySqlConnect();
@@ -33,14 +33,36 @@ namespace CalendarApplication.Controllers
                 DataRowCollection rows = table.Rows;
                 if (rows.Count == 1)
                 {
-                    string userData = ""+(int)rows[0]["userId"];
-
-                    FormsAuthentication.SetAuthCookie(userData, login.RememberMe);
-                    
-                    return RedirectToAction("Index","Home",null);
+                    // User found
+                    if ((bool)rows[0]["needsApproval"])
+                    {
+                        // User not approved
+                        TempData["message"] = "Account found, but is has not yet been approved. Contact your admin.";
+                    }
+                    else if (!(bool)rows[0]["active"])
+                    {
+                        // User not active
+                        TempData["message"] = "The found account has been deactivated. Contact your admin.";
+                    }
+                    else
+                    {
+                        // User approved -> log in
+                        string userData = ((int)rows[0]["userId"]).ToString();
+                        FormsAuthentication.SetAuthCookie(userData, login.RememberMe);
+                        return RedirectToAction("Index", "Home", null);
+                    }
+                }
+                else
+                {
+                    // User not found
+                    TempData["message"] = "Login unsuccessful! There was no match between the username and password!";
                 }
             }
-            TempData["message"] = "Login unsuccessful! There was no match between the username and password!";
+            else
+            {
+                // DB error
+                TempData["message"] = "Login unsuccessful! Some database error occured!";
+            }
             return RedirectToAction("Login");
         }
 
@@ -62,9 +84,7 @@ namespace CalendarApplication.Controllers
             int userId = msc.CreateUser(model);
             if (userId >= 0)
             {
-                //Remove this call if the user should not be logged in after registering.
-                FormsAuthentication.SetAuthCookie(""+userId, false);
-
+                //The user is not logged in, simply created, and needs approval
                 return RedirectToAction("Index", "Home", null);
             }
             TempData["message"] = "There was an error processing your information. Please try again.";

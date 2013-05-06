@@ -1,0 +1,88 @@
+﻿@model CalendarApplication.Models.User.UserEditModel
+
+@{
+    ViewBag.Title = "EditUser";
+}
+
+<h2>@(Model.AdminEdit ? "Edit User" : "Edit profile")</h2>
+<h3 style="color:red">@TempData["errorMsg"]</h3>
+
+@using (Html.BeginForm())
+{
+    @Html.HiddenFor(m => m.ID)
+    @Html.HiddenFor(m => m.EditType)
+    @Html.HiddenFor(m => m.AdminEdit)
+
+    <script type="text/javascript">
+        function setEditType(type) {
+            document.getElementById('EditType').value = type;
+        }
+
+        function setAdmin(adm) {
+            setEditType(4);
+            document.getElementById('Admin').value = adm;
+        }
+
+        function setActive(act) {
+            setEditType(5);
+            document.getElementById('Active').value = act;
+        }
+
+        function setApproval(apr) {
+            setEditType(6);
+            document.getElementById('NeedsApproval').value = apr;
+        }
+    </script>
+    
+    @Html.LabelFor(m => m.RealName)
+    @Html.EditorFor(m => m.RealName)
+    <input type="submit" value="Save" onclick="setEditType(1)"/>
+    <br />
+    <br />
+    
+    @Html.LabelFor(m => m.Email)
+    @Html.EditorFor(m => m.Email)
+    <input type="submit" value="Save" onclick="setEditType(2)"/>
+    <br />
+    <br />
+    
+    @Html.HiddenFor(m => m.Admin)
+    @Html.HiddenFor(m => m.Active)
+    @Html.HiddenFor(m => m.NeedsApproval)
+    
+    if(Model.Admin) { <span style="color:green">User is admin</span> }
+    else { <span style="color:red">User is not admin</span> }
+    if (Model.AdminEdit)
+    {
+        if(Model.Admin) { <input type="submit" value="Degrade" onclick="setAdmin(false)" /> }
+        else { <input type="submit" value="Make admin" onclick="setAdmin(true)" /> }
+    }
+    <br />
+
+    if (Model.AdminEdit)
+    {
+        if (Model.Active)
+        {
+            <span style="color:green">User is active</span>
+           <input type="submit" value="Deactivate" onclick="setActive(false)" />
+        }
+        else
+        {
+            <span style="color:red">User is not active</span>
+            <input type="submit" value="Activate" onclick="setActive(true)" />
+        }
+        <br />
+    }
+
+    if (Model.AdminEdit)
+    {
+        if (!Model.NeedsApproval)
+        { <span style="color:green">User is approved</span> }
+        else
+        {
+            <span style="color:red">User is not approved</span>
+            <input type="submit" value="Approve" onclick="setApproval(true)" />
+        }
+        <br />
+    }
+}

@@ -117,7 +117,8 @@ namespace CalendarApplication.Controllers
                             ID = (int)dr["fieldId"],
                             Name = (string)dr["fieldName"],
                             Description = dr["fieldDescription"] as string,
-                            Required = (bool)dr["requiredField"],
+                            RequiredCreate = (bool)dr["requiredCreation"],
+                            RequiredApprove = (bool)dr["requiredApproval"],
                             Datatype = (Fieldtype)dr["fieldType"],
                             ViewID = etm.TypeSpecific.Count,
                             VarcharLength = (int)dr["varCharLength"]
@@ -241,6 +242,51 @@ namespace CalendarApplication.Controllers
                 return View(grm);
             }
             return RedirectToAction("Index", "Maintenance", null);
+        }
+
+        public ActionResult ManageUsers()
+        {
+            ManageUserModel mum = new ManageUserModel
+            {
+                UASelect = 0,
+                UsersApproved = new List<SelectListItem>(),
+                UNASelect = 0,
+                UsersNotApproved = new List<SelectListItem>(),
+                UISelect = 0,
+                UsersInactive = new List<SelectListItem>()
+            };
+
+            MySqlConnect msc = new MySqlConnect();
+            CustomQuery query = new CustomQuery { Cmd = "SELECT userId,userName,needsApproval,active FROM pksudb.users ORDER BY userName" };
+            DataTable dt = msc.ExecuteQuery(query);
+
+            foreach (DataRow dr in dt.Rows)
+            {
+                SelectListItem sli = new SelectListItem { Value = ((int)dr["userId"]).ToString(), Text = (string)dr["userName"] };
+                if (!((bool)dr["active"])) { mum.UsersInactive.Add(sli); }
+                else if ((bool)dr["needsApproval"]) { mum.UsersNotApproved.Add(sli); }
+                else { mum.UsersApproved.Add(sli); }
+            }
+            
+            return View(mum);
+        }
+
+        [HttpPost]
+        public void EditUser(string type, int userId)
+        {
+            MySqlConnect msc = new MySqlConnect();
+            if (type == "active-add")
+            {
+                msc.EditUser(userId, true, "active");
+            }
+            else if (type == "active-rem")
+            {
+                msc.EditUser(userId, false, "active");
+            }
+            else if (type == "approval")
+            {
+                msc.EditUser(userId, false, "needsApproval");
+            }
         }
 
     }

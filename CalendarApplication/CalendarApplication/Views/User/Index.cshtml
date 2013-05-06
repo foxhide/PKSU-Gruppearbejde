@@ -13,57 +13,64 @@
 }
 else {
     <h2>User Info</h2>
-<table><tr><td>
-    <table class="gridtable">
+    <table>
         <tr>
-            <td>User Id</td>
-            <td>@Model.ID</td>
-        </tr>
-        <tr>
-            <td>User Name</td>
-            <td>@Model.UserName</td>
-        </tr>
-        <tr>
-            <td>Real Name</td>
-            <td>@Model.RealName</td>
-        </tr>
-        <tr>
-            <td>Is Admin</td>
-            <td>@Model.Admin</td>
-        </tr>
-        <tr>
-            <td>Email</td>
-            <td>@Model.Email</td>
+            <td>
+                <table class="gridtable">
+                    <tr>
+                        <td>User Id</td>
+                        <td>@Model.ID</td>
+                    </tr>
+                    <tr>
+                        <td>User Name</td>
+                        <td>@Model.UserName</td>
+                    </tr>
+                    <tr>
+                        <td>Real Name</td>
+                        <td>@Model.RealName</td>
+                    </tr>
+                    <tr>
+                        <td>Is Admin</td>
+                        <td>@Model.Admin</td>
+                    </tr>
+                    <tr>
+                        <td>Email</td>
+                        <td>@Model.Email</td>
+                    </tr>
+                </table>
+            </td>
+            <td>
+                <table class="gridtable">
+                    <tr>
+                        <td>User Groups</td>
+                    </tr>
+                    @for (int i = 0; i < Model.Groups.Count; i++)
+                    {
+                        <tr>
+                            <!-- Add Html.ActionLink when Group view is implemented -->
+                            <td>@Model.Groups[i].Name</td>
+                        </tr>
+                    }
+                </table>
+            </td>
+            <td>
+                <table class="gridtable">
+                    <tr>
+                        <td>Events created by user</td>
+                    </tr>
+                    @for (int i = 0; i < Model.Events.Count; i++)
+                    {
+                        <tr>
+                            <td style="background-color:@(Model.Events[i].getColor())">@Html.ActionLink(Model.Events[i].Name, "Index", "Event", new { id = Model.Events[i].ID }, null)
+                        </tr>
+                    }
+                </table>
+            </td>
         </tr>
     </table>
-</td>
-<td>
-    <table class="gridtable">
-        <tr>
-            <td>User Groups</td>
-        </tr>
-        @for (int i = 0; i < Model.Groups.Count; i++)
-        {
-            <tr>
-                <!-- Add Html.ActionLink when Group view is implemented -->
-                <td>@Model.Groups[i].Name</td>
-            </tr>
-        }
-    </table>
-</td>
-<td>
-    <table class="gridtable">
-        <tr>
-            <td>Events created by user</td>
-        </tr>
-        @for (int i = 0; i < Model.Events.Count; i++)
-        {
-            <tr>
-                <td style="background-color:@(Model.Events[i].getColor())">@Html.ActionLink(Model.Events[i].Name, "Index", "Event", new { id = Model.Events[i].ID }, null)
-            </tr>
-        }
-    </table>
-</td>
-</tr>
-</table>
+    if(UserModel.GetCurrentUserID() != -1 && (UserModel.GetCurrentUserID() == Model.ID || UserModel.GetCurrent().Admin))
+    {
+        @Html.ActionLink("Edit " + (UserModel.GetCurrentUserID() == Model.ID ? "Profile" : "User"),
+                        "EditUser", "User", new { userId = Model.ID }, null)
+    }
 }

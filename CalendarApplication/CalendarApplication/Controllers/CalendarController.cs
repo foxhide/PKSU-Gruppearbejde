@@ -9,6 +9,7 @@ using CalendarApplication.Models.Calendar;
 using CalendarApplication.Models.Event;
 using CalendarApplication.Models.User;
 using CalendarApplication.Models.EventType;
+using CalendarApplication.Models.Maintenance;
 
 namespace CalendarApplication.Controllers
 {
@@ -83,10 +84,9 @@ namespace CalendarApplication.Controllers
             int before = (int)first.DayOfWeek == 0 ? 6 : (int)first.DayOfWeek - 1;
             int days = DateTime.DaysInMonth(evm.Year, evm.Month) + before;
             days = days % 7 > 0 ? days + (7 - days % 7) : days;
-            
-            List<BasicEvent> events = this.GetEvents(evm, first, first.AddDays(days - 1),false);
-
             first = first.AddDays(-before);
+            
+            List<BasicEvent> events = this.GetEvents(evm, first, first.AddDays(days),false);
 
             for (int i = 0; i < days; i++)
             {
@@ -100,6 +100,7 @@ namespace CalendarApplication.Controllers
                 cdays.Add(cd);
             }
 
+            first = first.AddHours(Config.GetStartingHourOfDay());
             foreach (BasicEvent ev in events)
             {
                 TimeSpan end = ev.End - first;
@@ -120,11 +121,11 @@ namespace CalendarApplication.Controllers
             MySqlConnect msc = new MySqlConnect();
             DateTime date = new DateTime(evm.Year, evm.Month, evm.Day);
 
-            List<BasicEvent> events = this.GetEvents(evm, date, date,true);
+            List<BasicEvent> events = this.GetEvents(evm, date, date.AddDays(1),true);
 
             CalendarDay result = new CalendarDay
             {
-                Date = date,
+                Date = date.AddHours(Config.GetStartingHourOfDay()),
                 Rooms = msc.GetRooms(),
                 Events = events
             };
@@ -168,8 +169,15 @@ namespace CalendarApplication.Controllers
 
             // Build the where string
             //   - Input from filter:
-            string morning = start.ToString("yyyy-MM-dd 00:00:00");
-            string night = end.ToString("yyyy-MM-dd 23:59:59");
+
+            // Sanitize:
+            start = start.Date;
+            end = end.Date;
+
+            //     Calculate offset
+            int offset = Config.GetStartingHourOfDay();
+            string morning = start.AddHours(offset).ToString("yyyy-MM-dd HH:00:00");
+            string night = end.AddHours(offset).ToString("yyyy-MM-dd HH:00:00");
             string where = "WHERE ((eventStart <= '" + night + "' AND eventStart >= '" + morning
                             + "') OR (eventEnd <= '" + night + "' AND eventEnd >= '" + morning
                             + "') OR (eventEnd >= '" + night + "' AND eventStart <= '" + morning + "'))";
@@ -206,13 +214,13 @@ namespace CalendarApplication.Controllers
                 // A user, that is not an admin -> get events that are authenticated.
                 from += " LEFT JOIN (SELECT eventId,userId"
                         + " FROM eventeditorsusers"
-                        + " WHERE userId = 1) AS edt_user ON e.eventId = edt_user.eventId"
+                        + " WHERE userId = " + cur.ID + ") AS edt_user ON e.eventId = edt_user.eventId"
                         + " LEFT JOIN (SELECT eventId,userId"
                         + " FROM eventvisibility NATURAL JOIN groupmembers"
-                        + " WHERE userId = 1) AS vis_group ON e.eventId = vis_group.eventId"
+                        + " WHERE userId = " + cur.ID + ") AS vis_group ON e.eventId = vis_group.eventId"
                         + "	LEFT JOIN (SELECT eventId,userId"
                         + " FROM eventeditorsgroups NATURAL JOIN groupmembers"
-                        + "	WHERE userId = 1) AS edt_group ON e.eventId = edt_group.eventId";
+                        + "	WHERE userId = " + cur.ID + ") AS edt_group ON e.eventId = edt_group.eventId";
                 // Add extra fields for view authentication
                 select += ",vis_group.userId AS group_vis,edt_group.userId AS group_edt, edt_user.userId AS user_edt";
             }
@@ -241,19 +249,20 @@ namespace CalendarApplication.Controllers
                         State = (int)dr["state"],
                         TypeId = (int)dr["eventTypeId"],
                         TypeName = (string)dr["eventTypeName"],
-                        Visible = (bool)dr["visible"]
+                        Visible = (bool)dr["visible"],
                     };
                     // If no user and invisible event, do not add
                     if (cur == null && !e.Visible) { continue; }
-                    // If not admin and invisible event and not creator, perform check:
-                    if (cur != null && !cur.Admin && !e.Visible && cur.ID != e.CreatorId)
-                    {
-                        bool isEdtUser = !(dr["user_edt"] is DBNull);
-                        bool isEdtGroup = !(dr["group_edt"] is DBNull);
-                        bool isVisGroup = !(dr["group_vis"] is DBNull);
-                        e.Visible = isEdtUser && isEdtGroup && isVisGroup;
-                    }
-                    // If day: get rooms and add, if visible, only add, else don't add the event
+                    // Set ViewVisble
+                    e.ViewVisible = e.Visible || (cur != null &&
+                                                   (   cur.Admin 
+                                                    || cur.ID == e.CreatorId
+                                                    || !(dr["user_edt"] is DBNull)
+                                                    || !(dr["group_edt"] is DBNull)
+                                                    || !(dr["group_vis"] is DBNull)
+                                                   )
+                                                 );
+                    // If day: get rooms
                     if (day)
                     {
                         e.Rooms = new List<Room>();
@@ -265,7 +274,11 @@ namespace CalendarApplication.Controllers
                         events.Add(e);
                         continue;
                     }
-                    else if(e.Visible) { events.Add(e); }
+                    // If ViewVisible or day, add the event
+                    else if (e.ViewVisible)
+                    {
+                        events.Add(e);
+                    }
                     r++;
                 }
             }
@@ -273,7 +286,6 @@ namespace CalendarApplication.Controllers
             {
                 TempData["errorMsg"] = msc.ErrorMessage;
             }
-
             return events;
         }
     }

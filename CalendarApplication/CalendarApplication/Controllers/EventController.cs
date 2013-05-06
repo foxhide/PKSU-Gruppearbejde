@@ -73,7 +73,7 @@ namespace CalendarApplication.Controllers
                         };
                         switch(fm.Datatype)
                         {
-                            case Fieldtype.Integer: fm.IntValue = (int)ds.Tables[0].Rows[0]["field_" + fm.ID]; break;
+                            case Fieldtype.Float: fm.FloatValue = (float)ds.Tables[0].Rows[0]["field_" + fm.ID]; break;
 
                             case Fieldtype.File: if (DBNull.Value.Equals(ds.Tables[0].Rows[0]["field_" + fm.ID])) { fm.IntValue = 0; }
                                                  else { fm.IntValue = (int)ds.Tables[0].Rows[0]["field_" + fm.ID]; }
@@ -137,7 +137,7 @@ namespace CalendarApplication.Controllers
 
             // Get list of users
             eem.UserEditorList = new List<SelectListItem>();
-            string userquery = "SELECT userId,userName FROM pksudb.users";
+            string userquery = "SELECT userId,userName FROM pksudb.users ORDER BY userName";
             dt = msc.ExecuteQuery(userquery);
             if (dt != null)
             {
@@ -154,7 +154,7 @@ namespace CalendarApplication.Controllers
             // Get list of groups
             eem.GroupEditorList = new List<SelectListItem>();
             eem.GroupVisibleList = new List<SelectListItem>();
-            string groupquery = "SELECT groupId,groupName FROM pksudb.groups";
+            string groupquery = "SELECT groupId,groupName FROM pksudb.groups ORDER BY groupName";
             dt = msc.ExecuteQuery(groupquery);
             if (dt != null)
             {
@@ -187,7 +187,11 @@ namespace CalendarApplication.Controllers
             {
                 MySqlConnect msc = new MySqlConnect();
                 eem.CreatorId = UserModel.GetCurrentUserID();
-                if (msc.EditEvent(eem)) { return RedirectToAction("Index", "Home", null); }
+                int id = msc.EditEvent(eem);
+                if (id > 0)
+                {
+                    return RedirectToAction("Index", "Event", new { id = id });
+                }
                 else {
                     TempData["errorMsg"] = msc.ErrorMessage;
                     this.createModel(eem);
@@ -233,17 +237,18 @@ namespace CalendarApplication.Controllers
                         ID = (int)dr["fieldId"],
                         Name = (string)dr["fieldName"],
                         Description = dr["fieldDescription"] as string,
-                        Required = (bool)dr["requiredField"],
+                        RequiredCreate = (bool)dr["requiredCreation"],
+                        RequiredApprove = (bool)dr["requiredApproval"],
                         Datatype = (Fieldtype)dr["fieldType"],
                         VarcharLength = (int)dr["varCharLength"]
                     };
                     switch (fm.Datatype)
                     {
-                        case Fieldtype.Integer: fm.IntValue = 0; break; //int
+                        case Fieldtype.Float: fm.FloatValue = 0; break; //float
                         case Fieldtype.User: fm.List = eem.UserEditorList; fm.IntValue = 0; break;
                         case Fieldtype.Group: fm.List = eem.GroupEditorList; fm.IntValue = 0; break;
                         case Fieldtype.Text:
-                        case Fieldtype.File: fm.StringValue = ""; break; //string
+                        case Fieldtype.File: fm.StringValue = ""; fm.IntValue = 0; break;
                         case Fieldtype.Datetime: fm.DateValue = DateTime.Now; break;
                         case Fieldtype.Bool: fm.BoolValue = false; break; //bool
                     }
@@ -305,14 +310,15 @@ namespace CalendarApplication.Controllers
                             ID = (int)dr["fieldId"],
                             Name = (string)dr["fieldName"],
                             Description = (string)dr["fieldDescription"],
-                            Required = (bool)dr["requiredField"],
+                            RequiredCreate = (bool)dr["requiredCreation"],
+                            RequiredApprove = (bool)dr["requiredApproval"],
                             Datatype = (Fieldtype)dr["fieldType"],
                             VarcharLength = (int)dr["varCharLength"]
                         };
 
                         switch (fm.Datatype)
                         {
-                            case Fieldtype.Integer:
+                            case Fieldtype.Float:
                             case Fieldtype.User:
                             case Fieldtype.Group: fm.IntValue = (int)data[i + 1]; break; //int
                             case Fieldtype.Text:

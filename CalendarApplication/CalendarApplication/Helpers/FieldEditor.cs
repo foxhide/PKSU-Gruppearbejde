@@ -32,9 +32,9 @@ namespace CalendarApplication.Helpers
             builder.AppendLine("<label for='"+name+"'>"+model.Name+"</label><br>");
             builder.AppendLine("<span style='color:grey;font-size:80%;text-align:left'>"+model.Description+"</span><br>");
             
-            if (model.Datatype == Fieldtype.Integer)
+            if (model.Datatype == Fieldtype.Float)
             {
-                builder.AppendLine("<input type='number' name='" + name + ".IntValue' value='" + model.IntValue + "'>");
+                builder.AppendLine("<input type='number' name='" + name + ".FloatValue' value='" + model.FloatValue + "' step='any' >");
             }
             else if (model.Datatype == Fieldtype.Text)
             {
