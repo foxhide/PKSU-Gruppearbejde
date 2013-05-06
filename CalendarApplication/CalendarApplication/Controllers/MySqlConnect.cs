@@ -1135,13 +1135,47 @@ namespace CalendarApplication.Controllers
             string[] argnames0 = { "@groupName", "@groupId" };
             object[] args0 = { groupmodel.Name, groupmodel.ID };
             CustomQuery query0 = new CustomQuery { Cmd = cmd0, ArgNames = argnames0, Args = args0 };
+            string cmd1 = "DELETE FROM groupmembers WHERE groupId = @groupId";
+            string[] argnames1 = { "@groupId" };
+            object[] args1 = { groupmodel.ID };
+            CustomQuery query1 = new CustomQuery { Cmd = cmd1, ArgNames = argnames1, Args = args1 };
 
-            CustomQuery[] queries = new CustomQuery[] { query0 };
-            MySqlConnect msc = new MySqlConnect();
-            msc.ExecuteQuery(queries);
-            
-            
-            return false;
+
+            CustomQuery[] queries = this.insertGroupMembers(groupmodel);
+            queries[0] = query0;
+            queries[1] = query1;
+
+            if (this.ExecuteQuery(queries) != null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        
+        /// <summary>
+        /// generate a query to insert the groupmembers of a group into the database
+        /// </summary>
+        /// <param name="groupmodel">model of the group whose members are to be inserted</param>
+        /// <returns>CustumQuery array ready to be passed as argument to ExecuteQuery</returns>
+        public CustomQuery[] insertGroupMembers(GroupModel groupmodel)
+        {
+            CustomQuery[] result = new CustomQuery[groupmodel.groupMembers.Count + 2];
+
+            for (int i = 2; i < groupmodel.groupMembers.Count; i++)
+            {
+                //test
+                groupmodel.groupLeaders = groupmodel.groupMembers;
+                string tmpcmd = "INSERT INTO groupmembers (groupId, userId, groupLeader, approved) VALUES (@groupId, @userId, @groupLeader, @approved)";
+                string[] tmpargnames = { "@groupId", "@userId", "@groupLeader", "@approved" };
+                object[] tmpargs = { groupmodel.ID, groupmodel.groupMembers[i], groupmodel.groupLeaders[i], 1 };
+                CustomQuery tmpquery = new CustomQuery { Cmd = tmpcmd, ArgNames = tmpargnames, Args = tmpargs };
+                result[i] = tmpquery;
+            }
+
+            return result;
         }
     }
 }

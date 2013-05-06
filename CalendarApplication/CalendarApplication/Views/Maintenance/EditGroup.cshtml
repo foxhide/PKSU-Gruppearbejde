@@ -38,6 +38,8 @@
         Group Members
         @Html.ListEditorFor(m => m.groupMembers, "Group Members", "Approved Users")
         <br />
+
+        <input type="file" />
     </fieldset>
     
     <input type="submit" value="@(Model.ID != -1 ? "Save changes" : "Create Group")"/>
