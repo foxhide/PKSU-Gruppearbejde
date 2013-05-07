@@ -53,3 +53,14 @@ function disableLists(listName, disable) {
     document.getElementById(listName + "_add_button").disabled = disable;
     document.getElementById(listName + "_rem_button").disabled = disable;
 }
+
+function updateUser(field, id, value) {
+    var url = "/Account/EditUser";
+    if (typeof value === "string") { url += "String"; }
+    else { url += "Bool"; }
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: { field: field, userId: id, value: value }
+    });
+}

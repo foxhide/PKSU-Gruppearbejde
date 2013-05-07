@@ -28,6 +28,7 @@ namespace CalendarApplication.Models.User
         public string Email { set; get; }
 
         public bool Admin { set; get; }
+        public bool Active { set; get; }
 
         /// <summary>
         /// Gets the data for the user specified by the user ID

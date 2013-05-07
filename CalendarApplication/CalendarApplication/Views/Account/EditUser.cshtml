@@ -1,0 +1,72 @@
+﻿@model CalendarApplication.Models.Account.AccountEditModel
+
+@{
+    ViewBag.Title = "AccountUser";
+}
+
+<h2>Edit profile</h2>
+<h3 style="color:red">@TempData["errorMsg"]</h3>
+
+<script type="text/javascript">
+    function updatePassword(id) {
+        var op = $("#OldPassword").val()
+        var np = $("#NewPassword").val()
+        $.ajax({
+            url: "/Maintenance/EditUserPassword",
+            type: 'POST',
+            data: { userId: id, oldPass: op, newPass: np }
+        });
+    }
+</script>
+
+<style>
+    .password-table {
+        margin-left:0;
+        margin-right:auto;
+    }
+    .password-table td {
+        padding:0;
+        padding-right:5px;
+    }
+</style>
+
+<fieldset>
+    <legend>Name</legend>
+    @Html.EditorFor(m => m.RealName)
+    <input type="button" value="Save" onclick="updateUser('realName',@Model.ID,$('#RealName').val())"/>
+</fieldset>
+   
+<fieldset>
+    <legend>E-mail</legend> 
+    @Html.EditorFor(m => m.Email)
+    <input type="button" value="Save" onclick="updateUser('email',@Model.ID,$('#Email').val())"/>
+</fieldset>
+
+<fieldset>
+    <legend>Password</legend>
+    <table class="password-table">
+        <tr>
+            <td>Old:</td>
+            <td>@Html.EditorFor(m => m.OldPassword)</td>
+            <td rowspan="3">
+                <input type="button" value="Save" onclick="updatePassword(@Model.ID)"/>
+            </td>
+        </tr>
+        <tr>
+            <td>New:</td>
+            <td>
+                @Html.EditorFor(m => m.Password)
+                @Html.ValidationMessageFor(m => m.Password)
+            </td>
+        </tr>
+        <tr>
+            <td>Confirm new:</td>
+            <td>
+                @Html.EditorFor(m => m.PasswordConfirm)
+                @Html.ValidationMessageFor(m => m.PasswordConfirm)
+            </td>
+        </tr>
+    </table>
+</fieldset>
+    
+@if(Model.Admin) { <span style="color:green">You are admin</span> }

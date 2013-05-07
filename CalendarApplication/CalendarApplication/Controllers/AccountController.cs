@@ -90,5 +90,71 @@ namespace CalendarApplication.Controllers
             TempData["message"] = "There was an error processing your information. Please try again.";
             return View();
         }
+
+        public ActionResult EditUser(int userId)
+        {
+            // If no user -> go to home page...
+            if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Index", "Home", null); }
+
+            bool isAdmin = false;
+            if (UserModel.GetCurrentUserID() != userId)
+            {
+                // Only an admin may edit another user.
+                isAdmin = UserModel.GetCurrent().Admin;
+                if (!isAdmin)
+                {
+                    TempData["errorMsg"] = "You are not admin, untermensch...";
+                    return RedirectToAction("Index", new { userId = userId });
+                }
+            }
+
+            AccountEditModel result = new AccountEditModel { ID = userId };
+            string userinfo = "SELECT * FROM pksudb.users WHERE userId = @userId";
+
+            MySqlConnect con = new MySqlConnect();
+            CustomQuery query = new CustomQuery();
+            query.Cmd = userinfo;
+            query.ArgNames = new string[] { "@userId" };
+            query.Args = new object[] { userId };
+            DataTable table = con.ExecuteQuery(query);
+
+            if (table != null)
+            {
+                DataRow row = table.Rows[0];
+                result.UserName = (string)row["userName"];
+                result.RealName = (string)row["realName"];
+                result.Admin = (bool)row["admin"];
+                result.Email = (string)row["email"];
+            }
+            else
+            {
+                //negative user id upon error
+                result.ID = -1;
+                TempData["errorMsg"] = con.ErrorMessage;
+            }
+            return View(result);
+        }
+
+        [HttpPost]
+        public void EditUserString(string field, int userId, string value)
+        {
+            MySqlConnect msc = new MySqlConnect();
+            msc.EditUser(userId, value, field);
+        }
+
+        [HttpPost]
+        public void EditUserBool(string field, int userId, bool value)
+        {
+            MySqlConnect msc = new MySqlConnect();
+            msc.EditUser(userId, value, field);
+        }
+
+        [HttpPost]
+        public string EditUserPassword(int userId, string oldPass, string newPass)
+        {
+            MySqlConnect msc = new MySqlConnect();
+            msc.EditUser(userId, newPass, "password");
+            return "";
+        }
     }
 }

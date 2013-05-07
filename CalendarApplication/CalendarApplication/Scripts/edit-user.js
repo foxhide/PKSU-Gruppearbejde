@@ -3,24 +3,30 @@
 function sendData(type) {
     var fromList = "";
     var toList = "";
+    var field = "";
+    var value = false;
     if (type == "active-add") {
         fromList = "UISelect";
         toList = "UASelect";
+        field = "active";
+        value = true;
     }
     else if (type == "active-rem") {
         fromList = "UASelect";
         toList = "UISelect";
+        field = "active";
     }
     else if (type == "approval") {
         fromList = "UNASelect";
         toList = "UASelect";
+        field = "needsApproval";
     }
     var list = document.getElementById(fromList);
     var id = list.options[list.selectedIndex].value;
     $.ajax({
-        url: "/Maintenance/EditUser",
+        url: "/Account/EditUser",
         type: 'POST',
-        data: { type: type, userId: id },
+        data: { field: field, userId: id, value: value },
         success: moveList(fromList, toList, id)
     });
 }

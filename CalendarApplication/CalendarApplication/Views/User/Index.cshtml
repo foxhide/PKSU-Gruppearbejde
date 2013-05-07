@@ -13,14 +13,14 @@
 }
 else {
     <h2>User Info</h2>
+    if(!Model.Active)
+    {
+    <h3 style="color:red">This user is no longer active!</h3>
+    }
     <table>
         <tr>
             <td>
                 <table class="gridtable">
-                    <tr>
-                        <td>User Id</td>
-                        <td>@Model.ID</td>
-                    </tr>
                     <tr>
                         <td>User Name</td>
                         <td>@Model.UserName</td>
@@ -68,9 +68,23 @@ else {
             </td>
         </tr>
     </table>
-    if(UserModel.GetCurrentUserID() != -1 && (UserModel.GetCurrentUserID() == Model.ID || UserModel.GetCurrent().Admin))
+    if(UserModel.GetCurrentUserID() != -1 && UserModel.GetCurrentUserID() == Model.ID)
     {
-        @Html.ActionLink("Edit " + (UserModel.GetCurrentUserID() == Model.ID ? "Profile" : "User"),
-                        "EditUser", "User", new { userId = Model.ID }, null)
+        @Html.ActionLink("Edit Profile","EditUser", "Account", new { userId = Model.ID }, null)
+    }
+    else if (UserModel.GetCurrentUserID() != -1 && UserModel.GetCurrent().Admin)
+    {
+        if(Model.Active) {
+            if(Model.Admin) {
+                @:<input type="button" value="Remove admin rights" onclick="updateUser('admin',@(Model.ID),false)"/>
+            }
+            else {
+                @:<input type="button" value="Make admin" onclick="updateUser('admin',@(Model.ID),true)"/>
+            }
+            @:<input type="button" value="Deactivate user" onclick="updateUser('active',@(Model.ID),false)"/>
+        }
+        else {
+            @:<input type="button" value="Activate user" onclick="updateUser('active',@(Model.ID),true)"/>
+        }
     }
 }
