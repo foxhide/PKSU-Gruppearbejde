@@ -55,7 +55,7 @@ DROP TABLE IF EXISTS `pksudb`.`events` ;
 CREATE  TABLE IF NOT EXISTS `pksudb`.`events` (
   `eventId` INT NOT NULL AUTO_INCREMENT ,
   `userId` INT NOT NULL ,
-  `eventTypeId` INT NOT NULL ,
+  `eventTypeId` INT NULL ,
   `eventName` VARCHAR(45) NOT NULL ,
   `eventStart` DATETIME NOT NULL ,
   `eventEnd` DATETIME NOT NULL ,
@@ -72,7 +72,7 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`events` (
   CONSTRAINT `eventTypeId`
     FOREIGN KEY (`eventTypeId` )
     REFERENCES `pksudb`.`eventtypes` (`eventTypeId` )
-    ON DELETE NO ACTION
+    ON DELETE SET NULL
     ON UPDATE NO ACTION)
 AUTO_INCREMENT = 1
 COMMENT = 'Table for events.\n\neventId: Integer as primary key to identi /* comment truncated */ /*fy each event uniquely
@@ -193,7 +193,7 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`groupmembers` (
   CONSTRAINT `memberuserid`
     FOREIGN KEY (`userId` )
     REFERENCES `pksudb`.`users` (`userId` )
-    ON DELETE RESTRICT
+    ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
 COMMENT = 'A table describing which users belong to which groups.\n\ngrou /* comment truncated */ /*pId: foreign key referencing groups table.
@@ -331,6 +331,84 @@ ENGINE = InnoDB
 COMMENT = 'Table describing which groups can create which event types.\n /* comment truncated */ /*
 eventTypeId: Foreign and primary key, not null.
 groupId: Foreign and primary key, not null.*/';
+
+
+-- -----------------------------------------------------
+-- Table `pksudb`.`filelist`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `pksudb`.`filelist` ;
+
+CREATE  TABLE IF NOT EXISTS `pksudb`.`filelist` (
+  `fieldId` INT NOT NULL ,
+  `fileId` INT NOT NULL ,
+  PRIMARY KEY (`fieldId`, `fileId`) ,
+  INDEX `filelistfield_idx` (`fieldId` ASC) ,
+  INDEX `filelistfile_idx` (`fileId` ASC) ,
+  CONSTRAINT `filelistfield`
+    FOREIGN KEY (`fieldId` )
+    REFERENCES `pksudb`.`eventtypefields` (`fieldId` )
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION,
+  CONSTRAINT `filelistfile`
+    FOREIGN KEY (`fileId` )
+    REFERENCES `pksudb`.`files` (`fileId` )
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+COMMENT = 'Table for lists of files.\n\nfieldId: Foreign key referencing  /* comment truncated */ /*eventtypefields
+fileId: Foreign key referencing files*/';
+
+
+-- -----------------------------------------------------
+-- Table `pksudb`.`userlist`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `pksudb`.`userlist` ;
+
+CREATE  TABLE IF NOT EXISTS `pksudb`.`userlist` (
+  `fieldId` INT NOT NULL ,
+  `userId` INT NOT NULL ,
+  PRIMARY KEY (`fieldId`, `userId`) ,
+  INDEX `userlistfield_idx` (`fieldId` ASC) ,
+  INDEX `userlistuser_idx` (`userId` ASC) ,
+  CONSTRAINT `userlistfield`
+    FOREIGN KEY (`fieldId` )
+    REFERENCES `pksudb`.`eventtypefields` (`fieldId` )
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION,
+  CONSTRAINT `userlistuser`
+    FOREIGN KEY (`userId` )
+    REFERENCES `pksudb`.`users` (`userId` )
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+COMMENT = 'Table for lists of users.\n\nfieldId: Foreign key referencing  /* comment truncated */ /*eventtypefields
+userId: Foreign key referencing users*/';
+
+
+-- -----------------------------------------------------
+-- Table `pksudb`.`grouplist`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `pksudb`.`grouplist` ;
+
+CREATE  TABLE IF NOT EXISTS `pksudb`.`grouplist` (
+  `fieldId` INT NOT NULL ,
+  `groupId` INT NOT NULL ,
+  PRIMARY KEY (`fieldId`, `groupId`) ,
+  INDEX `grouplistfield_idx` (`fieldId` ASC) ,
+  INDEX `grouplistgroup_idx` (`groupId` ASC) ,
+  CONSTRAINT `grouplistfield`
+    FOREIGN KEY (`fieldId` )
+    REFERENCES `pksudb`.`eventtypefields` (`fieldId` )
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION,
+  CONSTRAINT `grouplistgroup`
+    FOREIGN KEY (`groupId` )
+    REFERENCES `pksudb`.`groups` (`groupId` )
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+COMMENT = 'Table for lists of groups.\n\nfieldId: Foreign key referencing /* comment truncated */ /* eventtypefields
+groupId: Foreign key referencing group*/';
 
 USE `pksudb` ;
 
