@@ -192,6 +192,7 @@
     <Content Include="Views\Maintenance\EditGroup.cshtml" />
     <Content Include="Views\Maintenance\ManageUsers.cshtml" />
     <Content Include="Views\Account\EditUser.cshtml" />
+    <Content Include="Views\Event\EventSpecificList.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

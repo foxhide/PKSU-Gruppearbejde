@@ -81,7 +81,8 @@ else {
                                     @switch(fm.Datatype)
                                     {
                                         case Fieldtype.Float:       @fm.FloatValue break;
-                                        case Fieldtype.User:        @Html.ActionLink(fm.StringValue, "Index", "User", new { UserId = fm.IntValue }, null) break;
+                                        case Fieldtype.User:        if(fm.IntValue != 0) { @Html.ActionLink(fm.StringValue, "Index", "User", new { UserId = fm.IntValue }, null) }
+                                                                    else { @fm.StringValue } break;
                                         case Fieldtype.Group:       @fm.StringValue break;
                                         case Fieldtype.Text:        @fm.StringValue break;
                                         case Fieldtype.File:        @fm.IntValue break;

@@ -21,7 +21,5 @@ namespace CalendarApplication.Models.Event
         public List<SelectListItem> GroupVisibleList { get; set; }
 
         public List<FieldModel> TypeSpecifics { get; set; }
-
-        public int SubmitType { get; set; }
     }
 }

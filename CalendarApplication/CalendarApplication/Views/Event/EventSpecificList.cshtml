@@ -1,0 +1,16 @@
+﻿@model CalendarApplication.Models.Event.EventEditModel
+
+@if(Model.TypeSpecifics.Count > 0)
+{
+    <h3>Event Type Specifics:</h3>
+    <table style="margin-left:0;margin-right:auto">
+        @for (int i = 0; i < Model.TypeSpecifics.Count; i++)
+        {
+            <tr style="padding:0">
+                <td style="padding:2px">
+                    @Html.FieldEditorFor(m => m.TypeSpecifics[i])
+                </td>
+            </tr>
+        }           
+    </table>
+}

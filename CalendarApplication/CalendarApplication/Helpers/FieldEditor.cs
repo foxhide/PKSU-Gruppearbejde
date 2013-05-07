@@ -84,6 +84,26 @@ namespace CalendarApplication.Helpers
                 }
                 builder.AppendLine("</select>");
             }
+            else if (model.Datatype == Fieldtype.File)
+            {
+                //////////////////////////// needs work ////////////////////////
+                builder.AppendLine("<input type='file'>");
+            }
+            else if (model.Datatype == Fieldtype.UserList)
+            {
+                builder.AppendLine(DoubleListEditor.ListEditorFor(model.List, name + ".List",
+                                     "Users selected", "Users available", "", "").ToString());
+            }
+            else if (model.Datatype == Fieldtype.GroupList)
+            {
+                builder.AppendLine(DoubleListEditor.ListEditorFor(model.List, name + ".List",
+                                     "Groups selected", "Groups available", "", "").ToString());
+            }
+            else if (model.Datatype == Fieldtype.FileList)
+            {
+                //////////////////////////// needs work ////////////////////////
+                builder.AppendLine("<text>File list</text>");
+            }
             else
             {
                 builder.AppendLine("<span style='color:red'>Error. Could not create input field. Not implemented...</span>");

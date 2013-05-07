@@ -994,7 +994,7 @@ namespace CalendarApplication.Controllers
                         dataReader.Close();
                         if (rows)
                         {
-                            // The old type has a table with a entry, remove this entry.
+                            // The old type has a table with an entry, remove this entry.
                             string delete = "DELETE FROM table_" + prevType + " WHERE eventId = @nid";
                             cmd.CommandText = delete;
                             cmd.Prepare();

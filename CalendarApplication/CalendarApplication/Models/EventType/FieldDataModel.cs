@@ -14,7 +14,10 @@ namespace CalendarApplication.Models.EventType
         User,
         Group,
         File,
-        Bool
+        Bool,
+        UserList,
+        GroupList,
+        FileList
     }
 
     public class FieldDataModel
@@ -28,7 +31,10 @@ namespace CalendarApplication.Models.EventType
                 "User",
                 "Group",
                 "File",
-                "Checkbox"
+                "Checkbox",
+                "List of users",
+                "List of groups",
+                "List of files"
             };
 
         public FieldDataModel()
@@ -78,6 +84,9 @@ namespace CalendarApplication.Models.EventType
                 case Fieldtype.Group: return "int"; //groupId
                 case Fieldtype.File: return "int";  //fileId
                 case Fieldtype.Bool: return "tinyint(1)";    //Yes/No
+                case Fieldtype.UserList:
+                case Fieldtype.GroupList:
+                case Fieldtype.FileList: return "tinyint(1)";  //Lists
                 default: return "int";
             }
         }
@@ -93,6 +102,9 @@ namespace CalendarApplication.Models.EventType
                 case Fieldtype.Group: return 4;
                 case Fieldtype.File: return 5;
                 case Fieldtype.Bool: return 6;
+                case Fieldtype.UserList: return 7;
+                case Fieldtype.GroupList: return 8;
+                case Fieldtype.FileList: return 9;
                 default: return -1;
             }
         }

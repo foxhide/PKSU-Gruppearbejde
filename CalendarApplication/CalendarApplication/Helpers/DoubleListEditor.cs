@@ -48,6 +48,12 @@ namespace CalendarApplication.Helpers
             // Get Name
             string name = ExpressionHelper.GetExpressionText(expression).Split('.').Last();
 
+            return ListEditorFor(list, name, labelList1, labelList2, onAdd, onRem);
+        }
+
+        public static MvcHtmlString ListEditorFor(List<SelectListItem> list, string name, string labelList1, string labelList2,
+                                                    string onAdd, string onRem)
+        {
             StringBuilder builder = new StringBuilder();
 
             builder.AppendLine("<span style='color:grey;font-size:80%;text-align:left'>");

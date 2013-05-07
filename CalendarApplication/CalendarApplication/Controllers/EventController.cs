@@ -85,13 +85,29 @@ namespace CalendarApplication.Controllers
 
                             case Fieldtype.Datetime: fm.DateValue = (DateTime)ds.Tables[0].Rows[0]["field_" + fm.ID]; break;
 
-                            case Fieldtype.User: if (DBNull.Value.Equals(ds.Tables[0].Rows[0]["field_" + fm.ID])) { fm.IntValue = 0; }
-                                                 else { fm.IntValue = (int)ds.Tables[0].Rows[0]["field_" + fm.ID]; }
-                                                 fm.StringValue = UserModel.GetUser(fm.IntValue).UserName; break;
+                            case Fieldtype.User: if (DBNull.Value.Equals(ds.Tables[0].Rows[0]["field_" + fm.ID]))
+                                                 {
+                                                    fm.IntValue = 0;
+                                                    fm.StringValue = "None";
+                                                 }
+                                                 else
+                                                 {
+                                                    fm.IntValue = (int)ds.Tables[0].Rows[0]["field_" + fm.ID]; 
+                                                    fm.StringValue = UserModel.GetUser(fm.IntValue).UserName;
+                                                 }
+                                                 break;
 
-                            case Fieldtype.Group: if (DBNull.Value.Equals(ds.Tables[0].Rows[0]["field_" + fm.ID])) { fm.IntValue = 0; }
-                                                  else { fm.IntValue = (int)ds.Tables[0].Rows[0]["field_" + fm.ID]; }
-                                                  fm.StringValue = "Group name not implemented until Andreas has made a GetGroup function..."; break;
+                            case Fieldtype.Group: if (DBNull.Value.Equals(ds.Tables[0].Rows[0]["field_" + fm.ID]))
+                                                  {
+                                                        fm.IntValue = 0;
+                                                        fm.StringValue = "None";
+                                                  }
+                                                  else
+                                                  {
+                                                        fm.IntValue = (int)ds.Tables[0].Rows[0]["field_" + fm.ID];
+                                                        fm.StringValue = "Group name not implemented until Andreas has made a GetGroup function...";
+                                                  }
+                                                  break;
                         }
                         result.TypeSpecifics.Add(fm);
                     }
@@ -111,7 +127,7 @@ namespace CalendarApplication.Controllers
             {
                 ID = id,
                 EventTypes = new List<SelectListItem>(),
-                SelectedEventType = "1", // Initial value -> Basic event
+                SelectedEventType = "0", // Initial value -> Basic event
                 Start = new DateTime(year, month, day, 10, 0, 0),
                 End = new DateTime(year, month, day, 18, 0, 0),
                 Visible = true
@@ -183,51 +199,36 @@ namespace CalendarApplication.Controllers
         [HttpPost]
         public ActionResult EditEvent(EventEditModel eem)
         {
-            if (eem.SubmitType == 1)
+            MySqlConnect msc = new MySqlConnect();
+            eem.CreatorId = UserModel.GetCurrentUserID();
+            int id = msc.EditEvent(eem);
+            if (id > 0)
             {
-                MySqlConnect msc = new MySqlConnect();
-                eem.CreatorId = UserModel.GetCurrentUserID();
-                int id = msc.EditEvent(eem);
-                if (id > 0)
-                {
-                    return RedirectToAction("Index", "Event", new { id = id });
-                }
-                else {
-                    TempData["errorMsg"] = msc.ErrorMessage;
-                    this.createModel(eem);
-                    return View(eem);
-                }
+                return RedirectToAction("Index", "Event", new { id = id });
             }
-            else
-            {
+            else {
+                TempData["errorMsg"] = msc.ErrorMessage;
                 this.createModel(eem);
                 return View(eem);
             }
         }
 
-        public void createModel(EventEditModel eem)
+        /// <summary>
+        /// Gets a partial view with the event specific fields. Called from js-AJAX
+        /// </summary>
+        /// <param name="type">The event type. Should always be > 0</param>
+        /// <returns>A partial view containing a list of the (empty) specifics for the event type</returns>
+        public ActionResult GetEventSpecific(int type)
         {
-            MySqlConnect msc = new MySqlConnect();
+            EventEditModel eem = new EventEditModel { TypeSpecifics = new List<FieldModel>() };
 
-            // Get list of event types //
-            eem.EventTypes = new List<SelectListItem>();
-            string etquery = "SELECT eventTypeId,eventTypeName FROM pksudb.eventtypes";
-            DataTable dt = msc.ExecuteQuery(etquery);
-            if (dt != null)
-            {
-                foreach (DataRow dr in dt.Rows)
-                {
-                    eem.EventTypes.Add(new SelectListItem
-                    {
-                        Value = ((int)dr["eventTypeId"]).ToString(),
-                        Text = (string)dr["eventTypeName"]
-                    });
-                }
-            }
-            
-            eem.TypeSpecifics = new List<FieldModel>();
-            string specQuery = "SELECT * FROM eventtypefields WHERE eventTypeId = " + eem.SelectedEventType;
-            dt = msc.ExecuteQuery(specQuery);
+            MySqlConnect msc = new MySqlConnect();
+            List<SelectListItem> users = null;       // List for user list
+            List<SelectListItem> groups = null;      // List for group list
+            List<SelectListItem> usersDrop = null;   // List for user dropdown
+            List<SelectListItem> groupsDrop = null;  // List for group dropdown
+            string specQuery = "SELECT * FROM eventtypefields WHERE eventTypeId = " + type;
+            DataTable dt = msc.ExecuteQuery(specQuery);
             if (dt != null)
             {
                 foreach (DataRow dr in dt.Rows)
@@ -245,9 +246,16 @@ namespace CalendarApplication.Controllers
                     switch (fm.Datatype)
                     {
                         case Fieldtype.Float: fm.FloatValue = 0; break; //float
-                        case Fieldtype.User: fm.List = eem.UserEditorList; fm.IntValue = 0; break;
-                        case Fieldtype.Group: fm.List = eem.GroupEditorList; fm.IntValue = 0; break;
+                        case Fieldtype.UserList: if (users == null) { users = this.GetUsers(msc, false); }
+                                                 fm.List = users; fm.IntValue = 0; break;
+                        case Fieldtype.User: if (usersDrop == null) { usersDrop = this.GetUsers(msc, true); }
+                                             fm.List = usersDrop; fm.IntValue = 0; break;
+                        case Fieldtype.GroupList: if (groups == null) { groups = this.GetGroups(msc , false); }
+                                                  fm.List = groups; fm.IntValue = 0; break;
+                        case Fieldtype.Group: if (groupsDrop == null) { groupsDrop = this.GetGroups(msc, true); }
+                                              fm.List = groupsDrop; fm.IntValue = 0; break;
                         case Fieldtype.Text:
+                        //case Fieldtype.FileList:
                         case Fieldtype.File: fm.StringValue = ""; fm.IntValue = 0; break;
                         case Fieldtype.Datetime: fm.DateValue = DateTime.Now; break;
                         case Fieldtype.Bool: fm.BoolValue = false; break; //bool
@@ -255,9 +263,131 @@ namespace CalendarApplication.Controllers
                     eem.TypeSpecifics.Add(fm);
                 }
             }
+
+            return PartialView("EventSpecificList", eem);
         }
 
-        public bool getModel(EventEditModel eem)
+        /// <summary>
+        /// Getter for a SelectListItem list of all groups.
+        /// </summary>
+        /// <param name="msc">MySqlConnect object</param>
+        /// <param name="nullVal">If true, includes a null-value</param>
+        /// <returns>A SelecetListItem list of groups</returns>
+        private List<SelectListItem> GetGroups(MySqlConnect msc, bool nullVal)
+        {
+            List<SelectListItem> result = new List<SelectListItem>();
+            if (nullVal) { result.Insert(0,new SelectListItem { Value = "0", Text = "Select group" }); }
+            string groupquery = "SELECT groupId,groupName FROM pksudb.groups ORDER BY groupName";
+            DataTable dt = msc.ExecuteQuery(groupquery);
+            if (dt != null)
+            {
+                foreach (DataRow dr in dt.Rows)
+                {
+                    result.Add(new SelectListItem
+                    {
+                        Value = ((int)dr["groupId"]).ToString(),
+                        Text = (string)dr["groupName"]
+                    });
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Getter for a SelectListItem list of all users.
+        /// </summary>
+        /// <param name="msc">MySqlConnect object</param>
+        /// <param name="nullVal">If true, includes a null-value</param>
+        /// <returns>A SelecetListItem list of users</returns>
+        private List<SelectListItem> GetUsers(MySqlConnect msc, bool nullVal)
+        {
+            List<SelectListItem> result = new List<SelectListItem>();
+            if (nullVal) { result.Insert(0, new SelectListItem { Value = "0", Text = "Select user" }); }
+            string userquery = "SELECT userId,userName FROM pksudb.users ORDER BY userName";
+            DataTable dt = msc.ExecuteQuery(userquery);
+            if (dt != null)
+            {
+                foreach (DataRow dr in dt.Rows)
+                {
+                    result.Add(new SelectListItem
+                    {
+                        Value = ((int)dr["userId"]).ToString(),
+                        Text = (string)dr["userName"]
+                    });
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Fills the EventEditModel -> event types and event specifics
+        /// </summary>
+        /// <param name="eem">The EventEditModel</param>
+        private void createModel(EventEditModel eem)
+        {
+            MySqlConnect msc = new MySqlConnect();
+
+            // Get event types //
+            eem.EventTypes = new List<SelectListItem>();
+            eem.EventTypes.Add(new SelectListItem { Value = "0", Text = "Select event type" });
+            string etquery = "SELECT eventTypeId,eventTypeName FROM pksudb.eventtypes";
+            DataTable dt = msc.ExecuteQuery(etquery);
+            if (dt != null)
+            {
+                foreach (DataRow dr in dt.Rows)
+                {
+                    eem.EventTypes.Add(new SelectListItem
+                    {
+                        Value = ((int)dr["eventTypeId"]).ToString(),
+                        Text = (string)dr["eventTypeName"]
+                    });
+                }
+            }
+
+            if (!eem.SelectedEventType.Equals("0"))
+            {
+                eem.TypeSpecifics = new List<FieldModel>();
+                string specQuery = "SELECT * FROM eventtypefields WHERE eventTypeId = " + eem.SelectedEventType;
+                dt = msc.ExecuteQuery(specQuery);
+                if (dt != null)
+                {
+                    foreach (DataRow dr in dt.Rows)
+                    {
+                        FieldModel fm = new FieldModel
+                        {
+                            ID = (int)dr["fieldId"],
+                            Name = (string)dr["fieldName"],
+                            Description = dr["fieldDescription"] as string,
+                            RequiredCreate = (bool)dr["requiredCreation"],
+                            RequiredApprove = (bool)dr["requiredApproval"],
+                            Datatype = (Fieldtype)dr["fieldType"],
+                            VarcharLength = (int)dr["varCharLength"]
+                        };
+                        switch (fm.Datatype)
+                        {
+                            case Fieldtype.Float: fm.FloatValue = 0; break; //float
+                            case Fieldtype.UserList:
+                            case Fieldtype.User: fm.List = eem.UserEditorList; fm.IntValue = 0; break;
+                            case Fieldtype.GroupList:
+                            case Fieldtype.Group: fm.List = eem.GroupEditorList; fm.IntValue = 0; break;
+                            case Fieldtype.Text:
+                            //case Fieldtype.FileList:
+                            case Fieldtype.File: fm.StringValue = ""; fm.IntValue = 0; break;
+                            case Fieldtype.Datetime: fm.DateValue = DateTime.Now; break;
+                            case Fieldtype.Bool: fm.BoolValue = false; break; //bool
+                        }
+                        eem.TypeSpecifics.Add(fm);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Fills the EventEditModel with event types and event specifics and data.
+        /// </summary>
+        /// <param name="eem">The EventEditModel</param>
+        /// <returns>True on success, false on error</returns>
+        private bool getModel(EventEditModel eem)
         {
             if (eem.ID == -1) { return true; }
 

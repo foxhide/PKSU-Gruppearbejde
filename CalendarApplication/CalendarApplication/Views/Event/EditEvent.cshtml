@@ -12,10 +12,28 @@
 
 <link type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/base/jquery-ui.css" rel="stylesheet" />
 
+<script>
+    function getSpecifics(type) {
+        if (type != 0) {
+            $.ajax({
+                url: "/Event/GetEventSpecific/",
+                type: 'GET',
+                data: { type: type },
+                dataType: 'html',
+                success: function (result) {
+                    $('#event_specifics').html(result);
+                }
+            });
+        }
+        else {
+            $('#event_specifics').html("");
+        }
+    }
+</script>
+
 @using (Html.BeginForm()) {
 <fieldset style="width:80%">
     <legend>Create New Event</legend>
-    @Html.HiddenFor(m => m.SubmitType)
     @Html.HiddenFor(m => m.ID)
 
     <table style="margin-left:0;margin-right:0;width:100%">
@@ -29,7 +47,7 @@
                 @Html.LabelFor(m => m.SelectedEventType)
                 @Html.DropDownListFor(m => Model.SelectedEventType,
                                         new SelectList(Model.EventTypes, "Value", "Text"),
-                                        new { onchange="this.form.submit()" })
+                                        new { onchange="getSpecifics(this.value)" })
                 <br />
                 <br />
                 @Html.LabelFor(m => m.Start) <br />
@@ -43,22 +61,13 @@
                 @Html.ListEditorFor(m => m.RoomSelectList, "Rooms Selected", "Rooms Available")
                 <br />
 
- 
-                @if (Model.TypeSpecifics != null && Model.TypeSpecifics.Count > 0)
-                {
-                    <h3>Event Type Specifics:</h3>
-                    <table style="margin-left:0;margin-right:auto">
-                        @for (int i = 0; i < Model.TypeSpecifics.Count; i++)
-                        {
-                            <tr style="padding:0">
-                                <td style="padding:2px">
-                                    @Html.FieldEditorFor(m => m.TypeSpecifics[i])
-                                </td>
-                            </tr>
-                        }           
-                    </table>
-                }
-                <input type="submit" value="Create event" onclick="document.getElementById('SubmitType').value = 1" />
+                <div id="event_specifics">
+                    @if (Model.TypeSpecifics != null && Model.TypeSpecifics.Count > 0)
+                    {
+                        @Html.Partial("EventSpecificList",Model)
+                    }
+                </div>
+                <input type="submit" value="Create event" />
             </td>
             <td>
                 <fieldset>
