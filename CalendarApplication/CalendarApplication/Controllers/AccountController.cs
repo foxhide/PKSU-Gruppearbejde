@@ -4,9 +4,11 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
+using System.Data;
+
 using CalendarApplication.Models.Account;
 using CalendarApplication.Models.User;
-using System.Data;
+using CalendarApplication.Database;
 
 namespace CalendarApplication.Controllers
 {
@@ -80,8 +82,8 @@ namespace CalendarApplication.Controllers
         [HttpPost]
         public ActionResult Register(Register model)
         {
-            MySqlConnect msc = new MySqlConnect();
-            int userId = msc.CreateUser(model);
+            MySqlUser msu = new MySqlUser();
+            int userId = msu.CreateUser(model);
             if (userId >= 0)
             {
                 //The user is not logged in, simply created, and needs approval
@@ -138,22 +140,22 @@ namespace CalendarApplication.Controllers
         [HttpPost]
         public void EditUserString(string field, int userId, string value)
         {
-            MySqlConnect msc = new MySqlConnect();
-            msc.EditUser(userId, value, field);
+            MySqlUser msu = new MySqlUser();
+            msu.EditUser(userId, value, field);
         }
 
         [HttpPost]
         public void EditUserBool(string field, int userId, bool value)
         {
-            MySqlConnect msc = new MySqlConnect();
-            msc.EditUser(userId, value, field);
+            MySqlUser msu = new MySqlUser();
+            msu.EditUser(userId, value, field);
         }
 
         [HttpPost]
         public string EditUserPassword(int userId, string oldPass, string newPass)
         {
-            MySqlConnect msc = new MySqlConnect();
-            msc.EditUser(userId, newPass, "password");
+            MySqlUser msu = new MySqlUser();
+            msu.EditUser(userId, newPass, "password");
             return "";
         }
     }

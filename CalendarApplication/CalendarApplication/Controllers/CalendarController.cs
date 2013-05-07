@@ -10,6 +10,7 @@ using CalendarApplication.Models.Event;
 using CalendarApplication.Models.User;
 using CalendarApplication.Models.EventType;
 using CalendarApplication.Models.Maintenance;
+using CalendarApplication.Database;
 
 namespace CalendarApplication.Controllers
 {

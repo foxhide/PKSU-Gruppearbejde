@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using CalendarApplication.Models.User;
 using CalendarApplication.Models.Event;
 using CalendarApplication.Models.EventType;
+using CalendarApplication.Database;
 
 namespace CalendarApplication.Controllers
 {
@@ -199,15 +200,15 @@ namespace CalendarApplication.Controllers
         [HttpPost]
         public ActionResult EditEvent(EventEditModel eem)
         {
-            MySqlConnect msc = new MySqlConnect();
+            MySqlEvent mse = new MySqlEvent();
             eem.CreatorId = UserModel.GetCurrentUserID();
-            int id = msc.EditEvent(eem);
+            int id = mse.EditEvent(eem);
             if (id > 0)
             {
                 return RedirectToAction("Index", "Event", new { id = id });
             }
             else {
-                TempData["errorMsg"] = msc.ErrorMessage;
+                TempData["errorMsg"] = mse.ErrorMessage;
                 this.createModel(eem);
                 return View(eem);
             }

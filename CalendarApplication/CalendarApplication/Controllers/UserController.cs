@@ -5,7 +5,8 @@ using System.Web;
 using System.Web.Mvc;
 using CalendarApplication.Models.User;
 using System.Data;
-using MySql.Data.MySqlClient;
+
+using CalendarApplication.Database;
 
 namespace CalendarApplication.Controllers
 {

@@ -4,13 +4,13 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.Data;
-using System.Windows.Forms;
 
 using CalendarApplication.Models.EventType;
 using CalendarApplication.Models.Maintenance;
 using CalendarApplication.Controllers;
 using CalendarApplication.Models.User;
 using CalendarApplication.Models.Group;
+using CalendarApplication.Database;
 
 namespace CalendarApplication.Controllers
 {
@@ -139,19 +139,19 @@ namespace CalendarApplication.Controllers
         [HttpPost]
         public ActionResult EditEventType(EventTypeModel etm)
         {
-            MySqlConnect msc = new MySqlConnect();
+            MySqlEvent mse = new MySqlEvent();
             bool ok;
             if (etm.ID == -1)
             {
-                ok = msc.CreateEventType(etm);
+                ok = mse.CreateEventType(etm);
             }
             else
             {
-                ok = msc.EditEventType(etm);
+                ok = mse.EditEventType(etm);
             }
             if (!ok)
             {
-                TempData["errorMsg"] = msc.ErrorMessage;
+                TempData["errorMsg"] = mse.ErrorMessage;
                 etm.TypeSpecific = new List<FieldDataModel>();
                 return View(etm);
             }
@@ -231,19 +231,19 @@ namespace CalendarApplication.Controllers
         [HttpPost]
         public ActionResult EditGroup(GroupModel grm)
         {
-            MySqlConnect msc = new MySqlConnect();
+            MySqlGroup msg = new MySqlGroup();
             bool ok;
             if (grm.ID == -1)
             {
-                ok = msc.CreateGroup(grm);
+                ok = msg.CreateGroup(grm);
             }
             else
             {
-                ok = msc.EditGroup(grm);
+                ok = msg.EditGroup(grm);
             }
             if (!ok)
             {
-                TempData["errorMsg"] = msc.ErrorMessage;
+                TempData["errorMsg"] = msg.ErrorMessage;
                 return View(grm);
             }
             return RedirectToAction("EditGroup", "Maintenance", new { groupId = grm.ID });

@@ -5,7 +5,7 @@ using System.Web;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
 
-using CalendarApplication.Controllers;
+using CalendarApplication.Database;
 using CalendarApplication.Models.Event;
 using CalendarApplication.Models.Group;
 
