@@ -17,11 +17,15 @@ namespace CalendarApplication.Models.Group
     {
         public int ID { set; get; }
 
-        [Display(Name = "Group name:")]
+        [Display(Name = "Group Name")]
         public string Name { set; get; }
         public bool Selected { set; get; }
+        [Display(Name = "Group Members")]
         public List<SelectListItem> groupMembers { set; get; }
+        [Display(Name = "Group Leaders")]
         public List<SelectListItem> groupLeaders { set; get; }
+        [Display(Name = "Can Create")]
+        public List<SelectListItem> canCreate { set; get; }
 
         //Override Equals
         public override bool Equals(object obj)

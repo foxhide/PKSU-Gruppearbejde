@@ -166,12 +166,11 @@ namespace CalendarApplication.Controllers
 
         public ActionResult EditGroup(int groupId)
         {
-            //begin transaction
-
             GroupModel result = new GroupModel
                                     { ID = groupId,
                                       groupMembers = new List<SelectListItem>(), 
-                                      groupLeaders = new List<SelectListItem>()
+                                      groupLeaders = new List<SelectListItem>(),
+                                      canCreate = new List<SelectListItem>()
                                     };
             
             MySqlConnect msc = new MySqlConnect();
@@ -200,6 +199,12 @@ namespace CalendarApplication.Controllers
                         Value = ((int)dt1.Rows[i]["userId"]).ToString(),
                         Text = (string)dt1.Rows[i]["userName"],
                         Selected = (bool)dt1.Rows[i]["groupLeader"]
+                    });
+                    result.canCreate.Add(new SelectListItem
+                    {
+                        Value = ((int)dt1.Rows[i]["userId"]).ToString(),
+                        Text = (string)dt1.Rows[i]["userName"],
+                        Selected = (bool)dt1.Rows[i]["canCreate"] || (bool)dt1.Rows[i]["groupLeader"]
                     });
                 }
             }
@@ -241,7 +246,7 @@ namespace CalendarApplication.Controllers
                 TempData["errorMsg"] = msc.ErrorMessage;
                 return View(grm);
             }
-            return RedirectToAction("Index", "Maintenance", null);
+            return RedirectToAction("EditGroup", "Maintenance", new { groupId = grm.ID });
         }
 
         public ActionResult ManageUsers()

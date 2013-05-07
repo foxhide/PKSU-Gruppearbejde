@@ -14,11 +14,6 @@
 
 @using (Html.BeginForm(new { ReturnUrl = ViewBag.ReturnUrl }))
 {
-    @Html.HiddenFor(model => Model.ID)
-    <b>@Html.LabelFor(model => Model.Name)</b><br />
-    @Html.EditorFor(model => Model.Name)
-    @Html.ValidationMessageFor(model => Model.Name)
-    <br />
     
     <!--Consider putting some description here!-->
     
@@ -29,16 +24,49 @@
         #fields th {padding:0;}
     </style>
     
-    <fieldset>
-        <legend>Group Management</legend>
-        Group Leaders
-        @Html.ListEditorFor(m => m.groupLeaders, "Group Leaders", "Group Members")
-        <br />
-
-        Group Members
-        @Html.ListEditorFor(m => m.groupMembers, "Group Members", "Approved Users")
-        <br />
-    </fieldset>
+    <table>
+        <tr>
+            <td>
+                <fieldset>
+                    <legend>
+                        @Html.HiddenFor(model => Model.ID)
+                        @Html.LabelFor(model => Model.Name)
+                    </legend>
+                    @Html.EditorFor(model => Model.Name)
+                    @Html.ValidationMessageFor(model => Model.Name)
+                </fieldset>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <fieldset>
+                    <legend>@Html.LabelFor(m => m.groupLeaders)</legend>
+                    @Html.ListEditorFor(m => m.groupLeaders, "Group Leaders", "Group Members")
+                </fieldset>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <fieldset>
+                    <legend>@Html.LabelFor(model => model.canCreate)</legend>
+                    @Html.ListEditorFor(m => m.canCreate, "Can Edit", "Group Members")
+                </fieldset>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <fieldset>
+                    <legend>@Html.LabelFor(model => model.groupMembers)</legend>
+                    @Html.ListEditorFor(m => m.groupMembers, "Group Members", "Approved Users")
+                </fieldset>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input type="submit" value="@(Model.ID != -1 ? "Save changes" : "Create Group")"/>
+            </td>
+        </tr>
+    </table>
     
-    <input type="submit" value="@(Model.ID != -1 ? "Save changes" : "Create Group")"/>
+    
 }
