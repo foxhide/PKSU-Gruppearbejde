@@ -60,11 +60,11 @@ namespace CalendarApplication.Controllers
                 switch (ex.Number)
                 {
                     case 0:
-                        MessageBox.Show("Cannot connect!");
+                        this.ErrorMessage = "Cannot connect to database!";
                         break;
 
                     case 1045:
-                        MessageBox.Show("User/password did not match!");
+                       this.ErrorMessage = "User/password did not match!";
                         break;
                 }
                 return false;
@@ -1173,17 +1173,74 @@ namespace CalendarApplication.Controllers
         public bool EditGroup(GroupModel groupmodel)
         {
             //NOT FINISHED
-            string cmd0 = "UPDATE groups SET groupName = @groupName WHERE groupId = @groupId";
-            string[] argnames0 = { "@groupName", "@groupId" };
-            object[] args0 = { groupmodel.Name, groupmodel.ID };
-            CustomQuery query0 = new CustomQuery { Cmd = cmd0, ArgNames = argnames0, Args = args0 };
+            if (this.OpenConnection() == true)
+            {
+                MySqlTransaction mst = null;
+                MySqlCommand cmd = null;
+                cmd = new MySqlCommand();
 
-            CustomQuery[] queries = new CustomQuery[] { query0 };
-            MySqlConnect msc = new MySqlConnect();
-            msc.ExecuteQuery(queries);
-            
-            
-            return false;
+                try
+                {
+                    mst = connection.BeginTransaction();
+                    cmd.Connection = connection;
+                    cmd.Transaction = mst;
+
+                    cmd.CommandText = "UPDATE groups SET groupName = @groupName WHERE groupId = @groupId";
+                    cmd.Parameters.AddWithValue("@groupName", groupmodel.Name);
+                    cmd.Parameters.AddWithValue("@groupId", groupmodel.ID);
+                    cmd.Prepare();
+                    cmd.ExecuteNonQuery();
+                    cmd.CommandText = "DELETE FROM groupmembers WHERE groupId = @groupId";
+                    cmd.Prepare();
+                    cmd.ExecuteNonQuery();
+
+                    if (groupmodel.groupMembers != null)
+                    {
+                        for (int i = 0; i < groupmodel.groupMembers.Count; i++)
+                        {
+                            cmd.CommandText = "INSERT INTO groupmembers (groupId, userId, groupLeader, approved) VALUES (@groupId, @userId, @groupLeader, @approved)";
+                            cmd.Parameters.AddWithValue("@groupId", groupmodel.ID);
+                            cmd.Parameters.AddWithValue("@userId", groupmodel.groupMembers[i]);
+                            cmd.Parameters.AddWithValue("@groupLeader", 0);
+                            cmd.Parameters.AddWithValue("@approved", 1);
+                            cmd.Prepare();
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                    if (groupmodel.groupLeaders != null)
+                    {
+                        for (int i = 0; i < groupmodel.groupLeaders.Count; i++)
+                        {
+                            cmd.Parameters.Clear();
+                            cmd.CommandText = "UPDATE groupmembers SET groupLeader = @groupLeader WHERE userId = @userId";
+                            cmd.Parameters.AddWithValue("@groupLeader", groupmodel.groupLeaders[i].Selected);
+                            cmd.Parameters.AddWithValue("@userId", groupmodel.groupLeaders[i]);
+                            if (i == 0)
+                            {
+                                cmd.Prepare();
+                            }
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+
+                    mst.Commit();
+
+                    this.CloseConnection();
+                    return true;
+                }
+                catch (MySqlException ex)
+                {
+                    this.ErrorMessage = ex.Message + " caused by: " + cmd.CommandText;
+                    mst.Rollback();
+                    this.CloseConnection();
+                    return false;
+                }
+            }
+            else
+            {
+                //could not open connection
+                return false;
+            }
         }
     }
 }
