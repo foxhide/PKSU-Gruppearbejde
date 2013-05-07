@@ -168,9 +168,11 @@ namespace CalendarApplication.Controllers
         {
             //begin transaction
 
-            GroupModel result = new GroupModel { ID = groupId };
-            List<SelectListItem> members = new List<SelectListItem>();
-            List<SelectListItem> leaders = new List<SelectListItem>();
+            GroupModel result = new GroupModel
+                                    { ID = groupId,
+                                      groupMembers = new List<SelectListItem>(), 
+                                      groupLeaders = new List<SelectListItem>()
+                                    };
             
             MySqlConnect msc = new MySqlConnect();
 
@@ -192,7 +194,8 @@ namespace CalendarApplication.Controllers
             {
                 if (!(dt1.Rows[i]["userId"] is DBNull))
                 {
-                    leaders.Add(new SelectListItem
+                    groupMembers.Add((int)dt1.Rows[i]["userId"]);
+                    result.groupLeaders.Add(new SelectListItem
                     {
                         Value = ((int)dt1.Rows[i]["userId"]).ToString(),
                         Text = (string)dt1.Rows[i]["userName"],
@@ -207,7 +210,7 @@ namespace CalendarApplication.Controllers
             {
                 if (!(dt0.Rows[i]["userId"] is DBNull))
                 {
-                    members.Add(new SelectListItem
+                    result.groupMembers.Add(new SelectListItem
                         {
                             Value = ((int)dt0.Rows[i]["userId"]).ToString(),
                             Text = (string)dt0.Rows[i]["userName"],
@@ -216,9 +219,6 @@ namespace CalendarApplication.Controllers
                 }
 
             }
-
-            result.groupMembers = members;
-            result.groupLeaders = leaders;
 
             return View(result);
         }

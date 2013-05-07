@@ -60,11 +60,11 @@ namespace CalendarApplication.Controllers
                 switch (ex.Number)
                 {
                     case 0:
-                        MessageBox.Show("Cannot connect!");
+                        this.ErrorMessage = "Cannot connect to database!";
                         break;
 
                     case 1045:
-                        MessageBox.Show("User/password did not match!");
+                       this.ErrorMessage = "User/password did not match!";
                         break;
                 }
                 return false;
@@ -1173,51 +1173,74 @@ namespace CalendarApplication.Controllers
         public bool EditGroup(GroupModel groupmodel)
         {
             //NOT FINISHED
-            string cmd0 = "UPDATE groups SET groupName = @groupName WHERE groupId = @groupId";
-            string[] argnames0 = { "@groupName", "@groupId" };
-            object[] args0 = { groupmodel.Name, groupmodel.ID };
-            CustomQuery query0 = new CustomQuery { Cmd = cmd0, ArgNames = argnames0, Args = args0 };
-            string cmd1 = "DELETE FROM groupmembers WHERE groupId = @groupId";
-            string[] argnames1 = { "@groupId" };
-            object[] args1 = { groupmodel.ID };
-            CustomQuery query1 = new CustomQuery { Cmd = cmd1, ArgNames = argnames1, Args = args1 };
-
-
-            CustomQuery[] queries = this.insertGroupMembers(groupmodel);
-            queries[0] = query0;
-            queries[1] = query1;
-
-            if (this.ExecuteQuery(queries) != null)
+            if (this.OpenConnection() == true)
             {
-                return true;
+                MySqlTransaction mst = null;
+                MySqlCommand cmd = null;
+                cmd = new MySqlCommand();
+
+                try
+                {
+                    mst = connection.BeginTransaction();
+                    cmd.Connection = connection;
+                    cmd.Transaction = mst;
+
+                    cmd.CommandText = "UPDATE groups SET groupName = @groupName WHERE groupId = @groupId";
+                    cmd.Parameters.AddWithValue("@groupName", groupmodel.Name);
+                    cmd.Parameters.AddWithValue("@groupId", groupmodel.ID);
+                    cmd.Prepare();
+                    cmd.ExecuteNonQuery();
+                    cmd.CommandText = "DELETE FROM groupmembers WHERE groupId = @groupId";
+                    cmd.Prepare();
+                    cmd.ExecuteNonQuery();
+
+                    if (groupmodel.groupMembers != null)
+                    {
+                        for (int i = 0; i < groupmodel.groupMembers.Count; i++)
+                        {
+                            cmd.CommandText = "INSERT INTO groupmembers (groupId, userId, groupLeader, approved) VALUES (@groupId, @userId, @groupLeader, @approved)";
+                            cmd.Parameters.AddWithValue("@groupId", groupmodel.ID);
+                            cmd.Parameters.AddWithValue("@userId", groupmodel.groupMembers[i]);
+                            cmd.Parameters.AddWithValue("@groupLeader", 0);
+                            cmd.Parameters.AddWithValue("@approved", 1);
+                            cmd.Prepare();
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                    if (groupmodel.groupLeaders != null)
+                    {
+                        for (int i = 0; i < groupmodel.groupLeaders.Count; i++)
+                        {
+                            cmd.Parameters.Clear();
+                            cmd.CommandText = "UPDATE groupmembers SET groupLeader = @groupLeader WHERE userId = @userId";
+                            cmd.Parameters.AddWithValue("@groupLeader", groupmodel.groupLeaders[i].Selected);
+                            cmd.Parameters.AddWithValue("@userId", groupmodel.groupLeaders[i]);
+                            if (i == 0)
+                            {
+                                cmd.Prepare();
+                            }
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+
+                    mst.Commit();
+
+                    this.CloseConnection();
+                    return true;
+                }
+                catch (MySqlException ex)
+                {
+                    this.ErrorMessage = ex.Message + " caused by: " + cmd.CommandText;
+                    mst.Rollback();
+                    this.CloseConnection();
+                    return false;
+                }
             }
             else
             {
+                //could not open connection
                 return false;
             }
-        }
-        
-        /// <summary>
-        /// generate a query to insert the groupmembers of a group into the database
-        /// </summary>
-        /// <param name="groupmodel">model of the group whose members are to be inserted</param>
-        /// <returns>CustumQuery array ready to be passed as argument to ExecuteQuery</returns>
-        public CustomQuery[] insertGroupMembers(GroupModel groupmodel)
-        {
-            CustomQuery[] result = new CustomQuery[groupmodel.groupMembers.Count + 2];
-
-            for (int i = 2; i < groupmodel.groupMembers.Count; i++)
-            {
-                //test
-                groupmodel.groupLeaders = groupmodel.groupMembers;
-                string tmpcmd = "INSERT INTO groupmembers (groupId, userId, groupLeader, approved) VALUES (@groupId, @userId, @groupLeader, @approved)";
-                string[] tmpargnames = { "@groupId", "@userId", "@groupLeader", "@approved" };
-                object[] tmpargs = { groupmodel.ID, groupmodel.groupMembers[i], groupmodel.groupLeaders[i], 1 };
-                CustomQuery tmpquery = new CustomQuery { Cmd = tmpcmd, ArgNames = tmpargnames, Args = tmpargs };
-                result[i] = tmpquery;
-            }
-
-            return result;
         }
     }
 }
