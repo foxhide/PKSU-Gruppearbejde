@@ -29,21 +29,10 @@ function moveSelected(name, add) {
     // Get lists, depending on add / rem (!add)
     var name1 = add ? name + '_select' : name + '_available';
     var name2 = add ? name + '_available' : name + '_select';
-    var list1 = document.getElementById(name1);
-    var list2 = document.getElementById(name2);
-
-    // Run through the list until selected option is found. Remove it
-    // and add it to the other list.
-    for (var i = 0; i < list1.length; i++) {
-        if(list1.options[i].selected) {
-            var id = list1.options[i].value;
-            var roomName = list1.options[i].innerHTML;
-            list1.remove(i);
-            list2.options[list2.length] = new Option(roomName,id);
-            document.getElementById(name + '_' + id).value = add;
-            break;
-        }
-    }
+    var id = $("#" + name1).val();
+    var option = $("#" + name1 + " option:selected").remove();
+    $("#" + name2).append(option);
+    $("#" + name + "_" + id).val(add);
 }
 
 /* Function for disableing double lists */
