@@ -75,10 +75,12 @@ namespace CalendarApplication.Helpers
             builder.AppendLine("</td>");
 
             builder.AppendLine("<td style='vertical-align:middle'>");
-            builder.Append("<input type='button' id='" + name + "_add_button' value='<--' onclick=\"moveSelected('" + name + "',true);");
-            builder.Append(onAdd + "\" ><br>");
-            builder.Append("<input type='button' id='" + name + "_rem_button' value='-->' onclick=\"moveSelected('" + name + "',false);");
-            builder.Append(onRem + "\" >");
+            builder.Append("<input type='button' id='" + name + "_add_button' value='<--' onclick=\"");
+            if (!string.IsNullOrEmpty(onAdd)) { builder.Append(onAdd + ";"); }
+            builder.Append("moveSelected('" + name + "',true)\" ><br>");
+            builder.Append("<input type='button' id='" + name + "_rem_button' value='-->' onclick=\"");
+            if (!string.IsNullOrEmpty(onAdd)) { builder.Append(onRem + ";"); }
+            builder.Append("moveSelected('" + name + "',false)\" >");
             builder.AppendLine("</td>");
 
             builder.AppendLine("<td>");
