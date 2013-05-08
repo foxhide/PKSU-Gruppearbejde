@@ -122,6 +122,12 @@ namespace CalendarApplication.Models.User
 
             return GetEvents(this.ID);
         }
+
+        /// <summary>
+        /// Get events created by the user with the given ID
+        /// </summary>
+        /// <param name="ID">ID for the user</param>
+        /// <returns>Events created by the user with id = ID</returns>
         public static List<BasicEvent> GetEvents(int ID)
         {
             List<BasicEvent> result = new List<BasicEvent>();
@@ -154,6 +160,79 @@ namespace CalendarApplication.Models.User
                 }
             }
             return result;
+        }
+
+        /// <summary>
+        /// Checks if a user may view a given event
+        /// </summary>
+        /// <param name="eventId">Event to be checked</param>
+        /// <param name="userId">User to be checked</param>
+        /// <returns>True if view is allowed, otherwise false</returns>
+        public static bool ViewAuthentication(int eventId, int userId)
+        {
+            if (userId == -1) { return false; }
+
+            string command = "SELECT e.visible,e.userId,vis_group.userId AS group_vis,"
+                                + "edt_group.userId AS group_edt, edt_user.userId AS user_edt"
+                                + " FROM pksudb.events AS e"
+                                + " LEFT JOIN (SELECT eventId,userId"
+                                + " FROM eventeditorsusers"
+                                + " WHERE userId = @uid) AS edt_user ON e.eventId = edt_user.eventId"
+                                + " LEFT JOIN (SELECT eventId,userId"
+                                + " FROM eventvisibility NATURAL JOIN groupmembers"
+                                + " WHERE userId = @uid) AS vis_group ON e.eventId = vis_group.eventId"
+                                + "	LEFT JOIN (SELECT eventId,userId"
+                                + " FROM eventeditorsgroups NATURAL JOIN groupmembers"
+                                + "	WHERE userId = @uid) AS edt_group ON e.eventId = edt_group.eventId"
+                                + " WHERE e.eventId = @eid";
+
+            MySqlConnect msc = new MySqlConnect();
+            CustomQuery query = new CustomQuery
+            {
+                Cmd = command,
+                ArgNames = new[] { "@eid", "@uid" },
+                Args = new[] { (object)eventId, (object)userId }
+            };
+            DataTable dt = msc.ExecuteQuery(query);
+            if (dt == null || dt.Rows.Count == 0) { return false; }
+            return (bool)dt.Rows[0]["visible"]
+                    || (int)dt.Rows[0]["userId"] == userId
+                    || !(dt.Rows[0]["group_vis"] is DBNull)
+                    || !(dt.Rows[0]["group_edt"] is DBNull)
+                    || !(dt.Rows[0]["user_edt"] is DBNull);
+        }
+
+        /// <summary>
+        /// Checks if a user may edit a given event
+        /// </summary>
+        /// <param name="eventId">Event to be checked</param>
+        /// <param name="userId">User to be checked</param>
+        /// <returns>True if edit is allowed, otherwise false</returns>
+        public static bool EditAuthentication(int eventId, int userId)
+        {
+            if (userId == -1) { return false; }
+            string command = "SELECT e.userId,edt_group.userId AS group_edt, edt_user.userId AS user_edt"
+                                + " FROM pksudb.events AS e"
+                                + " LEFT JOIN (SELECT eventId,userId"
+                                + " FROM eventeditorsusers"
+                                + " WHERE userId = @uid) AS edt_user ON e.eventId = edt_user.eventId"
+                                + "	LEFT JOIN (SELECT eventId,userId"
+                                + " FROM eventeditorsgroups NATURAL JOIN groupmembers"
+                                + "	WHERE userId = @uid) AS edt_group ON e.eventId = edt_group.eventId"
+                                + " WHERE e.eventId = @eid";
+
+            MySqlConnect msc = new MySqlConnect();
+            CustomQuery query = new CustomQuery
+            {
+                Cmd = command,
+                ArgNames = new[] { "@eid", "@uid" },
+                Args = new[] { (object)eventId, (object)userId }
+            };
+            DataTable dt = msc.ExecuteQuery(query);
+            if (dt == null || dt.Rows.Count == 0) { return false; }
+            return (int)dt.Rows[0]["userId"] == userId
+                    || !(dt.Rows[0]["group_edt"] is DBNull)
+                    || !(dt.Rows[0]["user_edt"] is DBNull);
         }
     }
 }

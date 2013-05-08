@@ -67,9 +67,9 @@ namespace CalendarApplication.Helpers
                 builder.AppendLine("<select name='" + name + ".IntValue'>");
                 foreach (SelectListItem user in model.List)
                 {
-                    builder.Append("<option value='" + user.Value);
-                    if (int.Parse(user.Value) == model.IntValue) { builder.Append(" selected"); }
-                    builder.Append("'>" + user.Text + "</option>");
+                    builder.Append("<option value='" + user.Value + "'");
+                    if (int.Parse(user.Value) == model.IntValue) { builder.Append(" selected='selected'"); }
+                    builder.Append(">" + user.Text + "</option>");
                 }
                 builder.AppendLine("</select>");
             }
@@ -78,9 +78,9 @@ namespace CalendarApplication.Helpers
                 builder.AppendLine("<select name='" + name + ".IntValue'>");
                 foreach (SelectListItem group in model.List)
                 {
-                    builder.Append("<option value='" + group.Value);
-                    if (int.Parse(group.Value) == model.IntValue) { builder.Append(" selected"); }
-                    builder.Append("'>" + group.Text + "</option>");
+                    builder.Append("<option value='" + group.Value + "'");
+                    if (int.Parse(group.Value) == model.IntValue) { builder.Append(" selected='selected'"); }
+                    builder.Append(">" + group.Text + "</option>");
                 }
                 builder.AppendLine("</select>");
             }

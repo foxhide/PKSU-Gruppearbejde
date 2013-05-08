@@ -51,7 +51,7 @@ else {
                     </tr>
                     <tr>
                         <td>Event State</td>
-                        <td style="background-color: @Model.getColor()">@Model.getStateText()</td>
+                        <td style="background-color: @(Model.getColor())">@(Model.getStateText())</td>
                     </tr>
                     <tr>
                         <td>Event Visible</td>
@@ -98,4 +98,8 @@ else {
             </td>
         </tr>
     </table>
+    if(UserModel.EditAuthentication(Model.ID,UserModel.GetCurrentUserID()))
+    {
+        @Html.ActionLink("Edit event", "EditEvent", "Event", new { id = Model.ID, year = 0, month = 0, day = 0 }, null)
+    }
 }
