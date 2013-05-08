@@ -26,8 +26,13 @@ namespace CalendarApplication.Helpers
 
 
             StringBuilder builder = new StringBuilder();
-            builder.AppendLine("<input type='hidden' name='" + name + ".Datatype' value='" + model.Datatype + "'>");
+            builder.AppendLine("<input type='hidden' id='" + name + "_Datatype' name='" + name + ".Datatype' value='" + model.Datatype + "'>");
             builder.AppendLine("<input type='hidden' name='" + name + ".ID' value='" + model.ID + "'>");
+            // Keep track of Name of server-side error message.
+            builder.AppendLine("<input type='hidden' name='" + name + ".Name' value='" + model.Name + "'>");
+            // Keep track of required fields to perform client and server-side checks for approval/creation
+            builder.AppendLine("<input type='hidden' id='" + name + "_RequiredCreate' name='" + name + ".RequiredCreate' value='" + model.RequiredCreate + "'>");
+            builder.AppendLine("<input type='hidden' id='" + name + "_RequiredApprove' name='" + name + ".RequiredApprove' value='" + model.RequiredApprove + "'>");
 
             builder.AppendLine("<label for='"+name+"'>"+model.Name+"</label><br>");
             builder.AppendLine("<span style='color:grey;font-size:80%;text-align:left'>"+model.Description+"</span><br>");
@@ -38,20 +43,22 @@ namespace CalendarApplication.Helpers
             }
             else if (model.Datatype == Fieldtype.Text)
             {
-                builder.AppendLine("<div id='" + name + "_StringValue_char_counter'>Characters left: " + model.VarcharLength + "</div>");
-                string counterInc = "onkeyup=updateCounter('" + name + "_StringValue'," + model.VarcharLength + ");";
+                builder.AppendLine("<div id='" + name + "_char_counter'>Characters left: " + model.VarcharLength + "</div>");
+                string counterInc = "onkeyup=\"updateCounter('" + name + "'," + model.VarcharLength + "); setState();\"";
                 if (model.VarcharLength < 50)
                 {
-                    builder.AppendLine("<input type='text' id='" + name + "_StringValue' name='" + name +
+                    builder.AppendLine("<input type='text' id='" + name + "' name='" + name +
                                         ".StringValue' value='" + model.StringValue);
                     builder.AppendLine("' " + counterInc + ">");
                 }
                 else
                 {
-                    builder.AppendLine("<textarea type='text' id='" + name + "_StringValue' name='" + name +
+                    builder.AppendLine("<textarea type='text' id='" + name + "' name='" + name +
                                         ".StringValue' cols='40' rows='");
                     builder.Append((model.VarcharLength/40+1) + "' " + counterInc + ">" + model.StringValue + "</textarea>");
                 }
+                // Keep track of varchar length, incase the page needs to be reloaded.
+                builder.AppendLine("<input type='hidden' name='" + name + ".VarcharLength' value='" + model.VarcharLength + "'>");
             }
             else if (model.Datatype == Fieldtype.Bool)
             {
@@ -64,7 +71,7 @@ namespace CalendarApplication.Helpers
             }
             else if (model.Datatype == Fieldtype.User)
             {
-                builder.AppendLine("<select name='" + name + ".IntValue'>");
+                builder.AppendLine("<select name='" + name + ".IntValue' id='" + name + "' onchange=setState()>");
                 foreach (SelectListItem user in model.List)
                 {
                     builder.Append("<option value='" + user.Value + "'");
@@ -75,7 +82,7 @@ namespace CalendarApplication.Helpers
             }
             else if (model.Datatype == Fieldtype.Group)
             {
-                builder.AppendLine("<select name='" + name + ".IntValue'>");
+                builder.AppendLine("<select name='" + name + ".IntValue' id='" + name + "' onchange=setState()>");
                 foreach (SelectListItem group in model.List)
                 {
                     builder.Append("<option value='" + group.Value + "'");
@@ -87,7 +94,7 @@ namespace CalendarApplication.Helpers
             else if (model.Datatype == Fieldtype.File)
             {
                 //////////////////////////// needs work ////////////////////////
-                builder.AppendLine("<input type='file'>");
+                builder.AppendLine("<input type='file' id='" + name + "'>");
             }
             else if (model.Datatype == Fieldtype.UserList)
             {

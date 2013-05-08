@@ -160,7 +160,8 @@ namespace CalendarApplication.Controllers
                         Start = (DateTime)dt.Rows[0]["eventStart"],
                         End = (DateTime)dt.Rows[0]["eventEnd"],
                         Visible = (bool)dt.Rows[0]["visible"],
-                        State = (int)dt.Rows[0]["state"]
+                        State = (int)dt.Rows[0]["state"],
+                        Approved = (int)dt.Rows[0]["state"] > 0
                     };
                 }
             }
@@ -272,16 +273,38 @@ namespace CalendarApplication.Controllers
         {
             MySqlEvent mse = new MySqlEvent();
             eem.CreatorId = UserModel.GetCurrentUserID();
-            int id = mse.EditEvent(eem);
-            if (id > 0)
+
+            // Serverside check for required fields
+            bool state = true;
+            bool req = false;
+            foreach (FieldModel fm in eem.TypeSpecifics)
             {
-                return RedirectToAction("Index", "Event", new { id = id });
+                if (fm.RequiredApprove) { state = state && fm.GetDBValue() != null; }
+                if (fm.RequiredCreate) { req = fm.GetDBValue() == null; }
+                if (req) { TempData["errorMsg"] = "The field " + fm.Name + " must be filled to create this event!"; break; }
             }
-            else {
-                TempData["errorMsg"] = mse.ErrorMessage;
-                eem.EventTypes = this.GetEventTypes(mse);
-                return View(eem);
+
+            // TODO: Make check for dates.
+
+            if (!req)
+            {
+                // All required fields were filled -> try to create the event
+                // Set state:
+                eem.State = eem.Approved ? (state ? 2 : 1) : 0;
+
+                // Create
+                int id = mse.EditEvent(eem);
+                if (id > 0)
+                {
+                    return RedirectToAction("Index", "Event", new { id = id });
+                }
+                else
+                {
+                    TempData["errorMsg"] = mse.ErrorMessage;
+                }
             }
+            eem.EventTypes = this.GetEventTypes(mse);
+            return View(eem);
         }
 
         /// <summary>

@@ -13,6 +13,7 @@ namespace CalendarApplication.Models.Event
         public BasicEvent()
         {
             this.ViewVisible = true;
+            this.Approved = false;
         }
 
         public int ID { set; get; }
@@ -33,6 +34,8 @@ namespace CalendarApplication.Models.Event
         public int State { set; get; }
         public bool Visible { set; get; }
         public List<Room> Rooms { set; get; }
+
+        public bool Approved { set; get; }
 
         // Used in CalendarView to display grey events
         public bool ViewVisible { set; get; }

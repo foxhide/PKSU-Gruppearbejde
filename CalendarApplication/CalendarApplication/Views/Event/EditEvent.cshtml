@@ -5,31 +5,13 @@
 }
 
 @using CalendarApplication.Models.Event
+@using CalendarApplication.Models.User
 
 <h2>Create Event</h2>
 
 <h3 style="color:red">@TempData["errorMsg"]</h3>
 
-<link type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/base/jquery-ui.css" rel="stylesheet" />
-
-<script>
-    function getSpecifics(type) {
-        if (type != 0) {
-            $.ajax({
-                url: "/Event/GetEventSpecific/",
-                type: 'GET',
-                data: { type: type },
-                dataType: 'html',
-                success: function (result) {
-                    $('#event_specifics').html(result);
-                }
-            });
-        }
-        else {
-            $('#event_specifics').html("");
-        }
-    }
-</script>
+<script src="@Url.Content("~/Scripts/edit-event.js")" type="text/javascript"></script>
 
 @using (Html.BeginForm()) {
 <fieldset style="width:80%">
@@ -40,6 +22,9 @@
         <tr>
             <td style="width:60%">
                 <h3>Basic event details:</h3>
+                @Html.HiddenFor(m => m.Approved)
+                @Html.HiddenFor(m => m.State)
+
                 @Html.LabelFor(m => m.Name)
                 @Html.TextBoxFor(m => m.Name)
                 <br />
@@ -50,6 +35,17 @@
                                         new { onchange="getSpecifics(this.value)" })
                 <br />
                 <br />
+                
+                State: <span id="state_text" style="color:@Model.getColor()">@Model.getStateText()</span>
+                @if (UserModel.GetCurrent().Admin)
+                {
+                    <!-- Admins may approved/disapprove the event -->
+                    <br />
+                    <input id="approve_button" type="button" value="@(Model.Approved ? "Disapprove" : "Approve")" onclick="setApproved()"/>
+                }
+                <br />
+                <br />
+
                 @Html.LabelFor(m => m.Start) <br />
                 @Html.DateTimeEditorFor(m => m.Start, "g.today,l.End")
                 <br />
