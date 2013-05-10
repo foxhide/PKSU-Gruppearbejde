@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using System.Windows.Forms;
 using MySql.Data.MySqlClient;
 
 using CalendarApplication.Models.Group;
@@ -31,6 +32,27 @@ namespace CalendarApplication.Database
                     cmd.Transaction = mst;
 
                     //body
+                    cmd.CommandText = "INSERT INTO groups (groupName) VALUES (@groupName); SELECT last_insert_id()";
+                    cmd.Parameters.AddWithValue("@groupName", groupmodel.Name);
+                    cmd.Prepare();
+                    int id = Convert.ToInt32(cmd.ExecuteScalar());
+
+                    groupmodel.ID = id;
+
+                    for (int i = 0; i < groupmodel.groupMembers.Count; i++)
+                    {
+                        if (groupmodel.groupMembers[i].Selected)
+                        {
+                            cmd.Parameters.Clear();
+                            cmd.CommandText = "INSERT INTO groupmembers (groupId, userId, groupLeader, canCreate) VALUES (@groupId, @userId, @groupLeader, @canCreate)";
+                            cmd.Parameters.AddWithValue("@groupId", groupmodel.ID);
+                            cmd.Parameters.AddWithValue("@userId", groupmodel.groupMembers[i].Value);
+                            cmd.Parameters.AddWithValue("@groupLeader", 0);
+                            cmd.Parameters.AddWithValue("@canCreate", 0);
+                            cmd.Prepare();
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
 
                     mst.Commit();
 
@@ -53,7 +75,7 @@ namespace CalendarApplication.Database
         }
 
         /// <summary>
-        /// Edit an existing group -WIP
+        /// Edit an existing group
         /// </summary>
         /// <param name="groupmodel"></param>
         /// <returns>bool indicating success or failure</returns>

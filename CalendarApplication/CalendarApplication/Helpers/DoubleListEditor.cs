@@ -54,14 +54,18 @@ namespace CalendarApplication.Helpers
         public static MvcHtmlString ListEditorFor(List<SelectListItem> list, string name, string labelList1, string labelList2,
                                                     string onAdd, string onRem)
         {
+
+            if (list == null)
+            {
+                list = new List<SelectListItem>();
+            }
             StringBuilder builder = new StringBuilder();
 
             builder.AppendLine("<span style='color:grey;font-size:80%;text-align:left'>");
-
             for (int i = 0; i < list.Count; i++)
             {
-                builder.AppendLine("<input type='hidden' name='" + name + "[" + i + "].Value' value='"+list[i].Value+"'>");
-                builder.AppendLine("<input type='hidden' name='" + name + "[" + i + "].Text' value='"+list[i].Text+"'>");
+                builder.AppendLine("<input type='hidden' name='" + name + "[" + i + "].Value' value='" + list[i].Value + "'>");
+                builder.AppendLine("<input type='hidden' name='" + name + "[" + i + "].Text' value='" + list[i].Text + "'>");
                 builder.AppendLine("<input type='hidden' id='" + name + "_" + list[i].Value + "' name='" + name +
                                     "[" + i + "].Selected' value=" + (list[i].Selected ? "true" : "false") + ">");
             }
