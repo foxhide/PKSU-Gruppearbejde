@@ -20,6 +20,7 @@ function getSpecifics(type) {
     }
     else {
         $('#event_specifics').html("");
+        numberOfFields = 0;
     }
 }
 
@@ -42,7 +43,7 @@ function setState() {
     }
     else {
         /* Note: RequiredApprove should be set whenever RequiredCreate is set (so we avoid to run both checks) */
-        if (!check("RequiredApprove")) {
+        if (!checkApprove()) {
             $("#State").val(1);
             $("#state_text").html("Approved");
             $("#state_text").css("color", "yellow");
@@ -55,14 +56,14 @@ function setState() {
     }
 }
 
-/* Checks all the nullable type specific fields to see if they have been set.
-   if field is set to "RequiredApprove", fields required for approval are checked,
-   if field is set to "RequiredCreate", fields required for create are checked.
+/* Checks all the nullable type specific fields to see if they are required
+   for approval and if they have been set.
  */
-function check(field) {
+function checkApprove() {
+    if ($("#Name").val() == "") { return false; }
     for (var i = 0; i < numberOfFields; i++) {
         var id = "#TypeSpecifics\\[" + i + "\\]";
-        var req = $(id + "_" + field).val();
+        var req = $(id + "_RequiredApprove").val();
         if (req.toLowerCase() == "true") {
             var dataType = $(id + "_Datatype").val();
             if (dataType == "User" || dataType == "Group") {
@@ -74,4 +75,44 @@ function check(field) {
         }
     }
     return true;
+}
+
+/* Check if all fields required for creation are filled out. */
+function checkCreate() {
+    var ok = true;
+    if ($("#Name").val() == "") {
+        ok = false;
+        $("#Name").addClass("input-validation-error");
+        $("#Name_Error").html("The event must have a Name!");
+    }
+    for (var i = 0; i < numberOfFields; i++) {
+        var id = "#TypeSpecifics\\[" + i + "\\]";
+        var req = $(id + "_RequiredCreate").val();
+        if (req.toLowerCase() == "true") {
+            var dataType = $(id + "_Datatype").val();
+            if (((dataType == "User" || dataType == "Group") && $(id).val() == "0")
+                || (dataType == "Text" && $(id).val() == "")) {
+
+                ok = false;
+                var name = $(id + "_Name").val();
+                $(id).addClass("input-validation-error");
+                $(id + "_Error").html("The field " + name + " must be filled!");
+            }
+        }
+    }
+    return ok;
+}
+
+/* Is called on change - removes error messages, if any. */
+function updateSelf(id,type) {
+
+    id = "#" + id;
+
+    // Get datatype and input elements
+    var input = $(id);
+    if (((type == "User" || type == "Group") && input.val() != "0")
+                || (type == "Text" && input.val() != "")) {
+        input.removeClass("input-validation-error");
+        $(id + "_Error").html("");
+    }
 }

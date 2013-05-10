@@ -24,12 +24,15 @@ namespace CalendarApplication.Helpers
             // Get Name
             string name = ExpressionHelper.GetExpressionText(expression).Split('.').Last();
 
+            // Make id-string for javascript functions.
+            string[] tmp = name.Split(new[] { '[' , ']' });
+            string jsName = tmp[0] + "\\\\[" + tmp[1] + "\\\\]";
 
             StringBuilder builder = new StringBuilder();
             builder.AppendLine("<input type='hidden' id='" + name + "_Datatype' name='" + name + ".Datatype' value='" + model.Datatype + "'>");
             builder.AppendLine("<input type='hidden' name='" + name + ".ID' value='" + model.ID + "'>");
             // Keep track of Name of server-side error message.
-            builder.AppendLine("<input type='hidden' name='" + name + ".Name' value='" + model.Name + "'>");
+            builder.AppendLine("<input type='hidden' id='" + name + "_Name' name='" + name + ".Name' value='" + model.Name + "'>");
             // Keep track of required fields to perform client and server-side checks for approval/creation
             builder.AppendLine("<input type='hidden' id='" + name + "_RequiredCreate' name='" + name + ".RequiredCreate' value='" + model.RequiredCreate + "'>");
             builder.AppendLine("<input type='hidden' id='" + name + "_RequiredApprove' name='" + name + ".RequiredApprove' value='" + model.RequiredApprove + "'>");
@@ -44,7 +47,7 @@ namespace CalendarApplication.Helpers
             else if (model.Datatype == Fieldtype.Text)
             {
                 builder.AppendLine("<div id='" + name + "_char_counter'>Characters left: " + model.VarcharLength + "</div>");
-                string counterInc = "onkeyup=\"updateCounter('" + name + "'," + model.VarcharLength + "); setState();\"";
+                string counterInc = "onkeyup=\"updateCounter('" + name + "'," + model.VarcharLength + "); setState(); updateSelf('" + jsName + "','Text')\"";
                 if (model.VarcharLength < 50)
                 {
                     builder.AppendLine("<input type='text' id='" + name + "' name='" + name +
@@ -71,7 +74,7 @@ namespace CalendarApplication.Helpers
             }
             else if (model.Datatype == Fieldtype.User)
             {
-                builder.AppendLine("<select name='" + name + ".IntValue' id='" + name + "' onchange=setState()>");
+                builder.AppendLine("<select name='" + name + ".IntValue' id='" + name + "' onchange=\"setState(); updateSelf('" + jsName + "','User')\">");
                 foreach (SelectListItem user in model.List)
                 {
                     builder.Append("<option value='" + user.Value + "'");
@@ -82,7 +85,7 @@ namespace CalendarApplication.Helpers
             }
             else if (model.Datatype == Fieldtype.Group)
             {
-                builder.AppendLine("<select name='" + name + ".IntValue' id='" + name + "' onchange=setState()>");
+                builder.AppendLine("<select name='" + name + ".IntValue' id='" + name + "' onchange=\"setState(); updateSelf('" + jsName + "','Group')\">");
                 foreach (SelectListItem group in model.List)
                 {
                     builder.Append("<option value='" + group.Value + "'");
@@ -114,6 +117,16 @@ namespace CalendarApplication.Helpers
             else
             {
                 builder.AppendLine("<span style='color:red'>Error. Could not create input field. Not implemented...</span>");
+            }
+
+            if (model.RequiredCreate)
+            {
+                builder.Append("<span style='color:red'>**</span>");
+                builder.AppendLine("<div id='" + name + "_Error' class='validation-summary-errors'></div>");
+            }
+            else if (model.RequiredApprove)
+            {
+                builder.Append("<span style='color:red'>*</span>");
             }
 
             return MvcHtmlString.Create(builder.ToString());

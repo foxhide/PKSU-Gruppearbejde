@@ -277,11 +277,23 @@ namespace CalendarApplication.Controllers
             // Serverside check for required fields
             bool state = true;
             bool req = false;
-            foreach (FieldModel fm in eem.TypeSpecifics)
+
+            // Check for name
+            if (string.IsNullOrEmpty(eem.Name))
             {
-                if (fm.RequiredApprove) { state = state && fm.GetDBValue() != null; }
-                if (fm.RequiredCreate) { req = fm.GetDBValue() == null; }
-                if (req) { TempData["errorMsg"] = "The field " + fm.Name + " must be filled to create this event!"; break; }
+                TempData["errorMsg"] = "The event must have a Name!";
+                req = true;
+            }
+
+            // Check for TypeSpecifics
+            if (eem.TypeSpecifics != null && !req)
+            {
+                foreach (FieldModel fm in eem.TypeSpecifics)
+                {
+                    if (fm.RequiredApprove) { state = state && fm.GetDBValue() != null; }
+                    if (fm.RequiredCreate) { req = fm.GetDBValue() == null; }
+                    if (req) { TempData["errorMsg"] = "The field " + fm.Name + " must be filled to create this event!"; break; }
+                }
             }
 
             // TODO: Make check for dates.
@@ -303,7 +315,31 @@ namespace CalendarApplication.Controllers
                     TempData["errorMsg"] = mse.ErrorMessage;
                 }
             }
+
+            // Error //
+
+            // Get the types again for the view
             eem.EventTypes = this.GetEventTypes(mse);
+
+            // Fill all the dropdown lists again, if any.
+            List<SelectListItem> users = null;
+            List<SelectListItem> groups = null;
+            if (eem.TypeSpecifics != null)
+            {
+                foreach (FieldModel fm in eem.TypeSpecifics)
+                {
+                    if (fm.Datatype == Fieldtype.Group)
+                    {
+                        groups = groups == null ? this.GetGroups(mse, true) : groups;
+                        fm.List = groups;
+                    }
+                    else if (fm.Datatype == Fieldtype.User)
+                    {
+                        users = users == null ? this.GetUsers(mse, true) : users;
+                        fm.List = users;
+                    }
+                }
+            }
             return View(eem);
         }
 

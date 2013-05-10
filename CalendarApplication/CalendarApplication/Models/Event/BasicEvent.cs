@@ -18,7 +18,6 @@ namespace CalendarApplication.Models.Event
 
         public int ID { set; get; }
 
-        [Required]
         public string Name { set; get; }
 
         public string Creator { set; get; }

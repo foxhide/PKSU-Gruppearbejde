@@ -26,7 +26,8 @@
                 @Html.HiddenFor(m => m.State)
 
                 @Html.LabelFor(m => m.Name)
-                @Html.TextBoxFor(m => m.Name)
+                @Html.TextBoxFor(m => m.Name, new { onchange="updateSelf('Name','Text')" })
+                <div class="validation-summary-errors" id="Name_Error"></div>
                 <br />
                 <br />
                 @Html.LabelFor(m => m.SelectedEventType)
@@ -63,7 +64,7 @@
                         @Html.Partial("EventSpecificList",Model)
                     }
                 </div>
-                <input type="submit" value="Create event" />
+                <input type="button" value="Create event" onclick="if (checkCreate()) { this.form.submit() }"/>
             </td>
             <td>
                 <fieldset>
