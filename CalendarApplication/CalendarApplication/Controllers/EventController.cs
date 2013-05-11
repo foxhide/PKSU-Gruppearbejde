@@ -277,6 +277,7 @@ namespace CalendarApplication.Controllers
             // Serverside check for required fields
             bool state = true;
             bool req = false;
+            bool rooms = true;
 
             // Check for name
             if (string.IsNullOrEmpty(eem.Name))
@@ -297,8 +298,13 @@ namespace CalendarApplication.Controllers
             }
 
             // TODO: Make check for dates.
+            rooms = this.CheckDates(eem.ID, eem.Start,eem.End,eem.RoomSelectList);
+            if (!rooms)
+            {
+                TempData["errorMsg"] = "There is an overlap with other rooms in the period chosen.";
+            }
 
-            if (!req)
+            if (!req && rooms)
             {
                 // All required fields were filled -> try to create the event
                 // Set state:
@@ -524,6 +530,40 @@ namespace CalendarApplication.Controllers
                 }
             }
             return result;
+        }
+
+        public bool CheckDates(int id, DateTime start, DateTime end, List<SelectListItem> rooms)
+        {
+            string cmd = "SELECT eventId FROM pksudb.events NATURAL JOIN pksudb.eventroomsused"
+                            + " WHERE ((@start >= eventStart AND @start < eventEnd) OR "
+                            + "(@end > eventStart AND @end <= eventEnd) OR (@start <= eventStart AND @end >= eventEnd))"
+                            + " AND eventId != @id AND (";
+            for (int i = 0; i < rooms.Count; i++)
+            {
+                if (rooms[i].Selected)
+                {
+                    cmd += "roomId = " + rooms[i].Value + " OR ";
+                }
+            }
+            cmd = cmd.Substring(0, cmd.Length - 4) + ")";  // Remove last OR
+            CustomQuery query = new CustomQuery
+            {
+                Cmd = cmd,
+                ArgNames = new[] { "@start", "@end", "@id" },
+                Args = new[] { (object)start, (object)end, id }
+            };
+            MySqlConnect msc = new MySqlConnect();
+            DataTable dt = msc.ExecuteQuery(query);
+
+            if (dt != null)
+            {
+                return dt.Rows.Count == 0;
+            }
+            else
+            {
+                TempData["errorMsg"] = msc.ErrorMessage;
+                return false;
+            }
         }
     }
 }
