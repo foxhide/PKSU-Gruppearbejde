@@ -62,7 +62,7 @@ function setState() {
 function checkApprove() {
     if ($("#Name").val() == "") { return false; }
     for (var i = 0; i < numberOfFields; i++) {
-        var id = "#TypeSpecifics\\[" + i + "\\]";
+        var id = "#TypeSpecifics_" + i;
         var req = $(id + "_RequiredApprove").val();
         if (req.toLowerCase() == "true") {
             var dataType = $(id + "_Datatype").val();
@@ -86,7 +86,7 @@ function checkCreate() {
         $("#Name_Error").html("The event must have a Name!");
     }
     for (var i = 0; i < numberOfFields; i++) {
-        var id = "#TypeSpecifics\\[" + i + "\\]";
+        var id = "#TypeSpecifics_" + i;
         var req = $(id + "_RequiredCreate").val();
         if (req.toLowerCase() == "true") {
             var dataType = $(id + "_Datatype").val();

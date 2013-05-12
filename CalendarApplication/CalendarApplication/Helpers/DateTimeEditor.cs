@@ -58,14 +58,17 @@ namespace CalendarApplication.Helpers
 
         public static MvcHtmlString DateTimeEditorFor(DateTime edt, string name, string[] fields, string compare)
         {
+            string[] tmp = name.Split(new[] { '[', ']', '.' });
+            string id = tmp[0];
+            for (int i = 1; i < tmp.Length; i++) { id += "_" + tmp[i]; }
+
             StringBuilder builder = new StringBuilder();
 
             // Build validation string.
             compare = compare == null ? "" : compare;
-            string validateStr = "onchange=validateDate('" + name + "','" + compare + "')";
+            string validateStr = "onchange=validateDate('" + id + "','" + compare + "')";
 
-            builder.AppendLine("<span style='color:grey;font-size:80%;text-align:left'>");
-            builder.AppendLine("<input type='hidden' name='" + name + "' id='" + name + "' value='"
+            builder.AppendLine("<input type='hidden' name='" + name + "' id='" + id + "' value='"
                                 + edt.ToString("dd-MM-yyyy HH:mm:ss") + "'>");
             builder.AppendLine("<table class='custom-style-1'>");
 
@@ -73,7 +76,7 @@ namespace CalendarApplication.Helpers
             builder.AppendLine("<tr>");
             foreach (string f in fields)
             {
-                builder.Append("<td>");
+                builder.Append("<td style='color:grey;font-size:80%;text-align:left'>");
                 builder.Append(f);
                 builder.Append("</td>");
             }
@@ -90,25 +93,19 @@ namespace CalendarApplication.Helpers
                     f.Equals("Day") ? edt.Day :
                     f.Equals("Hour") ? edt.Hour :
                     f.Equals("Minute") ? edt.Minute : 0;  // Current value
-                AddField(builder, name, f, val, w, validateStr); // Add the field
+                AddField(builder, id, f, val, w, validateStr); // Add the field
                 builder.Append("</td>");
             }
-            builder.AppendLine("<td><script>$(function() { $(\"#" + name + "\").datepicker();});</script>");
-            builder.Append("<input type='button' onclick=showDatePicker('" + name + "')></td>");
+            builder.Append("<td><script>createDatePicker('" + id + "','" + compare + "')</script>"
+            + "<input type='button' value='Select Date' id='" + id + "_but' onclick=showDatePicker('" + id + "_but') /></td>");
             builder.AppendLine("</tr></table>");
-            builder.AppendLine("</span>");
-
             return MvcHtmlString.Create(builder.ToString());
         }
 
         // Function for adding a input field to a builder
         private static void AddField(StringBuilder builder, string name, string field, int value, int width, string validate)
         {
-            builder.Append("<input class='text-box single-line' type='number' name='");
-            builder.Append(name);    //
-            builder.Append("_");     // name='name_field'
-            builder.Append(field);   //
-            builder.Append("' id='");
+            builder.Append("<input class='text-box single-line' type='number' id='");
             builder.Append(name);    //
             builder.Append("_");     // id='name_field'
             builder.Append(field);   //
