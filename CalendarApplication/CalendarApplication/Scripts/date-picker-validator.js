@@ -105,7 +105,52 @@ function validateCompare(name,other,compGreater) {
     }
 }
 
+/* Function for creating datepicker */
+function createDatePicker(name,compare) {
+    $(function () {
+        $("#" + name + "_but").datepicker({
+            beforeShow: function (input, inst) {
+                return getRange(compare);
+            },
+            onSelect: function (dateText, inst) {
+                var date = new Date(dateText);
+                $("#" + name + "_Year").val(date.getFullYear());
+                $("#" + name + "_Month").val(date.getMonth() + 1);
+                $("#" + name + "_Day").val(date.getDate());
+                validateDate(name, compare);
+            }
+        });
+    });
+}
+
+/* Function for updating times in datepickers */
+function getRange(cmpStr) {
+    var compareArr = cmpStr.split(",");
+    var maxDate = null;
+    var minDate = null;
+    for (var i = 0; i < compareArr.length; i++) {
+        var name = compareArr[i].substring(2);
+        if (compareArr[i].charAt(0) == 'g') {
+            if (name == "today") {
+                minDate = new Date();
+            }
+            else {
+                minDate = $.datepicker.parseDate("dd-mm-yy", $("#" + name).val().substring(0, 10))
+            }
+        }
+        else {
+            if (name == "today") {
+                maxDate = new Date();
+            }
+            else {
+                maxDate = $.datepicker.parseDate("dd-mm-yy", $("#" + name).val().substring(0, 10))
+            }
+        }
+    }
+    return { minDate: minDate, maxDate: maxDate };
+}
+
+/* Function for showing date picker */
 function showDatePicker(name) {
-    alert("try now "+name);
-    $(name).datepicker('show');
+    $("#" + name).datepicker("show")
 }
