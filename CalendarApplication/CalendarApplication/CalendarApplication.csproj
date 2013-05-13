@@ -144,6 +144,7 @@
     <Compile Include="Models\Account\AccountEditModel.cs" />
     <Compile Include="Models\User\UserModel.cs" />
     <Compile Include="Models\User\UserViewModel.cs" />
+    <Compile Include="PDFBuilder\EventBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
