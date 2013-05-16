@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using MySql.Data.MySqlClient;
+using System.Windows.Forms;
 
 using CalendarApplication.Models.Event;
 using CalendarApplication.Models.EventType;
@@ -403,6 +404,12 @@ namespace CalendarApplication.Database
                             for (int i = 0; i < eem.TypeSpecifics.Count; i++)
                             {
                                 FieldModel fm = eem.TypeSpecifics[i];
+                                if (fm.Datatype == Fieldtype.GroupList
+                                        || fm.Datatype == Fieldtype.UserList
+                                        || fm.Datatype == Fieldtype.FileList)
+                                {
+                                    this.InsertListValues(newId, fm, mst);
+                                }
                                 prologue += "field_" + fm.ID;
                                 string value = "@fieldval" + i;
                                 epilogue += value;
@@ -422,6 +429,12 @@ namespace CalendarApplication.Database
                             for (int i = 0; i < eem.TypeSpecifics.Count; i++)
                             {
                                 FieldModel fm = eem.TypeSpecifics[i];
+                                if (fm.Datatype == Fieldtype.GroupList
+                                        || fm.Datatype == Fieldtype.UserList
+                                        || fm.Datatype == Fieldtype.FileList)
+                                {
+                                    this.InsertListValues(newId, fm, mst);
+                                }
                                 string value = "@fieldvalue" + i;
                                 updateTable += "field_" + fm.ID + " = " + value;
                                 cmd.Parameters.AddWithValue(value, fm.GetDBValue());
@@ -515,6 +528,7 @@ namespace CalendarApplication.Database
                     }
 
                     mst.Commit();
+                    this.CloseConnection();
                 }
                 catch (MySqlException ex0)
                 {
@@ -540,6 +554,46 @@ namespace CalendarApplication.Database
             {
                 return -1;
             }
+        }
+
+        /// <summary>
+        /// Function for inserting values into eventtypefield lists. Assumes the connection to be open
+        /// and the transaction to be started
+        /// </summary>
+        /// <param name="eventId">Id of the current event</param>
+        /// <param name="fm">FieldModel, datatype should be a list</param>
+        /// <param name="currentTrans">The current transaction</param>
+        /// <returns>True on success, false if fm is not a list</returns>
+        private bool InsertListValues(int eventId, FieldModel fm, MySqlTransaction currentTrans)
+        {
+            MySqlCommand cmd = new MySqlCommand();
+            cmd.Transaction = currentTrans;
+            cmd.Connection = this.connection;
+            string table = null;
+            switch (fm.Datatype)
+            {
+                case Fieldtype.FileList: table = "file"; break;
+                case Fieldtype.UserList: table = "user"; break;
+                case Fieldtype.GroupList: table = "group"; break;
+                default: return false;
+            }
+            cmd.CommandText = "DELETE FROM pksudb." + table + "list WHERE eventId = @eid AND fieldId = @fid";
+            cmd.Parameters.AddWithValue("@eid", eventId);
+            cmd.Parameters.AddWithValue("@fid", fm.ID);
+            cmd.Prepare();
+            cmd.ExecuteNonQuery();
+
+            foreach (SelectListItem item in fm.List)
+            {
+                if (item.Selected)
+                {
+                    cmd.CommandText = "INSERT INTO pksudb." + table + "list (eventId,fieldId," + table + "Id)"
+                                      + " VALUES (@eid,@fid," + item.Value + ")";
+                    cmd.Prepare();
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            return true;
         }
     }
 }
