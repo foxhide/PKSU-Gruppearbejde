@@ -24,10 +24,22 @@ function sendData(type) {
     var list = document.getElementById(fromList);
     var id = list.options[list.selectedIndex].value;
     $.ajax({
-        url: "/Account/EditUser",
+        url: "/Account/EditUserBool",
         type: 'POST',
         data: { field: field, userId: id, value: value },
         success: moveList(fromList, toList, id)
+    });
+}
+
+/* Function for deleting user. A check is made server-side, that the user is not approved! */
+function deleteUser() {
+    var list = document.getElementById("UNASelect");
+    var id = list.options[list.selectedIndex].value;
+    $.ajax({
+        url: "/Account/DeleteUser",
+        type: 'POST',
+        data: { userId: id },
+        success: removeFromList("UNASelect", id)
     });
 }
 
@@ -39,4 +51,17 @@ function moveList(list1,list2,id) {
     var old2 = parseInt(document.getElementById(list2 + "_counter").value, 10);
     document.getElementById(list1 + "_counter").value = (old1 - 1);
     document.getElementById(list2 + "_counter").value = (old2 + 1);
+}
+
+/* Function for removing user, that is not approved */
+function removeFromList(list, id) {
+    var option = $("#" + list + " option[value='" + id + "']").remove();
+    var old = parseInt(document.getElementById(list + "_counter").value, 10);
+    document.getElementById(list + "_counter").value = (old - 1);
+}
+
+function showUser(list) {
+    var list = document.getElementById(list);
+    var id = list.options[list.selectedIndex].value;
+    window.location.href = "/User/Index?userId=" + id;
 }
