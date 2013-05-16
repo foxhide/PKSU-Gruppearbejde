@@ -99,9 +99,16 @@ namespace CalendarApplication.Controllers
                 case 2: return RedirectToAction("EditGroup", new { groupId = int.Parse(mm.SelectedGroup) });
                 //Create group
                 case 3: return RedirectToAction("EditGroup", new { groupId = -1 });
-                case 4: return RedirectToAction("Index", "");
-                case 5: return RedirectToAction("Index", "");
-                case 6: return RedirectToAction("Index", "");
+                //Edit room name
+                case 4: return RedirectToAction("EditRoom", new { roomId = int.Parse(mm.SelectedRoom) });
+                //Create Room
+                case 5: return RedirectToAction("EditRoom", new { roomId = -1 });
+                //Delete room
+                case 6: MySqlRoom msr = new MySqlRoom();
+                        msr.DeleteRoom(int.Parse(mm.SelectedRoom));
+                        return Index();
+                //Cancelled deletion of room
+                case 7: return Index();
             }
             return View(mm);
         }
@@ -290,6 +297,48 @@ namespace CalendarApplication.Controllers
             }
             
             return View(mum);
+        }
+
+        public ActionResult EditRoom(int? idd)
+        {
+            if (idd == null) { return RedirectToAction("Index", "Maintenance", ""); }
+            int id = (int)idd;
+            CalendarApplication.Models.Event.Room room = new CalendarApplication.Models.Event.Room{ ID = id, Name = "" };
+            if (id != -1)
+            {
+                MySqlConnect sql = new MySqlConnect();
+                string que = "SELECT roomName FROM pksudb.rooms WHERE roomId = @id";
+                string[] argsn = { "@id" };
+                object[] args = { id };
+                CustomQuery query = new CustomQuery { Cmd = que, Args = args, ArgNames = argsn };
+                DataTable dt = sql.ExecuteQuery(query);
+                string name = (string)dt.Rows[1]["roomName"];
+                room.Name = name;
+            }
+            return View(room);
+        }
+
+        [HttpPost]
+        public ActionResult EditRoom(CalendarApplication.Models.Event.Room room)
+        {
+            int roomId = room.ID;
+            bool worked = false;
+            MySqlRoom sqlrm = new MySqlRoom();
+            if (roomId == -1)
+            {
+                roomId = sqlrm.CreateRoom(room.Name);
+            }
+            else
+            {
+                worked = sqlrm.RenameRoom(roomId, room.Name);
+            }
+
+            if ((roomId != room.ID) || worked)
+            {
+                return RedirectToAction("Index","Maintenance",null);
+            }
+            TempData["errorMsg"] = sqlrm.ErrorMessage;
+            return View(room);
         }
     }
 
