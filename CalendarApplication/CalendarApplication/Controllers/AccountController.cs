@@ -137,6 +137,7 @@ namespace CalendarApplication.Controllers
             return View(result);
         }
 
+        /* Edit a user string value (other than password) */
         [HttpPost]
         public void EditUserString(string field, int userId, string value)
         {
@@ -144,6 +145,7 @@ namespace CalendarApplication.Controllers
             msu.EditUser(userId, value, field);
         }
 
+        /* Edit a user boolean value */
         [HttpPost]
         public void EditUserBool(string field, int userId, bool value)
         {
@@ -151,12 +153,34 @@ namespace CalendarApplication.Controllers
             msu.EditUser(userId, value, field);
         }
 
+        /* Edit the password -WIP */
         [HttpPost]
         public string EditUserPassword(int userId, string oldPass, string newPass)
         {
             MySqlUser msu = new MySqlUser();
             msu.EditUser(userId, newPass, "password");
             return "";
+        }
+
+        /* Delete a user (only if he/she is not approved yet) */
+        [HttpPost]
+        public void DeleteUser(int userId)
+        {
+            MySqlUser msu = new MySqlUser();
+            CustomQuery query = new CustomQuery
+            {
+                Cmd = "SELECT needsApproval FROM pksudb.users WHERE userId = @uid",
+                ArgNames = new[] { "@uid" },
+                Args = new[] { (object)userId }
+            };
+            DataTable dt = msu.ExecuteQuery(query);
+            if (dt != null && dt.Rows.Count == 1)
+            {
+                if ((bool)dt.Rows[0]["needsApproval"])
+                {
+                    msu.deleteUser(userId);
+                }
+            }
         }
     }
 }

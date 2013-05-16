@@ -38,17 +38,12 @@
                                 value="@Model.UsersApproved.Count" readonly="readonly"></h3>
 <table class="no-pad-table">
     <tr>
-        <td rowspan="3">
+        <td rowspan="2">
             @Html.DropDownListFor(m => Model.UASelect, new SelectList(Model.UsersApproved, "Value", "Text"),
                                         new { @class="custom-select", size="6" })
         </td>
         <td>
-            <input type="button" value="View" />
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <input type="button" value="Edit" />
+            <input type="button" value="View" onclick="showUser('UASelect')"/>
         </td>
     </tr>
     <tr>
@@ -67,12 +62,12 @@
                                         new { @class="custom-select", size="6" })
         </td>
         <td>
-            <input type="button" value="View" />
+            <input type="button" value="View" onclick="showUser('UNASelect')"/>
         </td>
     </tr>
     <tr>
         <td>
-            <input type="button" value="Edit" />
+            <input type="button" value="Delete" onclick="deleteUser()" />
         </td>
     </tr>
     <tr>
@@ -86,17 +81,12 @@
                         value="@Model.UsersInactive.Count" readonly="readonly"></h3>
 <table class="no-pad-table">
     <tr>
-        <td rowspan="3">
+        <td rowspan="2">
             @Html.DropDownListFor(m => Model.UISelect, new SelectList(Model.UsersInactive, "Value", "Text"),
                                         new { @class="custom-select", size="6" })
         </td>
         <td>
-            <input type="button" value="View" />
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <input type="button" value="Edit" />
+            <input type="button" value="View" onclick="showUser('UISelect')"/>
         </td>
     </tr>
     <tr>

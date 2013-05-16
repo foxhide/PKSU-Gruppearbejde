@@ -108,7 +108,7 @@ function validateCompare(name,other,compGreater) {
 /* Function for creating datepicker */
 function createDatePicker(name,compare) {
     $(function () {
-        $("#" + name + "_but").datepicker({
+        $("#" + name + "_picker").datepicker({
             beforeShow: function (input, inst) {
                 return getRange(compare);
             },
