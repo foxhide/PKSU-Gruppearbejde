@@ -96,8 +96,9 @@ namespace CalendarApplication.Helpers
                 AddField(builder, id, f, val, w, validateStr); // Add the field
                 builder.Append("</td>");
             }
-            builder.Append("<td><script>createDatePicker('" + id + "','" + compare + "')</script>"
-            + "<input type='button' value='Select Date' id='" + id + "_but' onclick=showDatePicker('" + id + "_but') /></td>");
+            builder.Append("<td><script>createDatePicker('" + id + "','" + compare + "')</script>");
+            builder.Append("<input type='hidden' id='" + id + "_picker'>");
+            builder.Append("<input type='button' value='Select Date' id='" + id + "_but' onclick=showDatePicker('" + id + "_picker') /></td>");
             builder.AppendLine("</tr></table>");
             return MvcHtmlString.Create(builder.ToString());
         }
