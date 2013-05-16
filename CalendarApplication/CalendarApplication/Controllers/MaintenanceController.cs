@@ -37,7 +37,9 @@ namespace CalendarApplication.Controllers
                 EventTypes = new List<SelectListItem>(),
                 SelectedEventType = "0",
                 Groups = new List<SelectListItem>(),
-                SelectedGroup = "0"
+                SelectedGroup = "0",
+                Rooms = new List<SelectListItem>(),
+                SelectedRoom = "0"
             };
 
             MySqlConnect msc = new MySqlConnect();
@@ -45,10 +47,13 @@ namespace CalendarApplication.Controllers
             CustomQuery etquery = new CustomQuery { Cmd = etcmd };
             string grcmd = "SELECT * FROM pksudb.groups";
             CustomQuery grquery = new CustomQuery { Cmd = grcmd, ArgNames = { }, Args = { } };
-            CustomQuery[] queries = { etquery, grquery };
+            string rmcmd = "SELECT * FROM pksudb.rooms";
+            CustomQuery rmquery = new CustomQuery { Cmd = rmcmd, ArgNames = { }, Args = { } };
+            CustomQuery[] queries = { etquery, grquery, rmquery };
             DataSet ds = msc.ExecuteQuery(queries);
             DataTable dt0 = ds.Tables[0];
             DataTable dt1 = ds.Tables[1];
+            DataTable dt2 = ds.Tables[2];
             if (dt0 != null)
             {
                 foreach (DataRow dr in dt0.Rows)
@@ -65,6 +70,14 @@ namespace CalendarApplication.Controllers
                     {
                         Value = ((int)dr["groupId"]).ToString(),
                         Text = (string)dr["groupName"]
+                    });
+                }
+                foreach (DataRow dr in dt2.Rows)
+                {
+                    mm.Rooms.Add(new SelectListItem
+                    {
+                        Value = ((int)dr["roomId"]).ToString(),
+                        Text = (string)dr["roomName"]
                     });
                 }
                 return View(mm);
@@ -86,6 +99,9 @@ namespace CalendarApplication.Controllers
                 case 2: return RedirectToAction("EditGroup", new { groupId = int.Parse(mm.SelectedGroup) });
                 //Create group
                 case 3: return RedirectToAction("EditGroup", new { groupId = -1 });
+                case 4: return RedirectToAction("Index", "");
+                case 5: return RedirectToAction("Index", "");
+                case 6: return RedirectToAction("Index", "");
             }
             return View(mm);
         }

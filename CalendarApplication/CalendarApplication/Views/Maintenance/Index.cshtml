@@ -12,6 +12,7 @@
     function setSubmitValue(subId) {
         document.getElementById("SubmitValue").value = subId;
     }
+
 </script>
 
 @using (Html.BeginForm()) {
@@ -53,5 +54,25 @@
 <fieldset>
     <legend>Users</legend>
     @Html.ActionLink("Manage users","ManageUsers","Maintenance",null,null)
+</fieldset>
+    
+    <fieldset>
+    <legend>Rooms</legend>
+    <table>
+        <tr>
+            <td>
+                @Html.DropDownListFor(m => Model.SelectedRoom, new SelectList(Model.Rooms, "Value", "Text"))
+            </td>
+            <td>
+                <input type="submit" value="Create" onclick="setSubmitValue(4)" />
+            </td>
+            <td>
+                <input type="submit" value="Rename" onclick="setSubmitValue(5)" />
+            </td>
+            <td>
+                <input type="submit" value="Delete" onclick="setSubmitValue(6)" />
+            </td>
+        </tr>
+    </table>
 </fieldset>
 }
