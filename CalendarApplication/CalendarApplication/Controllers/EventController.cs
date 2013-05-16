@@ -109,6 +109,9 @@ namespace CalendarApplication.Controllers
                                                         fm.StringValue = "Group name not implemented until Andreas has made a GetGroup function...";
                                                   }
                                                   break;
+                            case Fieldtype.UserList:
+                            case Fieldtype.GroupList:
+                            case Fieldtype.FileList: fm.List = GetList(fm.Datatype, id, fm.ID, con); break;
                         }
                         result.TypeSpecifics.Add(fm);
                     }
@@ -120,6 +123,66 @@ namespace CalendarApplication.Controllers
                 result.ID = -1;
             }
             return View(result);
+        }
+
+        private List<SelectListItem> GetList(Fieldtype type, int eventId, int fieldId, MySqlConnect msc)
+        {
+            List<SelectListItem> result = new List<SelectListItem>();
+            CustomQuery query = new CustomQuery();
+            query.ArgNames = new[] { "@eid", "@fid" };
+            query.Args = new[] { (object)eventId, (object)fieldId };
+
+            if (type == Fieldtype.FileList)
+            {
+                // Do something here!
+            }
+            else if (type == Fieldtype.UserList)
+            {
+                query.Cmd = "SELECT userId,userName FROM pksudb.users NATURAL JOIN pksudb.userlist"
+                            + " WHERE eventId = @eid AND fieldId = @fid";
+                DataTable dt = msc.ExecuteQuery(query);
+                if (dt != null)
+                {
+                    foreach (DataRow dr in dt.Rows)
+                    {
+                        result.Add(new SelectListItem
+                        {
+                            Text = (string)dr["userName"],
+                            Value = ((int)dr["userId"]).ToString()
+                        });
+                    }
+                }
+                else
+                {
+                    TempData["errorMsg"] = msc.ErrorMessage;
+                }
+            }
+            else if (type == Fieldtype.GroupList)
+            {
+                query.Cmd = "SELECT groupId,groupName FROM pksudb.groups NATURAL JOIN pksudb.grouplist"
+                            + " WHERE eventId = @eid AND fieldId = @fid";
+                DataTable dt = msc.ExecuteQuery(query);
+                if (dt != null)
+                {
+                    foreach (DataRow dr in dt.Rows)
+                    {
+                        result.Add(new SelectListItem
+                        {
+                            Text = (string)dr["groupName"],
+                            Value = ((int)dr["groupId"]).ToString()
+                        });
+                    }
+                }
+                else
+                {
+                    TempData["errorMsg"] = msc.ErrorMessage;
+                }
+            }
+            else
+            {
+                TempData["errorMsg"] = "Wrong argument for GetList...";
+            }
+            return result;
         }
 
         public ActionResult EditEvent(int id, int year, int month, int day)
@@ -428,14 +491,12 @@ namespace CalendarApplication.Controllers
                         {
                             case Fieldtype.Float: fm.FloatValue = row["field_" + fm.ID] is DBNull ? 0 : (float)row["field_" + fm.ID];
                                                 break; //float
-                            case Fieldtype.UserList: if (users == null) { users = this.GetUsers(msc, false); }
-                                                fm.List = users; break;
+                            case Fieldtype.UserList: fm.List = this.GetUsersValues(msc,id,fm.ID); break;
                             case Fieldtype.User: if (usersDrop == null) { usersDrop = this.GetUsers(msc, true); }
                                                 fm.List = usersDrop;
                                                 fm.IntValue = row["field_" + fm.ID] is DBNull ? 0 : (int)row["field_" + fm.ID];
                                                 break;
-                            case Fieldtype.GroupList: if (groups == null) { groups = this.GetGroups(msc, false); }
-                                                fm.List = groups; break;
+                            case Fieldtype.GroupList: fm.List = this.GetGroupsValues(msc,id,fm.ID); break;
                             case Fieldtype.Group: if (groupsDrop == null) { groupsDrop = this.GetGroups(msc, true); }
                                                 fm.List = groupsDrop;
                                                 fm.IntValue = row["field_" + fm.ID] is DBNull ? 0 : (int)row["field_" + fm.ID];
@@ -503,6 +564,82 @@ namespace CalendarApplication.Controllers
                         Text = (string)dr["userName"]
                     });
                 }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Similar to GetGroups, but sets the selected field if the group has been added
+        /// </summary>
+        /// <param name="msc">MySqlConnect</param>
+        /// <param name="eventId">Id of the event</param>
+        /// <param name="fieldId">Id of the field</param>
+        /// <returns>A list of all groups, with selected set</returns>
+        private List<SelectListItem> GetGroupsValues(MySqlConnect msc, int eventId, int fieldId)
+        {
+            List<SelectListItem> result = new List<SelectListItem>();
+            CustomQuery query = new CustomQuery
+            {
+                Cmd = "SELECT groupId,groupName,fieldId FROM pksudb.groups NATURAL LEFT JOIN"
+                        + "(SELECT fieldId,groupId FROM pksudb.grouplist WHERE eventId = @eid AND fieldId = @fid) AS gl"
+                        + " ORDER BY groupName",
+                ArgNames = new[] { "@eid", "@fid" },
+                Args = new[] { (object)eventId, (object)fieldId }
+            };
+            DataTable dt = msc.ExecuteQuery(query);
+            if (dt != null)
+            {
+                foreach (DataRow dr in dt.Rows)
+                {
+                    result.Add(new SelectListItem
+                    {
+                        Value = ((int)dr["groupId"]).ToString(),
+                        Text = (string)dr["groupName"],
+                        Selected = !(dr["fieldId"] is DBNull) // Selected if in userlist
+                    });
+                }
+            }
+            else
+            {
+                TempData["errorMsg"] = msc.ErrorMessage;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Similar to GetUsers, but sets the selected field if the user has been added
+        /// </summary>
+        /// <param name="msc">MySqlConnect</param>
+        /// <param name="eventId">Id of the event</param>
+        /// <param name="fieldId">Id of the field</param>
+        /// <returns>A list of all users, with selected set</returns>
+        private List<SelectListItem> GetUsersValues(MySqlConnect msc, int eventId, int fieldId)
+        {
+            List<SelectListItem> result = new List<SelectListItem>();
+            CustomQuery query = new CustomQuery
+            {
+                Cmd = "SELECT userId,userName,fieldId FROM pksudb.users NATURAL LEFT JOIN"
+                        + "(SELECT fieldId,userId FROM pksudb.userlist WHERE eventId = @eid AND fieldId = @fid) AS ul"
+                        + " ORDER BY userName",
+                ArgNames = new[] { "@eid", "@fid" },
+                Args = new[] { (object)eventId, (object)fieldId }
+            };
+            DataTable dt = msc.ExecuteQuery(query);
+            if (dt != null)
+            {
+                foreach (DataRow dr in dt.Rows)
+                {
+                    result.Add(new SelectListItem
+                    {
+                        Value = ((int)dr["userId"]).ToString(),
+                        Text = (string)dr["userName"],
+                        Selected = !(dr["fieldId"] is DBNull) // Selected if in userlist
+                    });
+                }
+            }
+            else
+            {
+                TempData["errorMsg"] = msc.ErrorMessage;
             }
             return result;
         }

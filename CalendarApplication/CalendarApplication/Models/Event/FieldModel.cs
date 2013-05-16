@@ -30,6 +30,9 @@ namespace CalendarApplication.Models.Event
                 case Fieldtype.File: if (this.IntValue < 1) { return null; } else { return this.IntValue; } //int or null, fileId
                 case Fieldtype.Datetime: return this.DateValue;
                 case Fieldtype.Bool: return this.BoolValue; //bool
+                case Fieldtype.FileList:
+                case Fieldtype.GroupList:
+                case Fieldtype.UserList: return false;
             }
             return "";
         }
