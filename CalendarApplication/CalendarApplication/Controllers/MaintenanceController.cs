@@ -106,9 +106,9 @@ namespace CalendarApplication.Controllers
                 //Delete room
                 case 6: MySqlRoom msr = new MySqlRoom();
                         msr.DeleteRoom(int.Parse(mm.SelectedRoom));
-                        return Index();
+                        return RedirectToAction("Index", "Maintenance", "");
                 //Cancelled deletion of room
-                case 7: return Index();
+                case 7: return RedirectToAction("Index", "Maintenance", "");
             }
             return View(mm);
         }
@@ -299,20 +299,20 @@ namespace CalendarApplication.Controllers
             return View(mum);
         }
 
-        public ActionResult EditRoom(int? idd)
+        public ActionResult EditRoom(int roomId)
         {
-            if (idd == null) { return RedirectToAction("Index", "Maintenance", ""); }
-            int id = (int)idd;
-            CalendarApplication.Models.Event.Room room = new CalendarApplication.Models.Event.Room{ ID = id, Name = "" };
-            if (id != -1)
+            //if (idd == null) { return RedirectToAction("Index", "Maintenance", ""); }
+            //int id = (int)idd;
+            CalendarApplication.Models.Event.Room room = new CalendarApplication.Models.Event.Room{ ID = roomId, Name = "" };
+            if (roomId != -1)
             {
                 MySqlConnect sql = new MySqlConnect();
                 string que = "SELECT roomName FROM pksudb.rooms WHERE roomId = @id";
                 string[] argsn = { "@id" };
-                object[] args = { id };
+                object[] args = { roomId };
                 CustomQuery query = new CustomQuery { Cmd = que, Args = args, ArgNames = argsn };
                 DataTable dt = sql.ExecuteQuery(query);
-                string name = (string)dt.Rows[1]["roomName"];
+                string name = (string)dt.Rows[0]["roomName"];
                 room.Name = name;
             }
             return View(room);

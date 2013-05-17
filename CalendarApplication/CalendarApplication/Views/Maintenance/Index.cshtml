@@ -13,11 +13,6 @@
         document.getElementById("SubmitValue").value = subId;
     }
 
-    function notImplemented()
-    {
-        alert("Doesn't work!");
-    }
-
     function deleteRoom() {
         var c = confirm("Are you sure you want to delete this room? \nThis will permanently remove its association with all events.");
         if (c == true) {
@@ -80,13 +75,13 @@
                 @Html.DropDownListFor(m => Model.SelectedRoom, new SelectList(Model.Rooms, "Value", "Text"))
             </td>
             <td>
-                <input type="submit" value="Rename" onclick="notImplemented(); setSubmitValue(4)" />
+                <input type="submit" value="Rename" onclick="setSubmitValue(4)" />
             </td>
             <td>
                 <input type="submit" value="Delete" onclick="deleteRoom()" />
             </td>
             <td>
-                <input type="submit" value="Create new" onclick="notImplemented(); setSubmitValue(5)" />
+                <input type="submit" value="Create new" onclick="setSubmitValue(5)" />
             </td>
         </tr>
     </table>
