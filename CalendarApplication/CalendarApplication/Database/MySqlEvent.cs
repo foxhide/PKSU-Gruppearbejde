@@ -580,16 +580,19 @@ namespace CalendarApplication.Database
             cmd.CommandText = "DELETE FROM pksudb." + table + "list WHERE eventId = @eid AND fieldId = @fid";
             cmd.Parameters.AddWithValue("@eid", eventId);
             cmd.Parameters.AddWithValue("@fid", fm.ID);
+            cmd.Parameters.AddWithValue("@item", null);
             cmd.Prepare();
             cmd.ExecuteNonQuery();
+
+            cmd.CommandText = "INSERT INTO pksudb." + table + "list (eventId,fieldId," + table + "Id)"
+                                      + " VALUES (@eid,@fid,@item)";
+            cmd.Prepare();
 
             foreach (SelectListItem item in fm.List)
             {
                 if (item.Selected)
                 {
-                    cmd.CommandText = "INSERT INTO pksudb." + table + "list (eventId,fieldId," + table + "Id)"
-                                      + " VALUES (@eid,@fid," + item.Value + ")";
-                    cmd.Prepare();
+                    cmd.Parameters["@item"].Value = item.Value;
                     cmd.ExecuteNonQuery();
                 }
             }

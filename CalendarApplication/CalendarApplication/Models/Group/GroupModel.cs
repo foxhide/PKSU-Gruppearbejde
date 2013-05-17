@@ -24,7 +24,7 @@ namespace CalendarApplication.Models.Group
         public List<SelectListItem> groupMembers { set; get; }
         [Display(Name = "Group Leaders")]
         public List<SelectListItem> groupLeaders { set; get; }
-        [Display(Name = "Can Create")]
+        [Display(Name = "Event Creators")]
         public List<SelectListItem> canCreate { set; get; }
 
         //Override Equals
