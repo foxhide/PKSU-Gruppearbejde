@@ -152,6 +152,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Content Include="Content\Calendar.css" />
     <Content Include="Content\Site.css" />
     <Content Include="Content\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />
     <Content Include="Content\themes\base\images\ui-bg_flat_75_ffffff_40x100.png" />
@@ -183,6 +184,7 @@
     <Content Include="Global.asax" />
     <Content Include="Content\themes\base\images\Thumbs.db" />
     <None Include="Scripts\jquery-1.5.1-vsdoc.js" />
+    <Content Include="Scripts\calendar-script.js" />
     <Content Include="Scripts\create-eventtype.js" />
     <Content Include="Scripts\date-picker-validator.js" />
     <Content Include="Scripts\edit-event.js" />

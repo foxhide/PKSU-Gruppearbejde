@@ -9,36 +9,34 @@
 <table style="font-size:20px;padding:0;border-spacing:0;width:700px">
     <tr style="padding:0">
         <td colspan="3" style="text-align:center;padding:0">
-            @Html.ActionLink("Today", "Index", "Calendar",
-                        new { mode = 0, year = DateTime.Now.Year, month = DateTime.Now.Month, day = 0, range = 0 },null)
+            <input type="button" value="Today" onclick="goto('@(DateTime.Today.ToString("yyyy-MM"))')" />
         </td>
     </tr>
     <tr style="padding:0">
         <td style="text-align:left;padding:0;width:15%">
-                        @Html.ActionLink(Model.Date.AddYears(-1).ToString("<- yyyy"), "Index", "Calendar",
-                             new { mode = 0, year = Model.Date.AddYears(-1).Year, month = Model.Date.Month, day = 0, range = 0},null)
+            <input type="button" value="@(Model.Date.AddYears(-1).ToString("<- yyyy"))"
+                onclick="goto('@(Model.Date.AddYears(-1).ToString("yyyy-MM"))')" />
         </td>
         <td style="padding:0;text-align:center;">@Model.Date.Year</td>
         <td style="text-align:right;padding:0;width:15%">
-                        @Html.ActionLink(Model.Date.AddYears(1).ToString("yyyy ->"), "Index", "Calendar",
-                             new { mode = 0, year = Model.Date.AddYears(1).Year, month = Model.Date.Month, day = 0, range = 0},null)
+            <input type="button" value="@(Model.Date.AddYears(1).ToString("yyyy ->"))"
+                onclick="goto('@(Model.Date.AddYears(1).ToString("yyyy-MM"))')" />
         </td>
     </tr>
     <tr style="padding:0">
         <td style="text-align:left;padding:0;width:15%">
-                        @Html.ActionLink(Model.Date.AddMonths(-1).ToString("<- MMMM"), "Index", "Calendar",
-                             new { mode = 0, year = Model.Date.AddMonths(-1).Year,
-                                    month = Model.Date.AddMonths(-1).Month, day = 0, range = 0},null)
+            <input type="button" value="@(Model.Date.AddMonths(-1).ToString("<- MMMM"))"
+                onclick="goto('@(Model.Date.AddMonths(-1).ToString("yyyy-MM"))')" />
         </td>
         <td style="padding:0;text-align:center">@(Model.Date.ToString("MMMM"))</td>
         <td style="text-align:right;padding:0;width:15%">
-                        @Html.ActionLink(Model.Date.AddMonths(1).ToString("MMMM ->"), "Index", "Calendar",
-                             new { mode = 0, year = Model.Date.AddMonths(1).Year,
-                                    month = Model.Date.AddMonths(1).Month, day = 0, range = 0},null)
+            <input type="button" value="@(Model.Date.AddMonths(1).ToString("MMMM ->"))"
+                onclick="goto('@(Model.Date.AddMonths(1).ToString("yyyy-MM"))')" />
         </td>
     </tr>
 </table>
 
+<div style="position:relative;z-index:1">
 <table border="1" style="border-spacing:0">
     <tr>
         <td></td>
@@ -68,24 +66,35 @@
                 day.Date.Day == DateTime.Now.Day ? "border-width:4px" : "")">
             <table style="border-spacing:0;width:100%">
                 <tr>
-                    <td style="text-align:left;vertical-align:top;padding:0;font-size:14px;width:8px">
-                        @Html.ActionLink(day.Date.Day.ToString(), "Index", "Calendar",
-                                         new { mode = 1, year = day.Date.Year, month = day.Date.Month, day = day.Date.Day, range = 0},null)
+                    <td class="calendar-date-number" onclick="goto('@(day.Date.ToString("yyyy-MM-dd"))')">
+                        @day.Date.Day.ToString()
                     </td>
-                    <td style="padding:3px">
+                    <td style="padding:3px" rowspan="2">
                         <table style="border-spacing:0;width:100%">
                             @foreach (BasicEvent e in day.Events)
                             {
-                            <tr style="padding:0;background-color:@(e.getColor())">
-                                <td style="text-align:left;padding:0">
-                                    @Html.ActionLink((e.Name.Length > 10 ? e.Name.Substring(0,8)+"..." : e.Name), "Index", "Event",
-                                    new { id = e.ID }, new { Class = "action add", title = e.Name })
-                                </td>
-                            </tr>
+                                string divId = "event_" + day.Date.ToString("MM-dd") + e.ID;
+                                <tr style="padding:0;background-color:@(e.getColor());">
+                                    <td style="position:relative;text-align:left;padding:0"
+                                        onmouseover="$('#@divId').show()"
+                                        onmouseout="$('#@divId').hide()">
+                                        <div id="@divId" hidden="hidden" style="position:absolute;z-index:2">
+                                            <table class="event-popup">
+                                                <tr><td colspan="2" style="background-color:@(e.getColor());white-space:nowrap">@e.Name</td></tr>
+                                                <tr><td>Type:</td><td>@e.TypeName</td></tr>
+                                                <tr><td>Creator:</td><td>@e.Creator</td></tr>
+                                                <tr><td>State:</td><td style="color:@(e.getColor())">@e.getStateText()</td></tr>
+                                            </table>
+                                        </div>
+                                        <!-- Fixed size span - because inherit doesn't work properly -->
+                                        <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:86px;display:block">@e.Name</span>
+                                    </td>
+                                </tr>
                             }
                         </table>
                     </td>
                 </tr>
+                <tr><td></td></tr>
             </table>
         </td>
         i++;
@@ -96,3 +105,4 @@
     }
     </tr>
 </table>
+</div>

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.Data;
+using System.Text.RegularExpressions;
 
 using CalendarApplication.Models.Calendar;
 using CalendarApplication.Models.Event;
@@ -19,41 +20,55 @@ namespace CalendarApplication.Controllers
         //
         // GET: /Calendar/
 
-        public ActionResult Index(int mode, int year, int month, int day, int range)
+        public ActionResult Index(CalendarMode mode, string from, string to, string state, string types)
         {
+            DateTime dfrom = this.parseString(from);
+            DateTime dto = this.parseString(to);
+            if (from == null && mode == CalendarMode.MONTH) { dfrom = new DateTime(dfrom.Year, dfrom.Month, 1); }
+
             EventViewModel evm = new EventViewModel
             {
                 Mode = mode,
-                Day = day,
-                Month = month,
-                Year = year,
-                Range = range,
+                DateFrom = dfrom,
+                DateTo = dto,
                 ViewState0 = true,
                 ViewState1 = true,
                 ViewState2 = true,
                 Eventtypes = new List<EventTypeModel>()
             };
 
+            if (state != null)
+            {
+                char[] stateArr = state.ToCharArray();
+                evm.ViewState0 = stateArr[0] == '1';
+                evm.ViewState1 = stateArr[1] == '1';
+                evm.ViewState2 = stateArr[2] == '1';
+            }
+
             MySqlConnect msc = new MySqlConnect();
             string etget = "SELECT eventTypeId, eventTypeName FROM pksudb.eventtypes";
             DataTable dt = msc.ExecuteQuery(etget);
+
+            char[] typeArr = types != null ? types.ToCharArray() : null;
+            int tCount = 0;
+
             foreach (DataRow dr in dt.Rows)
             {
                 EventTypeModel etm = new EventTypeModel
                 {
                     ID = (int)dr["eventTypeId"],
                     Name = (string)dr["eventTypeName"],
-                    Selected = true
+                    Selected = typeArr != null && tCount < typeArr.Length ? typeArr[tCount] == '1' : true
                 };
+                tCount++;
                 evm.Eventtypes.Add(etm);
             }
 
-
             switch (mode)
             {
-                case 0:     evm.CurrentModel = GetMonth(evm); break;
-                case 1:     evm.CurrentModel = GetDay(evm); break;
-                case 2:     evm.CurrentModel = GetList(evm); break;
+                case CalendarMode.MONTH:     evm.CurrentModel = GetMonth(evm); break;
+                case CalendarMode.DAY:       evm.CurrentModel = GetDay(evm); break;
+                case CalendarMode.LIST:      evm.CurrentModel = GetList(evm); break;
             }
 
             return View(evm);
@@ -62,28 +77,46 @@ namespace CalendarApplication.Controllers
         [HttpPost]
         public ActionResult Index(EventViewModel evm)
         {
-            evm.Year = evm.Year > 0 ? evm.Year : 1;
-            evm.Month = evm.Month <= 0 ? 1 : (evm.Month > 12 ? 12 : evm.Month);
-            int days = DateTime.DaysInMonth(evm.Year,evm.Month);
-            evm.Day = evm.Day <= 0 ? 1 : (evm.Day > days ? days : evm.Day);
+            string from = evm.Mode == CalendarMode.MONTH ? evm.DateFrom.ToString("yyyy-MM") : evm.DateFrom.ToString("yyyy-MM-dd");
+            string to = evm.Mode == CalendarMode.LIST ? evm.DateTo.ToString("yyyy-MM-dd") : null;
 
-            switch (evm.Mode)
+            string state = (evm.ViewState0 ? "1" : "0") + (evm.ViewState1 ? "1" : "0") + (evm.ViewState2 ? "1" : "0");
+
+            string types = "";
+            foreach (EventTypeModel etm in evm.Eventtypes)
             {
-                case 0: evm.CurrentModel = GetMonth(evm); break;
-                case 1: evm.CurrentModel = GetDay(evm); break;
-                case 2: evm.CurrentModel = GetList(evm); break;
+                types += etm.Selected ? "1" : "0";
             }
 
-            return View(evm);
+            return RedirectToAction("Index", new { mode = evm.Mode, from = from, to = to, state = state, types = types });
+        }
+
+        private DateTime parseString(string date)  // FORMAT: yyyy-mm-dd
+        {
+            if(string.IsNullOrEmpty(date)) { return DateTime.Now; }
+            Match m = Regex.Match(date, @"[0-9]{4}-[0-9]{2}(-[0-9]{2})?");
+            if (!m.Success) { TempData["errorMsg"] = "BadRegex"; return DateTime.Now; }
+            string[] vals = date.Split('-');
+            int year = Convert.ToInt32(vals[0]);
+            int month = Convert.ToInt32(vals[1]);
+            int day = vals.Length > 2 ? Convert.ToInt32(vals[2]) : 1;
+
+            DateTime result = DateTime.Now;
+            try
+            {
+                result = new DateTime(year, month, day);
+            }
+            catch (Exception ex) { TempData["errorMsg"] = ex.Message; }
+            return result;
         }
 
         private CalendarMonth GetMonth(EventViewModel evm)
         {
             List<CalendarDay> cdays = new List<CalendarDay>();
 
-            DateTime first = new DateTime(evm.Year, evm.Month, 1);
+            DateTime first = new DateTime(evm.DateFrom.Year,evm.DateFrom.Month,evm.DateFrom.Day);
             int before = (int)first.DayOfWeek == 0 ? 6 : (int)first.DayOfWeek - 1;
-            int days = DateTime.DaysInMonth(evm.Year, evm.Month) + before;
+            int days = DateTime.DaysInMonth(evm.DateFrom.Year, evm.DateFrom.Month) + before;
             days = days % 7 > 0 ? days + (7 - days % 7) : days;
             first = first.AddDays(-before);
             
@@ -95,7 +128,7 @@ namespace CalendarApplication.Controllers
                 CalendarDay cd = new CalendarDay
                 {
                     Date = myDate,
-                    Active = myDate.Month == evm.Month,
+                    Active = myDate.Month == evm.DateFrom.Month,
                     Events = new List<BasicEvent>()
                 };
                 cdays.Add(cd);
@@ -114,12 +147,12 @@ namespace CalendarApplication.Controllers
                 }
             }
 
-            return new CalendarMonth { Date = new DateTime(evm.Year, evm.Month, 1), Days = cdays };
+            return new CalendarMonth { Date = evm.DateFrom, Days = cdays };
         }
 
         private CalendarDay GetDay(EventViewModel evm)
         {
-            DateTime date = new DateTime(evm.Year, evm.Month, evm.Day);
+            DateTime date = new DateTime(evm.DateFrom.Year, evm.DateFrom.Month, evm.DateFrom.Day);
 
             List<BasicEvent> events = this.GetEvents(evm, date, date.AddDays(1),true);
 
@@ -145,8 +178,8 @@ namespace CalendarApplication.Controllers
 
         private CalendarList GetList(EventViewModel evm)
         {
-            DateTime start = new DateTime(evm.Year, evm.Month, evm.Day);
-            DateTime end = start.AddDays(evm.Range);
+            DateTime start = new DateTime(evm.DateFrom.Year, evm.DateFrom.Month, evm.DateFrom.Day);
+            DateTime end = new DateTime(evm.DateTo.Year, evm.DateTo.Month, evm.DateTo.Day);
 
             List<BasicEvent> events = this.GetEvents(evm,start,end,false);
 

@@ -11,21 +11,20 @@ using CalendarApplication.Models.Event;
 
 namespace CalendarApplication.Models.Calendar
 {
+    public enum CalendarMode
+    {
+        MONTH,
+        DAY,
+        LIST
+    }
+
     public class EventViewModel
     {
-        public int Mode { set; get; }
+        public CalendarMode Mode { set; get; }
         public Calendar CurrentModel { set; get; }
 
-        [Display(Name = "Day")]
-        public int Day { set; get; }
-
-        [Display(Name = "Month")]
-        public int Month { set; get; }
-
-        [Display(Name = "Year")]
-        public int Year { set; get; }
-
-        public int Range { set; get; }
+        public DateTime DateFrom { set; get; }
+        public DateTime DateTo { set; get; }
 
         public bool ViewState0 { set; get; }
         public bool ViewState1 { set; get; }
