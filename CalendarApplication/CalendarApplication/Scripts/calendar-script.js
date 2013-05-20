@@ -11,3 +11,21 @@
     }
     $("#cal_form").submit();
 }
+
+function showPopup(name) {
+    // Show full name
+    $('#' + name + '_small').show();
+    // Set time
+    setTimeout(function () {
+        // Show big if small is still visible == cursor is still on event
+        if ($('#' + name + '_small').is(":visible")) {
+            $('#' + name + '_big').fadeIn();
+        }
+    }, 700);
+}
+
+function hidePopup(name) {
+    // Hide both big and small on cursor exit
+    $('#' + name + '_big').hide();
+    $('#' + name + '_small').hide();
+}

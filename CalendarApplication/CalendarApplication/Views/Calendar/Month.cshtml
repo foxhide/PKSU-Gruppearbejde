@@ -76,9 +76,13 @@
                                 string divId = "event_" + day.Date.ToString("MM-dd") + e.ID;
                                 <tr style="padding:0;background-color:@(e.getColor());">
                                     <td style="position:relative;text-align:left;padding:0"
-                                        onmouseover="$('#@divId').show()"
-                                        onmouseout="$('#@divId').hide()">
-                                        <div id="@divId" hidden="hidden" style="position:absolute;z-index:2">
+                                        onmouseover="showPopup('@divId')"
+                                        onmouseout="hidePopup('@divId')">
+                                        <div id="@(divId)_small" hidden="hidden" style="position:absolute;z-index:2;
+                                                    background-color:@(e.getColor());white-space:nowrap;cursor:pointer">
+                                            @e.Name
+                                        </div>
+                                        <div id="@(divId)_big" hidden="hidden" style="position:absolute;z-index:2;cursor:pointer">
                                             <table class="event-popup">
                                                 <tr><td colspan="2" style="background-color:@(e.getColor());white-space:nowrap">@e.Name</td></tr>
                                                 <tr><td>Type:</td><td>@e.TypeName</td></tr>
@@ -86,7 +90,7 @@
                                                 <tr><td>State:</td><td style="color:@(e.getColor())">@e.getStateText()</td></tr>
                                             </table>
                                         </div>
-                                        <!-- Fixed size span - because inherit doesn't work properly -->
+                                        @* Fixed size span - because inherit doesn't work properly *@
                                         <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:86px;display:block">@e.Name</span>
                                     </td>
                                 </tr>
