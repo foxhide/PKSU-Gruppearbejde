@@ -34,6 +34,7 @@ namespace CalendarApplication.PDFBuilder
             this.input.Add("\\begin{document}");
 
             //body
+            
 
             //epilogue
             this.input.Add("\\end{document}");
