@@ -116,6 +116,7 @@
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Database\MySqlEvent.cs" />
     <Compile Include="Database\MySqlGroup.cs" />
+    <Compile Include="Database\MySqlRoom.cs" />
     <Compile Include="Database\MySqlUser.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -226,6 +227,7 @@
     <Content Include="Views\Maintenance\ManageUsers.cshtml" />
     <Content Include="Views\Account\EditUser.cshtml" />
     <Content Include="Views\Event\EventSpecificList.cshtml" />
+    <Content Include="Views\Maintenance\EditRoom.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

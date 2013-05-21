@@ -341,9 +341,11 @@ DROP TABLE IF EXISTS `pksudb`.`filelist` ;
 CREATE  TABLE IF NOT EXISTS `pksudb`.`filelist` (
   `fieldId` INT NOT NULL ,
   `fileId` INT NOT NULL ,
-  PRIMARY KEY (`fieldId`, `fileId`) ,
+  `eventId` INT NOT NULL ,
+  PRIMARY KEY (`fieldId`, `fileId`, `eventId`) ,
   INDEX `filelistfield_idx` (`fieldId` ASC) ,
   INDEX `filelistfile_idx` (`fileId` ASC) ,
+  INDEX `filelistevent_idx` (`eventId` ASC) ,
   CONSTRAINT `filelistfield`
     FOREIGN KEY (`fieldId` )
     REFERENCES `pksudb`.`eventtypefields` (`fieldId` )
@@ -353,10 +355,16 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`filelist` (
     FOREIGN KEY (`fileId` )
     REFERENCES `pksudb`.`files` (`fileId` )
     ON DELETE CASCADE
+    ON UPDATE NO ACTION,
+  CONSTRAINT `filelistevent`
+    FOREIGN KEY (`eventId` )
+    REFERENCES `pksudb`.`events` (`eventId` )
+    ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
 COMMENT = 'Table for lists of files.\n\nfieldId: Foreign key referencing  /* comment truncated */ /*eventtypefields
-fileId: Foreign key referencing files*/';
+fileId: Foreign key referencing files
+eventId: Foreign key referencing event*/';
 
 
 -- -----------------------------------------------------
@@ -367,9 +375,11 @@ DROP TABLE IF EXISTS `pksudb`.`userlist` ;
 CREATE  TABLE IF NOT EXISTS `pksudb`.`userlist` (
   `fieldId` INT NOT NULL ,
   `userId` INT NOT NULL ,
-  PRIMARY KEY (`fieldId`, `userId`) ,
+  `eventId` INT NOT NULL ,
+  PRIMARY KEY (`fieldId`, `userId`, `eventId`) ,
   INDEX `userlistfield_idx` (`fieldId` ASC) ,
   INDEX `userlistuser_idx` (`userId` ASC) ,
+  INDEX `userlistevent_idx` (`eventId` ASC) ,
   CONSTRAINT `userlistfield`
     FOREIGN KEY (`fieldId` )
     REFERENCES `pksudb`.`eventtypefields` (`fieldId` )
@@ -379,10 +389,16 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`userlist` (
     FOREIGN KEY (`userId` )
     REFERENCES `pksudb`.`users` (`userId` )
     ON DELETE CASCADE
+    ON UPDATE NO ACTION,
+  CONSTRAINT `userlistevent`
+    FOREIGN KEY (`eventId` )
+    REFERENCES `pksudb`.`events` (`eventId` )
+    ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
 COMMENT = 'Table for lists of users.\n\nfieldId: Foreign key referencing  /* comment truncated */ /*eventtypefields
-userId: Foreign key referencing users*/';
+userId: Foreign key referencing users
+eventId: Foreign key referencing events*/';
 
 
 -- -----------------------------------------------------
@@ -393,9 +409,11 @@ DROP TABLE IF EXISTS `pksudb`.`grouplist` ;
 CREATE  TABLE IF NOT EXISTS `pksudb`.`grouplist` (
   `fieldId` INT NOT NULL ,
   `groupId` INT NOT NULL ,
-  PRIMARY KEY (`fieldId`, `groupId`) ,
+  `eventId` INT NOT NULL ,
+  PRIMARY KEY (`fieldId`, `groupId`, `eventId`) ,
   INDEX `grouplistfield_idx` (`fieldId` ASC) ,
   INDEX `grouplistgroup_idx` (`groupId` ASC) ,
+  INDEX `grouplistevent_idx` (`eventId` ASC) ,
   CONSTRAINT `grouplistfield`
     FOREIGN KEY (`fieldId` )
     REFERENCES `pksudb`.`eventtypefields` (`fieldId` )
@@ -405,10 +423,16 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`grouplist` (
     FOREIGN KEY (`groupId` )
     REFERENCES `pksudb`.`groups` (`groupId` )
     ON DELETE CASCADE
+    ON UPDATE NO ACTION,
+  CONSTRAINT `grouplistevent`
+    FOREIGN KEY (`eventId` )
+    REFERENCES `pksudb`.`events` (`eventId` )
+    ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
 COMMENT = 'Table for lists of groups.\n\nfieldId: Foreign key referencing /* comment truncated */ /* eventtypefields
-groupId: Foreign key referencing group*/';
+groupId: Foreign key referencing group
+eventId: Foreign key referencing events*/';
 
 USE `pksudb` ;
 

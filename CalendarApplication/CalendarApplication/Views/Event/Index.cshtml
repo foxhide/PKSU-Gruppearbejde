@@ -88,6 +88,25 @@ else {
                                         case Fieldtype.File:        @fm.IntValue break;
                                         case Fieldtype.Datetime:    @fm.DateValue break;
                                         case Fieldtype.Bool:        @(fm.BoolValue ? "Yes" : "No") break;
+                                        case Fieldtype.UserList:    <table>
+                                                                    @foreach (SelectListItem user in fm.List)
+                                                                    {
+                                                                        <tr><td>
+                                                                            @Html.ActionLink(user.Text, "Index", "User", new { UserId = Convert.ToInt32(user.Value) }, null)
+                                                                        </td></tr>
+                                                                    }
+                                                                    </table>
+                                                                    break;
+                                        case Fieldtype.FileList:
+                                        case Fieldtype.GroupList:    <table>
+                                                                    @foreach (SelectListItem item in fm.List)
+                                                                    {
+                                                                        <tr><td>
+                                                                            @item.Text
+                                                                        </td></tr>
+                                                                    }
+                                                                    </table>
+                                                                    break;
                                     }
                                 </td>
                             </tr>

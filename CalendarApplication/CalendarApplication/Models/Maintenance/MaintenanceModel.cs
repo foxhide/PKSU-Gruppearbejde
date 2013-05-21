@@ -16,5 +16,9 @@ namespace CalendarApplication.Models.Maintenance
 
         public string SelectedGroup { get; set; }
         public List<SelectListItem> Groups { get; set; }
+
+        public string SelectedRoom { get; set; }
+        public List<SelectListItem> Rooms { get; set; }
+
     }
 }

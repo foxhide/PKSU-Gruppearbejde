@@ -2,20 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Web.Mvc;
+using System.Windows.Forms;
 using MySql.Data.MySqlClient;
-
-using CalendarApplication.Models.Account;
 
 namespace CalendarApplication.Database
 {
-    public class MySqlUser : MySqlConnect
+    public class MySqlRoom : MySqlConnect
     {
-        public int CreateUser(Register data)
+        /// <summary>
+        /// Create a new room
+        /// </summary>
+        /// <param name="name">Name of new room</param>
+        /// <returns>id of new room, -1 in case of failure</returns>
+        public int CreateRoom(string name)
         {
-            string insert = "INSERT INTO pksudb.users (userName,password,realName,email,active,needsApproval) " +
-                            "VALUES (@username, @password, @realname, @email, 1, 1);"
-                            + " SELECT last_insert_id();";
-
             if (this.OpenConnection() == true)
             {
                 MySqlTransaction mst = null;
@@ -24,16 +25,16 @@ namespace CalendarApplication.Database
 
                 try
                 {
-                    mst = this.connection.BeginTransaction();
+                    mst = connection.BeginTransaction();
                     cmd = new MySqlCommand();
-                    cmd.Connection = this.connection;
+                    cmd.Connection = connection;
                     cmd.Transaction = mst;
 
+                    string insert = "INSERT INTO pksudb.rooms (roomName) VALUES (@name); "
+                                + "SELECT last_insert_id();";
+
                     cmd.CommandText = insert;
-                    cmd.Parameters.AddWithValue("@username", data.UserName);
-                    cmd.Parameters.AddWithValue("@password", data.Password);
-                    cmd.Parameters.AddWithValue("@realname", data.RealName);
-                    cmd.Parameters.AddWithValue("@email", data.Email);
+                    cmd.Parameters.AddWithValue("@name", name);
                     cmd.Prepare();
                     result = Convert.ToInt32(cmd.ExecuteScalar());
 
@@ -67,7 +68,13 @@ namespace CalendarApplication.Database
             }
         }
 
-        public bool EditUser(int id, object newValue, string change)
+        /// <summary>
+        /// Rename an existing room
+        /// </summary>
+        /// <param name="id">room id</param>
+        /// <param name="newName">New name of room</param>
+        /// <returns>bool indicating success or failure</returns>
+        public bool RenameRoom(int id, string newName)
         {
             if (this.OpenConnection() == true)
             {
@@ -76,18 +83,17 @@ namespace CalendarApplication.Database
 
                 try
                 {
-                    mst = this.connection.BeginTransaction();
+                    mst = connection.BeginTransaction();
                     cmd = new MySqlCommand();
-                    cmd.Connection = this.connection;
+                    cmd.Connection = connection;
                     cmd.Transaction = mst;
 
-                    string update = "UPDATE pksudb.users SET " + change + " = @value WHERE userId = @uid";
-                    cmd.Parameters.AddWithValue("@value", newValue);
-                    cmd.Parameters.AddWithValue("@uid", id);
+                    string rename = "UPDATE pksudb.rooms SET roomName = @name WHERE roomId = @id";
 
-                    cmd.CommandText = update;
+                    cmd.CommandText = rename;
+                    cmd.Parameters.AddWithValue("@name", newName);
+                    cmd.Parameters.AddWithValue("@id", id);
                     cmd.Prepare();
-
                     cmd.ExecuteNonQuery();
 
                     mst.Commit();
@@ -120,26 +126,30 @@ namespace CalendarApplication.Database
             }
         }
 
-        public bool deleteUser(int userId)
+        /// <summary>
+        /// Delete an existing room
+        /// </summary>
+        /// <param name="id">id of room to be deleted</param>
+        /// <returns>bool indicating success or failure</returns>
+        public bool DeleteRoom(int id)
         {
             if (this.OpenConnection() == true)
             {
                 MySqlTransaction mst = null;
                 MySqlCommand cmd = null;
-                
+
                 try
                 {
-                    mst = this.connection.BeginTransaction();
+                    mst = connection.BeginTransaction();
                     cmd = new MySqlCommand();
-                    cmd.Connection = this.connection;
+                    cmd.Connection = connection;
                     cmd.Transaction = mst;
 
-                    string delete = "DELETE FROM pksudb.users WHERE userId = @uid";
-                    cmd.Parameters.AddWithValue("@uid", userId);
+                    string delete = "DELETE FROM pksudb.rooms WHERE roomId = @id";
 
                     cmd.CommandText = delete;
+                    cmd.Parameters.AddWithValue("@id", id);
                     cmd.Prepare();
-
                     cmd.ExecuteNonQuery();
 
                     mst.Commit();
