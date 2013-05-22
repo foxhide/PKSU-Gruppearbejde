@@ -1,8 +1,13 @@
-﻿function gotoOther(from) {
+﻿/* Function for switching between pages in lists */
+function gotoOtherPage(from) {
     $('#EventFrom').val(from);
     $('#list_form').submit();
 }
 
+/* Function for navigating calendar (month and days).
+   If date is of format yyyy-MM, the calendar month is
+   shown. If it has format yyyy-MM-dd, the calendar day
+   is shown. */
 function goto(date) {
     var data = date.split("-");
     if (data.length < 2 || data.length > 3) { return; }
@@ -17,6 +22,7 @@ function goto(date) {
     $("#cal_form").submit();
 }
 
+/* Functions for showing/hideing event pop-ups in the calendar. */
 function showPopup(name) {
     // Show full name
     $('#' + name + '_small').show();

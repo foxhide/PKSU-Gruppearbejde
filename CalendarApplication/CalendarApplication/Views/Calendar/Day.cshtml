@@ -42,39 +42,23 @@
                     </tr>
                 </table>
 
-                <style>
-                    table.day-view {
-                        border: 1px solid black;
-                        border-collapse:collapse
-                    }
-                    table.day-view tr {
-                        border: 1px solid black;
-                        padding:0;
-                    }
-                    table.day-view td {
-                        border: 1px solid black;
-                        padding:0;
-                        height:14px;
-                    }
-                </style>
-
                 <table class="day-view">
                     <tr>
-                        <td></td>
+                        <td style="border-left:none;border-top:none"></td>
                         @foreach (Room r in Model.Rooms)
                         {
-                            <td style="width:100px">
+                            <th>
                                 @r.Name
-                            </td>
+                            </th>
                         }
                     </tr>
                     <tr>
                         @{
                             DateTime offset = Model.Date;
-                            <td style="height:28px" rowspan="2">@offset.ToString("HH:mm")</td>
+                            <td class="timestamp" rowspan="2">@offset.ToString("HH:mm")</td>
                             foreach (Room r in Model.Rooms)
                             {
-                                <td style="position:relative;z-index:2;">
+                                <td class="row" style="position:relative;z-index:2;">
                                     @foreach (BasicEvent e in Model.Events)
                                     {
                                         if (e.Rooms.Contains(r))
@@ -83,9 +67,19 @@
                                             int dist = e.End > offset.AddDays(1) ? 720 - start
                                                 : ((e.End.Hour - offset.Hour) * 60 + e.End.Minute) / 2 - start;
                                             
-                                            <div style="position:absolute;z-index:1;top:@(start)px;left:4px;width:92px;height:@(dist)px;
-                                                        background-color:@(e.getColor());">
-                                                @e.Name
+                                            <div class="day-event"
+                                                style="position:absolute;z-index:1;top:@(start)px;left:4px;width:92px;height:@(dist)px;
+                                                       background-color:@(e.getColor());@(e.ViewVisible?"cursor:pointer":"")"
+                                                @(e.ViewVisible?"onclick=window.location='" + Url.Action("Index","Event", new { id = e.ID }) + "'":"")>
+                                                @if(e.ViewVisible)
+                                                {
+                                                    @e.Name <br />
+                                                    @* Creator: e.Creator and more fields *@
+                                                }
+                                                else
+                                                {
+                                                    @:Room occupied!
+                                                }
                                             </div>
                                         }
                                     }
@@ -99,15 +93,23 @@
                             @if (hour % 2 != 0)
                             {
                                 offset = offset.AddHours(1);
-                                <td style="height:28px" rowspan="2">@offset.ToString("HH:mm")</td>
+                                <td class="timestamp" rowspan="2">@offset.ToString("HH:mm")</td>
                             }
-                            @for (int i = 0; i < Model.Rooms.Count; i++) { <td></td> }
+                            @for (int i = 0; i < Model.Rooms.Count; i++) { <td class="row"></td> }
                         </tr>
                     }
                 </table>
             </td>
             <td>
                 @Html.Partial("_FilterPartial", Model)
+
+                @if (UserModel.GetCurrentUserID() != -1)
+                {
+                    @* A user is signed in... *@
+                    <input type="button" value="New event!" onclick="window.location='@Url.Action("EditEvent","Event",
+                                                                    new { id = -1, year = Model.Date.Year,
+                                                                          month = Model.Date.Month, day = Model.Date.Day })'"/>
+                }
             </td>
         </tr>
     </table>

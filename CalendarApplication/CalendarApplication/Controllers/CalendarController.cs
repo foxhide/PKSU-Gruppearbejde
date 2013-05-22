@@ -86,9 +86,9 @@ namespace CalendarApplication.Controllers
         public ActionResult List(string from, string to, string limit, string efrom, string state, string types)
         {
             EventFilter f = this.GetFilter(state, types);
-            DateTime dtFrom = from == null ? DateTime.Now : this.parseString(from);
-            DateTime dtTo = to == null ? DateTime.Now.AddDays(10) : this.parseString(to);
-
+            DateTime dtFrom = from == null ? new DateTime(1,1,1) : this.parseString(from);
+            DateTime dtTo = to == null ? new DateTime(9999,1,1) : this.parseString(to);
+            
             int limitInt = limit == null ? 10 : Convert.ToInt32(limit);
             int efromInt = efrom == null ? 0 : Convert.ToInt32(efrom);
 
@@ -99,6 +99,7 @@ namespace CalendarApplication.Controllers
             cl.Limit = limitInt;
             cl.OldLimit = limitInt;
             cl.EventFrom = efromInt;
+            cl.All = from == null && to == null;
 
             return View(cl);
         }
@@ -119,15 +120,28 @@ namespace CalendarApplication.Controllers
             // If limit had changed -> set from to 0, else set from accordingly
             int from = cl.Limit != cl.OldLimit ? 0 : cl.EventFrom - (cl.EventFrom % cl.Limit);
 
-            if (cl.All) {
-                cl.Start = new DateTime(1, 1, 1);
-                cl.End = new DateTime(9999, 1, 1);
+            if (cl.All)
+            {
+                return RedirectToAction("List", new
+                {
+                    limit = cl.Limit.ToString(),
+                    efrom = from.ToString(),
+                    state = state,
+                    types = types
+                });
             }
-            return RedirectToAction("List", new { from = cl.Start.ToString("yyyy-MM-dd"),
-                                                    to = cl.End.ToString("yyyy-MM-dd"),
-                                                    limit = cl.Limit.ToString(),
-                                                    efrom = from.ToString(),
-                                                    state = state, types = types });
+            else
+            {
+                return RedirectToAction("List", new
+                {
+                    from = cl.Start.ToString("yyyy-MM-dd"),
+                    to = cl.End.ToString("yyyy-MM-dd"),
+                    limit = cl.Limit.ToString(),
+                    efrom = from.ToString(),
+                    state = state,
+                    types = types
+                });
+            }
         }
 
         private DateTime parseString(string date)  // FORMAT: yyyy-mm-dd
@@ -257,8 +271,8 @@ namespace CalendarApplication.Controllers
 
         private CalendarList GetList(DateTime dateFrom, DateTime dateTo, EventFilter f, int limit, int starting)
         {
-            DateTime start = new DateTime(dateFrom.Year, dateFrom.Month, dateFrom.Day);
-            DateTime end = new DateTime(dateTo.Year, dateTo.Month, dateTo.Day);
+            DateTime start = dateFrom;
+            DateTime end = dateTo;
 
             List<BasicEvent> eventsFull = this.GetEvents(f,start,end,false);
 

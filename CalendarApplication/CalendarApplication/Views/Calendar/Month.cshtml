@@ -12,8 +12,6 @@
 <script src="@Url.Content("~/Scripts/calendar-script.js")" type="text/javascript"></script>
 <link href="@Url.Content("~/Content/Calendar.css")" rel="stylesheet" type="text/css" />
 
-<h2>Events</h2>
-
 <h3 style="color:red">@TempData["errorMsg"]</h3>
 
 <form id="cal_form" method="post">
@@ -72,16 +70,13 @@
                 </table>
 
                 <div style="position:relative;z-index:1">
-                <table border="1" style="border-spacing:0">
+                <table class="calendar">
                     <tr>
-                        <td></td>
-                        <td>Monday</td>
-                        <td>Tuesday</td>
-                        <td>Wednesday</td>
-                        <td>Thursday</td>
-                        <td>Friday</td>
-                        <td>Saturday</td>
-                        <td>Sunday</td>
+                        <th></th>
+                        @foreach (string day in CalendarApplication.Models.Calendar.Calendar.DAYS)
+                        {
+                            <th>@day</th>
+                        }
                     </tr>
                     <tr>
                     @{
@@ -93,7 +88,7 @@
                     {
                         if (i % 7 == 0)
                         {
-                            <td>@cal.GetWeekOfYear(day.Date,dfi.CalendarWeekRule,dfi.FirstDayOfWeek)</td>
+                            <td class="week-number">@cal.GetWeekOfYear(day.Date,dfi.CalendarWeekRule,dfi.FirstDayOfWeek)</td>
                         }
                         <td class="calendar-month" style="@(!day.Active ? "background-color:lightgrey;" : "")
                             @(day.Date.Year == DateTime.Now.Year &&

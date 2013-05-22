@@ -65,21 +65,24 @@
                 <h3>Showing events @(Model.EventFrom+1)-@(Model.EventFrom+Model.Limit > Model.TotalEventCount ?
                                                             Model.TotalEventCount : Model.EventFrom+Model.Limit)
                     out of a total of @Model.TotalEventCount!</h3>
+
                 <table class="navigator" id="navi-high">
                     <tr>
-                        <td onclick="gotoOther(@(Model.EventFrom-Model.Limit < 0 ? 0 : Model.EventFrom-Model.Limit))"><-</td>
+                        <td onclick="gotoOtherPage(@(Model.EventFrom-Model.Limit < 0 ? 0 : Model.EventFrom-Model.Limit))"><-</td>
                         @for (int i = 0; Model.TotalEventCount > 0 && i <= (Model.TotalEventCount-1) / Model.Limit; i++)
                         {
                             int gotoVal = i * Model.Limit;
-                            if(gotoVal != Model.EventFrom) { <td  onclick="gotoOther(@(gotoVal))">@(i+1)</td> }
+                            if(gotoVal != Model.EventFrom) { <td  onclick="gotoOtherPage(@(gotoVal))">@(i+1)</td> }
                             else { <td class="selected">@(i+1)</td> }
                         }
-                        <td onclick="gotoOther(@(Model.EventFrom+Model.Limit > Model.TotalEventCount
+                        <td onclick="gotoOtherPage(@(Model.EventFrom+Model.Limit > Model.TotalEventCount
                                                     ? Model.TotalEventCount
                                                     : Model.EventFrom+Model.Limit))">-></td>
                     </tr>
                 </table>
+
                 <br />
+
                 <table class="event-list" id ="list">
                     <tr>
                         <th>Event name</th>

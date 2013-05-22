@@ -46,7 +46,7 @@ namespace CalendarApplication.Models.Event
 
         public string getColor()
         {
-            if (!this.ViewVisible) { return "lightgrey"; }
+            if (!this.ViewVisible) { return "grey"; }
             return BasicEvent.getColor(this.State);
         }
 

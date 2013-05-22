@@ -3,6 +3,12 @@
 /**************************************************/
 
 /* A month square in monthly view */
+table.calendar {
+    border:1px solid black;
+}
+table.calendar th {
+    font-weight:bold;
+}
 td.calendar-month {
     background-color:white;
     text-align:left;
@@ -10,7 +16,7 @@ td.calendar-month {
     padding:0;
     width:100px;
     height:80px;
-    border-width:1px;
+    border:1px solid black;
 }
 
 /* The little black square with the number in monthly view */
@@ -39,8 +45,46 @@ table.event-popup td {
 }
 
 /**************************************************/
-/*                 Dayly view                     */
+/*                 Daily view                     */
 /**************************************************/
+table.day-view {
+    border-collapse:collapse;
+    border-bottom:solid 1px black;
+}
+table.day-view th {
+    padding:0;
+    height:40px;
+    width:100px;
+    font-weight:bold;
+    text-align:center;
+    vertical-align:middle;
+    border:solid 1px black;
+}
+table.day-view tr td {
+    border:solid 1px black;
+    padding:0;
+    height:14px;
+}
+table.day-view td.timestamp {
+    background-color:lightgrey;
+    text-align:right;
+    width:50px;
+    height:28px;
+    padding-right:3px;
+    border-top:solid 1px #BDBDBD;
+    border-bottom:none;
+    border-left:none;
+}
+table.day-view td.row {
+    background-color:lightgrey;
+    border-bottom:solid 1px #BDBDBD;
+    border-top:solid 1px #BDBDBD;
+}
+
+div.day-event {
+    text-align:center;
+    vertical-align:middle;
+}
 
 /**************************************************/
 /*                  List view                     */
