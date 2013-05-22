@@ -5,6 +5,13 @@ using System.Web;
 
 namespace CalendarApplication.Models.Calendar
 {
+    public enum CalendarMode
+    {
+        MONTH,
+        DAY,
+        LIST
+    }
+
     public class Calendar
     {
         public static object InitialView = new
@@ -15,5 +22,8 @@ namespace CalendarApplication.Models.Calendar
             day = DateTime.Now.Day,
             range = 0
         };
+
+        public CalendarMode Mode { set; get; }
+        public EventFilter Filter { set; get; }
     }
 }

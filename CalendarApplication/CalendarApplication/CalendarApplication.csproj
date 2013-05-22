@@ -129,7 +129,7 @@
     <Compile Include="Models\Calendar\CalendarDay.cs" />
     <Compile Include="Models\Calendar\CalendarList.cs" />
     <Compile Include="Models\Calendar\CalendarMonth.cs" />
-    <Compile Include="Models\Calendar\EventViewModel.cs" />
+    <Compile Include="Models\Calendar\EventFilter.cs" />
     <Compile Include="Models\Event\BasicEvent.cs" />
     <Compile Include="Models\EventType\EventTypeModel.cs" />
     <Compile Include="Models\Event\EventEditModel.cs" />
@@ -217,8 +217,6 @@
       <DependentUpon>Web.config</DependentUpon>
     </Content>
     <Content Include="Views\Web.config" />
-    <Content Include="Views\Calendar\Index.cshtml" />
-    <Content Include="Views\Calendar\List.cshtml" />
     <Content Include="Views\Maintenance\EditEventType.cshtml" />
     <Content Include="Views\Maintenance\FieldDetails.cshtml" />
     <Content Include="Views\Shared\_MenuPartial.cshtml" />
@@ -229,6 +227,10 @@
     <Content Include="Views\Maintenance\ManageUsers.cshtml" />
     <Content Include="Views\Account\EditUser.cshtml" />
     <Content Include="Views\Event\EventSpecificList.cshtml" />
+    <Content Include="Views\Calendar\_FilterPartial.cshtml" />
+    <Content Include="Views\Calendar\Month.cshtml" />
+    <Content Include="Views\Calendar\Day.cshtml" />
+    <Content Include="Views\Calendar\List.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -245,12 +247,6 @@
   <ItemGroup>
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\Calendar\Month.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\Calendar\Day.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Account\Login.cshtml" />

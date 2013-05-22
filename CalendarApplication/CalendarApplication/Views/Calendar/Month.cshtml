@@ -1,112 +1,161 @@
 ﻿@model CalendarApplication.Models.Calendar.CalendarMonth
 
-@using CalendarApplication.Models.Calendar;
-@using CalendarApplication.Models.Event;
+@{
+    ViewBag.Title = "Month";
+}
+
 @using System.Globalization;
+@using CalendarApplication.Models.Calendar;
+@using CalendarApplication.Models.User;
+@using CalendarApplication.Models.Event;
 
-@Html.ActionLink("View List", "Index", new { mode = 2, year = Model.Date.Year, month = Model.Date.Month, day = DateTime.Now.Day, range = 10},null)
+<script src="@Url.Content("~/Scripts/calendar-script.js")" type="text/javascript"></script>
+<link href="@Url.Content("~/Content/Calendar.css")" rel="stylesheet" type="text/css" />
 
-<table style="font-size:20px;padding:0;border-spacing:0;width:700px">
-    <tr style="padding:0">
-        <td colspan="3" style="text-align:center;padding:0">
-            <input type="button" value="Today" onclick="goto('@(DateTime.Today.ToString("yyyy-MM"))')" />
-        </td>
-    </tr>
-    <tr style="padding:0">
-        <td style="text-align:left;padding:0;width:15%">
-            <input type="button" value="@(Model.Date.AddYears(-1).ToString("<- yyyy"))"
-                onclick="goto('@(Model.Date.AddYears(-1).ToString("yyyy-MM"))')" />
-        </td>
-        <td style="padding:0;text-align:center;">@Model.Date.Year</td>
-        <td style="text-align:right;padding:0;width:15%">
-            <input type="button" value="@(Model.Date.AddYears(1).ToString("yyyy ->"))"
-                onclick="goto('@(Model.Date.AddYears(1).ToString("yyyy-MM"))')" />
-        </td>
-    </tr>
-    <tr style="padding:0">
-        <td style="text-align:left;padding:0;width:15%">
-            <input type="button" value="@(Model.Date.AddMonths(-1).ToString("<- MMMM"))"
-                onclick="goto('@(Model.Date.AddMonths(-1).ToString("yyyy-MM"))')" />
-        </td>
-        <td style="padding:0;text-align:center">@(Model.Date.ToString("MMMM"))</td>
-        <td style="text-align:right;padding:0;width:15%">
-            <input type="button" value="@(Model.Date.AddMonths(1).ToString("MMMM ->"))"
-                onclick="goto('@(Model.Date.AddMonths(1).ToString("yyyy-MM"))')" />
-        </td>
-    </tr>
-</table>
+<h2>Events</h2>
 
-<div style="position:relative;z-index:1">
-<table border="1" style="border-spacing:0">
-    <tr>
-        <td></td>
-        <td>Monday</td>
-        <td>Tuesday</td>
-        <td>Wednesday</td>
-        <td>Thursday</td>
-        <td>Friday</td>
-        <td>Saturday</td>
-        <td>Sunday</td>
-    </tr>
-    <tr>
-    @{
-        var i = 0;
-        DateTimeFormatInfo dfi = DateTimeFormatInfo.CurrentInfo;
-        System.Globalization.Calendar cal = dfi.Calendar;
-    }
-    @foreach (CalendarDay day in Model.Days)
-    {
-        if (i % 7 == 0)
-        {
-            <td>@cal.GetWeekOfYear(day.Date,dfi.CalendarWeekRule,dfi.FirstDayOfWeek)</td>
-        }
-        <td class="calendar-month" style="@(!day.Active ? "background-color:lightgrey;" : "")
-            @(day.Date.Year == DateTime.Now.Year &&
-                day.Date.Month == DateTime.Now.Month &&
-                day.Date.Day == DateTime.Now.Day ? "border-width:4px" : "")">
-            <table style="border-spacing:0;width:100%">
-                <tr>
-                    <td class="calendar-date-number" onclick="goto('@(day.Date.ToString("yyyy-MM-dd"))')">
-                        @day.Date.Day.ToString()
-                    </td>
-                    <td style="padding:3px" rowspan="2">
-                        <table style="border-spacing:0;width:100%">
-                            @foreach (BasicEvent e in day.Events)
-                            {
-                                string divId = "event_" + day.Date.ToString("MM-dd") + e.ID;
-                                <tr style="padding:0;background-color:@(e.getColor());">
-                                    <td style="position:relative;text-align:left;padding:0"
-                                        onmouseover="showPopup('@divId')"
-                                        onmouseout="hidePopup('@divId')">
-                                        <div id="@(divId)_small" hidden="hidden" style="position:absolute;z-index:2;
-                                                    background-color:@(e.getColor());white-space:nowrap;cursor:pointer">
-                                            @e.Name
-                                        </div>
-                                        <div id="@(divId)_big" hidden="hidden" style="position:absolute;z-index:2;cursor:pointer">
-                                            <table class="event-popup">
-                                                <tr><td colspan="2" style="background-color:@(e.getColor());white-space:nowrap">@e.Name</td></tr>
-                                                <tr><td>Type:</td><td>@e.TypeName</td></tr>
-                                                <tr><td>Creator:</td><td>@e.Creator</td></tr>
-                                                <tr><td>State:</td><td style="color:@(e.getColor())">@e.getStateText()</td></tr>
-                                            </table>
-                                        </div>
-                                        @* Fixed size span - because inherit doesn't work properly *@
-                                        <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:86px;display:block">@e.Name</span>
+<h3 style="color:red">@TempData["errorMsg"]</h3>
+
+<form id="cal_form" method="post">
+    @Html.HiddenFor(model => model.Date)
+    @Html.HiddenFor(model => model.Mode)
+    <table>
+        <tr>
+            <td>
+                <table style="font-size:20px;padding:0;border-spacing:0;width:700px">
+                    <tr style="padding:0">
+                        <td colspan="3" style="text-align:center;padding:0">
+                            <input type="button" value="Today" onclick="goto('@(DateTime.Today.ToString("yyyy-MM"))')" />
+                        </td>
+                    </tr>
+                    <tr style="padding:0">
+                        <td style="text-align:left;padding:0;width:15%">
+                            <input type="button" value="@(Model.Date.AddYears(-1).ToString("<- yyyy"))"
+                                onclick="goto('@(Model.Date.AddYears(-1).ToString("yyyy-MM"))')" />
+                        </td>
+                        <td style="padding:0;text-align:center;">
+                            <select onchange="goto(this.options[this.selectedIndex].value + '-@(Model.Date.ToString("MM"))')">
+                                @for (int offset = -5; offset < 10; offset++)
+                                {
+                                    int year = Model.Date.Year + offset;
+                                    <option value="@year" @(offset == 0 ? "selected='selected'" : "")>@year</option>
+                                }
+                            </select>
+                        </td>
+                        <td style="text-align:right;padding:0;width:15%">
+                            <input type="button" value="@(Model.Date.AddYears(1).ToString("yyyy ->"))"
+                                onclick="goto('@(Model.Date.AddYears(1).ToString("yyyy-MM"))')" />
+                        </td>
+                    </tr>
+                    <tr style="padding:0">
+                        <td style="text-align:left;padding:0;width:15%">
+                            <input type="button" value="@(Model.Date.AddMonths(-1).ToString("<- MMMM"))"
+                                onclick="goto('@(Model.Date.AddMonths(-1).ToString("yyyy-MM"))')" />
+                        </td>
+                        <td style="padding:0;text-align:center">
+                            <select onchange="goto('@(Model.Date.ToString("yyyy"))-' + this.options[this.selectedIndex].value)">
+                                <option value="01" @(Model.Date.Month == 1 ? "selected='selected'" : "")>January</option>
+                                <option value="02" @(Model.Date.Month == 2 ? "selected='selected'" : "")>Feburary</option>
+                                <option value="03" @(Model.Date.Month == 3 ? "selected='selected'" : "")>March</option>
+                                <option value="04" @(Model.Date.Month == 4 ? "selected='selected'" : "")>April</option>
+                                <option value="05" @(Model.Date.Month == 5 ? "selected='selected'" : "")>May</option>
+                                <option value="06" @(Model.Date.Month == 6 ? "selected='selected'" : "")>June</option>
+                                <option value="07" @(Model.Date.Month == 7 ? "selected='selected'" : "")>July</option>
+                                <option value="08" @(Model.Date.Month == 8 ? "selected='selected'" : "")>August</option>
+                                <option value="09" @(Model.Date.Month == 9 ? "selected='selected'" : "")>September</option>
+                                <option value="10" @(Model.Date.Month == 10 ? "selected='selected'" : "")>Oktober</option>
+                                <option value="11" @(Model.Date.Month == 11 ? "selected='selected'" : "")>November</option>
+                                <option value="12" @(Model.Date.Month == 12 ? "selected='selected'" : "")>December</option>
+                            </select>
+                        </td>
+                        <td style="text-align:right;padding:0;width:15%">
+                            <input type="button" value="@(Model.Date.AddMonths(1).ToString("MMMM ->"))"
+                                onclick="goto('@(Model.Date.AddMonths(1).ToString("yyyy-MM"))')" />
+                        </td>
+                    </tr>
+                </table>
+
+                <div style="position:relative;z-index:1">
+                <table border="1" style="border-spacing:0">
+                    <tr>
+                        <td></td>
+                        <td>Monday</td>
+                        <td>Tuesday</td>
+                        <td>Wednesday</td>
+                        <td>Thursday</td>
+                        <td>Friday</td>
+                        <td>Saturday</td>
+                        <td>Sunday</td>
+                    </tr>
+                    <tr>
+                    @{
+                        int i = 0;
+                        DateTimeFormatInfo dfi = DateTimeFormatInfo.CurrentInfo;
+                        System.Globalization.Calendar cal = dfi.Calendar;
+                    }
+                    @foreach (CalendarDay day in Model.Days)
+                    {
+                        if (i % 7 == 0)
+                        {
+                            <td>@cal.GetWeekOfYear(day.Date,dfi.CalendarWeekRule,dfi.FirstDayOfWeek)</td>
+                        }
+                        <td class="calendar-month" style="@(!day.Active ? "background-color:lightgrey;" : "")
+                            @(day.Date.Year == DateTime.Now.Year &&
+                                day.Date.Month == DateTime.Now.Month &&
+                                day.Date.Day == DateTime.Now.Day ? "border-width:4px" : "")">
+                            <table style="border-spacing:0;width:100%">
+                                <tr>
+                                    <td class="calendar-date-number" onclick="goto('@(day.Date.ToString("yyyy-MM-dd"))')">
+                                        @day.Date.Day.ToString()
+                                    </td>
+                                    <td style="padding:3px" rowspan="2">
+                                        <table style="border-spacing:0;width:100%">
+                                            @foreach (BasicEvent e in day.Events)
+                                            {
+                                                string divId = "event_" + day.Date.ToString("MM-dd") + e.ID;
+                                                <tr style="padding:0;background-color:@(e.getColor());">
+                                                    <td style="position:relative;text-align:left;padding:0;cursor:pointer"
+                                                        onmouseover="showPopup('@divId')"
+                                                        onmouseout="hidePopup('@divId')"
+                                                        onclick="window.location='@Url.Action("Index","Event",new {id=e.ID})'">
+                                                        <div id="@(divId)_small" hidden="hidden" style="position:absolute;z-index:2;
+                                                                    background-color:@(e.getColor());white-space:nowrap;cursor:pointer"
+                                                            onclick="window.location='@Url.Action("Index","Event",new {id=e.ID})'">
+                                                            @e.Name
+                                                        </div>
+                                                        <div id="@(divId)_big" hidden="hidden" style="position:absolute;z-index:2;cursor:pointer" onmouseout="hidePopupBig('@divId')">
+                                                            <table class="event-popup">
+                                                                <tr><td colspan="2" style="background-color:@(e.getColor());white-space:nowrap"
+                                                                    onclick="window.location='@Url.Action("Index","Event",new {id=e.ID})'">@e.Name</td></tr>
+                                                                <tr><td>Type:</td><td>@e.TypeName</td></tr>
+                                                                <tr><td>Creator:</td><td>@e.Creator</td></tr>
+                                                                <tr><td>State:</td><td style="color:@(e.getColor())">@e.getStateText()</td></tr>
+                                                            </table>
+                                                        </div>
+                                                        @* Fixed size span - because inherit doesn't work properly *@
+                                                        <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:86px;display:block">@e.Name</span>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </table>
                                     </td>
                                 </tr>
-                            }
-                        </table>
-                    </td>
-                </tr>
-                <tr><td></td></tr>
-            </table>
-        </td>
-        i++;
-        if(@i % 7 == 0)
-        {
-            @:</tr><tr>  
-        }
-    }
-    </tr>
-</table>
-</div>
+                                <tr><td></td></tr>
+                            </table>
+                        </td>
+                        i++;
+                        if(@i % 7 == 0)
+                        {
+                            @:</tr><tr>  
+                        }
+                    }
+                    </tr>
+                </table>
+                </div>
+            </td>
+            <td>
+                @Html.Partial("_FilterPartial",Model)
+            </td>
+        </tr>
+    </table>
+</form>

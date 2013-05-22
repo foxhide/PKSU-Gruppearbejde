@@ -2,11 +2,11 @@
     var data = date.split("-");
     if (data.length < 2 || data.length > 3) { return; }
     else if (data.length == 2) {
-        $("#DateFrom").val(date + "-01 00:00:00");
+        $("#Date").val(date + "-01 00:00:00");
         $("#Mode").val("MONTH");
     }
     else {
-        $("#DateFrom").val(date + " 00:00:00");
+        $("#Date").val(date + " 00:00:00");
         $("#Mode").val("DAY");
     }
     $("#cal_form").submit();
@@ -26,6 +26,9 @@ function showPopup(name) {
 
 function hidePopup(name) {
     // Hide both big and small on cursor exit
-    $('#' + name + '_big').hide();
     $('#' + name + '_small').hide();
+}
+
+function hidePopupBig(name) {
+    $('#' + name + '_big').hide();
 }

@@ -1,40 +1,95 @@
 ﻿@model CalendarApplication.Models.Calendar.CalendarList
 
-@using System;
-@using System.Data;
-@using CalendarApplication.Models.Calendar;
+@{
+    ViewBag.Title = "List";
+}
+
 @using CalendarApplication.Models.Event;
 
-<h2>Listing events from <i>@(Model.Start.ToString("d. MMM yyyy"))</i>
-                     to <i>@(Model.End.ToString("d. MMM yyyy"))</i></h2>
-
-<table border="1">
-    <tr>
-        <td><b>Event Name</b></td>   <td><b>Starting</b></td>    <td><b>Ending</b></td>  <td><b>Created by:</b></td>
-        <td><b>Event Type</b></td>   <td><b>State</b></td>
-    </tr>
-    @foreach (BasicEvent ev in Model.Events) {
+<form id="list_form">
+    <table>
         <tr>
             <td>
-                @Html.ActionLink((ev.Name.Length > 10 ? ev.Name.Substring(0,8)+"..." : ev.Name), "Index", "Event", new { id = ev.ID }, null)
+                <fieldset id="search">
+        <legend>Search</legend>
+
+        <table id="dates">
+            <tr>
+                <td id="from">
+
+                </td>
+                <td id="all">
+
+                </td>
+            </tr>
+            <tr>
+                <td id="to">
+
+                </td>
+            </tr>
+        </table>
+
+        <table id="limit">
+            <tr>
+                <td>Results pr. page:</td>
+            </tr>
+        </table>
+    
+        <input type="submit" value="Search" />
+    </fieldset>
             </td>
-            <td>
-                @Html.DisplayFor(modelItem => ev.Start)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => ev.End)
-            </td>
-            <td>
-                <!-- Html.DisplayFor(modelItem => ev.Creator) -->
-                @Html.ActionLink(ev.Creator, "Index", "User", new { UserId = ev.CreatorId }, null)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => ev.TypeName)
-            </td>
-            <td style="background-color:@(ev.getColor())">
-                @ev.getStateText()
+            <td rowspan="2">
+                @Html.Partial("_FilterPartial", Model);
             </td>
         </tr>
-    }
+        <tr>
+            <td>
+                <table id="navi-high" border="1">
+                    <tr>
+                        <td><-</td>
+                        <td>1</td>
+                        @for (int i = 0; i < Model.Events.Count / Model.Limit; i++)
+                        {
+                            <td>@(i+2)</td>
+                        }
+                        <td>-></td>
+                    </tr>
+                </table>
 
-</table>
+                <table id ="list">
+                    <tr>
+                        <th>Event name</th>
+                        <th>Type</th>
+                        <th>Creator</th>
+                        <th>Starting</th>
+                        <th>Ending</th>
+                        <th>State</th>
+                    </tr>
+                    @foreach (BasicEvent e in Model.Events)
+                    {
+                        <tr>
+                            <td>@e.Name</td>
+                            <td>@e.TypeName</td>
+                            <td>@e.Creator</td>
+                            <td>@e.Start</td>
+                            <td>@e.End</td>
+                            <td style="background-color:@e.getColor()">@e.getStateText()</td>
+                        </tr>
+                    }
+                </table>
+
+                <table id="navi-low" border="1">
+                    <tr>
+                        <td><-</td>
+                        <td>1</td>
+                        @for (int i = 0; i < Model.Events.Count / Model.Limit; i++)
+                        {
+                            <td>@(i+2)</td>
+                        }
+                        <td>-></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</form>

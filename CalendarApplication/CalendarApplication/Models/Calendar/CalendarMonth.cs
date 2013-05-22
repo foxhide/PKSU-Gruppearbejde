@@ -10,6 +10,5 @@ namespace CalendarApplication.Models.Calendar
     {
         public List<CalendarDay> Days { get; set; }
         public DateTime Date { get; set; }
-
     }
 }
