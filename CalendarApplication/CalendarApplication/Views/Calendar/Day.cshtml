@@ -63,12 +63,30 @@
                                     {
                                         if (e.Rooms.Contains(r))
                                         {
-                                            int start = e.Start < offset ? 0 : ((e.Start.Hour - offset.Hour) * 60 + e.Start.Minute) / 2;
-                                            int dist = e.End > offset.AddDays(1) ? 720 - start
-                                                : ((e.End.Hour - offset.Hour) * 60 + e.End.Minute) / 2 - start;
+                                            @* Calculate painting start and height *@
+                                            int start = 0;
+                                            if(e.Start > offset)
+                                            {
+                                                TimeSpan s = e.Start - offset;
+                                                start = (s.Hours * 60 + s.Minutes) / 2;
+                                            }
+                                            int height = 720 - start;
+                                            if(e.End < offset.AddDays(1))
+                                            {
+                                                if(start == 0)
+                                                {
+                                                    TimeSpan s = e.End - offset;
+                                                    height = (s.Hours * 60 + s.Minutes) / 2;
+                                                }
+                                                else
+                                                {
+                                                    TimeSpan s = e.End - e.Start;
+                                                    height = (s.Hours * 60 + s.Minutes) / 2;
+                                                }
+                                            }
                                             
                                             <div class="day-event"
-                                                style="position:absolute;z-index:1;top:@(start)px;left:4px;width:92px;height:@(dist)px;
+                                                style="position:absolute;z-index:1;top:@(start)px;left:4px;width:92px;height:@(height)px;
                                                        background-color:@(e.getColor());@(e.ViewVisible?"cursor:pointer":"")"
                                                 @(e.ViewVisible?"onclick=window.location='" + Url.Action("Index","Event", new { id = e.ID }) + "'":"")>
                                                 @if(e.ViewVisible)

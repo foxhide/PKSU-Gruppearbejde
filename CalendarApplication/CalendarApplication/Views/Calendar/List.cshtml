@@ -46,7 +46,7 @@
                                 <select name="Limit">
                                     @foreach (int limit in CalendarList.LIMITS)
                                     {
-                                    <option value="@limit">@limit</option>
+                                    <option value="@limit" @(limit == Model.Limit ? "selected='selected'":"")>@limit</option>
                                     }
                                 </select>
                             </td>
