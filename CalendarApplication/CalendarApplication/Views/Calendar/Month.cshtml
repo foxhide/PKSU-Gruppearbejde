@@ -54,18 +54,14 @@
                         </td>
                         <td style="padding:0;text-align:center">
                             <select onchange="goto('@(Model.Date.ToString("yyyy"))-' + this.options[this.selectedIndex].value)">
-                                <option value="01" @(Model.Date.Month == 1 ? "selected='selected'" : "")>January</option>
-                                <option value="02" @(Model.Date.Month == 2 ? "selected='selected'" : "")>Feburary</option>
-                                <option value="03" @(Model.Date.Month == 3 ? "selected='selected'" : "")>March</option>
-                                <option value="04" @(Model.Date.Month == 4 ? "selected='selected'" : "")>April</option>
-                                <option value="05" @(Model.Date.Month == 5 ? "selected='selected'" : "")>May</option>
-                                <option value="06" @(Model.Date.Month == 6 ? "selected='selected'" : "")>June</option>
-                                <option value="07" @(Model.Date.Month == 7 ? "selected='selected'" : "")>July</option>
-                                <option value="08" @(Model.Date.Month == 8 ? "selected='selected'" : "")>August</option>
-                                <option value="09" @(Model.Date.Month == 9 ? "selected='selected'" : "")>September</option>
-                                <option value="10" @(Model.Date.Month == 10 ? "selected='selected'" : "")>Oktober</option>
-                                <option value="11" @(Model.Date.Month == 11 ? "selected='selected'" : "")>November</option>
-                                <option value="12" @(Model.Date.Month == 12 ? "selected='selected'" : "")>December</option>
+                                @for (int m = 0; m < 12; m++)
+                                {
+                                    int month = m + 1;
+                                    <option value="@(month < 10 ? "0"+month : month.ToString())"
+                                        @(Model.Date.Month == month ? "selected='selected'" : "")>
+                                        @CalendarApplication.Models.Calendar.Calendar.MONTHS[m]
+                                    </option>
+                                }
                             </select>
                         </td>
                         <td style="text-align:right;padding:0;width:15%">

@@ -9,6 +9,10 @@ namespace CalendarApplication.Models.Calendar
 {
     public class CalendarList : Calendar
     {
+        // Allowed limits for the list
+        public static int[] LIMITS = { 10, 20, 50 };
+
+        public int TotalEventCount { get; set; }
         public List<BasicEvent> Events { get; set; }
 
         public DateTime Start { get; set; }
@@ -16,6 +20,7 @@ namespace CalendarApplication.Models.Calendar
         public bool All { get; set; }
 
         public int Limit { get; set; }
-        public int From { get; set; }
+        public int OldLimit { get; set; }
+        public int EventFrom { get; set; }
     }
 }

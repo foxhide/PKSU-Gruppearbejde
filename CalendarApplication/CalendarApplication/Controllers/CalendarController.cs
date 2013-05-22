@@ -86,10 +86,10 @@ namespace CalendarApplication.Controllers
         public ActionResult List(string from, string to, string limit, string efrom, string state, string types)
         {
             EventFilter f = this.GetFilter(state, types);
-            DateTime dtFrom = from == null ? new DateTime(1,1,1) : this.parseString(from);
-            DateTime dtTo = to == null ? new DateTime(9999, 1, 1) : this.parseString(to);
+            DateTime dtFrom = from == null ? DateTime.Now : this.parseString(from);
+            DateTime dtTo = to == null ? DateTime.Now.AddDays(10) : this.parseString(to);
 
-            int limitInt = limit == null ? 5 : Convert.ToInt32(limit);
+            int limitInt = limit == null ? 10 : Convert.ToInt32(limit);
             int efromInt = efrom == null ? 0 : Convert.ToInt32(efrom);
 
             CalendarList cl = this.GetList(dtFrom, dtTo, f, limitInt, efromInt);
@@ -97,7 +97,8 @@ namespace CalendarApplication.Controllers
             cl.Filter = f;
             cl.Mode = CalendarMode.LIST;
             cl.Limit = limitInt;
-            cl.From = efromInt;
+            cl.OldLimit = limitInt;
+            cl.EventFrom = efromInt;
 
             return View(cl);
         }
@@ -115,12 +116,18 @@ namespace CalendarApplication.Controllers
                 types += etm.Selected ? "1" : "0";
             }
 
-            if (cl.All) { return RedirectToAction("List", new { state = state, types = types }); }
-            else {
-                return RedirectToAction("List", new { from = cl.Start.ToString("yyyy-MM-dd"),
-                                                      to = cl.End.ToString("yyyy-MM-dd"),
-                                                      state = state, types = types });
+            // If limit had changed -> set from to 0, else set from accordingly
+            int from = cl.Limit != cl.OldLimit ? 0 : cl.EventFrom - (cl.EventFrom % cl.Limit);
+
+            if (cl.All) {
+                cl.Start = new DateTime(1, 1, 1);
+                cl.End = new DateTime(9999, 1, 1);
             }
+            return RedirectToAction("List", new { from = cl.Start.ToString("yyyy-MM-dd"),
+                                                    to = cl.End.ToString("yyyy-MM-dd"),
+                                                    limit = cl.Limit.ToString(),
+                                                    efrom = from.ToString(),
+                                                    state = state, types = types });
         }
 
         private DateTime parseString(string date)  // FORMAT: yyyy-mm-dd
@@ -192,7 +199,7 @@ namespace CalendarApplication.Controllers
             days = days % 7 > 0 ? days + (7 - days % 7) : days;
             first = first.AddDays(-before);
             
-            List<BasicEvent> events = this.GetEvents(f, first, first.AddDays(days),false,-1,-1);
+            List<BasicEvent> events = this.GetEvents(f, first, first.AddDays(days),false);
 
             for (int i = 0; i < days; i++)
             {
@@ -226,7 +233,7 @@ namespace CalendarApplication.Controllers
         {
             DateTime date = new DateTime(dateInput.Year, dateInput.Month, dateInput.Day);
             
-            List<BasicEvent> events = this.GetEvents(f, date, date.AddDays(1),true,-1,-1);
+            List<BasicEvent> events = this.GetEvents(f, date, date.AddDays(1),true);
 
             CalendarDay result = new CalendarDay
             {
@@ -253,13 +260,24 @@ namespace CalendarApplication.Controllers
             DateTime start = new DateTime(dateFrom.Year, dateFrom.Month, dateFrom.Day);
             DateTime end = new DateTime(dateTo.Year, dateTo.Month, dateTo.Day);
 
-            List<BasicEvent> events = this.GetEvents(f,start,end,false,limit,starting);
+            List<BasicEvent> eventsFull = this.GetEvents(f,start,end,false);
+
+            // Sanity checks
+            starting = starting < 0 || starting > eventsFull.Count ? 0 : starting;
+            limit = CalendarList.LIMITS.Contains(limit) ? limit : CalendarList.LIMITS[0];
+
+            List<BasicEvent> events = new List<BasicEvent>();
+            for (int i = 0; i < limit && starting+i < eventsFull.Count; i++)
+            {
+                events.Add(eventsFull[starting+i]);
+            }
 
             CalendarList model = new CalendarList
             {
                 Events = events,
                 Start = start,
                 End = end,
+                TotalEventCount = eventsFull.Count
             };
 
             return model;
@@ -276,7 +294,7 @@ namespace CalendarApplication.Controllers
         /// <param name="start">Starting date</param>
         /// <param name="end">Ending date</param>
         /// <returns>List of events</returns>
-        private List<BasicEvent> GetEvents(EventFilter f, DateTime start, DateTime end, bool day, int limit, int starting)
+        private List<BasicEvent> GetEvents(EventFilter f, DateTime start, DateTime end, bool day)
         {
             string select = "SELECT e.eventId,e.userId,u.userName,e.eventTypeId,e.eventName,e.eventStart,"
                             + "e.eventEnd,e.state,e.visible,et.eventTypeName";
@@ -349,8 +367,8 @@ namespace CalendarApplication.Controllers
             DataTable dt = msc.ExecuteQuery(query);
             if (dt != null)
             {
-                int r = limit == -1 ? 0 : starting;
-                while (r < dt.Rows.Count && (limit == -1 || r < limit+starting))
+                int r = 0;
+                while (r < dt.Rows.Count)
                 {
                     DataRow dr = dt.Rows[r];
                     BasicEvent e = new BasicEvent

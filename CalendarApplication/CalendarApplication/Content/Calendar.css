@@ -1,3 +1,8 @@
+/**************************************************/
+/*                Monthly view                    */
+/**************************************************/
+
+/* A month square in monthly view */
 td.calendar-month {
     background-color:white;
     text-align:left;
@@ -8,6 +13,7 @@ td.calendar-month {
     border-width:1px;
 }
 
+/* The little black square with the number in monthly view */
 td.calendar-date-number {
     text-align:center;
     vertical-align:top;
@@ -19,18 +25,7 @@ td.calendar-date-number {
     cursor: pointer;
 }
 
-event-red {
-    background-color:red;
-}
-
-event-yellow {
-    background-color:yellow;
-}
-
-event-green {
-    background-color:green;
-}
-
+/* Event pop-ups in monthly view */
 table.event-popup {
     padding:0;
     background-color:#EBEBEB;
@@ -41,4 +36,67 @@ table.event-popup td {
     padding:0;
     padding-left:2px;
     padding-right:2px;
+}
+
+/**************************************************/
+/*                 Dayly view                     */
+/**************************************************/
+
+/**************************************************/
+/*                  List view                     */
+/**************************************************/
+
+/* Navigator panel */
+table.navigator {
+    border:double 3px grey;
+    border-collapse:collapse;
+}
+table.navigator tr td {
+    width:28px;
+    height:28px;
+    text-align:center;
+    vertical-align:middle;
+    border:solid 1px grey;
+    padding:3px;
+    background-color:lightgrey;
+    cursor:pointer;
+}
+table.navigator tr td:hover {
+    color:white;
+    background-color:black;
+}
+/* Selected number in navigator */
+table.navigator td.selected {
+    color:black;
+    background-color:darkgrey;
+    cursor:text;
+}
+table.navigator td.selected:hover {
+    color:black;
+    background-color:darkgrey;
+}
+
+/* Style for the list of events */
+table.event-list {
+    border:double 3px grey;
+    border-collapse:collapse;
+}
+table.event-list tr td {
+    text-align:left;
+    vertical-align:middle;
+    border:solid 1px grey;
+    padding:5px;
+}
+/* Clickable table headers for sorting */
+table.event-list th {
+    text-align:left;
+    vertical-align:middle;
+    border:solid 1px grey;
+    background-color:lightgrey;
+    font-weight:bold;
+    cursor:pointer;
+}
+table.event-list th:hover {
+    background-color:black;
+    color:white;
 }

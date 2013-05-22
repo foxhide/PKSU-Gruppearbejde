@@ -33,7 +33,7 @@
                                 onclick="goto('@(Model.Date.AddDays(-1).ToString("yyyy-MM-dd"))')" />
                         </td>
                         <td style="padding:0;text-align:center;">
-                            @(Model.Date.ToString("d. MMM yyyy"))
+                            @(Model.Date.Day + ". " + Calendar.MONTHS[Model.Date.Month-1] + " " + Model.Date.Year)
                         </td>
                         <td style="text-align:right;padding:0;width:15%">
                             <input type="button" value="@(Model.Date.AddDays(1).ToString("d. MMM ->"))"

@@ -1,4 +1,9 @@
-﻿function goto(date) {
+﻿function gotoOther(from) {
+    $('#EventFrom').val(from);
+    $('#list_form').submit();
+}
+
+function goto(date) {
     var data = date.split("-");
     if (data.length < 2 || data.length > 3) { return; }
     else if (data.length == 2) {
