@@ -167,15 +167,29 @@ namespace CalendarApplication.Controllers
 
         /* Edit the password -WIP */
         [HttpPost]
-        public string EditUserPassword(int userId, string oldPass, string newPass)
+        public int EditUserPassword(int userId, string oldPass, string newPass)
         {
             // If no user or user trying to edit other user's profile -> return error message
             if (UserModel.GetCurrentUserID() == -1
-                || UserModel.GetCurrentUserID() != userId) { return "Bad user error"; }
+                || UserModel.GetCurrentUserID() != userId) { return -1; }
 
             MySqlUser msu = new MySqlUser();
-            msu.EditUser(userId, newPass, "password");
-            return "";
+            CustomQuery query = new CustomQuery
+            {
+                Cmd = "SELECT password FROM pksudb.users WHERE userId = @uid",
+                ArgNames = new[] { "@uid" },
+                Args = new[] { (object)userId }
+            };
+            DataTable dt = msu.ExecuteQuery(query);
+            if (dt == null) { return -11; }
+            else if (dt.Rows.Count == 0) { return -12; }
+
+            string goodHash = (string)dt.Rows[0]["password"];
+            if (!PasswordHashing.ValidatePassword(oldPass, goodHash)) { return -2; }
+
+            string newPassHashed = PasswordHashing.CreateHash(newPass);
+            if (!msu.EditUser(userId, newPassHashed, "password")) { return -13; }
+            return 0;
         }
 
         /* Delete a user (only if he/she is not approved yet) - only admins */

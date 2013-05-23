@@ -65,3 +65,51 @@ function showUser(list) {
     var id = list.options[list.selectedIndex].value;
     window.location.href = "/User/Index?userId=" + id;
 }
+
+/* Function used for editing password in edit profile */
+function updatePassword(id) {
+    var op = $("#OldPassword").val();
+    var np = $("#Password").val();
+    var rep = $("#PasswordConfirm").val();
+    if (np != rep) {
+        $("#match_error").html("Confirmation password does not match!");
+        $("#PasswordConfirm").addClass("input-validation-error");
+        return;
+    }
+    $("#match_error").html("");
+    $("#PasswordConfirm").removeClass("input-validation-error");
+    $.ajax({
+        url: "/Account/EditUserPassword",
+        type: 'POST',
+        data: { userId: id, oldPass: op, newPass: np },
+        success: function (result) {
+            var i = parseInt(result, 10);
+            switch (i) {
+                case 0:
+                    $('#basic_error').html("");
+                    $('#old_pass_error').html("");
+                    break; // OK
+                case -1:
+                    $('#basic_error').html("User validation error!");
+                    break;
+                case -2:
+                    $('#old_pass_error').html("Incorrect password!");
+                    break;
+                case -11:
+                    $('#basic_error').html("Some database error occured!");
+                    break;
+                case -12:
+                    $('#basic_error').html("Profile not found!");
+                    break;
+                case -13:
+                    $('#basic_error').html("Could not save new password!");
+                    break;
+            }
+            if (i != 0) {
+                $("#OldPassword").val("");
+                $("#Password").val("");
+                $("#PasswordConfirm").val("");
+            }
+        }
+    });
+}

@@ -7,17 +7,7 @@
 <h2>Edit profile</h2>
 <h3 style="color:red">@TempData["errorMsg"]</h3>
 
-<script type="text/javascript">
-    function updatePassword(id) {
-        var op = $("#OldPassword").val()
-        var np = $("#NewPassword").val()
-        $.ajax({
-            url: "/Maintenance/EditUserPassword",
-            type: 'POST',
-            data: { userId: id, oldPass: op, newPass: np }
-        });
-    }
-</script>
+<script src="@Url.Content("~/Scripts/edit-user.js")" type="text/javascript"></script>
 
 <style>
     .password-table {
@@ -29,6 +19,8 @@
         padding-right:5px;
     }
 </style>
+
+<div class="validation-summary-errors" id="basic_error"></div>
 
 <fieldset>
     <legend>Name</legend>
@@ -47,7 +39,10 @@
     <table class="password-table">
         <tr>
             <td>Old:</td>
-            <td>@Html.EditorFor(m => m.OldPassword)</td>
+            <td>
+                @Html.EditorFor(m => m.OldPassword)
+                <div class="validation-summary-errors" id="old_pass_error"></div>
+            </td>
             <td rowspan="3">
                 <input type="button" value="Save" onclick="updatePassword(@Model.ID)"/>
             </td>
@@ -64,6 +59,7 @@
             <td>
                 @Html.EditorFor(m => m.PasswordConfirm)
                 @Html.ValidationMessageFor(m => m.PasswordConfirm)
+                <div class="validation-summary-errors" id="match_error"></div>
             </td>
         </tr>
     </table>

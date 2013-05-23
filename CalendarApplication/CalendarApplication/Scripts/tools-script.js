@@ -54,6 +54,7 @@ function disableLists(listName, disable) {
     document.getElementById(listName + "_rem_button").disabled = disable;
 }
 
+/* Function used for editing a user string or bool value, used in several pages */
 function updateUser(field, id, value) {
     var url = "/Account/EditUser";
     if (typeof value === "string") { url += "String"; }
