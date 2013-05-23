@@ -88,7 +88,7 @@
                                             <div class="day-event"
                                                 style="position:absolute;z-index:1;top:@(start)px;left:4px;width:92px;height:@(height)px;
                                                        background-color:@(e.getColor());@(e.ViewVisible?"cursor:pointer":"")"
-                                                @(e.ViewVisible?"onclick=window.location='" + Url.Action("Index","Event", new { id = e.ID }) + "'":"")>
+                                                @(e.ViewVisible?"onclick=window.location='" + Url.Action("Index","Event", new { eventId = e.ID }) + "'":"")>
                                                 @if(e.ViewVisible)
                                                 {
                                                     @e.Name <br />
@@ -125,7 +125,7 @@
                 {
                     @* A user is signed in... *@
                     <input type="button" value="New event!" onclick="window.location='@Url.Action("EditEvent","Event",
-                                                                    new { id = -1, year = Model.Date.Year,
+                                                                    new { eventId = -1, year = Model.Date.Year,
                                                                           month = Model.Date.Month, day = Model.Date.Day })'"/>
                 }
             </td>

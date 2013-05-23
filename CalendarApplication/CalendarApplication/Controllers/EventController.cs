@@ -18,15 +18,22 @@ namespace CalendarApplication.Controllers
         //
         // GET: /Event/
 
-        public ActionResult Index(int id)
+        public ActionResult Index(int eventId)
         {
+            // Check if current user may view this event.
+            if (!UserModel.ViewAuthentication(eventId,UserModel.GetCurrentUserID()))
+            {
+                if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
+                else { return RedirectToAction("Index", "Home", null); }
+            }
+
             EventWithDetails result = new EventWithDetails
             {
-                ID = id
+                ID = eventId
             };
             string eventinfo = "SELECT * FROM pksudb.events NATURAL JOIN pksudb.eventroomsused " +
                                "NATURAL JOIN pksudb.rooms NATURAL JOIN pksudb.eventtypes NATURAL JOIN pksudb.users " +
-                               "WHERE eventId = " + id;
+                               "WHERE eventId = " + eventId;
             MySqlConnect con = new MySqlConnect();
             DataTable table = con.ExecuteQuery(eventinfo);
 
@@ -54,7 +61,7 @@ namespace CalendarApplication.Controllers
                 CustomQuery query0 = new CustomQuery();
                 query0.Cmd = "SELECT * FROM table_" + result.TypeId + " WHERE eventId = @eventId";
                 query0.ArgNames = new string[] { "@eventId" };
-                query0.Args = new object[] { id };
+                query0.Args = new object[] { eventId };
                 CustomQuery query1 = new CustomQuery();
                 query1.Cmd = "SELECT * FROM pksudb.eventtypefields WHERE eventTypeId = @eventTypeId";
                 query1.ArgNames = new string[] { "@eventTypeId" };
@@ -111,7 +118,7 @@ namespace CalendarApplication.Controllers
                                                   break;
                             case Fieldtype.UserList:
                             case Fieldtype.GroupList:
-                            case Fieldtype.FileList: fm.List = GetList(fm.Datatype, id, fm.ID, con); break;
+                            case Fieldtype.FileList: fm.List = GetList(fm.Datatype, eventId, fm.ID, con); break;
                         }
                         result.TypeSpecifics.Add(fm);
                     }
@@ -185,16 +192,23 @@ namespace CalendarApplication.Controllers
             return result;
         }
 
-        public ActionResult EditEvent(int id, int year, int month, int day)
+        public ActionResult EditEvent(int eventId, int year, int month, int day)
         {
+            // Check if that there is a user, or if it is an old event and user may edit this event
+            if(UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
+            else if (eventId != -1 && !UserModel.EditAuthentication(eventId, UserModel.GetCurrentUserID()))
+            {
+                return RedirectToAction("Index", "Home", null);
+            }
+
             EventEditModel eem = null;
             MySqlConnect msc = new MySqlConnect();
             DataTable dt = null;
-            if (id == -1)
+            if (eventId == -1)
             {
                 eem = new EventEditModel
                 {
-                    ID = id,
+                    ID = eventId,
                     EventTypes = new List<SelectListItem>(),
                     SelectedEventType = "0", // Initial value -> Basic event
                     Start = new DateTime(year, month, day, 10, 0, 0),
@@ -208,14 +222,14 @@ namespace CalendarApplication.Controllers
                 {
                     Cmd = "SELECT userId,eventTypeId,eventName,eventStart,eventEnd,visible,state FROM pksudb.events WHERE eventId = @eid",
                     ArgNames = new[] { "@eid" },
-                    Args = new[] { (object)id }
+                    Args = new[] { (object)eventId }
                 };
                 dt = msc.ExecuteQuery(query);
                 if (dt != null)
                 {
                     eem = new EventEditModel
                     {
-                        ID = id,
+                        ID = eventId,
                         Name = (string)dt.Rows[0]["eventName"],
                         CreatorId = (int)dt.Rows[0]["userId"],
                         EventTypes = new List<SelectListItem>(),
@@ -323,9 +337,9 @@ namespace CalendarApplication.Controllers
 
             eem.EventTypes = this.GetEventTypes(msc);
             TempData["errorMsg"] = msc.ErrorMessage;
-            if (id != -1)
+            if (eventId != -1)
             {
-                eem.TypeSpecifics = this.GetTypeSpecifics(id, int.Parse(eem.SelectedEventType), msc);
+                eem.TypeSpecifics = this.GetTypeSpecifics(eventId, int.Parse(eem.SelectedEventType), msc);
             }
             
             return View(eem);
@@ -334,6 +348,13 @@ namespace CalendarApplication.Controllers
         [HttpPost]
         public ActionResult EditEvent(EventEditModel eem)
         {
+            // Check if that there is a user, or if it is an old event and user may edit this event
+            if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
+            else if (eem.ID != -1 && !UserModel.EditAuthentication(eem.ID, UserModel.GetCurrentUserID()))
+            {
+                return RedirectToAction("Index", "Home", null);
+            }
+
             MySqlEvent mse = new MySqlEvent();
             eem.CreatorId = UserModel.GetCurrentUserID();
 
@@ -425,6 +446,9 @@ namespace CalendarApplication.Controllers
         /// <returns>A partial view containing a list of the (empty) specifics for the event type</returns>
         public ActionResult GetEventSpecific(int type)
         {
+            // Check if this request is made by a user (should also have a check for event creation ok!)
+            if (UserModel.GetCurrentUserID() == -1) { return null; }
+
             EventEditModel eem = new EventEditModel { TypeSpecifics = new List<FieldModel>() };
 
             MySqlConnect msc = new MySqlConnect();
@@ -440,7 +464,7 @@ namespace CalendarApplication.Controllers
         /// <param name="type">Type id of event</param>
         /// <param name="msc">MySqlConnect</param>
         /// <returns>A list of FieldModels</returns>
-        public List<FieldModel> GetTypeSpecifics(int id, int type, MySqlConnect msc)
+        private List<FieldModel> GetTypeSpecifics(int eventId, int type, MySqlConnect msc)
         {
             List<FieldModel> result = new List<FieldModel>();
             List<SelectListItem> users = null;       // List for user list
@@ -450,9 +474,9 @@ namespace CalendarApplication.Controllers
             string specQuery = "SELECT * FROM eventtypefields WHERE eventTypeId = " + type;
             DataTable dt = msc.ExecuteQuery(specQuery);
             DataTable value = null;
-            if (id != -1)
+            if (eventId != -1)
             {
-                value = msc.ExecuteQuery("SELECT * FROM table_" + type + " WHERE eventId = " + id);
+                value = msc.ExecuteQuery("SELECT * FROM table_" + type + " WHERE eventId = " + eventId);
             }
             if (dt != null)
             {
@@ -468,7 +492,7 @@ namespace CalendarApplication.Controllers
                         Datatype = (Fieldtype)dr["fieldType"],
                         VarcharLength = (int)dr["varCharLength"]
                     };
-                    if (id == -1 || value == null || value.Rows.Count == 0)
+                    if (eventId == -1 || value == null || value.Rows.Count == 0)
                     {
                         // We just set the values to standard values.
                         switch (fm.Datatype)
@@ -497,12 +521,12 @@ namespace CalendarApplication.Controllers
                         {
                             case Fieldtype.Float: fm.FloatValue = row["field_" + fm.ID] is DBNull ? 0 : (float)row["field_" + fm.ID];
                                                 break; //float
-                            case Fieldtype.UserList: fm.List = this.GetUsersValues(msc,id,fm.ID); break;
+                            case Fieldtype.UserList: fm.List = this.GetUsersValues(msc, eventId, fm.ID); break;
                             case Fieldtype.User: if (usersDrop == null) { usersDrop = this.GetUsers(msc, true); }
                                                 fm.List = usersDrop;
                                                 fm.IntValue = row["field_" + fm.ID] is DBNull ? 0 : (int)row["field_" + fm.ID];
                                                 break;
-                            case Fieldtype.GroupList: fm.List = this.GetGroupsValues(msc,id,fm.ID); break;
+                            case Fieldtype.GroupList: fm.List = this.GetGroupsValues(msc, eventId, fm.ID); break;
                             case Fieldtype.Group: if (groupsDrop == null) { groupsDrop = this.GetGroups(msc, true); }
                                                 fm.List = groupsDrop;
                                                 fm.IntValue = row["field_" + fm.ID] is DBNull ? 0 : (int)row["field_" + fm.ID];
@@ -675,7 +699,15 @@ namespace CalendarApplication.Controllers
             return result;
         }
 
-        public bool CheckDates(int id, DateTime start, DateTime end, List<SelectListItem> rooms)
+        /// <summary>
+        /// Checks if the given rooms are available in the given time span.
+        /// </summary>
+        /// <param name="eventId">Id of the event wanting to use the rooms</param>
+        /// <param name="start">Start time</param>
+        /// <param name="end">End time</param>
+        /// <param name="rooms">List of desired rooms</param>
+        /// <returns>True on ok, else false.</returns>
+        public bool CheckDates(int eventId, DateTime start, DateTime end, List<SelectListItem> rooms)
         {
             string cmd = "SELECT eventId FROM pksudb.events NATURAL JOIN pksudb.eventroomsused"
                             + " WHERE ((@start >= eventStart AND @start < eventEnd) OR "
@@ -693,7 +725,7 @@ namespace CalendarApplication.Controllers
             {
                 Cmd = cmd,
                 ArgNames = new[] { "@start", "@end", "@id" },
-                Args = new[] { (object)start, (object)end, id }
+                Args = new[] { (object)start, (object)end, eventId }
             };
             MySqlConnect msc = new MySqlConnect();
             DataTable dt = msc.ExecuteQuery(query);

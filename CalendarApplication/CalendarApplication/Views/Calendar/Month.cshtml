@@ -108,16 +108,16 @@
                                                     <td style="position:relative;text-align:left;padding:0;cursor:pointer"
                                                         onmouseover="showPopup('@divId')"
                                                         onmouseout="hidePopup('@divId')"
-                                                        onclick="window.location='@Url.Action("Index","Event",new {id=e.ID})'">
+                                                        onclick="window.location='@Url.Action("Index","Event",new {eventId=e.ID})'">
                                                         <div id="@(divId)_small" hidden="hidden" style="position:absolute;z-index:2;
                                                                     background-color:@(e.getColor());white-space:nowrap;cursor:pointer"
-                                                            onclick="window.location='@Url.Action("Index","Event",new {id=e.ID})'">
+                                                            onclick="window.location='@Url.Action("Index","Event",new {eventId=e.ID})'">
                                                             @e.Name
                                                         </div>
                                                         <div id="@(divId)_big" hidden="hidden" style="position:absolute;z-index:2;cursor:pointer" onmouseout="hidePopupBig('@divId')">
                                                             <table class="event-popup">
                                                                 <tr><td colspan="2" style="background-color:@(e.getColor());white-space:nowrap"
-                                                                    onclick="window.location='@Url.Action("Index","Event",new {id=e.ID})'">@e.Name</td></tr>
+                                                                    onclick="window.location='@Url.Action("Index","Event",new {eventId=e.ID})'">@e.Name</td></tr>
                                                                 <tr><td>Type:</td><td>@e.TypeName</td></tr>
                                                                 <tr><td>Creator:</td><td>@e.Creator</td></tr>
                                                                 <tr><td>State:</td><td style="color:@(e.getColor())">@e.getStateText()</td></tr>

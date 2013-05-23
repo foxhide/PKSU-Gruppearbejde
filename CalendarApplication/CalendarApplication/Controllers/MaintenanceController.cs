@@ -23,14 +23,9 @@ namespace CalendarApplication.Controllers
 
         public ActionResult Index()
         {
-            if (UserModel.GetCurrentUserID() == -1)
-            {
-                return RedirectToAction("Login", "Account", null);
-            }
-            else if (!UserModel.GetCurrent().Admin)
-            {
-                return RedirectToAction("Index", "Home", null);
-            }
+            // Check if user is logged in and is admin
+            if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
+            else if (!UserModel.GetCurrent().Admin) { return RedirectToAction("Index", "Home", null); }
 
             MaintenanceModel mm = new MaintenanceModel
             {
@@ -89,6 +84,10 @@ namespace CalendarApplication.Controllers
         [HttpPost]
         public ActionResult Index(MaintenanceModel mm)
         {
+            // Check if user is logged in and is admin
+            if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
+            else if (!UserModel.GetCurrent().Admin) { return RedirectToAction("Index", "Home", null); }
+
             switch (mm.SubmitValue)
             {
                 //Edit event
@@ -113,20 +112,24 @@ namespace CalendarApplication.Controllers
             return View(mm);
         }
 
-        public ActionResult EditEventType(int id)
+        public ActionResult EditEventType(int eventId)
         {
+            // Check if user is logged in and is admin
+            if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
+            else if (!UserModel.GetCurrent().Admin) { return RedirectToAction("Index", "Home", null); }
+
             EventTypeModel etm = new EventTypeModel { TypeSpecific = new List<FieldDataModel>() };
-            if (id == -1)
+            if (eventId == -1)
             {
                 etm.ID = -1;
                 //etm.Name = "Event type name here";
             }
             else
             {
-                string getType = "SELECT * FROM (eventtypes NATURAL LEFT JOIN eventtypefields) WHERE eventTypeId = " + id;
+                string getType = "SELECT * FROM (eventtypes NATURAL LEFT JOIN eventtypefields) WHERE eventTypeId = " + eventId;
                 MySqlConnect msc = new MySqlConnect();
                 DataTable dt = msc.ExecuteQuery(getType);
-                etm.ID = id;
+                etm.ID = eventId;
                 etm.Name = (string)dt.Rows[0]["eventTypeName"];
                 etm.ActiveFields = 0;
 
@@ -150,18 +153,16 @@ namespace CalendarApplication.Controllers
                     }
                 }
             }
-
-
-            for (int i = etm.TypeSpecific.Count; i < MAX_NUMBER_OF_FIELDS; i++)
-            {
-                etm.TypeSpecific.Add(new FieldDataModel());
-            }
             return View(etm);
         }
 
         [HttpPost]
         public ActionResult EditEventType(EventTypeModel etm)
         {
+            // Check if user is logged in and is admin
+            if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
+            else if (!UserModel.GetCurrent().Admin) { return RedirectToAction("Index", "Home", null); }
+
             MySqlEvent mse = new MySqlEvent();
             bool ok;
             if (etm.ID == -1)
@@ -189,12 +190,19 @@ namespace CalendarApplication.Controllers
 
         public ActionResult EditGroup(int groupId)
         {
+            // Check if user is logged in and is admin
+            if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
+            else if (!UserModel.GetCurrent().Admin || !this.IsGroupLeader(groupId,UserModel.GetCurrentUserID()))
+            {
+                return RedirectToAction("Index", "Home", null);
+            }
+
             GroupModel result = new GroupModel
-                                    { ID = groupId,
-                                      groupMembers = new List<SelectListItem>(), 
-                                      groupLeaders = new List<SelectListItem>(),
-                                      canCreate = new List<SelectListItem>()
-                                    };
+            { ID = groupId,
+                groupMembers = new List<SelectListItem>(), 
+                groupLeaders = new List<SelectListItem>(),
+                canCreate = new List<SelectListItem>()
+            };
             
             MySqlConnect msc = new MySqlConnect();
 
@@ -254,6 +262,13 @@ namespace CalendarApplication.Controllers
         [HttpPost]
         public ActionResult EditGroup(GroupModel grm)
         {
+            // Check if user is logged in and is admin
+            if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
+            else if (!UserModel.GetCurrent().Admin || !this.IsGroupLeader(grm.ID, UserModel.GetCurrentUserID()))
+            {
+                return RedirectToAction("Index", "Home", null);
+            }
+
             MySqlGroup msg = new MySqlGroup();
             bool ok;
             if (grm.ID == -1)
@@ -272,8 +287,37 @@ namespace CalendarApplication.Controllers
             return RedirectToAction("EditGroup", "Maintenance", new { groupId = grm.ID });
         }
 
+        /// <summary>
+        /// Check if a user is a leader of a group
+        /// </summary>
+        /// <param name="groupId">Id of group</param>
+        /// <param name="userId">Id of user</param>
+        /// <returns>True if leader, otherwise false</returns>
+        private bool IsGroupLeader(int groupId, int userId)
+        {
+            if (groupId == -1 || userId == -1) { return false; }
+
+            MySqlConnect msc = new MySqlConnect();
+            CustomQuery query = new CustomQuery
+            {
+                Cmd = "SELECT groupLeader FROM pksudb.groupmembers WHERE groupId = @gid AND userId = @uid",
+                ArgNames = new[] { "@gid", "@uid" },
+                Args = new[] { (object)groupId, (object)userId }
+            };
+            DataTable dt = msc.ExecuteQuery(query);
+            return dt != null && dt.Rows.Count == 1 && (bool)dt.Rows[0]["groupLeader"];
+        }
+
+        /// <summary>
+        /// Gets the page for managing users - admins only
+        /// </summary>
+        /// <returns>The page for user management</returns>
         public ActionResult ManageUsers()
         {
+            // Check if user is logged in and is admin
+            if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
+            else if (!UserModel.GetCurrent().Admin) { return RedirectToAction("Index", "Home", null); }
+
             ManageUserModel mum = new ManageUserModel
             {
                 UASelect = 0,
@@ -299,10 +343,17 @@ namespace CalendarApplication.Controllers
             return View(mum);
         }
 
+        /// <summary>
+        /// Gets the page for editing a room - admins only
+        /// </summary>
+        /// <param name="roomId">Id of the room to edit, -1 for new room</param>
+        /// <returns>The page for editing the given room</returns>
         public ActionResult EditRoom(int roomId)
         {
-            //if (idd == null) { return RedirectToAction("Index", "Maintenance", ""); }
-            //int id = (int)idd;
+            // Check if user is logged in and is admin
+            if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
+            else if (!UserModel.GetCurrent().Admin) { return RedirectToAction("Index", "Home", null); }
+
             CalendarApplication.Models.Event.Room room = new CalendarApplication.Models.Event.Room{ ID = roomId, Name = "" };
             if (roomId != -1)
             {
@@ -318,9 +369,18 @@ namespace CalendarApplication.Controllers
             return View(room);
         }
 
+        /// <summary>
+        /// HttpPost for room edit
+        /// </summary>
+        /// <param name="room">Room model from the view</param>
+        /// <returns>A redirect to Home/Index on success, otherwise a return to room view.</returns>
         [HttpPost]
         public ActionResult EditRoom(CalendarApplication.Models.Event.Room room)
         {
+            // Check if user is logged in and is admin
+            if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
+            else if (!UserModel.GetCurrent().Admin) { return RedirectToAction("Index", "Home", null); }
+
             int roomId = room.ID;
             bool worked = false;
             MySqlRoom sqlrm = new MySqlRoom();
