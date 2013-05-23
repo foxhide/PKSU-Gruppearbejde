@@ -10,6 +10,7 @@ using CalendarApplication.Models.User;
 using CalendarApplication.Models.Event;
 using CalendarApplication.Models.EventType;
 using CalendarApplication.Database;
+using CalendarApplication.PDFBuilder;
 
 namespace CalendarApplication.Controllers
 {
@@ -20,6 +21,18 @@ namespace CalendarApplication.Controllers
 
         public ActionResult Index(int id)
         {
+            return View(GetEvent(id));
+        }
+
+        [HttpPost]
+        public string PrintEvent(int id)
+        {
+            return EventBuilder.BuildPDF(GetEvent(id));
+        }
+
+        public EventWithDetails GetEvent(int id)
+        {
+
             EventWithDetails result = new EventWithDetails
             {
                 ID = id
@@ -42,7 +55,7 @@ namespace CalendarApplication.Controllers
                 result.Visible = (bool)rows[0]["visible"];
                 result.Creator = (string)rows[0]["userName"];
                 result.CreatorId = (int)rows[0]["userId"];
-                result.Rooms = new List<Room>();                       
+                result.Rooms = new List<Room>();
                 for (int i = 0; i < rows.Count; i++)
                 {
                     result.Rooms.Add(new Room
@@ -72,13 +85,13 @@ namespace CalendarApplication.Controllers
                             Name = (string)ds.Tables[1].Rows[i]["fieldName"],
                             Datatype = (Fieldtype)ds.Tables[1].Rows[i]["fieldType"]
                         };
-                        switch(fm.Datatype)
+                        switch (fm.Datatype)
                         {
                             case Fieldtype.Float: fm.FloatValue = (float)ds.Tables[0].Rows[0]["field_" + fm.ID]; break;
 
                             case Fieldtype.File: if (DBNull.Value.Equals(ds.Tables[0].Rows[0]["field_" + fm.ID])) { fm.IntValue = 0; }
-                                                 else { fm.IntValue = (int)ds.Tables[0].Rows[0]["field_" + fm.ID]; }
-                                                 fm.StringValue = "File system not yet implemented."; break;
+                                else { fm.IntValue = (int)ds.Tables[0].Rows[0]["field_" + fm.ID]; }
+                                fm.StringValue = "File system not yet implemented."; break;
 
                             case Fieldtype.Text: fm.StringValue = ds.Tables[0].Rows[0]["field_" + fm.ID] as string; break;
 
@@ -87,28 +100,28 @@ namespace CalendarApplication.Controllers
                             case Fieldtype.Datetime: fm.DateValue = (DateTime)ds.Tables[0].Rows[0]["field_" + fm.ID]; break;
 
                             case Fieldtype.User: if (DBNull.Value.Equals(ds.Tables[0].Rows[0]["field_" + fm.ID]))
-                                                 {
-                                                    fm.IntValue = 0;
-                                                    fm.StringValue = "None";
-                                                 }
-                                                 else
-                                                 {
-                                                    fm.IntValue = (int)ds.Tables[0].Rows[0]["field_" + fm.ID]; 
-                                                    fm.StringValue = UserModel.GetUser(fm.IntValue).UserName;
-                                                 }
-                                                 break;
+                                {
+                                    fm.IntValue = 0;
+                                    fm.StringValue = "None";
+                                }
+                                else
+                                {
+                                    fm.IntValue = (int)ds.Tables[0].Rows[0]["field_" + fm.ID];
+                                    fm.StringValue = UserModel.GetUser(fm.IntValue).UserName;
+                                }
+                                break;
 
                             case Fieldtype.Group: if (DBNull.Value.Equals(ds.Tables[0].Rows[0]["field_" + fm.ID]))
-                                                  {
-                                                        fm.IntValue = 0;
-                                                        fm.StringValue = "None";
-                                                  }
-                                                  else
-                                                  {
-                                                        fm.IntValue = (int)ds.Tables[0].Rows[0]["field_" + fm.ID];
-                                                        fm.StringValue = "Group name not implemented until Andreas has made a GetGroup function...";
-                                                  }
-                                                  break;
+                                {
+                                    fm.IntValue = 0;
+                                    fm.StringValue = "None";
+                                }
+                                else
+                                {
+                                    fm.IntValue = (int)ds.Tables[0].Rows[0]["field_" + fm.ID];
+                                    fm.StringValue = "Group name not implemented until Andreas has made a GetGroup function...";
+                                }
+                                break;
                             case Fieldtype.UserList:
                             case Fieldtype.GroupList:
                             case Fieldtype.FileList: fm.List = GetList(fm.Datatype, id, fm.ID, con); break;
@@ -122,7 +135,7 @@ namespace CalendarApplication.Controllers
                 TempData["errorMsg"] = con.ErrorMessage;
                 result.ID = -1;
             }
-            return View(result);
+            return result;
         }
 
         private List<SelectListItem> GetList(Fieldtype type, int eventId, int fieldId, MySqlConnect msc)

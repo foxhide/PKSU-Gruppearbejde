@@ -121,4 +121,17 @@ else {
     {
         @Html.ActionLink("Edit event", "EditEvent", "Event", new { id = Model.ID, year = 0, month = 0, day = 0 }, null)
     }
+
+    <script>
+        function printEvent(id) {
+            $.ajax({
+                url: "/Event/PrintEvent",
+                type: 'POST',
+                data: { id: id },
+                success: function (result) { window.open(result); }
+            });
+        }
+    </script>
+    
+    <button onclick="printEvent(@(Model.ID))">Print Event</button>
 }
