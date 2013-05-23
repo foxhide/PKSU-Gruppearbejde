@@ -91,13 +91,18 @@ namespace CalendarApplication.Controllers
         [HttpPost]
         public ActionResult Day(CalendarDay cd)
         {
+            // Create string date
             string date = cd.Mode == CalendarMode.MONTH ? cd.Date.ToString("yyyy-MM") : cd.Date.ToString("yyyy-MM-dd");
 
+            // Create state string
             string state = cd.Filter.GetStateString();
 
+            // Create type
             string types = cd.Filter.GetTypeString();
 
+            // Determine action
             string action = cd.Mode == CalendarMode.MONTH ? "Month" : "Day";
+
             return RedirectToAction(action, new { date = date, state = state, types = types });
         }
 

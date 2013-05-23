@@ -15,7 +15,7 @@
 <h3 style="color:red">@TempData["errorMsg"]</h3>
 
 <form id="cal_form" method="post">
-    @Html.HiddenFor(model => model.Date)
+    <input type="hidden" name="Date" id="Date" value="@Model.Date.ToString("yyyy-MM")" />
     @Html.HiddenFor(model => model.Mode)
     <table>
         <tr>
