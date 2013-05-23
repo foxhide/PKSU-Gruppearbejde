@@ -22,9 +22,17 @@ namespace CalendarApplication.Controllers
 
         public ActionResult Index()
         {
+            //Simply redirect to month
             return RedirectToAction("Month");
         }
 
+        /// <summary>
+        /// Gets the monthly view page
+        /// </summary>
+        /// <param name="date">Date in the desired month, if null -> today</param>
+        /// <param name="state">State string, e.g. 111 or 010, if null -> all visible</param>
+        /// <param name="types">Type string, e.g. 101101..., if null -> all visible</param>
+        /// <returns>The monthly view page</returns>
         public ActionResult Month(string date, string state, string types)
         {
             EventFilter f = this.GetFilter(state, types);
@@ -35,25 +43,36 @@ namespace CalendarApplication.Controllers
             return View(cm);
         }
 
+        /// <summary>
+        /// Post function for the monthly view
+        /// </summary>
+        /// <param name="cm">CalendarMonth model, with the posted data</param>
+        /// <returns>A redirect to the month page</returns>
         [HttpPost]
         public ActionResult Month(CalendarMonth cm)
         {
+            // Create string date
             string date = cm.Mode == CalendarMode.MONTH ? cm.Date.ToString("yyyy-MM") : cm.Date.ToString("yyyy-MM-dd");
 
-            string state = (cm.Filter.ViewState0 ? "1" : "0")
-                            + (cm.Filter.ViewState1 ? "1" : "0")
-                            + (cm.Filter.ViewState2 ? "1" : "0");
+            // Create state string
+            string state = cm.Filter.GetStateString();
 
-            string types = "";
-            foreach (EventTypeModel etm in cm.Filter.Eventtypes)
-            {
-                types += etm.Selected ? "1" : "0";
-            }
+            // Create type
+            string types = cm.Filter.GetTypeString();
 
+            // Determine action
             string action = cm.Mode == CalendarMode.MONTH ? "Month" : "Day";
+
             return RedirectToAction(action, new { date = date, state = state, types = types });
         }
 
+        /// <summary>
+        /// Gets the daily view page
+        /// </summary>
+        /// <param name="date">The desired date, today if null</param>
+        /// <param name="state">State string, e.g. 111 or 010, if null -> all visible</param>
+        /// <param name="types">Type string, e.g. 101101..., if null -> all visible</param>
+        /// <returns>The daily view page</returns>
         public ActionResult Day(string date, string state, string types)
         {
             EventFilter f = this.GetFilter(state, types);
@@ -64,34 +83,55 @@ namespace CalendarApplication.Controllers
             return View(cd);
         }
 
+        /// <summary>
+        /// Post function for the daily view
+        /// </summary>
+        /// <param name="cd">CalendarDay model, with the posted data</param>
+        /// <returns>A redirect to the daily page</returns>
         [HttpPost]
         public ActionResult Day(CalendarDay cd)
         {
             string date = cd.Mode == CalendarMode.MONTH ? cd.Date.ToString("yyyy-MM") : cd.Date.ToString("yyyy-MM-dd");
 
-            string state = (cd.Filter.ViewState0 ? "1" : "0")
-                            + (cd.Filter.ViewState1 ? "1" : "0")
-                            + (cd.Filter.ViewState2 ? "1" : "0");
+            string state = cd.Filter.GetStateString();
 
-            string types = "";
-            foreach (EventTypeModel etm in cd.Filter.Eventtypes)
-            {
-                types += etm.Selected ? "1" : "0";
-            }
+            string types = cd.Filter.GetTypeString();
 
             string action = cd.Mode == CalendarMode.MONTH ? "Month" : "Day";
             return RedirectToAction(action, new { date = date, state = state, types = types });
         }
 
-        public ActionResult List(string from, string to, string limit, string efrom, string state, string types, string order, string desc)
+        /// <summary>
+        /// Gets the list view page
+        /// </summary>
+        /// <param name="from">The from-date, if null -> 0001-01-01 is chosen</param>
+        /// <param name="to">The to-date, if null -> 9999-01-01 is chosen</param>
+        /// <param name="limit">The limit pr. page, if null -> 10 is chosen</param>
+        /// <param name="efrom">The starting event, if null -> 0 is chosen. efrom is rounded down to a multiplum of limit</param>
+        /// <param name="state">State string, e.g. 111 or 010, if null -> all visible</param>
+        /// <param name="types">Type string, e.g. 101101..., if null -> all visible</param>
+        /// <param name="order">Determines the sorting of the events, if null -> sort by start date</param>
+        /// <param name="desc">Detemines desc/asc, if true the descending, else ascending.</param>
+        /// <returns>The list view page</returns>
+        public ActionResult List(string from,
+                                 string to,
+                                 string limit,
+                                 string efrom,
+                                 string state,
+                                 string types,
+                                 string order,
+                                 string desc)
         {
+            // Get filter and dates
             EventFilter f = this.GetFilter(state, types);
             DateTime dtFrom = from == null ? new DateTime(1,1,1) : this.parseString(from);
             DateTime dtTo = to == null ? new DateTime(9999,1,1) : this.parseString(to);
             
+            // Get limit and efrom
             int limitInt = limit == null ? 10 : Convert.ToInt32(limit);
             int efromInt = efrom == null ? 0 : Convert.ToInt32(efrom);
 
+            // Get event order and descending
             EventOrder eo = EventOrder.START;
             if (order != null && Enum.IsDefined(typeof(EventOrder), order))
             {
@@ -106,29 +146,32 @@ namespace CalendarApplication.Controllers
             cl.Limit = limitInt;
             cl.OldLimit = limitInt;
             cl.EventFrom = efromInt;
+            // If both are null, set the all checkbox.
             cl.All = from == null && to == null;
 
             return View(cl);
         }
 
+        /// <summary>
+        /// Post function for the list view
+        /// </summary>
+        /// <param name="cd">CalendarList model, with the posted data</param>
+        /// <returns>A redirect to the list page</returns>
         [HttpPost]
         public ActionResult List(CalendarList cl)
         {
-            string state = (cl.Filter.ViewState0 ? "1" : "0")
-                            + (cl.Filter.ViewState1 ? "1" : "0")
-                            + (cl.Filter.ViewState2 ? "1" : "0");
+            // Get state string
+            string state = cl.Filter.GetStateString();
 
-            string types = "";
-            foreach (EventTypeModel etm in cl.Filter.Eventtypes)
-            {
-                types += etm.Selected ? "1" : "0";
-            }
+            // Get type string
+            string types = cl.Filter.GetTypeString();
 
             // If limit had changed -> set from to 0, else set from accordingly
             int from = cl.Limit != cl.OldLimit ? 0 : cl.EventFrom - (cl.EventFrom % cl.Limit);
 
             if (cl.All)
             {
+                // If all, do not send the dates
                 return RedirectToAction("List", new
                 {
                     limit = cl.Limit.ToString(),
@@ -141,6 +184,7 @@ namespace CalendarApplication.Controllers
             }
             else
             {
+                // Else, return the dates too
                 return RedirectToAction("List", new
                 {
                     from = cl.Start.ToString("yyyy-MM-dd"),
@@ -155,25 +199,44 @@ namespace CalendarApplication.Controllers
             }
         }
 
-        private DateTime parseString(string date)  // FORMAT: yyyy-mm-dd
+        /// <summary>
+        /// Function for parsing string to DateTime
+        /// </summary>
+        /// <param name="date">The date as a string, format: yyyy-MM-dd</param>
+        /// <returns>DateTime.Now on invalid input, else the DateTime represented by the date string</returns>
+        private DateTime parseString(string date)
         {
+            // Check null
             if(string.IsNullOrEmpty(date)) { return DateTime.Now; }
+
+            // Regex check
             Match m = Regex.Match(date, @"[0-9]{4}-[0-9]{2}(-[0-9]{2})?");
-            if (!m.Success) { TempData["errorMsg"] = "BadRegex"; return DateTime.Now; }
+            if (!m.Success) { TempData["errorMsg"] = "Bad date string!"; return DateTime.Now; }
+
             string[] vals = date.Split('-');
             int year = Convert.ToInt32(vals[0]);
             int month = Convert.ToInt32(vals[1]);
             int day = vals.Length > 2 ? Convert.ToInt32(vals[2]) : 1;
 
             DateTime result = DateTime.Now;
+            // Try to create the dateTime (checks if valid date)
             try
             {
                 result = new DateTime(year, month, day);
             }
+            // Date was not valid
             catch (Exception ex) { TempData["errorMsg"] = ex.Message; }
+
+            // Date was valid -> return it.
             return result;
         }
 
+        /// <summary>
+        /// Creates an EventFilter from the state string and type string
+        /// </summary>
+        /// <param name="state">State string</param>
+        /// <param name="types">Type string</param>
+        /// <returns>An EventFilter</returns>
         private EventFilter GetFilter(string state, string types)
         {
             EventFilter f = new EventFilter
@@ -184,6 +247,7 @@ namespace CalendarApplication.Controllers
                 Eventtypes = new List<EventTypeModel>()
             };
 
+            // Set state values
             if (state != null)
             {
                 char[] stateArr = state.ToCharArray();
@@ -192,6 +256,7 @@ namespace CalendarApplication.Controllers
                 f.ViewState2 = stateArr.Length < 3 || stateArr[2] == '1';
             }
 
+            // Get event types
             MySqlConnect msc = new MySqlConnect();
             string etget = "SELECT eventTypeId, eventTypeName FROM pksudb.eventtypes";
             DataTable dt = msc.ExecuteQuery(etget);
@@ -199,6 +264,7 @@ namespace CalendarApplication.Controllers
             char[] typeArr = types != null ? types.ToCharArray() : null;
             int tCount = 0;
 
+            // Fill in event types and set their values
             foreach (DataRow dr in dt.Rows)
             {
                 EventTypeModel etm = new EventTypeModel
@@ -214,18 +280,27 @@ namespace CalendarApplication.Controllers
             return f;
         }
 
+        /// <summary>
+        /// Creates a CalendarMonth
+        /// </summary>
+        /// <param name="dt">Date in the desired month</param>
+        /// <param name="f">The current filter</param>
+        /// <returns>A CalendarMonth with the right number of days for the view</returns>
         private CalendarMonth GetMonth(DateTime dt, EventFilter f)
         {
             List<CalendarDay> cdays = new List<CalendarDay>();
 
+            // Calculate the needed number of days.
             DateTime first = new DateTime(dt.Year,dt.Month,1);
             int before = (int)first.DayOfWeek == 0 ? 6 : (int)first.DayOfWeek - 1;
             int days = DateTime.DaysInMonth(dt.Year, dt.Month) + before;
             days = days % 7 > 0 ? days + (7 - days % 7) : days;
             first = first.AddDays(-before);
             
+            // Get all events between the calculated days
             List<BasicEvent> events = this.GetEvents(f, first, first.AddDays(days),false,EventOrder.START, false);
 
+            // Create calendar days
             for (int i = 0; i < days; i++)
             {
                 DateTime myDate = first.AddDays(i);
@@ -238,7 +313,10 @@ namespace CalendarApplication.Controllers
                 cdays.Add(cd);
             }
 
+            // Apply offset
             first = first.AddHours(Config.GetStartingHourOfDay());
+
+            // Add event to its days
             foreach (BasicEvent ev in events)
             {
                 TimeSpan end = ev.End - first;
@@ -254,10 +332,15 @@ namespace CalendarApplication.Controllers
             return new CalendarMonth { Date = dt, Days = cdays };
         }
 
-        private CalendarDay GetDay(DateTime dateInput, EventFilter f)
+        /// <summary>
+        /// Gets a day model for the given date
+        /// </summary>
+        /// <param name="date">The date to get</param>
+        /// <param name="f">The current filter</param>
+        /// <returns>A CalendarDay</returns>
+        private CalendarDay GetDay(DateTime date, EventFilter f)
         {
-            DateTime date = new DateTime(dateInput.Year, dateInput.Month, dateInput.Day);
-            
+            // Get events
             List<BasicEvent> events = this.GetEvents(f, date, date.AddDays(1),true,EventOrder.START, false);
 
             CalendarDay result = new CalendarDay
@@ -267,6 +350,7 @@ namespace CalendarApplication.Controllers
                 Events = events
             };
 
+            // Get all the rooms
             MySqlConnect msc = new MySqlConnect();
             CustomQuery query = new CustomQuery { Cmd = "SELECT * FROM pksudb.rooms" };
             DataTable dt = msc.ExecuteQuery(query);
@@ -280,23 +364,33 @@ namespace CalendarApplication.Controllers
             return result;
         }
 
-        private CalendarList GetList(DateTime dateFrom,
-                                     DateTime dateTo,
+        /// <summary>
+        /// Get the CalendarList model
+        /// </summary>
+        /// <param name="start">The from-date</param>
+        /// <param name="end">The to-date</param>
+        /// <param name="f">The current filter</param>
+        /// <param name="limit">The limit</param>
+        /// <param name="starting">The starting event</param>
+        /// <param name="o">Determines the sorting</param>
+        /// <param name="desc">Determines if sorting should be ascending or descending (true -> descending)</param>
+        /// <returns></returns>
+        private CalendarList GetList(DateTime start,
+                                     DateTime end,
                                      EventFilter f,
                                      int limit,
                                      int starting,
                                      EventOrder o,
                                      bool desc)
         {
-            DateTime start = dateFrom;
-            DateTime end = dateTo;
-
+            // Get all events between the dates
             List<BasicEvent> eventsFull = this.GetEvents(f,start,end,false,o,desc);
 
-            // Sanity checks
+            // Sanity checks of starting and limit (limit must be one of the predefined)
             starting = starting < 0 || starting > eventsFull.Count ? 0 : starting;
             limit = CalendarList.LIMITS.Contains(limit) ? limit : CalendarList.LIMITS[0];
 
+            // Limit the number of events.
             List<BasicEvent> events = new List<BasicEvent>();
             for (int i = 0; i < limit && starting+i < eventsFull.Count; i++)
             {
@@ -324,6 +418,9 @@ namespace CalendarApplication.Controllers
         /// <param name="f">EventFilter</param>
         /// <param name="start">Starting date</param>
         /// <param name="end">Ending date</param>
+        /// <param name="day">If true, rooms will be filled too and invisible events will be added</param>
+        /// <param name="order">Determines the sorting order</param>
+        /// <param name="desc">Determines ascending or descending order (true -> descending)</param>
         /// <returns>List of events</returns>
         private List<BasicEvent> GetEvents(EventFilter f, DateTime start, DateTime end, bool day, EventOrder order, bool desc)
         {
