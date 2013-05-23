@@ -65,3 +65,8 @@ function updateUser(field, id, value) {
         data: { field: field, userId: id, value: value }
     });
 }
+
+/* Redirect to the given url */
+function gotoUrl(url) {
+    window.location = url;
+}

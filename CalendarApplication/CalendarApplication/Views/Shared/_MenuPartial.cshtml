@@ -1,67 +1,118 @@
 ﻿@using CalendarApplication.Models.Calendar;
 @using CalendarApplication.Models.User;
 
-<table class="gridtable">
+<table class="nav-bar">
     @{
         var curActn = ViewContext.Controller.ValueProvider.GetValue("action").RawValue.ToString().ToLowerInvariant();
         var curCtrl = ViewContext.Controller.ValueProvider.GetValue("controller").RawValue.ToString().ToLowerInvariant();
-        <tr><td>
-            @if(curActn != "" && curCtrl != "home") { @Html.ActionLink("Home", "", "Home") }
-            else { <b>@Html.ActionLink("Home", "", "Home")</b> }
-        </td></tr>
-        <tr><td>
-            @if(curActn != "" && curCtrl != "calendar") {
-                @Html.ActionLink("Calendar", "Index", "Calendar", Calendar.InitialView, null)
-            }
-            else { <b>@Html.ActionLink("Calendar", "Index", "Calendar", Calendar.InitialView, null)</b> }
-        </td></tr>
-        if(UserModel.GetCurrentUserID() != -1)
-        {
-        
-            <tr>
-                <td>
-                    @if (curActn != "" && curCtrl != "user")
-                    {
-                        @Html.ActionLink("Profile", "Index", "User", new { userId = UserModel.GetCurrentUserID() }, null)
-                    }
-                    else
-                    {
-                        <b>@Html.ActionLink("Profile", "Index", "User", new { userId = UserModel.GetCurrentUserID() }, null)</b>
-                    }
-                </td>
-            </tr>
-        
-            <tr>
-                <td>
-                    @if (curActn != "" && curCtrl != "group")
-                    {
-                        @Html.ActionLink("Groups", "Index", "GroupView", null, null)
-                    }
-                    else
-                    {
-                        <b>@Html.ActionLink("Groups", "Index", "GroupView", null, null)</b>
-                    }
-                </td>
-            </tr>
-            if(UserModel.GetCurrent().Admin) //Only admins may access the maintenance page
-            {
-                if(curActn != "" && curCtrl != "maintenance") {
-                    <tr>
-                        <td>
-                            @Html.ActionLink("Maintenance","Index","Maintenance",null,null)
-                        </td>
-                    </tr>   
-                }
-                else {
-                    <tr><td><b>@Html.ActionLink("Maintenance","Index","Maintenance",null,null)</b></td></tr>
-                }
-            }
-        }
-        
-        <tr>
-                <td>
-                    @Html.ActionLink("About", "About", "Home", null, null)
-                </td>
-            </tr>
     }
+    <tr>
+
+        <td @(curCtrl == "home" ? "class=selected" : "")
+            onmouseover="$('#home-drop').show()"
+            onmouseout="$('#home-drop').hide()">
+            Home
+            <div id="home-drop" hidden="hidden">
+                <table class="nav-bar-drop">
+                    <tr>
+                        <td @(curCtrl == "home" && (curActn == "" || curActn == "index") ? "class=selected" : "")
+                            onclick="gotoUrl('@Url.Action("","Home",null)')">
+                            Front page
+                        </td>
+                    </tr>
+                    <tr>
+                        <td  @(curCtrl == "home" && curActn == "about" ? "class=selected" : "")
+                            onclick="gotoUrl('@Url.Action("About","Home",null)')">
+                            About
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </td>
+        
+        <td  @(curCtrl == "calendar" ? "class=selected" : "")
+            onmouseover="$('#calendar-drop').show()"
+            onmouseout="$('#calendar-drop').hide()">
+            Calendar
+            <div id="calendar-drop" hidden="hidden">
+                <table class="nav-bar-drop">
+                    <tr>
+                        <td @(curCtrl == "calendar" && curActn == "month" ? "class=selected" : "")
+                            onclick="gotoUrl('@Url.Action("Month","Calendar",null)')">
+                            Monthly View
+                        </td>
+                    </tr>
+                    <tr>
+                        <td  @(curCtrl == "calendar" && curActn == "day" ? "class=selected" : "")
+                            onclick="gotoUrl('@Url.Action("Day","Calendar",null)')">
+                            Daily View
+                        </td>
+                    </tr>
+                    <tr>
+                        <td  @(curCtrl == "calendar" && curActn == "list" ? "class=selected" : "")
+                            onclick="gotoUrl('@Url.Action("List","Calendar",null)')">
+                            List
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </td>
+
+        @if(UserModel.GetCurrentUserID() != -1)
+        {
+            <td  @(curCtrl == "user" || curCtrl == "account" ? "class=selected" : "")
+                onmouseover="$('#user-drop').show()"
+                onmouseout="$('#user-drop').hide()">
+                Profile
+                <div id="user-drop" hidden="hidden">
+                <table class="nav-bar-drop">
+                    <tr>
+                        <td @(curCtrl == "user" && curActn == "index" ? "class=selected" : "")
+                            onclick="gotoUrl('@Url.Action("","User", new { userId = UserModel.GetCurrentUserID() })')">
+                            View
+                        </td>
+                    </tr>
+                    <tr>
+                        <td  @(curCtrl == "account" && curActn == "edituser" ? "class=selected" : "")
+                            onclick="gotoUrl('@Url.Action("EditUser","Account",  new { userId = UserModel.GetCurrentUserID() })')">
+                            Edit
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            </td>
+        }
+
+        <td  @(curCtrl == "group" ? "class=selected" : "")
+            onclick="gotoUrl('@Url.Action("","Group",null)')">
+            Groups
+        </td>
+
+        @if(UserModel.GetCurrentUserID() != -1 && UserModel.GetCurrent().Admin)
+        {
+            <td  @(curCtrl == "maintenance" ? "class=selected" : "")
+                onmouseover="$('#maintenance-drop').show()"
+                onmouseout="$('#maintenance-drop').hide()">
+                Maintenance
+                <div id="maintenance-drop" hidden="hidden">
+                <table class="nav-bar-drop">
+                    <tr>
+                        <td @(curCtrl == "maintenance" && (curActn == "index" ||curActn == "") ? "class=selected" : "")
+                            onclick="gotoUrl('@Url.Action("","Maintenance",null)')">
+                            Maintenance page
+                        </td>
+                    </tr>
+                    <tr>
+                        <td  @(curCtrl == "maintenance" && curActn == "manageusers" ? "class=selected" : "")
+                            onclick="gotoUrl('@Url.Action("ManageUsers","Maintenance",null)')">
+                            Manage users
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            </td>
+        }
+
+    </tr>
+
 </table>
