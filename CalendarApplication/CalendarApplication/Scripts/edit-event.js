@@ -85,6 +85,11 @@ function checkCreate() {
         $("#Name").addClass("input-validation-error");
         $("#Name_Error").html("The event must have a Name!");
     }
+    if ($("#SelectedEventType").val() == "0") {
+        ok = false;
+        $("#SelectedEventType").addClass("input-validation-error");
+        $("#SelectedEventType_Error").html("The event must have a Type!");
+    }
     for (var i = 0; i < numberOfFields; i++) {
         var id = "#TypeSpecifics_" + i;
         var req = $(id + "_RequiredCreate").val();
@@ -110,7 +115,7 @@ function updateSelf(id,type) {
 
     // Get datatype and input elements
     var input = $(id);
-    if (((type == "User" || type == "Group") && input.val() != "0")
+    if (((type == "User" || type == "Group" || type == "Type") && input.val() != "0")
                 || (type == "Text" && input.val() != "")) {
         input.removeClass("input-validation-error");
         $(id + "_Error").html("");
