@@ -231,6 +231,7 @@
     <Content Include="Views\Calendar\Month.cshtml" />
     <Content Include="Views\Calendar\Day.cshtml" />
     <Content Include="Views\Calendar\List.cshtml" />
+    <Content Include="Views\Maintenance\EditRoom.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

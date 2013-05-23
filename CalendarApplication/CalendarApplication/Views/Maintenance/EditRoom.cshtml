@@ -1,0 +1,18 @@
+﻿@model CalendarApplication.Models.Event.Room
+
+@{
+    ViewBag.Title = "EditRoom";
+}
+
+<h2>@(Model.ID != -1 ? "Edit Room Name" : "Create Room")</h2>
+
+<h3 style="color:red">@TempData["errorMsg"]</h3>
+@using (Html.BeginForm(new { ReturnUrl = ViewBag.ReturnUrl }))
+{
+    @Html.HiddenFor(model => Model.ID)
+    <b>@Html.LabelFor(model => Model.Name)</b><br />
+    @Html.EditorFor(model => Model.Name)
+    @Html.ValidationMessageFor(model => Model.Name)
+    <br />
+    <input type="submit"  name="id"  value="@(Model.ID != -1 ? "Save changes" : "Create Room")"/>
+}

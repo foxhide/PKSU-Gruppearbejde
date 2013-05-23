@@ -37,19 +37,19 @@ namespace CalendarApplication.Database
                     cmd.Prepare();
                     int id = Convert.ToInt32(cmd.ExecuteScalar());
 
-                    groupmodel.ID = id;
+                    cmd.CommandText = "INSERT INTO groupmembers (groupId, userId, groupLeader, canCreate) VALUES (@groupId, @userId, @groupLeader, @canCreate)";
+                    cmd.Parameters.AddWithValue("@groupId", groupmodel.ID);
+                    cmd.Parameters.AddWithValue("@userId", null);
+                    cmd.Parameters.AddWithValue("@groupLeader", 0);
+                    cmd.Parameters.AddWithValue("@canCreate", 0);
+                    cmd.Prepare();
 
                     for (int i = 0; i < groupmodel.groupMembers.Count; i++)
                     {
                         if (groupmodel.groupMembers[i].Selected)
                         {
-                            cmd.Parameters.Clear();
-                            cmd.CommandText = "INSERT INTO groupmembers (groupId, userId, groupLeader, canCreate) VALUES (@groupId, @userId, @groupLeader, @canCreate)";
-                            cmd.Parameters.AddWithValue("@groupId", groupmodel.ID);
-                            cmd.Parameters.AddWithValue("@userId", groupmodel.groupMembers[i].Value);
-                            cmd.Parameters.AddWithValue("@groupLeader", 0);
-                            cmd.Parameters.AddWithValue("@canCreate", 0);
-                            cmd.Prepare();
+                            
+                            cmd.Parameters["@userId"].Value = groupmodel.groupMembers[i].Value;
                             cmd.ExecuteNonQuery();
                         }
                     }
@@ -110,28 +110,33 @@ namespace CalendarApplication.Database
                     {
                         groupmodel.groupLeaders = new List<SelectListItem>();
                     }
-                    for (int i = 0; i < groupmodel.groupMembers.Count; i++)
+
+                    int memberSize = groupmodel.groupMembers.Count;
+                    int leaderSize = groupmodel.groupLeaders.Count;
+                    
+                    cmd.CommandText = "INSERT INTO groupmembers (groupId, userId, groupLeader, canCreate) VALUES (@groupId, @userId, @groupLeader, @canCreate)";
+                    cmd.Parameters.AddWithValue("@userId", null);
+                    cmd.Parameters.AddWithValue("@groupLeader", 0);
+                    cmd.Parameters.AddWithValue("@canCreate", 0);
+                    cmd.Prepare();
+
+                    for (int i = 0; i < memberSize; i++)
                     {
                         if (groupmodel.groupMembers[i].Selected)
                         {
-                            cmd.Parameters.Clear();
-                            cmd.CommandText = "INSERT INTO groupmembers (groupId, userId, groupLeader, canCreate) VALUES (@groupId, @userId, @groupLeader, @canCreate)";
-                            cmd.Parameters.AddWithValue("@groupId", groupmodel.ID);
-                            cmd.Parameters.AddWithValue("@userId", groupmodel.groupMembers[i].Value);
-                            cmd.Parameters.AddWithValue("@groupLeader", 0);
-                            cmd.Parameters.AddWithValue("@canCreate", 0);
-                            cmd.Prepare();
+                            cmd.Parameters["@userId"].Value = groupmodel.groupMembers[i].Value;
                             cmd.ExecuteNonQuery();
                         }
                     }
-                    for (int i = 0; i < groupmodel.groupLeaders.Count; i++)
+
+                    cmd.CommandText = "UPDATE groupmembers SET groupLeader = @groupLeader, canCreate = @canCreate WHERE userId = @userId";
+                    cmd.Prepare();
+
+                    for (int i = 0; i < leaderSize; i++)
                     {
-                        cmd.Parameters.Clear();
-                        cmd.CommandText = "UPDATE groupmembers SET groupLeader = @groupLeader, canCreate = @canCreate WHERE userId = @userId";
-                        cmd.Parameters.AddWithValue("@groupLeader", groupmodel.groupLeaders[i].Selected);
-                        cmd.Parameters.AddWithValue("@canCreate", groupmodel.groupLeaders[i].Selected || groupmodel.canCreate[i].Selected);
-                        cmd.Parameters.AddWithValue("@userId", groupmodel.groupLeaders[i].Value);
-                        cmd.Prepare();
+                        cmd.Parameters["@groupLeader"].Value = groupmodel.groupLeaders[i].Selected;
+                        cmd.Parameters["@canCreate"].Value = groupmodel.groupLeaders[i].Selected || groupmodel.canCreate[i].Selected;
+                        cmd.Parameters["@userId"].Value = groupmodel.groupLeaders[i].Value;
                         cmd.ExecuteNonQuery();
                     }
 

@@ -13,6 +13,17 @@
         document.getElementById("SubmitValue").value = subId;
     }
 
+    function deleteRoom() {
+        var c = confirm("Are you sure you want to delete this room? \nThis will permanently remove its association with all events.");
+        if (c == true) {
+            setSubmitValue(6)
+        }
+        else {
+            setSubmitValue(7)
+        }
+
+    }
+
 </script>
 
 @using (Html.BeginForm()) {
@@ -64,13 +75,13 @@
                 @Html.DropDownListFor(m => Model.SelectedRoom, new SelectList(Model.Rooms, "Value", "Text"))
             </td>
             <td>
-                <input type="submit" value="Create" onclick="setSubmitValue(4)" />
+                <input type="submit" value="Rename" onclick="setSubmitValue(4)" />
             </td>
             <td>
-                <input type="submit" value="Rename" onclick="setSubmitValue(5)" />
+                <input type="submit" value="Delete" onclick="deleteRoom()" />
             </td>
             <td>
-                <input type="submit" value="Delete" onclick="setSubmitValue(6)" />
+                <input type="submit" value="Create new" onclick="setSubmitValue(5)" />
             </td>
         </tr>
     </table>
