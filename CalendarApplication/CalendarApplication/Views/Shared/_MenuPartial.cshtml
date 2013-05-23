@@ -7,16 +7,17 @@
         var curCtrl = ViewContext.Controller.ValueProvider.GetValue("controller").RawValue.ToString().ToLowerInvariant();
         <tr><td>
             @if(curActn != "" && curCtrl != "home") { @Html.ActionLink("Home", "", "Home") }
-            else { <b>Home</b> }
+            else { <b>@Html.ActionLink("Home", "", "Home")</b> }
         </td></tr>
         <tr><td>
             @if(curActn != "" && curCtrl != "calendar") {
                 @Html.ActionLink("Calendar", "Index", "Calendar", Calendar.InitialView, null)
             }
-            else { <b>Calendar</b> }
+            else { <b>@Html.ActionLink("Calendar", "Index", "Calendar", Calendar.InitialView, null)</b> }
         </td></tr>
         if(UserModel.GetCurrentUserID() != -1)
         {
+        
             <tr>
                 <td>
                     @if (curActn != "" && curCtrl != "user")
@@ -25,11 +26,23 @@
                     }
                     else
                     {
-                        <b>Profile</b>
+                        <b>@Html.ActionLink("Profile", "Index", "User", new { userId = UserModel.GetCurrentUserID() }, null)</b>
                     }
                 </td>
             </tr>
-            
+        
+            <tr>
+                <td>
+                    @if (curActn != "" && curCtrl != "group")
+                    {
+                        @Html.ActionLink("Groups", "Index", "GroupView", null, null)
+                    }
+                    else
+                    {
+                        <b>@Html.ActionLink("Groups", "Index", "GroupView", null, null)</b>
+                    }
+                </td>
+            </tr>
             if(UserModel.GetCurrent().Admin) //Only admins may access the maintenance page
             {
                 if(curActn != "" && curCtrl != "maintenance") {
@@ -40,9 +53,15 @@
                     </tr>   
                 }
                 else {
-                    <tr><td><b>Maintenance</b></td></tr>
+                    <tr><td><b>@Html.ActionLink("Maintenance","Index","Maintenance",null,null)</b></td></tr>
                 }
             }
         }
+        
+        <tr>
+                <td>
+                    @Html.ActionLink("About", "About", "Home", null, null)
+                </td>
+            </tr>
     }
 </table>
