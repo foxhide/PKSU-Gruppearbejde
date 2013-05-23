@@ -1,0 +1,26 @@
+﻿@model CalendarApplication.Models.Calendar.Calendar
+
+@using CalendarApplication.Models.Event;
+
+<fieldset>
+    <legend>Filter</legend>
+        <b>Event States:</b><br />
+        @Html.CheckBoxFor(model => Model.Filter.ViewState0)
+        <span style="color:@BasicEvent.getColor(0)">@BasicEvent.getStateText(0)</span><br />
+        @Html.CheckBoxFor(model => Model.Filter.ViewState1)
+        <span style="color:@BasicEvent.getColor(1)">@BasicEvent.getStateText(1)</span><br />
+        @Html.CheckBoxFor(model => Model.Filter.ViewState2)
+        <span style="color:@BasicEvent.getColor(2)">@BasicEvent.getStateText(2)</span><br />
+
+        <b>Event Types:</b><br />
+        @for (int i = 0; i < Model.Filter.Eventtypes.Count; i++)
+        {
+            <div>
+                @Html.HiddenFor(model => Model.Filter.Eventtypes[i].ID)
+                @Html.HiddenFor(model => Model.Filter.Eventtypes[i].Name)
+                @Html.CheckBoxFor(model => Model.Filter.Eventtypes[i].Selected)
+                @Model.Filter.Eventtypes[i].Name
+            </div>
+        }
+<input type="submit" value="Go"/>
+</fieldset>

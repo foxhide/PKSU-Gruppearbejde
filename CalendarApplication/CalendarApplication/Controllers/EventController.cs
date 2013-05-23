@@ -348,6 +348,12 @@ namespace CalendarApplication.Controllers
                 TempData["errorMsg"] = "The event must have a Name!";
                 req = true;
             }
+            // Check for type
+            else if (eem.SelectedEventType.Equals("0"))
+            {
+                TempData["errorMsg"] = "The event must have a type!";
+                req = true;
+            }
 
             // Check for TypeSpecifics
             if (eem.TypeSpecifics != null && !req)

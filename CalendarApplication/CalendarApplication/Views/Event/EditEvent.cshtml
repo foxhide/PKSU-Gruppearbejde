@@ -33,7 +33,8 @@
                 @Html.LabelFor(m => m.SelectedEventType)
                 @Html.DropDownListFor(m => Model.SelectedEventType,
                                         new SelectList(Model.EventTypes, "Value", "Text"),
-                                        new { onchange="getSpecifics(this.value)" })
+                                        new { onchange="{ getSpecifics(this.value); updateSelf('SelectedEventType','Type') }" })
+                <div class="validation-summary-errors" id="SelectedEventType_Error"></div>
                 <br />
                 <br />
                 
@@ -64,7 +65,8 @@
                         @Html.Partial("EventSpecificList",Model)
                     }
                 </div>
-                <input type="button" value="Create event" onclick="if (checkCreate()) { this.form.submit() }"/>
+                <input type="button" value="@(Model.ID == -1 ? "Create event" : "Save changes")"
+                        onclick="if (checkCreate()) { this.form.submit() }"/>
             </td>
             <td>
                 <fieldset>

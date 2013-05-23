@@ -1,0 +1,146 @@
+/**************************************************/
+/*                Monthly view                    */
+/**************************************************/
+
+/* A month square in monthly view */
+table.calendar {
+    border:1px solid black;
+}
+table.calendar th {
+    font-weight:bold;
+}
+td.calendar-month {
+    background-color:white;
+    text-align:left;
+    vertical-align:top;
+    padding:0;
+    width:100px;
+    height:80px;
+    border:1px solid black;
+}
+
+/* The little black square with the number in monthly view */
+td.calendar-date-number {
+    text-align:center;
+    vertical-align:top;
+    padding:0;
+    font-size:14px;
+    width:8px;
+    background-color:black;
+    color:white;
+    cursor: pointer;
+}
+
+/* Event pop-ups in monthly view */
+table.event-popup {
+    padding:0;
+    background-color:#EBEBEB;
+    border:solid 1px black;
+    border-collapse:collapse;
+}
+table.event-popup td {
+    padding:0;
+    padding-left:2px;
+    padding-right:2px;
+}
+
+/**************************************************/
+/*                 Daily view                     */
+/**************************************************/
+table.day-view {
+    border-collapse:collapse;
+    border-bottom:solid 1px black;
+}
+table.day-view th {
+    padding:0;
+    height:40px;
+    width:100px;
+    font-weight:bold;
+    text-align:center;
+    vertical-align:middle;
+    border:solid 1px black;
+}
+table.day-view tr td {
+    border:solid 1px black;
+    padding:0;
+    height:14px;
+}
+table.day-view td.timestamp {
+    background-color:lightgrey;
+    text-align:right;
+    width:50px;
+    height:28px;
+    padding-right:3px;
+    border-top:solid 1px #BDBDBD;
+    border-bottom:none;
+    border-left:none;
+}
+table.day-view td.row {
+    background-color:lightgrey;
+    border-bottom:solid 1px #BDBDBD;
+    border-top:solid 1px #BDBDBD;
+}
+
+div.day-event {
+    text-align:center;
+    vertical-align:middle;
+}
+
+/**************************************************/
+/*                  List view                     */
+/**************************************************/
+
+/* Navigator panel */
+table.navigator {
+    border:double 3px grey;
+    border-collapse:collapse;
+}
+table.navigator tr td {
+    width:28px;
+    height:28px;
+    text-align:center;
+    vertical-align:middle;
+    border:solid 1px grey;
+    padding:3px;
+    background-color:lightgrey;
+    cursor:pointer;
+}
+table.navigator tr td:hover {
+    color:white;
+    background-color:black;
+}
+/* Selected number in navigator */
+table.navigator td.selected {
+    color:black;
+    background-color:darkgrey;
+    cursor:text;
+}
+table.navigator td.selected:hover {
+    color:black;
+    background-color:darkgrey;
+}
+
+/* Style for the list of events */
+table.event-list {
+    border:double 3px grey;
+    border-collapse:collapse;
+}
+table.event-list tr td {
+    text-align:left;
+    vertical-align:middle;
+    border:solid 1px grey;
+    padding:5px;
+}
+/* Clickable table headers for sorting */
+table.event-list th {
+    text-align:left;
+    vertical-align:middle;
+    border:solid 1px grey;
+    background-color:lightgrey;
+    font-weight:bold;
+    cursor:pointer;
+}
+table.event-list th:hover {
+    background-color:black;
+    color:white;
+}
