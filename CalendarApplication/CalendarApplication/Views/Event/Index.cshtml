@@ -123,11 +123,11 @@ else {
     }
 
     <script>
-        function printEvent(id) {
+        function printEvent(eventId) {
             $.ajax({
                 url: "/Event/PrintEvent",
                 type: 'POST',
-                data: { id: id },
+                data: { eventId: eventId },
                 success: function (result) { window.open(result); }
             });
         }
