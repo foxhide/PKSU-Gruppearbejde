@@ -14,7 +14,7 @@ DROP TABLE IF EXISTS `pksudb`.`users` ;
 CREATE  TABLE IF NOT EXISTS `pksudb`.`users` (
   `userId` INT NOT NULL AUTO_INCREMENT ,
   `userName` VARCHAR(45) NOT NULL ,
-  `password` VARCHAR(45) NOT NULL ,
+  `password` VARCHAR(70) NOT NULL ,
   `realName` VARCHAR(45) NOT NULL ,
   `admin` TINYINT(1) NULL DEFAULT 0 ,
   `email` VARCHAR(45) NULL DEFAULT NULL ,

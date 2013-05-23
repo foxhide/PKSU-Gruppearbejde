@@ -31,16 +31,16 @@ namespace CalendarApplication.Controllers
             if (UserModel.GetCurrentUserID() != -1) { return RedirectToAction("Index", "Home", null); }
 
             CustomQuery query = new CustomQuery();
-            query.Cmd = "SELECT userId,needsApproval,active FROM pksudb.users WHERE userName = @usrnam AND password = @passw";
-            query.ArgNames = new string[] { "@usrnam" , "@passw" };
-            query.Args = new object[] { login.UserName , login.Password };
+            query.Cmd = "SELECT userId,needsApproval,active,password FROM pksudb.users WHERE userName = @usrnam";
+            query.ArgNames = new string[] { "@usrnam" };
+            query.Args = new object[] { login.UserName };
             MySqlConnect con = new MySqlConnect();
             DataTable table = con.ExecuteQuery(query);
 
             if (table != null)
             {
                 DataRowCollection rows = table.Rows;
-                if (rows.Count == 1)
+                if (rows.Count == 1 && PasswordHashing.ValidatePassword(login.Password, (string)rows[0]["password"]))
                 {
                     // User found
                     if ((bool)rows[0]["needsApproval"])
@@ -97,7 +97,7 @@ namespace CalendarApplication.Controllers
         {
             // Check if user is logged in
             if (UserModel.GetCurrentUserID() != -1) { return RedirectToAction("Index", "Home", null); }
-
+            
             MySqlUser msu = new MySqlUser();
             int userId = msu.CreateUser(model);
             if (userId >= 0)
@@ -106,6 +106,7 @@ namespace CalendarApplication.Controllers
                 return RedirectToAction("Index", "Home", null);
             }
             TempData["message"] = "There was an error processing your information. Please try again.";
+            
             return View();
         }
 
@@ -131,7 +132,7 @@ namespace CalendarApplication.Controllers
                 result.UserName = (string)row["userName"];
                 result.RealName = (string)row["realName"];
                 result.Admin = (bool)row["admin"];
-                result.Email = (string)row["email"];
+                result.Email = row["email"] is DBNull ? "" : (string)row["email"];
             }
             else
             {

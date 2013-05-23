@@ -37,7 +37,7 @@ namespace CalendarApplication.Controllers
                 //result.Password = (string)row["password"];
                 result.RealName = (string)row["realName"];
                 result.Admin = (bool)row["admin"];
-                result.Email = (string)row["email"];
+                result.Email = row["email"] is DBNull ? "None" : (string)row["email"];
                 result.Active = (bool)row["active"];
                 //result.NeedsApproval = (bool)row["needsApproval"];
                 result.Groups = UserModel.GetGroups(userId);

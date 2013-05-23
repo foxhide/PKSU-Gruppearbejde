@@ -30,8 +30,9 @@ namespace CalendarApplication.Database
                     cmd.Transaction = mst;
 
                     cmd.CommandText = insert;
+                    string hashedPassword = PasswordHashing.CreateHash(data.Password);
                     cmd.Parameters.AddWithValue("@username", data.UserName);
-                    cmd.Parameters.AddWithValue("@password", data.Password);
+                    cmd.Parameters.AddWithValue("@password", hashedPassword);
                     cmd.Parameters.AddWithValue("@realname", data.RealName);
                     cmd.Parameters.AddWithValue("@email", data.Email);
                     cmd.Prepare();

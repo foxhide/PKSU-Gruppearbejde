@@ -9,13 +9,13 @@ INSERT INTO rooms (roomName) VALUES ("Room 7");
 
 -- Users
 INSERT INTO users (userName, password, realName, admin, email, active, needsApproval)
-	VALUES ("johan_the_man","johanersej","Johan", 1,"johan@stengade.dk",1,0);
+	VALUES ("johan_the_man","1000:40fMt+KjU9BuxnAzB30T7iD7AxGRn08Z:Iumz5ozS0aTrq+OzbkugeXsl1pNIWoiT","Johan", 1,"johan@stengade.dk",1,0);
 INSERT INTO users (userName, password, realName, admin, email, active, needsApproval)
-	VALUES ("andreas_PKSU","andreasercool","Andreas", 1,"andreas@stengade.dk",1,0);
+	VALUES ("andreas_PKSU","1000:WJ5Ayds/Y/ppFJQUabbWiBZqxF+EDQg4:+8y/SwqlBVsAww1mvN2wC9a5JIKxhBP7","Andreas", 1,"andreas@stengade.dk",1,0);
 INSERT INTO users (userName, password, realName, admin, email, active, needsApproval)
-	VALUES ("stephan_kerbal","kerbaltillinux","Stephan", 1,"stephan@stengade.dk",1,0);
+	VALUES ("stephan_kerbal","1000:9Fmy1xBY2YVGGNcNcSVuN9SZoukPehdL:0hVUB/TjHtnGIqpl1CXggrkcDkciHwpW","Stephan", 1,"stephan@stengade.dk",1,0);
 INSERT INTO users (userName, password, realName, admin, email, active, needsApproval)
-	VALUES ("bill123","kerbal","Bill", 0,"bill@kerbal.kb",1,0);
+	VALUES ("bill123","1000:isl+vj+KMCRz1AB3fWiB5g1z0ESC/JKe:IJ0ibpJ8nm5tlxtZhkwN/fCTsORR+vM1","Bill", 0,"bill@kerbal.kb",1,0);
 
 -- Groups
 INSERT INTO groups (groupName) VALUES ("Poker players");
