@@ -1,40 +1,112 @@
 ﻿@model CalendarApplication.Models.Calendar.CalendarList
 
-@using System;
-@using System.Data;
-@using CalendarApplication.Models.Calendar;
+@{
+    ViewBag.Title = "List";
+}
+
 @using CalendarApplication.Models.Event;
+@using CalendarApplication.Models.Calendar;
 
-<h2>Listing events from <i>@(Model.Start.ToString("d. MMM yyyy"))</i>
-                     to <i>@(Model.End.ToString("d. MMM yyyy"))</i></h2>
+<script src="@Url.Content("~/Scripts/calendar-script.js")" type="text/javascript"></script>
+<link href="@Url.Content("~/Content/Calendar.css")" rel="stylesheet" type="text/css" />
 
-<table border="1">
-    <tr>
-        <td><b>Event Name</b></td>   <td><b>Starting</b></td>    <td><b>Ending</b></td>  <td><b>Created by:</b></td>
-        <td><b>Event Type</b></td>   <td><b>State</b></td>
-    </tr>
-    @foreach (BasicEvent ev in Model.Events) {
+<h3 style="color:red">@TempData["errorMsg"]</h3>
+
+<form id="list_form" method="post">
+    @Html.HiddenFor(model => model.EventFrom)
+    @Html.HiddenFor(model => model.OldLimit)
+    @Html.HiddenFor(model => model.Order)
+    @Html.HiddenFor(model => model.Descending)
+    <table>
         <tr>
             <td>
-                @Html.ActionLink((ev.Name.Length > 10 ? ev.Name.Substring(0,8)+"..." : ev.Name), "Index", "Event", new { id = ev.ID }, null)
+                <fieldset id="search">
+                    <legend>Search</legend>
+
+                    <table id="dates">
+                        <tr>
+                            <td id="from">
+                                From date: <br />
+                                @Html.DateTimeEditorFor(model => model.Start)
+                            </td>
+                            <td id="all">
+                                Show all events:
+                                @Html.CheckBoxFor(model => model.All)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td id="to">
+                                To Date: <br />
+                                @Html.DateTimeEditorFor(model => model.End)
+                            </td>
+                        </tr>
+                    </table>
+
+                    <table id="limit">
+                        <tr>
+                            <td>Results pr. page: 
+                                <select name="Limit">
+                                    @foreach (int limit in CalendarList.LIMITS)
+                                    {
+                                    <option value="@limit" @(limit == Model.Limit ? "selected='selected'":"")>@limit</option>
+                                    }
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+    
+                    <input type="submit" value="Search" />
+                </fieldset>
             </td>
             <td>
-                @Html.DisplayFor(modelItem => ev.Start)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => ev.End)
-            </td>
-            <td>
-                <!-- Html.DisplayFor(modelItem => ev.Creator) -->
-                @Html.ActionLink(ev.Creator, "Index", "User", new { UserId = ev.CreatorId }, null)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => ev.TypeName)
-            </td>
-            <td style="background-color:@(ev.getColor())">
-                @ev.getStateText()
+                @Html.Partial("_FilterPartial", Model)
             </td>
         </tr>
-    }
+        <tr>
+            <td colspan="2">
+                <h3>Showing events @(Model.EventFrom+1)-@(Model.EventFrom+Model.Limit > Model.TotalEventCount ?
+                                                            Model.TotalEventCount : Model.EventFrom+Model.Limit)
+                    out of a total of @Model.TotalEventCount!</h3>
 
-</table>
+                <table class="navigator" id="navi-high">
+                    <tr>
+                        <td onclick="gotoOtherPage(@(Model.EventFrom-Model.Limit < 0 ? 0 : Model.EventFrom-Model.Limit))"><-</td>
+                        @for (int i = 0; Model.TotalEventCount > 0 && i <= (Model.TotalEventCount-1) / Model.Limit; i++)
+                        {
+                            int gotoVal = i * Model.Limit;
+                            if(gotoVal != Model.EventFrom) { <td  onclick="gotoOtherPage(@(gotoVal))">@(i+1)</td> }
+                            else { <td class="selected">@(i+1)</td> }
+                        }
+                        <td onclick="gotoOtherPage(@(Model.EventFrom+Model.Limit > Model.TotalEventCount
+                                                    ? Model.TotalEventCount
+                                                    : Model.EventFrom+Model.Limit))">-></td>
+                    </tr>
+                </table>
+
+                <br />
+
+                <table class="event-list" id ="list">
+                    <tr>
+                        <th onclick="sortBy('NAME')">Event name</th>
+                        <th onclick="sortBy('TYPE')">Type</th>
+                        <th onclick="sortBy('CREATOR')">Creator</th>
+                        <th onclick="sortBy('START')">Starting</th>
+                        <th onclick="sortBy('END')">Ending</th>
+                        <th onclick="sortBy('STATE')">State</th>
+                    </tr>
+                    @foreach (BasicEvent e in Model.Events)
+                    {
+                        <tr>
+                            <td>@Html.ActionLink(e.Name, "Index", "Event", new { eventId = e.ID }, null)</td>
+                            <td>@e.TypeName</td>
+                            <td>@Html.ActionLink(e.Creator, "Index", "User", new { userId = e.CreatorId }, null)</td>
+                            <td>@e.Start</td>
+                            <td>@e.End</td>
+                            <td style="background-color:@e.getColor()">@e.getStateText()</td>
+                        </tr>
+                    }
+                </table>
+            </td>
+        </tr>
+    </table>
+</form>

@@ -16,5 +16,9 @@ namespace CalendarApplication.Controllers
             return View();
         }
 
+        public ActionResult About()
+        {
+            return View();
+        }
     }
 }

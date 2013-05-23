@@ -125,6 +125,7 @@ function createDatePicker(name,compare) {
 
 /* Function for updating times in datepickers */
 function getRange(cmpStr) {
+    if (cmpStr == "") { return {}; }
     var compareArr = cmpStr.split(",");
     var maxDate = null;
     var minDate = null;

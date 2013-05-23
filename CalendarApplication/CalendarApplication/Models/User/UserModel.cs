@@ -128,15 +128,53 @@ namespace CalendarApplication.Models.User
         /// </summary>
         /// <param name="ID">ID for the user</param>
         /// <returns>Events created by the user with id = ID</returns>
-        public static List<BasicEvent> GetEvents(int ID)
+        public static List<BasicEvent> GetEvents(int userId)
         {
             List<BasicEvent> result = new List<BasicEvent>();
             string[] argnames = { "@userId" };
-            object[] args = { ID };
+            object[] args = { userId };
+
+            int currentUser = UserModel.GetCurrentUserID();
+            
+            string command;
+            if (currentUser == -1)
+            {
+                // No user -> only visible events
+                command = "SELECT eventId,eventName,state"
+                            + "FROM (events NATURAL JOIN users NATURAL JOIN eventtypes)"
+                            + "WHERE userId = @userId AND visible = 1 ORDER BY eventStart";
+            }
+            else if (currentUser == userId || UserModel.GetCurrent().Admin)
+            {
+                // User is looking at his/her own events or user is admin
+                command = "SELECT eventId,eventName,state"
+                            + " FROM (events NATURAL JOIN users NATURAL JOIN eventtypes)"
+                            + " WHERE userId = @userId ORDER BY eventStart";
+            }
+            else
+            {
+                // Check if user in edit-group/user or visible-group or if event is visible.
+                command = "SELECT e.eventId, e.eventName, e.state"
+                                + " FROM pksudb.events AS e"
+                                + " LEFT JOIN (SELECT eventId,userId"
+                                + " FROM eventeditorsusers"
+                                + " WHERE userId = @uid) AS edt_user ON e.eventId = edt_user.eventId"
+                                + " LEFT JOIN (SELECT eventId,userId"
+                                + " FROM eventvisibility NATURAL JOIN groupmembers"
+                                + " WHERE userId = @uid) AS vis_group ON e.eventId = vis_group.eventId"
+                                + "	LEFT JOIN (SELECT eventId,userId"
+                                + " FROM eventeditorsgroups NATURAL JOIN groupmembers"
+                                + "	WHERE userId = @uid) AS edt_group ON e.eventId = edt_group.eventId"
+                                + " WHERE e.userId = @userId AND (visible = 1 OR edt_group.userId IS NOT NULL"
+                                + " OR edt_user.userId IS NOT NULL OR vis_group.userId IS NOT NULL)"
+                                + " ORDER BY eventStart";
+                argnames = new[] { "@userId", "@uid" };
+                args = new[] { (object)userId, (object)currentUser };
+            }
+
             CustomQuery query = new CustomQuery
             {
-                Cmd = "SELECT * FROM (events NATURAL JOIN users NATURAL JOIN eventtypes) " +
-                      "WHERE userId = @userId ORDER BY eventStart",
+                Cmd = command,
                 ArgNames = argnames,
                 Args = args
             };
@@ -150,11 +188,6 @@ namespace CalendarApplication.Models.User
                         {
                             ID = (int)dt["eventId"],
                             Name = (string)dt["eventName"],
-                            Creator = (string)dt["username"],
-                            CreatorId = (int)dt["userId"],
-                            TypeName = (string)dt["eventTypeName"],
-                            Start = (DateTime)dt["eventStart"],
-                            End = (DateTime)dt["eventEnd"],
                             State = (int)dt["state"]
                         });
                 }
@@ -170,36 +203,49 @@ namespace CalendarApplication.Models.User
         /// <returns>True if view is allowed, otherwise false</returns>
         public static bool ViewAuthentication(int eventId, int userId)
         {
-            if (userId == -1) { return false; }
-
-            string command = "SELECT e.visible,e.userId,vis_group.userId AS group_vis,"
-                                + "edt_group.userId AS group_edt, edt_user.userId AS user_edt"
-                                + " FROM pksudb.events AS e"
-                                + " LEFT JOIN (SELECT eventId,userId"
-                                + " FROM eventeditorsusers"
-                                + " WHERE userId = @uid) AS edt_user ON e.eventId = edt_user.eventId"
-                                + " LEFT JOIN (SELECT eventId,userId"
-                                + " FROM eventvisibility NATURAL JOIN groupmembers"
-                                + " WHERE userId = @uid) AS vis_group ON e.eventId = vis_group.eventId"
-                                + "	LEFT JOIN (SELECT eventId,userId"
-                                + " FROM eventeditorsgroups NATURAL JOIN groupmembers"
-                                + "	WHERE userId = @uid) AS edt_group ON e.eventId = edt_group.eventId"
-                                + " WHERE e.eventId = @eid";
-
             MySqlConnect msc = new MySqlConnect();
-            CustomQuery query = new CustomQuery
+            if (userId == -1)
             {
-                Cmd = command,
-                ArgNames = new[] { "@eid", "@uid" },
-                Args = new[] { (object)eventId, (object)userId }
-            };
-            DataTable dt = msc.ExecuteQuery(query);
-            if (dt == null || dt.Rows.Count == 0) { return false; }
-            return (bool)dt.Rows[0]["visible"]
-                    || (int)dt.Rows[0]["userId"] == userId
-                    || !(dt.Rows[0]["group_vis"] is DBNull)
-                    || !(dt.Rows[0]["group_edt"] is DBNull)
-                    || !(dt.Rows[0]["user_edt"] is DBNull);
+                CustomQuery checkVisibility = new CustomQuery
+                {
+                    Cmd = "SELECT visible FROM pksudb.events WHERE userId = @uid",
+                    ArgNames = new[] { "@uid" },
+                    Args = new[] { (object)userId }
+                };
+                DataTable d = msc.ExecuteQuery(checkVisibility);
+                return d != null && d.Rows.Count == 1 && (bool)d.Rows[0]["visible"];
+            }
+            else
+            {
+                string command = "SELECT e.visible,e.userId,vis_group.userId AS group_vis,"
+                                    + "edt_group.userId AS group_edt, edt_user.userId AS user_edt"
+                                    + " FROM pksudb.events AS e"
+                                    + " LEFT JOIN (SELECT eventId,userId"
+                                    + " FROM eventeditorsusers"
+                                    + " WHERE userId = @uid) AS edt_user ON e.eventId = edt_user.eventId"
+                                    + " LEFT JOIN (SELECT eventId,userId"
+                                    + " FROM eventvisibility NATURAL JOIN groupmembers"
+                                    + " WHERE userId = @uid) AS vis_group ON e.eventId = vis_group.eventId"
+                                    + "	LEFT JOIN (SELECT eventId,userId"
+                                    + " FROM eventeditorsgroups NATURAL JOIN groupmembers"
+                                    + "	WHERE userId = @uid) AS edt_group ON e.eventId = edt_group.eventId"
+                                    + " WHERE e.eventId = @eid";
+
+                CustomQuery query = new CustomQuery
+                {
+                    Cmd = command,
+                    ArgNames = new[] { "@eid", "@uid" },
+                    Args = new[] { (object)eventId, (object)userId }
+                };
+                DataTable dt = msc.ExecuteQuery(query);
+                if (dt == null || dt.Rows.Count == 0) { return false; }
+                return (bool)dt.Rows[0]["visible"]
+                        || (int)dt.Rows[0]["userId"] == userId
+                        || !(dt.Rows[0]["group_vis"] is DBNull)
+                        || !(dt.Rows[0]["group_edt"] is DBNull)
+                        || !(dt.Rows[0]["user_edt"] is DBNull)
+                        || UserModel.GetCurrent().Admin;
+            }
         }
 
         /// <summary>
@@ -232,7 +278,8 @@ namespace CalendarApplication.Models.User
             if (dt == null || dt.Rows.Count == 0) { return false; }
             return (int)dt.Rows[0]["userId"] == userId
                     || !(dt.Rows[0]["group_edt"] is DBNull)
-                    || !(dt.Rows[0]["user_edt"] is DBNull);
+                    || !(dt.Rows[0]["user_edt"] is DBNull)
+                    || UserModel.GetCurrent().Admin;
         }
     }
 }

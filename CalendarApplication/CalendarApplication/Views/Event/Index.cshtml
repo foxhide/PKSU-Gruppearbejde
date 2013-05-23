@@ -119,7 +119,7 @@ else {
     </table>
     if(UserModel.EditAuthentication(Model.ID,UserModel.GetCurrentUserID()))
     {
-        @Html.ActionLink("Edit event", "EditEvent", "Event", new { id = Model.ID, year = 0, month = 0, day = 0 }, null)
+        @Html.ActionLink("Edit event", "EditEvent", "Event", new { eventId = Model.ID, year = 0, month = 0, day = 0 }, null)
     }
 
     <script>
