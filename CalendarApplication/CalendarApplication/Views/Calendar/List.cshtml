@@ -15,6 +15,8 @@
 <form id="list_form" method="post">
     @Html.HiddenFor(model => model.EventFrom)
     @Html.HiddenFor(model => model.OldLimit)
+    @Html.HiddenFor(model => model.Order)
+    @Html.HiddenFor(model => model.Descending)
     <table>
         <tr>
             <td>
@@ -85,19 +87,19 @@
 
                 <table class="event-list" id ="list">
                     <tr>
-                        <th>Event name</th>
-                        <th>Type</th>
-                        <th>Creator</th>
-                        <th>Starting</th>
-                        <th>Ending</th>
-                        <th>State</th>
+                        <th onclick="sortBy('NAME')">Event name</th>
+                        <th onclick="sortBy('TYPE')">Type</th>
+                        <th onclick="sortBy('CREATOR')">Creator</th>
+                        <th onclick="sortBy('START')">Starting</th>
+                        <th onclick="sortBy('END')">Ending</th>
+                        <th onclick="sortBy('STATE')">State</th>
                     </tr>
                     @foreach (BasicEvent e in Model.Events)
                     {
                         <tr>
-                            <td>@e.Name</td>
+                            <td>@Html.ActionLink(e.Name, "Index", "Event", new { id = e.ID }, null)</td>
                             <td>@e.TypeName</td>
-                            <td>@e.Creator</td>
+                            <td>@Html.ActionLink(e.Creator, "Index", "User", new { userId = e.CreatorId }, null)</td>
                             <td>@e.Start</td>
                             <td>@e.End</td>
                             <td style="background-color:@e.getColor()">@e.getStateText()</td>

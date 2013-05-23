@@ -4,6 +4,21 @@ function gotoOtherPage(from) {
     $('#list_form').submit();
 }
 
+/* Function for sorting */
+function sortBy(eventOrder) {
+    var old = $('#Order').val();
+    if (old == eventOrder) {
+        var desc = $('#Descending').val().toLowerCase() == "true";
+        $('#Descending').val(!desc);
+    }
+    else {
+        $('#Descending').val(false);
+    }
+    $('#Order').val(eventOrder);
+    $('#EventFrom').val(0);
+    $('#list_form').submit();
+}
+
 /* Function for navigating calendar (month and days).
    If date is of format yyyy-MM, the calendar month is
    shown. If it has format yyyy-MM-dd, the calendar day

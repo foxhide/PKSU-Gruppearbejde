@@ -7,6 +7,16 @@ using CalendarApplication.Models.Event;
 
 namespace CalendarApplication.Models.Calendar
 {
+    public enum EventOrder
+    {
+        START,
+        END,
+        TYPE,
+        NAME,
+        CREATOR,
+        STATE
+    }
+
     public class CalendarList : Calendar
     {
         // Allowed limits for the list
@@ -22,5 +32,8 @@ namespace CalendarApplication.Models.Calendar
         public int Limit { get; set; }
         public int OldLimit { get; set; }
         public int EventFrom { get; set; }
+
+        public EventOrder Order { get; set; }
+        public bool Descending { get; set; }
     }
 }

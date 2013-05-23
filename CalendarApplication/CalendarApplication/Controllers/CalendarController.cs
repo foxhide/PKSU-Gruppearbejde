@@ -83,7 +83,7 @@ namespace CalendarApplication.Controllers
             return RedirectToAction(action, new { date = date, state = state, types = types });
         }
 
-        public ActionResult List(string from, string to, string limit, string efrom, string state, string types)
+        public ActionResult List(string from, string to, string limit, string efrom, string state, string types, string order, string desc)
         {
             EventFilter f = this.GetFilter(state, types);
             DateTime dtFrom = from == null ? new DateTime(1,1,1) : this.parseString(from);
@@ -92,7 +92,14 @@ namespace CalendarApplication.Controllers
             int limitInt = limit == null ? 10 : Convert.ToInt32(limit);
             int efromInt = efrom == null ? 0 : Convert.ToInt32(efrom);
 
-            CalendarList cl = this.GetList(dtFrom, dtTo, f, limitInt, efromInt);
+            EventOrder eo = EventOrder.START;
+            if (order != null && Enum.IsDefined(typeof(EventOrder), order))
+            {
+                eo = (EventOrder)Enum.Parse(typeof(EventOrder), order, true);
+            }
+            bool descend = desc != null && desc.ToLower().Equals("true");
+
+            CalendarList cl = this.GetList(dtFrom, dtTo, f, limitInt, efromInt, eo, descend);
 
             cl.Filter = f;
             cl.Mode = CalendarMode.LIST;
@@ -127,7 +134,9 @@ namespace CalendarApplication.Controllers
                     limit = cl.Limit.ToString(),
                     efrom = from.ToString(),
                     state = state,
-                    types = types
+                    types = types,
+                    order = cl.Order,
+                    desc = cl.Descending.ToString()
                 });
             }
             else
@@ -139,7 +148,9 @@ namespace CalendarApplication.Controllers
                     limit = cl.Limit.ToString(),
                     efrom = from.ToString(),
                     state = state,
-                    types = types
+                    types = types,
+                    order = cl.Order,
+                    desc = cl.Descending.ToString()
                 });
             }
         }
@@ -213,7 +224,7 @@ namespace CalendarApplication.Controllers
             days = days % 7 > 0 ? days + (7 - days % 7) : days;
             first = first.AddDays(-before);
             
-            List<BasicEvent> events = this.GetEvents(f, first, first.AddDays(days),false);
+            List<BasicEvent> events = this.GetEvents(f, first, first.AddDays(days),false,EventOrder.START, false);
 
             for (int i = 0; i < days; i++)
             {
@@ -247,7 +258,7 @@ namespace CalendarApplication.Controllers
         {
             DateTime date = new DateTime(dateInput.Year, dateInput.Month, dateInput.Day);
             
-            List<BasicEvent> events = this.GetEvents(f, date, date.AddDays(1),true);
+            List<BasicEvent> events = this.GetEvents(f, date, date.AddDays(1),true,EventOrder.START, false);
 
             CalendarDay result = new CalendarDay
             {
@@ -269,12 +280,18 @@ namespace CalendarApplication.Controllers
             return result;
         }
 
-        private CalendarList GetList(DateTime dateFrom, DateTime dateTo, EventFilter f, int limit, int starting)
+        private CalendarList GetList(DateTime dateFrom,
+                                     DateTime dateTo,
+                                     EventFilter f,
+                                     int limit,
+                                     int starting,
+                                     EventOrder o,
+                                     bool desc)
         {
             DateTime start = dateFrom;
             DateTime end = dateTo;
 
-            List<BasicEvent> eventsFull = this.GetEvents(f,start,end,false);
+            List<BasicEvent> eventsFull = this.GetEvents(f,start,end,false,o,desc);
 
             // Sanity checks
             starting = starting < 0 || starting > eventsFull.Count ? 0 : starting;
@@ -308,7 +325,7 @@ namespace CalendarApplication.Controllers
         /// <param name="start">Starting date</param>
         /// <param name="end">Ending date</param>
         /// <returns>List of events</returns>
-        private List<BasicEvent> GetEvents(EventFilter f, DateTime start, DateTime end, bool day)
+        private List<BasicEvent> GetEvents(EventFilter f, DateTime start, DateTime end, bool day, EventOrder order, bool desc)
         {
             string select = "SELECT e.eventId,e.userId,u.userName,e.eventTypeId,e.eventName,e.eventStart,"
                             + "e.eventEnd,e.state,e.visible,et.eventTypeName";
@@ -373,7 +390,19 @@ namespace CalendarApplication.Controllers
             }
             //If admin, show all events.
 
-            string query = select + " " + from + " " + where + " ORDER BY e.eventStart";
+            string query = select + " " + from + " " + where + " ORDER BY ";
+
+            switch (order)
+            {
+                case EventOrder.START: query += "e.eventStart"; break;
+                case EventOrder.END: query += "e.eventEnd"; break;
+                case EventOrder.NAME: query += "e.eventName"; break;
+                case EventOrder.TYPE: query += "et.eventTypeName"; break;
+                case EventOrder.STATE: query += "e.state"; break;
+                case EventOrder.CREATOR: query += "u.userName"; break;
+                default: query += "e.eventStart"; break;
+            }
+            if (desc) { query += " DESC"; }
 
             List<BasicEvent> events = new List<BasicEvent>();
 
