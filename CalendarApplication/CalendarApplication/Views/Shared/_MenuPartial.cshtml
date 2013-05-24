@@ -11,8 +11,10 @@
         <td @(curCtrl == "home" ? "class=selected" : "")
             onmouseover="$('#home-drop').show()"
             onmouseout="$('#home-drop').hide()">
-            Home
-            <div id="home-drop" hidden="hidden">
+            <div class="box" onclick="gotoUrl('@Url.Action("","Home",null)')">
+                Home
+            </div>
+            <div class="drop" id="home-drop" hidden="hidden">
                 <table class="nav-bar-drop">
                     <tr>
                         <td @(curCtrl == "home" && (curActn == "" || curActn == "index") ? "class=selected" : "")
@@ -33,8 +35,10 @@
         <td  @(curCtrl == "calendar" ? "class=selected" : "")
             onmouseover="$('#calendar-drop').show()"
             onmouseout="$('#calendar-drop').hide()">
-            Calendar
-            <div id="calendar-drop" hidden="hidden">
+            <div class="box" onclick="gotoUrl('@Url.Action("","Calendar",null)')">
+                Calendar
+            </div>
+            <div class="drop" id="calendar-drop" hidden="hidden">
                 <table class="nav-bar-drop">
                     <tr>
                         <td @(curCtrl == "calendar" && curActn == "month" ? "class=selected" : "")
@@ -60,20 +64,26 @@
 
         @if(UserModel.GetCurrentUserID() != -1)
         {
-            <td  @(curCtrl == "user" || curCtrl == "account" ? "class=selected" : "")
+            int userId = Convert.ToInt32(Request.Params["userId"]);
+            <td  @((curCtrl == "user" || curCtrl == "account") &&
+                   userId == UserModel.GetCurrentUserID() ? "class=selected" : "")
                 onmouseover="$('#user-drop').show()"
                 onmouseout="$('#user-drop').hide()">
-                Profile
-                <div id="user-drop" hidden="hidden">
+                <div class="box" onclick="gotoUrl('@Url.Action("","User", new { userId = UserModel.GetCurrentUserID() })')">
+                    Profile
+                </div>
+                <div class="drop" id="user-drop" hidden="hidden">
                 <table class="nav-bar-drop">
                     <tr>
-                        <td @(curCtrl == "user" && curActn == "index" ? "class=selected" : "")
+                        <td @(curCtrl == "user" && curActn == "index" &&
+                            userId == UserModel.GetCurrentUserID() ? "class=selected" : "")
                             onclick="gotoUrl('@Url.Action("","User", new { userId = UserModel.GetCurrentUserID() })')">
                             View
                         </td>
                     </tr>
                     <tr>
-                        <td  @(curCtrl == "account" && curActn == "edituser" ? "class=selected" : "")
+                        <td  @(curCtrl == "account" && curActn == "edituser" &&
+                            userId == UserModel.GetCurrentUserID() ? "class=selected" : "")
                             onclick="gotoUrl('@Url.Action("EditUser","Account",  new { userId = UserModel.GetCurrentUserID() })')">
                             Edit
                         </td>
@@ -93,8 +103,10 @@
             <td  @(curCtrl == "maintenance" ? "class=selected" : "")
                 onmouseover="$('#maintenance-drop').show()"
                 onmouseout="$('#maintenance-drop').hide()">
-                Maintenance
-                <div id="maintenance-drop" hidden="hidden">
+                <div class="box" onclick="gotoUrl('@Url.Action("","Maintenance",null)')">
+                    Maintenance
+                </div>
+                <div class="drop" id="maintenance-drop" hidden="hidden">
                 <table class="nav-bar-drop">
                     <tr>
                         <td @(curCtrl == "maintenance" && (curActn == "index" ||curActn == "") ? "class=selected" : "")

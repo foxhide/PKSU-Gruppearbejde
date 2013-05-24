@@ -11,7 +11,7 @@
     
     <text>
         You may view upcoming events using the
-        @Html.ActionLink("calendar menu", "Index", "Calendar", Calendar.InitialView, null).<br />
+        @Html.ActionLink("calendar menu", "", "Calendar", null, null).<br />
         If you have an account, you may  
         @Html.ActionLink("log in", "Login", "Account", null, null)
         else you may create an account by @Html.ActionLink("registering", "Register", "Account", null, null).
@@ -22,7 +22,9 @@ else {
 
     <text>
         You may view upcoming events using the
-        @Html.ActionLink("calendar menu", "Index", "Calendar", Calendar.InitialView, null).<br />
+        @Html.ActionLink("calendar menu", "", "Calendar", null, null).<br />
+        Use the @Html.ActionLink("profile page", "", "User", new { userId = UserModel.GetCurrentUserID() }, null)
+        to view or edit your profile.
     </text>
     
 }
