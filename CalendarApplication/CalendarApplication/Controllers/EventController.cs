@@ -415,7 +415,7 @@ namespace CalendarApplication.Controllers
                 int id = mse.EditEvent(eem);
                 if (id > 0)
                 {
-                    return RedirectToAction("Index", "Event", new { id = id });
+                    return RedirectToAction("Index", "Event", new { eventId = id });
                 }
                 else
                 {

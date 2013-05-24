@@ -11,12 +11,12 @@ using CalendarApplication.Controllers;
 using CalendarApplication.Models.User;
 using CalendarApplication.Models.Group;
 using CalendarApplication.Database;
+using System.Windows.Forms;
 
 namespace CalendarApplication.Controllers
 {
     public class MaintenanceController : Controller
     {
-        public static int MAX_NUMBER_OF_FIELDS = 100;
 
         //
         // GET: /Maintenance/
@@ -91,9 +91,9 @@ namespace CalendarApplication.Controllers
             switch (mm.SubmitValue)
             {
                 //Edit event
-                case 0: return RedirectToAction("EditEventType", new { id = int.Parse(mm.SelectedEventType) });
+                case 0: return RedirectToAction("EditEventType", new { eventId = int.Parse(mm.SelectedEventType) });
                 //Create event
-                case 1: return RedirectToAction("EditEventType", new { id = -1 });
+                case 1: return RedirectToAction("EditEventType", new { eventId = -1 });
                 //Edit group
                 case 2: return RedirectToAction("EditGroup", new { groupId = int.Parse(mm.SelectedGroup) });
                 //Create group
@@ -192,7 +192,7 @@ namespace CalendarApplication.Controllers
         {
             // Check if user is logged in and is admin
             if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
-            else if (!UserModel.GetCurrent().Admin || !this.IsGroupLeader(groupId,UserModel.GetCurrentUserID()))
+            else if (!(!UserModel.GetCurrent().Admin || !this.IsGroupLeader(groupId,UserModel.GetCurrentUserID())))
             {
                 return RedirectToAction("Index", "Home", null);
             }
@@ -264,7 +264,7 @@ namespace CalendarApplication.Controllers
         {
             // Check if user is logged in and is admin
             if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
-            else if (!UserModel.GetCurrent().Admin || !this.IsGroupLeader(grm.ID, UserModel.GetCurrentUserID()))
+            else if (!(!UserModel.GetCurrent().Admin || !this.IsGroupLeader(grm.ID, UserModel.GetCurrentUserID())))
             {
                 return RedirectToAction("Index", "Home", null);
             }
