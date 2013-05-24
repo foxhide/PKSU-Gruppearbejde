@@ -35,9 +35,9 @@ namespace CalendarApplication.Controllers
                 DataRow row = table.Rows[0];
                 result.UserName = (string)row["userName"];
                 //result.Password = (string)row["password"];
-                result.RealName = (string)row["realName"];
+                result.RealName = row["realName"] is DBNull ? "Not available" : (string)row["realName"];
                 result.Admin = (bool)row["admin"];
-                result.Email = row["email"] is DBNull ? "None" : (string)row["email"];
+                result.Email = row["email"] is DBNull ? "Not available" : (string)row["email"];
                 result.Active = (bool)row["active"];
                 //result.NeedsApproval = (bool)row["needsApproval"];
                 result.Groups = UserModel.GetGroups(userId);

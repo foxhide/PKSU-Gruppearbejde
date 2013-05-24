@@ -45,7 +45,7 @@ namespace CalendarApplication.Models.User
             {
                 ID = ID,
                 UserName = (string)dt.Rows[0]["userName"],
-                RealName = (string)dt.Rows[0]["realName"],
+                RealName = dt.Rows[0]["realName"] as string,
                 Email = dt.Rows[0]["email"] as string,
                 Admin = (bool)dt.Rows[0]["admin"]
             };
@@ -208,9 +208,9 @@ namespace CalendarApplication.Models.User
             {
                 CustomQuery checkVisibility = new CustomQuery
                 {
-                    Cmd = "SELECT visible FROM pksudb.events WHERE userId = @uid",
-                    ArgNames = new[] { "@uid" },
-                    Args = new[] { (object)userId }
+                    Cmd = "SELECT visible FROM pksudb.events WHERE eventId = @eid",
+                    ArgNames = new[] { "@eid" },
+                    Args = new[] { (object)eventId }
                 };
                 DataTable d = msc.ExecuteQuery(checkVisibility);
                 return d != null && d.Rows.Count == 1 && (bool)d.Rows[0]["visible"];
