@@ -16,14 +16,128 @@ section {
 /* Classes for GUI
 -----------------------------------------------------------*/
 
-td.calendar-month {
-    background-color:white;
-    text-align:left;
-    vertical-align:top;
+/* Some basic layout */
+table {
+    margin: 0 auto;
+}
+th, td {
+    vertical-align: top;
+    padding: 10px;
+}
+body {
+    margin:0;
+}
+
+/* Classes for layout */
+table.layout-style-basic {
+    border-collapse:collapse;
+    height:100%;
+    width:100%;
+    margin:0;
     padding:0;
-    width:100px;
-    height:80px;
-    border-width:1px;
+}
+table.layout-style-basic td.layout-body {
+    padding-left:50px;
+}
+table.layout-style-basic tr.account-header {
+    background-color:lightgrey;
+    width:100%;
+    height:30px;
+    text-align:right;
+}
+table.layout-style-basic tr.nav-header {
+    background-color:black;
+    width:100%;
+    height:40px;
+    padding:0;
+}
+table.layout-style-basic tr.nav-header th {
+    padding:0;
+    margin:0 auto;
+    padding-left:30px;
+}
+
+table.nav-bar {
+    height:100%;
+    border-collapse:collapse;
+    margin:0;
+}
+table.nav-bar td {
+    background-color:black;
+    color:white;
+    border-left:3px grey solid;
+    border-right:3px grey solid;
+    cursor:pointer;
+    width:72px;
+    height:100%;
+    padding:0;
+    vertical-align:middle;
+    position:relative;
+    z-index:1;
+}
+table.nav-bar td:hover {
+    background-color:grey;
+    color:black;
+}
+table.nav-bar td.selected {
+    background-color:darkgrey;
+    color:black;
+}
+table.nav-bar td.selected:hover {
+    background-color:darkgrey;
+}
+table.nav-bar div {
+    position:absolute;
+    z-index:2;
+    width:78px;
+    top:40px;
+    left:-3px;
+}
+table.nav-bar-drop {
+    border-collapse:collapse;
+}
+table.nav-bar-drop td {
+    height:40px;
+}
+
+/* No-Script error */
+.no-script-error {
+    background-color:red;
+    border:double 3px black;
+    color:white;
+    width:400px;
+    margin:-100px 0 0 -200px;  
+    position:fixed;
+    z-index:100;
+    top:50%;
+    left:50%;
+    text-align:center;
+    vertical-align:central;
+    padding:30px;
+}
+
+/* gridtable - a table with a grid, used several places */
+table.gridtable {
+    font-family: verdana,arial,sans-serif;
+    font-size:11px;
+    color:#333333;
+    border-width: 1px;
+    border-color: #666666;
+    border-collapse: collapse;
+}
+table.gridtable th {
+    border-width: 1px;
+    padding: 8px;
+    border-style: solid;
+    border-color: #666666;
+    background-color: #dedede;
+}
+table.gridtable td {
+    border-width: 1px;
+    padding: 8px;
+    border-style: solid;
+    border-color: #666666;
+    background-color: #ffffff;
 }
 
 /* Used for the datetime editor */
