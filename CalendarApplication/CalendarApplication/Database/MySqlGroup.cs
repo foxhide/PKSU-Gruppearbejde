@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using MySql.Data.MySqlClient;
 
 using CalendarApplication.Models.Group;
+using System.Data;
 
 namespace CalendarApplication.Database
 {
@@ -72,6 +73,21 @@ namespace CalendarApplication.Database
                 //could not open connection
                 return false;
             }
+        }
+
+        public static GroupModel getGroup(int groupId)
+        {
+            GroupModel result = new GroupModel { ID = groupId };
+
+            MySqlConnect msc = new MySqlConnect();
+            string cmd = "SELECT * FROM groups WHERE groupId = @groupId";
+            string[] argnames = { "@groupId" };
+            object[] args = { groupId };
+            DataRow dr = msc.ExecuteQuery(new CustomQuery { Cmd = cmd, ArgNames = argnames, Args = args }).Rows[0];
+            
+            result.Name = (string)dr["groupName"];
+
+            return result;
         }
 
         /// <summary>

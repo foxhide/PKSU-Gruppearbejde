@@ -124,7 +124,7 @@ namespace CalendarApplication.Controllers
                                 else
                                 {
                                     fm.IntValue = (int)ds.Tables[0].Rows[0]["field_" + fm.ID];
-                                    fm.StringValue = "Group name not implemented until Andreas has made a GetGroup function...";
+                                    fm.StringValue = MySqlGroup.getGroup(fm.IntValue).Name;
                                 }
                                 break;
                             case Fieldtype.UserList:

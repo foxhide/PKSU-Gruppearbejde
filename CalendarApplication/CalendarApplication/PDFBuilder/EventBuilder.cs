@@ -10,6 +10,10 @@ using System.Text.RegularExpressions;
 using System.IO;
 
 using CalendarApplication.Models.Event;
+using CalendarApplication.Models.EventType;
+using CalendarApplication.Models.User;
+using CalendarApplication.Models.Group;
+using CalendarApplication.Database;
 
 namespace CalendarApplication.PDFBuilder
 {
@@ -57,10 +61,17 @@ namespace CalendarApplication.PDFBuilder
             return @"..\..\" + name + ".pdf";
         }
 
+        /// <summary>
+        /// Parse through template .tex file and insert all keywords at their respective positions
+        /// keyword syntax in template .tex file: ¤¤=keyword=option=option=¤¤
+        /// </summary>
+        /// <param name="evm">model of the event to be parsed</param>
+        /// <returns></returns>
         private static List<string> ParseFile(EventWithDetails evm)
         {
             string templatepath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Desktop\templates\";
             string[] lines;
+
             if (File.Exists(templatepath + evm.TypeName + ".tex"))
             {
                 lines = File.ReadAllLines(templatepath + evm.TypeName + ".tex");
@@ -73,21 +84,42 @@ namespace CalendarApplication.PDFBuilder
             for (int i = 0; i < lines.Length; i++)
             {
                 StringBuilder sb = new StringBuilder();
-                string[] tokens = Regex.Split(lines[i], "¤¤");
-                for (int j = 0; j < tokens.Length; j++)
+                if (Regex.Match(lines[i], "¤¤.*¤¤").Success)
                 {
-                    switch (tokens[j])
+                    string[] tokens = Regex.Split(lines[i], "¤¤");
+                    for (int j = 0; j < tokens.Length; j++)
                     {
-                        case "=eventname=":       sb.Append(evm.Name); break;
-                        case "=eventstart=":      sb.Append(evm.Start); break;
-                        case "=eventend=":        sb.Append(evm.End); break;
-                        case "=eventtype=":       sb.Append(evm.TypeName); break;
-                        case "=eventapproved=":   sb.Append(evm.Approved); break;
-                        case "=eventrooms=":      sb.Append(EventBuilder.ListRooms(evm)); break;
-                        default:                sb.Append(tokens[j]); break;
+                        string[] keys = tokens[j].Split('=');
+                        if (keys.Length == 1)
+                        {
+                            sb.Append(keys[0]);
+                        }
+                        else
+                        {
+                            switch (keys[1])
+                            {
+                                case "eventname": sb.Append(evm.Name); break;
+                                case "eventstart": sb.Append(evm.Start); break;
+                                case "eventend": sb.Append(evm.End); break;
+                                case "eventtype": sb.Append(evm.TypeName); break;
+                                case "eventapproved": sb.Append(evm.Approved); break;
+                                case "eventrooms": sb.Append(EventBuilder.ListRooms(evm)); break;
+                                case "eventcreator": sb.Append(evm.Creator); break;
+                                case "eventduration": sb.Append(evm.getDuration()); break;
+                                case "eventstatetext": sb.Append(evm.getStateText()); break;
+                                case "eventspecific":
+                                    if (keys.Length == 4)
+                                    { sb.AppendLine(EventBuilder.ListEventSpecific(evm, keys[2], false)); }
+                                    else if (keys.Length == 5)
+                                    { sb.AppendLine(EventBuilder.ListEventSpecific(evm, keys[2], bool.Parse(keys[3]))); }
+                                    break;
+                                case "": break;
+                                default: sb.Append(tokens[j]); break;
+                            }
+                        }
+                        lines[i] = sb.ToString();
                     }
                 }
-                lines[i] = sb.ToString();
             }
             return lines.OfType<string>().ToList();
         }
@@ -100,6 +132,72 @@ namespace CalendarApplication.PDFBuilder
                 result.AppendLine(evm.Rooms[i].Name + @"\\\hline ");
             }
             result.AppendLine(@"\end{tabular}");
+            return result.ToString();
+        }
+
+        private static string ListEventSpecific(EventWithDetails evm, string fieldname, bool fileappend)
+        {
+            StringBuilder result = new StringBuilder();
+            FieldModel fm = null;
+            for (int i = 0; i < evm.TypeSpecifics.Count; i++)
+            {
+                fm = evm.TypeSpecifics[i];
+                if (fieldname.Equals(evm.TypeSpecifics[i].Name)) { break; }
+                if (i == evm.TypeSpecifics.Count - 1) { return ""; }
+            }
+            switch (fm.Datatype)
+            {
+                case Fieldtype.Float: result.AppendLine(fm.FloatValue.ToString()); break;
+                case Fieldtype.Text: result.AppendLine(fm.StringValue); break;
+                case Fieldtype.Datetime: result.AppendLine(fm.DateValue.ToString()); break;
+                case Fieldtype.User: result.AppendLine(EventBuilder.printUser(UserModel.GetUser(fm.IntValue))); break;
+                case Fieldtype.Group: result.AppendLine(EventBuilder.printGroup(MySqlGroup.getGroup(fm.IntValue))); break;
+                case Fieldtype.File: result.AppendLine(fileappend ? @" \includepdf{" + fm.StringValue + "}" : fm.StringValue); break;
+                case Fieldtype.Bool: result.AppendLine(fm.BoolValue.ToString()); break;
+                case Fieldtype.UserList: for (int i = 0; i < fm.List.Count; i++)
+                                         {
+                                            result.AppendLine(EventBuilder.printUser(UserModel.GetUser(int.Parse(fm.List[i].Value))));
+                                         }
+                                         break;
+                case Fieldtype.GroupList: for (int i = 0; i < fm.List.Count; i++)
+                                          {
+                                              result.AppendLine(EventBuilder.printGroup(MySqlGroup.getGroup(int.Parse(fm.List[i].Value))));
+                                          }
+                                          break;
+                case Fieldtype.FileList: /*for (int i = 0; i < fm.List.Count; i++)
+                                         {
+                                             result.AppendLine(fileappend ? @"\includepdf{" + fm.List[i]. + "}" : fm.StringValue);
+                                         }
+                                         break;*/
+                default: return "";
+            }
+            return result.ToString();
+        }
+
+        public static string printUser(UserModel um)
+        {
+            StringBuilder result = new StringBuilder();
+
+            result.AppendLine(@"\begin{tabular}{|c|c|}\hline");
+            result.AppendLine(@"User Name & " + um.UserName + @"\\\hline");
+            result.AppendLine(@"Real Name & " + um.RealName + @"\\\hline");
+            result.AppendLine(@"Admin & " + um.Admin + @"\\\hline");
+            result.AppendLine(@"Active & " + um.Active + @"\\\hline");
+            result.AppendLine(@"Email & " + um.Email + @"\\\hline");
+            result.AppendLine(@"\end{tabular}");
+
+            return result.ToString();
+        }
+
+        public static string printGroup(GroupModel gm)
+        {
+            StringBuilder result = new StringBuilder();
+
+            result.AppendLine(@"\begin{tabular}{|c|}\hline");
+            result.AppendLine(@"Group Name\\\hline");
+            result.AppendLine(gm.Name + @"\\\hline");
+            result.AppendLine(@"\end{tabular}");
+
             return result.ToString();
         }
 
