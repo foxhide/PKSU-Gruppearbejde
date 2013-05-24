@@ -15,7 +15,7 @@
                 <div class="box" onclick="gotoUrl('@Url.Action("","Home",null)')">
                     Home
                 </div>
-                <div class="drop" id="home-drop" hidden="hidden">
+                <div class="drop" id="home-drop">
                     <table class="nav-bar-drop">
                         <tr>
                             <td @(curCtrl == "home" && (curActn == "" || curActn == "index") ? "class=selected" : "")
@@ -41,7 +41,7 @@
                 <div class="box" onclick="gotoUrl('@Url.Action("","Calendar",null)')">
                     Calendar
                 </div>
-                <div class="drop" id="calendar-drop" hidden="hidden">
+                <div class="drop" id="calendar-drop">
                     <table class="nav-bar-drop">
                         <tr>
                             <td @(curCtrl == "calendar" && curActn == "month" ? "class=selected" : "")
@@ -77,7 +77,7 @@
                     <div class="box" onclick="gotoUrl('@Url.Action("","User", new { userId = UserModel.GetCurrentUserID() })')">
                         Profile
                     </div>
-                    <div class="drop" id="user-drop" hidden="hidden">
+                    <div class="drop" id="user-drop">
                         <table class="nav-bar-drop">
                             <tr>
                                 <td @(curCtrl == "user" && curActn == "index" &&
@@ -113,7 +113,7 @@
                     <div class="box" onclick="gotoUrl('@Url.Action("","Maintenance",null)')">
                         Maintenance
                     </div>
-                    <div class="drop" id="maintenance-drop" hidden="hidden">
+                    <div class="drop" id="maintenance-drop">
                         <table class="nav-bar-drop">
                             <tr>
                                 <td @(curCtrl == "maintenance" && (curActn == "index" ||curActn == "") ? "class=selected" : "")
