@@ -10,6 +10,11 @@
 
 <h2>Login</h2>
 
+<!-- Print message if any (fx if unsuccessful login) -->
+<p style="color:red">
+    @TempData["message"]
+</p>
+
 <h2>Use a local account to log in.</h2>
 
 @using (Html.BeginForm(new { ReturnUrl = ViewBag.ReturnUrl })) {
@@ -36,12 +41,7 @@
         </ol>
         <input type="submit" value="Log in" />
     </fieldset>
-    
-    <!-- Print message if any (fx if unsuccessful login) -->
-    <p style="color:red">
-        @TempData["message"]
-    </p>
-    
+        
     <p>
        @Html.ActionLink("Register", "Register", "Account") if you don't have an account.
     </p>
