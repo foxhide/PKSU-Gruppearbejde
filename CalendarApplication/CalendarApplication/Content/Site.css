@@ -100,6 +100,22 @@ table.nav-bar-drop td {
     height:40px;
 }
 
+/* No-Script error */
+.no-script-error {
+    background-color:red;
+    border:double 3px black;
+    color:white;
+    width:400px;
+    margin:-100px 0 0 -200px;  
+    position:fixed;
+    z-index:100;
+    top:50%;
+    left:50%;
+    text-align:center;
+    vertical-align:central;
+    padding:30px;
+}
+
 /* gridtable - a table with a grid, used several places */
 table.gridtable {
     font-family: verdana,arial,sans-serif;
