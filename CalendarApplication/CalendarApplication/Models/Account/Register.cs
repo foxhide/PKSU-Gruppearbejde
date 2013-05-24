@@ -8,7 +8,7 @@ namespace CalendarApplication.Models.Account
 {
     public class Register
     {
-        [Required]
+        
         [StringLength(45, ErrorMessage = "The {0} field must be less than {1} characters long.")]
         [Display(Name = "Your real name")]
         public string RealName { get; set; }
