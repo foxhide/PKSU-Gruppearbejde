@@ -130,7 +130,7 @@ namespace CalendarApplication.Controllers
             {
                 DataRow row = table.Rows[0];
                 result.UserName = (string)row["userName"];
-                result.RealName = (string)row["realName"];
+                result.RealName = row["realName"] is DBNull ? "" : (string)row["realName"];
                 result.Admin = (bool)row["admin"];
                 result.Email = row["email"] is DBNull ? "" : (string)row["email"];
             }

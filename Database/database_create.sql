@@ -15,7 +15,7 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`users` (
   `userId` INT NOT NULL AUTO_INCREMENT ,
   `userName` VARCHAR(45) NOT NULL ,
   `password` VARCHAR(70) NOT NULL ,
-  `realName` VARCHAR(45) NOT NULL ,
+  `realName` VARCHAR(45) NULL DEFAULT NULL ,
   `admin` TINYINT(1) NULL DEFAULT 0 ,
   `email` VARCHAR(45) NULL DEFAULT NULL ,
   `active` TINYINT(1) NULL DEFAULT 0 ,
@@ -72,7 +72,7 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`events` (
   CONSTRAINT `eventTypeId`
     FOREIGN KEY (`eventTypeId` )
     REFERENCES `pksudb`.`eventtypes` (`eventTypeId` )
-    ON DELETE SET NULL
+    ON DELETE RESTRICT
     ON UPDATE NO ACTION)
 AUTO_INCREMENT = 1
 COMMENT = 'Table for events.\n\neventId: Integer as primary key to identi /* comment truncated */ /*fy each event uniquely
