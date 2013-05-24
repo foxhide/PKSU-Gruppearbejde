@@ -192,7 +192,7 @@ namespace CalendarApplication.Controllers
         {
             // Check if user is logged in and is admin
             if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
-            else if (!(!UserModel.GetCurrent().Admin || !this.IsGroupLeader(groupId,UserModel.GetCurrentUserID())))
+            else if (!(UserModel.GetCurrent().Admin || this.IsGroupLeader(groupId,UserModel.GetCurrentUserID())))
             {
                 return RedirectToAction("Index", "Home", null);
             }
@@ -264,7 +264,7 @@ namespace CalendarApplication.Controllers
         {
             // Check if user is logged in and is admin
             if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
-            else if (!(!UserModel.GetCurrent().Admin || !this.IsGroupLeader(grm.ID, UserModel.GetCurrentUserID())))
+            else if (!(UserModel.GetCurrent().Admin || this.IsGroupLeader(grm.ID, UserModel.GetCurrentUserID())))
             {
                 return RedirectToAction("Index", "Home", null);
             }
