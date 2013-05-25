@@ -39,7 +39,7 @@ namespace CalendarApplication.Database
                     int id = Convert.ToInt32(cmd.ExecuteScalar());
 
                     cmd.CommandText = "INSERT INTO groupmembers (groupId, userId, groupLeader, canCreate) VALUES (@groupId, @userId, @groupLeader, @canCreate)";
-                    cmd.Parameters.AddWithValue("@groupId", groupmodel.ID);
+                    cmd.Parameters.AddWithValue("@groupId", id);
                     cmd.Parameters.AddWithValue("@userId", null);
                     cmd.Parameters.AddWithValue("@groupLeader", 0);
                     cmd.Parameters.AddWithValue("@canCreate", 0);
