@@ -65,7 +65,7 @@ namespace CalendarApplication.Helpers
             }
             else if (model.Datatype == Fieldtype.Bool)
             {
-                builder.AppendLine("<input type='checkbox' name='" + name + ".BoolValue' value='true'"+(model.BoolValue?" selected>":">"));
+                builder.AppendLine("<input type='checkbox' name='" + name + ".BoolValue' value='true'" + (model.BoolValue ? " checked='checked'>" : ">"));
             }
             else if (model.Datatype == Fieldtype.Datetime)
             {
