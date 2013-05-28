@@ -284,7 +284,11 @@ namespace CalendarApplication.Controllers
                 TempData["errorMsg"] = msg.ErrorMessage;
                 return View(grm);
             }
-            return RedirectToAction("EditGroup", "Maintenance", new { groupId = grm.ID });
+            if (grm.ID != -1)
+            {
+                return RedirectToAction("EditGroup", "Maintenance", new { groupId = grm.ID });
+            }
+            return RedirectToAction("Index", "Maintenance", null);
         }
 
         /// <summary>

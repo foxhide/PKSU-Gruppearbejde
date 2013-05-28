@@ -97,13 +97,13 @@
                     </div>
                 </div>
             </td>
-        }
+        
 
         <td  @(curCtrl == "group" ? "class=selected" : "")
             onclick="gotoUrl('@Url.Action("","GroupView",null)')">
             Groups
         </td>
-
+        }
         @if(UserModel.GetCurrentUserID() != -1 && UserModel.GetCurrent().Admin)
         {
             <td  @(curCtrl == "maintenance" ? "class=selected" : "")

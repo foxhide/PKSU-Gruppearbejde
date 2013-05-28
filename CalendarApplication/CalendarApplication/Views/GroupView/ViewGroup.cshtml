@@ -1,0 +1,67 @@
+﻿@model CalendarApplication.Models.Group.GroupViewModel
+
+@{
+    ViewBag.Title = "ViewGroup";
+}
+@using CalendarApplication.Models.User
+
+<h2>  @(string.IsNullOrEmpty(Model.Name) ? "Group" : Model.Name) </h2>
+@using (Html.BeginForm()) {
+    <table>
+        <tr>
+            <td>
+                <table class="gridtable">
+                        <tr>
+                            <td>Group Leaders</td>
+                        </tr>
+                    @for (int i = 0; i < Model.Leaders.Count; i++)
+                    {
+                        <tr>
+                            <td>@Html.ActionLink(Model.Leaders[i].UserName, "Index", "User", new { userId = Model.Leaders[i].ID }, null)</td>
+                        </tr>
+                    }
+                </table>
+            </td>
+            <td>
+                <table class="gridtable">
+                    <tr>
+                        <td>Event Creators</td>
+                    </tr>
+                    @for (int i = 0; i < Model.Creators.Count; i++)
+                    {
+                        <tr>
+                            <td>@Html.ActionLink(Model.Creators[i].UserName, "Index", "User", new { userId = Model.Creators[i].ID }, null)</td>
+                        </tr>
+                    }
+                </table>
+            </td>
+            <td>
+                <table class="gridtable">
+                    <tr>
+                        <td>Group Members</td>
+                    </tr>
+                    @for (int i = 0; i < Model.Members.Count; i++)
+                    {
+                        <tr>
+                            <td>@Html.ActionLink(Model.Members[i].UserName, "Index", "User", new { userId = Model.Members[i].ID }, null)</td>
+                        </tr>
+                    }
+                </table>
+            </td>
+        </tr>
+    </table>
+    <br />
+    UserModel user = UserModel.GetCurrent();
+    if(user.Admin)
+                {
+                    <!-- Admins may edit the group and set privileges (PUT LINK TO PRIVILEGES HERE WHEN IT'S DONE) -->
+                    @Html.ActionLink("Edit group", "EditGroup", "Maintenance", new { groupId = Model.ID }, null)
+                    <br />
+                }
+    if(Model.IsLeader(user.ID))
+                {
+                    <!-- Leaders may edit the group -->
+                    @Html.ActionLink("Edit group", "EditGroup", "Maintenance", new { groupId = Model.ID }, null)
+                    <br />
+                }
+}
