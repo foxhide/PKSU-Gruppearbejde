@@ -20,7 +20,7 @@ namespace CalendarApplication.Helpers
         public static MvcHtmlString DateTimeEditorFor<TModel, TValue>(this HtmlHelper<TModel> helper,
             Expression<Func<TModel, TValue>> expression)
         {
-            return DateTimeEditor.DateTimeEditorFor(helper, expression, DATE_TIME_ALL_FIELDS,"");
+            return DateTimeEditor.DateTimeEditorFor(helper, expression, DATE_TIME_ALL_FIELDS,"","");
         }
 
         /// <summary>
@@ -32,7 +32,20 @@ namespace CalendarApplication.Helpers
         public static MvcHtmlString DateTimeEditorFor<TModel, TValue>(this HtmlHelper<TModel> helper,
             Expression<Func<TModel, TValue>> expression, string compare)
         {
-            return DateTimeEditor.DateTimeEditorFor(helper, expression, DATE_TIME_ALL_FIELDS, compare);
+            return DateTimeEditor.DateTimeEditorFor(helper, expression, DATE_TIME_ALL_FIELDS, compare, "");
+        }
+
+        /// <summary>
+        /// Returns the html for a datetime editor
+        /// </summary>
+        /// <param name="compare">String of compares, ex: 'g.today,l.otherName, ...' -> date should be greater than
+        /// today, but less than date named 'otherName'</param>
+        /// <param name="onchange">JS-function to be called onchange</param>
+        /// <returns></returns>
+        public static MvcHtmlString DateTimeEditorFor<TModel, TValue>(this HtmlHelper<TModel> helper,
+            Expression<Func<TModel, TValue>> expression, string compare, string onchange)
+        {
+            return DateTimeEditor.DateTimeEditorFor(helper, expression, DATE_TIME_ALL_FIELDS, compare, onchange);
         }
 
         /// <summary>
@@ -43,8 +56,9 @@ namespace CalendarApplication.Helpers
         /// in this array.</param>
         /// <param name="compare">String of compares, ex: 'g.today,l.otherName, ...' -> date should be greater than
         /// today, but less than date named 'otherName'</param>
+        /// <param name="onchange">"JS-function to be called onchange"</param>
         public static MvcHtmlString DateTimeEditorFor<TModel, TValue>(this HtmlHelper<TModel> helper,
-            Expression<Func<TModel, TValue>> expression, string[] fields, string compare)
+            Expression<Func<TModel, TValue>> expression, string[] fields, string compare, string onchange)
         {
             // Get model
             ModelMetadata metadata = ModelMetadata.FromLambdaExpression(expression, helper.ViewData);
@@ -53,10 +67,10 @@ namespace CalendarApplication.Helpers
             // Get Name
             string name = ExpressionHelper.GetExpressionText(expression).Split('.').Last();
 
-            return DateTimeEditorFor(edt, name, fields, compare);
+            return DateTimeEditorFor(edt, name, fields, compare, onchange);
         }
 
-        public static MvcHtmlString DateTimeEditorFor(DateTime edt, string name, string[] fields, string compare)
+        public static MvcHtmlString DateTimeEditorFor(DateTime edt, string name, string[] fields, string compare, string onchange)
         {
             string[] tmp = name.Split(new[] { '[', ']', '.' });
             string id = tmp[0];
@@ -66,7 +80,7 @@ namespace CalendarApplication.Helpers
 
             // Build validation string.
             compare = compare == null ? "" : compare;
-            string validateStr = "onchange=validateDate('" + id + "','" + compare + "')";
+            string validateStr = "onchange=\"validateDate('" + id + "','" + compare + "'); " + onchange + "\"";
 
             builder.AppendLine("<input type='hidden' name='" + name + "' id='" + id + "' value='"
                                 + edt.ToString("dd-MM-yyyy HH:mm:ss") + "'>");
@@ -96,7 +110,8 @@ namespace CalendarApplication.Helpers
                 AddField(builder, id, f, val, w, validateStr); // Add the field
                 builder.Append("</td>");
             }
-            builder.Append("<td><script>createDatePicker('" + id + "','" + compare + "')</script>");
+            string function = string.IsNullOrEmpty(onchange) ? "null" : onchange.Substring(0, onchange.Length - 2);
+            builder.Append("<td><script>createDatePicker('" + id + "','" + compare + "'," + function + ")</script>");
             builder.Append("<input type='hidden' id='" + id + "_picker'>");
             builder.Append("<input type='button' value='Select Date' id='" + id + "_but' onclick=showDatePicker('" + id + "_picker') /></td>");
             builder.AppendLine("</tr></table>");

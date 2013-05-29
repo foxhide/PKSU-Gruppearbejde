@@ -26,15 +26,19 @@
                 @Html.HiddenFor(m => m.State)
 
                 @Html.LabelFor(m => m.Name)
-                @Html.TextBoxFor(m => m.Name, new { onchange="updateSelf('Name','Text')" })
-                <div class="validation-summary-errors" id="Name_Error"></div>
+                @Html.TextBoxFor(m => m.Name, new { onchange="{ setState(); validateInput('Name','Text',true,true); }" })
+                <div class="validation-summary-errors" id="Name_Error" style="display:none">
+                    The event must have a Name!
+                </div>
                 <br />
                 <br />
                 @Html.LabelFor(m => m.SelectedEventType)
                 @Html.DropDownListFor(m => Model.SelectedEventType,
                                         new SelectList(Model.EventTypes, "Value", "Text"),
-                                        new { onchange="{ getSpecifics(this.value); updateSelf('SelectedEventType','Type') }" })
-                <div class="validation-summary-errors" id="SelectedEventType_Error"></div>
+                                        new { onchange="{ getSpecifics(this.value); }" })
+                <div class="validation-summary-errors" id="SelectedEventType_Error" style="display:none">
+                    The event must have a Type!
+                </div>
                 <br />
                 <br />
                 
@@ -49,14 +53,23 @@
                 <br />
 
                 @Html.LabelFor(m => m.Start) <br />
-                @Html.DateTimeEditorFor(m => m.Start, "g.today,l.End")
+                @Html.DateTimeEditorFor(m => m.Start, "g.today,l.End", "dateRoomUpdate()")
                 <br />
                 @Html.LabelFor(m => m.End) <br />
-                @Html.DateTimeEditorFor(m => m.End, "g.today,g.Start")
+                @Html.DateTimeEditorFor(m => m.End, "g.today,g.Start", "dateRoomUpdate()")
                 <br />
 
                 @Html.LabelFor(m => m.RoomSelectList)
-                @Html.ListEditorFor(m => m.RoomSelectList, "Rooms Selected", "Rooms Available")
+                @Html.ListEditorFor(m => m.RoomSelectList, "Rooms Selected", "Rooms Available",
+                        "dateRoomUpdate(); setState(); validateInput('RoomSelectList','List',true,true)",
+                        "dateRoomUpdate(); setState()")
+                <div class="validation-summary-errors" id="RoomSelectList_Error" style="display:none">
+                    You must add some rooms!
+                </div>
+                <br />
+
+                <input type="button" id="rd_but" value="Check rooms and dates" onclick="checkRooms()" style="background-color:yellow" />
+                <div id="room_date_feedback" style="color:red"></div>
                 <br />
 
                 <div id="event_specifics">

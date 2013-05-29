@@ -11,6 +11,7 @@ using CalendarApplication.Models.Event;
 using CalendarApplication.Models.EventType;
 using CalendarApplication.Database;
 using CalendarApplication.PDFBuilder;
+using Newtonsoft.Json;
 
 namespace CalendarApplication.Controllers
 {
@@ -372,7 +373,7 @@ namespace CalendarApplication.Controllers
             // Serverside check for required fields
             bool state = true;
             bool req = false;
-            bool rooms = true;
+            bool rooms = false;
 
             // Check for name
             if (string.IsNullOrEmpty(eem.Name))
@@ -398,12 +399,31 @@ namespace CalendarApplication.Controllers
                 }
             }
 
-            // TODO: Make check for dates.
-            rooms = this.CheckDates(eem.ID, eem.Start,eem.End,eem.RoomSelectList);
-            if (!rooms)
+            // If no error, check rooms
+            if (!req)
             {
-                TempData["errorMsg"] = "There is an overlap with other rooms in the period chosen.";
+                // Check that at least one room has been chosen
+                foreach (SelectListItem room in eem.RoomSelectList)
+                {
+                    if (room.Selected) {
+                        rooms = true;
+                        break;
+                    }
+                }
+                // If at least one room has been chosen, check availability 
+                if (rooms)
+                {
+                    List<RoomWithTimes> roomCheck = this.CheckDates(eem.ID, eem.Start, eem.End, eem.RoomSelectList);
+                    rooms = roomCheck != null && roomCheck.Count == 0;
+                    if (!rooms)
+                    {
+                        // No room at given time
+                        TempData["errorMsg"] = "There is an overlap with other rooms in the period chosen.";
+                    }
+                }
+                else { TempData["errorMsg"] = "No rooms selected!"; } // No room chosen
             }
+            
 
             if (!req && rooms)
             {
@@ -711,16 +731,17 @@ namespace CalendarApplication.Controllers
         }
 
         /// <summary>
-        /// Checks if the given rooms are available in the given time span.
+        /// Checks if the given rooms are available in the given time span. Returns a list of rooms used, empty list if none.
         /// </summary>
         /// <param name="eventId">Id of the event wanting to use the rooms</param>
         /// <param name="start">Start time</param>
         /// <param name="end">End time</param>
         /// <param name="rooms">List of desired rooms</param>
-        /// <returns>True on ok, else false.</returns>
-        public bool CheckDates(int eventId, DateTime start, DateTime end, List<SelectListItem> rooms)
+        /// <returns>List of rooms used</returns>
+        public List<RoomWithTimes> CheckDates(int eventId, DateTime start, DateTime end, List<SelectListItem> rooms)
         {
-            string cmd = "SELECT eventId FROM pksudb.events NATURAL JOIN pksudb.eventroomsused"
+            List<RoomWithTimes> result = new List<RoomWithTimes>();
+            string cmd = "SELECT roomName, eventStart, eventEnd FROM pksudb.events NATURAL JOIN pksudb.eventroomsused NATURAL JOIN pksudb.rooms"
                             + " WHERE ((@start >= eventStart AND @start < eventEnd) OR "
                             + "(@end > eventStart AND @end <= eventEnd) OR (@start <= eventStart AND @end >= eventEnd))"
                             + " AND eventId != @id AND (";
@@ -731,7 +752,7 @@ namespace CalendarApplication.Controllers
                     cmd += "roomId = " + rooms[i].Value + " OR ";
                 }
             }
-            cmd = cmd.Substring(0, cmd.Length - 4) + ")";  // Remove last OR
+            cmd = cmd.Substring(0, cmd.Length - 4) + ") ORDER BY eventStart";  // Remove last OR
             CustomQuery query = new CustomQuery
             {
                 Cmd = cmd,
@@ -743,13 +764,35 @@ namespace CalendarApplication.Controllers
 
             if (dt != null)
             {
-                return dt.Rows.Count == 0;
+                foreach (DataRow dr in dt.Rows)
+                {
+                    result.Add(new RoomWithTimes
+                    {
+                        Name = (string)dr["roomName"],
+                        Start = ((DateTime)dr["eventStart"]).ToString("dd/MM/yyyy HH:mm"),
+                        End = ((DateTime)dr["eventEnd"]).ToString("dd/MM/yyyy HH:mm")
+                    });
+                }
+                return result;
             }
             else
             {
                 TempData["errorMsg"] = msc.ErrorMessage;
-                return false;
+                return null;
             }
+        }
+
+        /// <summary>
+        /// Returns a JSON string with the list of rooms obtained from CheckDates
+        /// </summary>
+        /// <param name="eventId">Id of the event wanting to use the rooms</param>
+        /// <param name="start">Start time</param>
+        /// <param name="end">End time</param>
+        /// <param name="rooms">List of desired rooms</param>
+        /// <returns>A JSON-string with a list of the rooms</returns>
+        public string CheckDatesJson(int eventId, DateTime start, DateTime end, List<SelectListItem> rooms)
+        {
+            return JsonConvert.SerializeObject(this.CheckDates(eventId, start, end, rooms));
         }
     }
 }

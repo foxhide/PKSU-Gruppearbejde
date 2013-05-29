@@ -48,11 +48,11 @@ namespace CalendarApplication.Helpers
             // Get Name
             string name = ExpressionHelper.GetExpressionText(expression).Split('.').Last();
 
-            return ListEditorFor(list, name, labelList1, labelList2, onAdd, onRem);
+            return ListEditorFor(list, name, name, labelList1, labelList2, onAdd, onRem);
         }
 
-        public static MvcHtmlString ListEditorFor(List<SelectListItem> list, string name, string labelList1, string labelList2,
-                                                    string onAdd, string onRem)
+        public static MvcHtmlString ListEditorFor(List<SelectListItem> list, string id, string name,
+                                                  string labelList1, string labelList2, string onAdd, string onRem)
         {
 
             if (list == null)
@@ -64,9 +64,11 @@ namespace CalendarApplication.Helpers
             builder.AppendLine("<span style='color:grey;font-size:80%;text-align:left'>");
             for (int i = 0; i < list.Count; i++)
             {
-                builder.AppendLine("<input type='hidden' name='" + name + "[" + i + "].Value' value='" + list[i].Value + "'>");
-                builder.AppendLine("<input type='hidden' name='" + name + "[" + i + "].Text' value='" + list[i].Text + "'>");
-                builder.AppendLine("<input type='hidden' id='" + name + "_" + list[i].Value + "' name='" + name +
+                builder.AppendLine("<input type='hidden' id='" + id + "_" + i + "_Value' name='" + name +
+                                    "[" + i + "].Value' value='" + list[i].Value + "'>");
+                builder.AppendLine("<input type='hidden' id='" + id + "_" + i + "_Text' name='" + name +
+                                    "[" + i + "].Text' value='" + list[i].Text + "'>");
+                builder.AppendLine("<input type='hidden' id='" + id + "_" + list[i].Value + "' name='" + name +
                                     "[" + i + "].Selected' value=" + (list[i].Selected ? "true" : "false") + ">");
             }
 
@@ -76,7 +78,7 @@ namespace CalendarApplication.Helpers
 
             builder.AppendLine("</tr><tr>");
             builder.AppendLine("<td>");
-            builder.AppendLine("<select id='" + name + "_available' name='" + name + "' size='5' style='min-width:100px'>");
+            builder.AppendLine("<select id='" + id + "_select' name='" + name + "' size='5' style='min-width:100px'>");
             foreach (SelectListItem sli in list)
             {
                 if(sli.Selected) builder.AppendLine("<option value='" + sli.Value + "'>" + sli.Text + "</option>");
@@ -85,16 +87,14 @@ namespace CalendarApplication.Helpers
             builder.AppendLine("</td>");
 
             builder.AppendLine("<td style='vertical-align:middle'>");
-            builder.Append("<input type='button' id='" + name + "_add_button' value='<--' onclick=\"");
-            if (!string.IsNullOrEmpty(onAdd)) { builder.Append(onAdd + ";"); }
-            builder.Append("moveSelected('" + name + "',true)\" ><br>");
-            builder.Append("<input type='button' id='" + name + "_rem_button' value='-->' onclick=\"");
-            if (!string.IsNullOrEmpty(onAdd)) { builder.Append(onRem + ";"); }
-            builder.Append("moveSelected('" + name + "',false)\" >");
+            builder.Append("<input type='button' id='" + name + "_add_button' value='<--' onclick=\"moveSelected('" + id + "',true);");
+            builder.Append(onAdd + "\" ><br>");
+            builder.Append("<input type='button' id='" + name + "_rem_button' value='-->' onclick=\"moveSelected('" + id + "',false);");
+            builder.Append(onRem + "\" >");
             builder.AppendLine("</td>");
 
             builder.AppendLine("<td>");
-            builder.AppendLine("<select id='" + name + "_select' name='" + name + "' size='5' style='min-width:100px'>");
+            builder.AppendLine("<select id='" + id + "_available' name='" + name + "' size='5' style='min-width:100px'>");
             foreach (SelectListItem sli in list)
             {
                 if (!sli.Selected) builder.AppendLine("<option value='" + sli.Value + "'>" + sli.Text + "</option>");
