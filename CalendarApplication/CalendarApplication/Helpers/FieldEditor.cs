@@ -37,8 +37,11 @@ namespace CalendarApplication.Helpers
             builder.AppendLine("<input type='hidden' id='" + id + "_RequiredCreate' name='" + name + ".RequiredCreate' value='" + model.RequiredCreate + "'>");
             builder.AppendLine("<input type='hidden' id='" + id + "_RequiredApprove' name='" + name + ".RequiredApprove' value='" + model.RequiredApprove + "'>");
 
-            builder.AppendLine("<label for='"+name+"'>"+model.Name+"</label><br>");
-            builder.AppendLine("<span style='color:grey;font-size:80%;text-align:left'>"+model.Description+"</span><br>");
+            builder.AppendLine("<label for='" + name + "' style='font-weight:bold'>" + model.Name + "</label><br>");
+            if (!string.IsNullOrEmpty(model.Description))
+            {
+                builder.AppendLine("<span style='color:grey;font-size:80%;text-align:left'>" + model.Description + "</span><br>");
+            }
             
             if (model.Datatype == Fieldtype.Float)
             {
@@ -47,7 +50,7 @@ namespace CalendarApplication.Helpers
             else if (model.Datatype == Fieldtype.Text)
             {
                 builder.AppendLine("<div id='" + id + "_char_counter'>Characters left: " + model.VarcharLength + "</div>");
-                string counterInc = "onkeyup=\"updateCounter('" + id + "'," + model.VarcharLength + "); setState(); updateSelf('" + id + "','Text')\"";
+                string counterInc = "onkeyup=\"updateCounter('" + id + "'," + model.VarcharLength + "); setState(); validateInput('" + id + "','Text',true,true)\"";
                 if (model.VarcharLength < 50)
                 {
                     builder.AppendLine("<input type='text' id='" + id + "' name='" + name +
@@ -65,16 +68,17 @@ namespace CalendarApplication.Helpers
             }
             else if (model.Datatype == Fieldtype.Bool)
             {
-                builder.AppendLine("<input type='checkbox' name='" + name + ".BoolValue' value='true'"+(model.BoolValue?" selected>":">"));
+                builder.AppendLine("<input type='checkbox' name='" + name + ".BoolValue' value='true'" + (model.BoolValue ? " checked='checked'>" : ">"));
             }
             else if (model.Datatype == Fieldtype.Datetime)
             {
                 builder.AppendLine(DateTimeEditor.DateTimeEditorFor(model.DateValue, name + ".DateValue",
-                                                        DateTimeEditor.DATE_TIME_ALL_FIELDS, "").ToString());
+                                                        DateTimeEditor.DATE_TIME_ALL_FIELDS, "", "").ToString());
             }
             else if (model.Datatype == Fieldtype.User)
             {
-                builder.AppendLine("<select name='" + name + ".IntValue' id='" + id + "' onchange=\"setState(); updateSelf('" + id + "','User')\">");
+                builder.Append("<select name='" + name + ".IntValue' id='" + id);
+                builder.AppendLine("' onchange=\"setState(); validateInput('" + id + "','User',true,true)\">");
                 foreach (SelectListItem user in model.List)
                 {
                     builder.Append("<option value='" + user.Value + "'");
@@ -85,7 +89,8 @@ namespace CalendarApplication.Helpers
             }
             else if (model.Datatype == Fieldtype.Group)
             {
-                builder.AppendLine("<select name='" + name + ".IntValue' id='" + id + "' onchange=\"setState(); updateSelf('" + id + "','Group')\">");
+                builder.Append("<select name='" + name + ".IntValue' id='" + id);
+                builder.AppendLine("' onchange=\"setState(); validateInput('" + id + "','Group',true,true)\">");
                 foreach (SelectListItem group in model.List)
                 {
                     builder.Append("<option value='" + group.Value + "'");
@@ -101,13 +106,15 @@ namespace CalendarApplication.Helpers
             }
             else if (model.Datatype == Fieldtype.UserList)
             {
-                builder.AppendLine(DoubleListEditor.ListEditorFor(model.List, name + ".List",
-                                     "Users selected", "Users available", "", "").ToString());
+                builder.AppendLine(DoubleListEditor.ListEditorFor(model.List, id, name + ".List",
+                                     "Users selected", "Users available",
+                                     "setState(); validateInput('" + id + "','List',true,true)", "").ToString());
             }
             else if (model.Datatype == Fieldtype.GroupList)
             {
-                builder.AppendLine(DoubleListEditor.ListEditorFor(model.List, name + ".List",
-                                     "Groups selected", "Groups available", "", "").ToString());
+                builder.AppendLine(DoubleListEditor.ListEditorFor(model.List, id, name + ".List",
+                                     "Groups selected", "Groups available",
+                                     "setState(); validateInput('" + id + "','List',true,true)", "").ToString());
             }
             else if (model.Datatype == Fieldtype.FileList)
             {
@@ -122,7 +129,9 @@ namespace CalendarApplication.Helpers
             if (model.RequiredCreate)
             {
                 builder.Append("<span style='color:red'>**</span>");
-                builder.AppendLine("<div id='" + id + "_Error' class='validation-summary-errors'></div>");
+                builder.AppendLine("<div id='" + id + "_Error' class='validation-summary-errors' style='display:none'>");
+                builder.Append(model.Name + " is required!");
+                builder.Append("</div>");
             }
             else if (model.RequiredApprove)
             {

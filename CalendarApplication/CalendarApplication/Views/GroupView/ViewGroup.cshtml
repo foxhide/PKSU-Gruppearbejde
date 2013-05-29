@@ -1,0 +1,84 @@
+﻿@model CalendarApplication.Models.Group.GroupViewModel
+
+@{
+    ViewBag.Title = "ViewGroup";
+}
+@using CalendarApplication.Models.User
+
+<h2>  @(string.IsNullOrEmpty(Model.Name) ? "Group" : Model.Name) </h2>
+@using (Html.BeginForm()) {
+    UserModel user = UserModel.GetCurrent();
+    <table>
+        <tr>
+            <td>
+                <table class="gridtable">
+                        <tr>
+                            <td>Group Leaders</td>
+                        </tr>
+                    @for (int i = 0; i < Model.Leaders.Count; i++)
+                    {
+                        <tr>
+                            <td>@Html.ActionLink(Model.Leaders[i].UserName, "Index", "User", new { userId = Model.Leaders[i].ID }, null)</td>
+                        </tr>
+                    }
+                </table>
+            </td>
+            <td>
+                <table class="gridtable">
+                    <tr>
+                        <td>Event Creators</td>
+                    </tr>
+                    @for (int i = 0; i < Model.Creators.Count; i++)
+                    {
+                        <tr>
+                            <td>@Html.ActionLink(Model.Creators[i].UserName, "Index", "User", new { userId = Model.Creators[i].ID }, null)</td>
+                        </tr>
+                    }
+                </table>
+            </td>
+            <td>
+                <table class="gridtable">
+                    <tr>
+                        <td>Group Members</td>
+                    </tr>
+                    @for (int i = 0; i < Model.Members.Count; i++)
+                    {
+                        <tr>
+                            <td>@Html.ActionLink(Model.Members[i].UserName, "Index", "User", new { userId = Model.Members[i].ID }, null)</td>
+                        </tr>
+                    }
+                </table>
+            </td>
+           <!-- Perhaps not show this to everyone? e.g.: if (user.Admin || Model.IsMember(user.ID)){ -->
+            <td>
+                <table class="gridtable">
+                    <tr>
+                        <td>Event type privileges</td>
+                    </tr>
+                    @for (int i = 0; i < Model.EventTypes.Count; i++)
+                    {
+                        <tr>
+                            <td>@Model.EventTypes[i].Name</td>
+                        </tr>
+                    }
+                </table>
+            </td>
+            <!--}-->
+        </tr>
+    </table>
+    <br />
+    if(user.Admin)
+                {
+                    <!-- Admins may edit the group members and set privileges -->
+                    @Html.ActionLink("Edit group members", "EditGroup", "Maintenance", new { groupId = Model.ID }, null) 
+                    <br />
+                    @Html.ActionLink("Set group privileges", "SetPrivileges", "GroupView", new { groupId = Model.ID }, null)
+                    <br />
+                }
+    else if(Model.IsLeader(user.ID))
+                {
+                    <!-- Leaders may edit the group members -->
+                    @Html.ActionLink("Edit group members", "EditGroup", "Maintenance", new { groupId = Model.ID }, null)
+                    <br />
+                }
+}

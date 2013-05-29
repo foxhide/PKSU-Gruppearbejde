@@ -29,4 +29,11 @@ namespace CalendarApplication.Models.Event
             return ID;
         }
     }
+
+    public class RoomWithTimes
+    {
+        public string Start { get; set; }
+        public string End { get; set; }
+        public string Name { get; set; }
+    }
 }

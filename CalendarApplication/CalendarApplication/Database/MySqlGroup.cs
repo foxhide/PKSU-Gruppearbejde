@@ -39,7 +39,7 @@ namespace CalendarApplication.Database
                     int id = Convert.ToInt32(cmd.ExecuteScalar());
 
                     cmd.CommandText = "INSERT INTO groupmembers (groupId, userId, groupLeader, canCreate) VALUES (@groupId, @userId, @groupLeader, @canCreate)";
-                    cmd.Parameters.AddWithValue("@groupId", groupmodel.ID);
+                    cmd.Parameters.AddWithValue("@groupId", id);
                     cmd.Parameters.AddWithValue("@userId", null);
                     cmd.Parameters.AddWithValue("@groupLeader", 0);
                     cmd.Parameters.AddWithValue("@canCreate", 0);
@@ -154,6 +154,63 @@ namespace CalendarApplication.Database
                         cmd.Parameters["@canCreate"].Value = groupmodel.groupLeaders[i].Selected || groupmodel.canCreate[i].Selected;
                         cmd.Parameters["@userId"].Value = groupmodel.groupLeaders[i].Value;
                         cmd.ExecuteNonQuery();
+                    }
+
+                    mst.Commit();
+
+                    this.CloseConnection();
+                    return true;
+                }
+                catch (MySqlException ex)
+                {
+                    this.ErrorMessage = ex.Message + " caused by: " + cmd.CommandText;
+                    mst.Rollback();
+                    this.CloseConnection();
+                    return false;
+                }
+            }
+            else
+            {
+                //could not open connection
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Set privileges for group from GroupPrivilegesModel
+        /// </summary>
+        /// <param name="model">Model to set privileges from</param>
+        /// <returns>bool indicating success or failure</returns>
+        public bool SetPrivileges(GroupPrivilegesModel model)
+        {
+            if (this.OpenConnection() == true)
+            {
+                MySqlTransaction mst = null;
+                MySqlCommand cmd = null;
+                cmd = new MySqlCommand();
+
+                try
+                {
+                    mst = connection.BeginTransaction();
+                    cmd.Connection = connection;
+                    cmd.Transaction = mst;
+
+                    cmd.CommandText = "DELETE FROM pksudb.eventcreationgroups WHERE groupId = @groupId";
+                    cmd.Parameters.AddWithValue("@groupId", model.ID);
+                    cmd.Prepare();
+                    cmd.ExecuteNonQuery();
+
+                    cmd.CommandText = "INSERT INTO pksudb.eventcreationgroups (groupId, eventTypeId) VALUES (@groupId, @eventTypeId)";
+                    cmd.Parameters.AddWithValue("@eventTypeId", null);
+                    cmd.Prepare();
+
+                    for (int i = 0; i < model.EventTypes.Count; i++)
+                    {
+                        if (model.EventTypes[i].Selected)
+                        {
+                            cmd.Parameters["@eventTypeId"].Value = int.Parse(model.EventTypes[i].Value);
+                            cmd.ExecuteNonQuery();
+                        }
                     }
 
                     mst.Commit();

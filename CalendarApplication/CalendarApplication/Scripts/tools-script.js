@@ -27,8 +27,8 @@ function updateCounter(name, maxSize) {
 /* Function used for selecting/deselecting items in the double select list */
 function moveSelected(name, add) {
     // Get lists, depending on add / rem (!add)
-    var name1 = add ? name + '_select' : name + '_available';
-    var name2 = add ? name + '_available' : name + '_select';
+    var name1 = add ? name + '_available' : name + '_select';
+    var name2 = add ? name + '_select' : name + '_available';
     var list1 = document.getElementById(name1);
     var list2 = document.getElementById(name2);
     // Run through the list until selected option is found. Remove it
@@ -52,6 +52,32 @@ function disableLists(listName, disable) {
     document.getElementById(listName + "_select").disabled = disable;
     document.getElementById(listName + "_add_button").disabled = disable;
     document.getElementById(listName + "_rem_button").disabled = disable;
+}
+
+/* Get a list of SelectListItem for all selected items in a double list */
+function getListSelected(listName) {
+    var list = [];
+    var i = 1;
+    var text = $('#' + listName + '_0_Text');
+    var value = $('#' + listName + '_0_Value');
+    var select = $('#' + listName + '_' + value.val());
+
+    while (value.length > 0) {
+        if (select.val().toLowerCase() == "true") {
+            list.push({
+                Text: text.val(),
+                Value: value.val(),
+                Selected: true
+            });
+        }
+
+        text = $('#' + listName + '_' + i + '_Text');
+        value = $('#' + listName + '_' + i + '_Value');
+        select = $('#' + listName + '_' + value.val());
+        i++;
+    }
+
+    return list;
 }
 
 /* Function used for editing a user string or bool value, used in several pages */

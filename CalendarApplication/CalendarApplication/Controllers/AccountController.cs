@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using System.Web.Helpers;
 using System.Web.Security;
 using System.Data;
+using Recaptcha;
 
 using CalendarApplication.Models.Account;
 using CalendarApplication.Models.User;
@@ -46,12 +47,12 @@ namespace CalendarApplication.Controllers
                     if ((bool)rows[0]["needsApproval"])
                     {
                         // User not approved
-                        TempData["message"] = "Account found, but is has not yet been approved. Contact your admin.";
+                        TempData["message"] = "Account found, but it has not yet been approved. Contact your admin.";
                     }
                     else if (!(bool)rows[0]["active"])
                     {
                         // User not active
-                        TempData["message"] = "The found account has been deactivated. Contact your admin.";
+                        TempData["message"] = "That account has been deactivated. Contact your admin.";
                     }
                     else
                     {
@@ -70,7 +71,7 @@ namespace CalendarApplication.Controllers
             else
             {
                 // DB error
-                TempData["message"] = "Login unsuccessful! Some database error occured!";
+                TempData["message"] = "Login unsuccessful! " + con.ErrorMessage;
             }
             return RedirectToAction("Login");
         }
@@ -93,8 +94,15 @@ namespace CalendarApplication.Controllers
         }
 
         [HttpPost]
-        public ActionResult Register(Register model)
+        [RecaptchaControlMvc.CaptchaValidator]
+        public ActionResult Register(Register model, bool captchaValid)
         {
+            if(!captchaValid)
+            {
+                TempData["message"] = "Captcha invalid.";
+
+                return View();
+            }
             // Check if user is logged in
             if (UserModel.GetCurrentUserID() != -1) { return RedirectToAction("Index", "Home", null); }
             
@@ -103,9 +111,10 @@ namespace CalendarApplication.Controllers
             if (userId >= 0)
             {
                 //The user is not logged in, simply created, and needs approval
-                return RedirectToAction("Index", "Home", null);
+                TempData["message"] = "Registration successful. You will need to be approved by an administrator before you can log in.";
+                return RedirectToAction("Login", "Account", null);
             }
-            TempData["message"] = "There was an error processing your information. Please try again.";
+            TempData["message"] = "There was an error processing your information: " + msu.ErrorMessage;
             
             return View();
         }
