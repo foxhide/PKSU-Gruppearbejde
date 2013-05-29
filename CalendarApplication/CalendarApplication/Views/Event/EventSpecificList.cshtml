@@ -3,7 +3,6 @@
 @if(Model.TypeSpecifics.Count > 0)
 {
     <h3>Event Type Specifics:</h3>
-    <script>numberOfFields = @Model.TypeSpecifics.Count;</script>
     <table style="margin-left:0;margin-right:auto">
         @for (int i = 0; i < Model.TypeSpecifics.Count; i++)
         {
@@ -15,3 +14,8 @@
         }           
     </table>
 }
+<script>
+    numberOfFields = @Model.TypeSpecifics.Count;
+    setState();
+    validateInput('SelectedEventType','Type',true,true);
+</script>

@@ -1,4 +1,5 @@
-﻿function validateDate(name,compare) {
+﻿/* Function for validating a date input */
+function validateDate(name, compare) {
     var year = document.getElementById(name + "_Year");
     var month = document.getElementById(name + "_Month");
     var day = document.getElementById(name + "_Day");
@@ -37,6 +38,7 @@
                         + pad(hour.value) + ":" + pad(minute.value) + ":00";
 }
 
+/* Padding function: pads a single digit with a leading zero */
 function pad(val) {
     if (val < 10) {
         return "0" + val;
@@ -46,6 +48,7 @@ function pad(val) {
     }
 }
 
+/* Compares to another DateTimeEditor or to todays date */
 function validateCompare(name,other,compGreater) {
     var year = document.getElementById(name + "_Year");
     var month = document.getElementById(name + "_Month");
@@ -106,7 +109,7 @@ function validateCompare(name,other,compGreater) {
 }
 
 /* Function for creating datepicker */
-function createDatePicker(name,compare) {
+function createDatePicker(name, compare, onchange) {
     $(function () {
         $("#" + name + "_picker").datepicker({
             beforeShow: function (input, inst) {
@@ -118,6 +121,7 @@ function createDatePicker(name,compare) {
                 $("#" + name + "_Month").val(date.getMonth() + 1);
                 $("#" + name + "_Day").val(date.getDate());
                 validateDate(name, compare);
+                if (onchange) { onchange(); } // Call the onchange function
             }
         });
     });
