@@ -9,8 +9,9 @@ namespace CalendarApplication.Models.Group
 {
     public class GroupPrivilegesModel
     {
-        [Display(Name = "Event types allowed")]
+        public string Name { get; set; }
+        public int ID { get; set; }
+        [Display(Name = "Event types allowed to view, create and edit")]
         public List<SelectListItem> EventTypes { set; get; }
-
     }
 }
