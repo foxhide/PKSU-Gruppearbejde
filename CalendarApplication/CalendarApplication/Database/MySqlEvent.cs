@@ -272,8 +272,22 @@ namespace CalendarApplication.Database
                             else
                             {
                                 //field MIGHT have been changed
+
                                 //don't allow datatype to be changed
-                                //alterEventTable = "ALTER TABLE table_" + data.ID + " MODIFY COLUMN field_" + fdm.ID + " " + fdm.GetDBType();
+                                //unless we have a Text-field -> we have to update varCharLength
+                                if (fdm.Datatype == Fieldtype.Text)
+                                {
+                                    // Get the old length
+                                    cmd.CommandText = "SELECT varCharLength FROM pksudb.eventtypefields WHERE fieldId = " + fdm.ID;
+                                    int oldLength = Convert.ToInt32(cmd.ExecuteScalar());
+                                    if (oldLength < fdm.VarcharLength)
+                                    {
+                                        // New length is greater. Update the table
+                                        alterEventTable = "ALTER TABLE table_" + data.ID + " MODIFY COLUMN field_" + fdm.ID
+                                                            + " varchar(" + fdm.VarcharLength + ")";
+                                        altered = true;
+                                    }
+                                }
 
                                 cmd.CommandText = updateField;
                                 cmd.Parameters["@fname"].Value = fdm.Name;

@@ -37,8 +37,11 @@ namespace CalendarApplication.Helpers
             builder.AppendLine("<input type='hidden' id='" + id + "_RequiredCreate' name='" + name + ".RequiredCreate' value='" + model.RequiredCreate + "'>");
             builder.AppendLine("<input type='hidden' id='" + id + "_RequiredApprove' name='" + name + ".RequiredApprove' value='" + model.RequiredApprove + "'>");
 
-            builder.AppendLine("<label for='"+name+"'>"+model.Name+"</label><br>");
-            builder.AppendLine("<span style='color:grey;font-size:80%;text-align:left'>"+model.Description+"</span><br>");
+            builder.AppendLine("<label for='" + name + "' style='font-weight:bold'>" + model.Name + "</label><br>");
+            if (!string.IsNullOrEmpty(model.Description))
+            {
+                builder.AppendLine("<span style='color:grey;font-size:80%;text-align:left'>" + model.Description + "</span><br>");
+            }
             
             if (model.Datatype == Fieldtype.Float)
             {
