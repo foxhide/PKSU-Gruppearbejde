@@ -714,7 +714,19 @@ namespace CalendarApplication.Controllers
         {
             List<SelectListItem> result = new List<SelectListItem>();
             result.Add(new SelectListItem { Value = "0", Text = "Select event type" });
-            CustomQuery userquery = new CustomQuery { Cmd = "SELECT eventTypeId,eventTypeName FROM pksudb.eventtypes" };
+            CustomQuery userquery = new CustomQuery();
+            if (UserModel.GetCurrentUserID() != -1 && UserModel.GetCurrent().Admin)
+            {
+                userquery.Cmd = "SELECT eventTypeId,eventTypeName FROM pksudb.eventtypes";
+            }
+            else
+            {
+                userquery.Cmd = "SELECT DISTINCT(eventTypeId),eventTypeName "
+                        + "FROM pksudb.eventtypes NATURAL JOIN pksudb.eventcreationgroups NATURAL JOIN pksudb.groupmembers "
+                        + "WHERE userId = @uid AND canCreate = 1";
+                userquery.ArgNames = new[] { "@uid" };
+                userquery.Args = new[] { (object)UserModel.GetCurrentUserID() };
+            }
             DataTable dt = msc.ExecuteQuery(userquery);
             if (dt != null)
             {
