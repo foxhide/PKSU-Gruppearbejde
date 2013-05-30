@@ -275,7 +275,7 @@ fieldName: name of the field in the database. cannot be null.
 fieldDescription: description of a field. cannot be null.
 requiredCreation: whether or not filling this field is required to create an event of this type.
 requiredApproval: whether or not filling this field is required for full approval of an event of this type.
-fieldType: 0 for float, 1 for text, 2 for date, 3 for user, 4 for group, 5 for file, 6 for boolean.
+fieldType: 0 for float, 1 for text, 2 for date, 3 for user, 4 for group, 5 for file, 6 for boolean, 7 for userlist, 8 for grouplist, 9 for filelist
 varCharLength: length of string if type is string, 0 if not string.*/';
 
 

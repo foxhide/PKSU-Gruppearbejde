@@ -19,6 +19,9 @@ namespace CalendarApplication.Controllers
         /// <returns>view of list of GroupModel</returns>
         public ActionResult Index()
         {
+            //Only for users
+            if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
+
             GroupListModel model = new GroupListModel { GroupList = new List<GroupModel>() };
             MySqlConnect msc = new MySqlConnect();
             string grcmd = "SELECT * FROM pksudb.groups";
@@ -48,6 +51,9 @@ namespace CalendarApplication.Controllers
         /// <returns>view of GroupViewModel</returns>
         public ActionResult ViewGroup(int groupId)
         {
+            //Only for users
+            if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
+
             GroupViewModel model = new GroupViewModel
             {
                 ID = groupId,

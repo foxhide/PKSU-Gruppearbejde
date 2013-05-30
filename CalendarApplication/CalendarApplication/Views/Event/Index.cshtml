@@ -83,7 +83,8 @@ else {
                                         case Fieldtype.Float:       @fm.FloatValue break;
                                         case Fieldtype.User:        if(fm.IntValue != 0) { @Html.ActionLink(fm.StringValue, "Index", "User", new { UserId = fm.IntValue }, null) }
                                                                     else { @fm.StringValue } break;
-                                        case Fieldtype.Group:       @fm.StringValue break;
+                                        case Fieldtype.Group:       if(fm.IntValue != 0) { @Html.ActionLink(fm.StringValue, "ViewGroup", "GroupView", new { groupId = fm.IntValue }, null) }
+                                                                    else { @fm.StringValue } break;
                                         case Fieldtype.Text:        @fm.StringValue break;
                                         case Fieldtype.File:        @fm.IntValue break;
                                         case Fieldtype.Datetime:    @fm.DateValue break;
@@ -99,10 +100,10 @@ else {
                                                                     break;
                                         case Fieldtype.FileList:
                                         case Fieldtype.GroupList:    <table>
-                                                                    @foreach (SelectListItem item in fm.List)
+                                                                    @foreach (SelectListItem group in fm.List)
                                                                     {
                                                                         <tr><td>
-                                                                            @item.Text
+                                                                            @Html.ActionLink(group.Text, "ViewGroup", "GroupView", new { groupId = Convert.ToInt32(group.Value) }, null)
                                                                         </td></tr>
                                                                     }
                                                                     </table>

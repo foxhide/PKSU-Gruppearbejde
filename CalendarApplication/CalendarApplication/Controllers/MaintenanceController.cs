@@ -87,7 +87,7 @@ namespace CalendarApplication.Controllers
             // Check if user is logged in and is admin
             if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
             else if (!UserModel.GetCurrent().Admin) { return RedirectToAction("Index", "Home", null); }
-
+            bool ok;
             switch (mm.SubmitValue)
             {
                 //Edit event
@@ -104,10 +104,20 @@ namespace CalendarApplication.Controllers
                 case 5: return RedirectToAction("EditRoom", new { roomId = -1 });
                 //Delete room
                 case 6: MySqlRoom msr = new MySqlRoom();
-                        msr.DeleteRoom(int.Parse(mm.SelectedRoom));
+                        ok = msr.DeleteRoom(int.Parse(mm.SelectedRoom));
+                        if (!ok) { TempData["errorMsg"] = msr.ErrorMessage; }
                         return RedirectToAction("Index", "Maintenance", "");
                 //Cancelled deletion of room
                 case 7: return RedirectToAction("Index", "Maintenance", "");
+                //Delete group
+                case 8: MySqlGroup msg = new MySqlGroup();
+                    ok = msg.DeleteGroup(int.Parse(mm.SelectedGroup));
+                    if (!ok) { TempData["errorMsg"] = msg.ErrorMessage; }
+                    return RedirectToAction("Index", "Maintenance", "");
+                //Cancelled deletion of group
+                case 9: return RedirectToAction("Index", "Maintenance", "");
+                //Set group privileges
+                case 10: return RedirectToAction("SetPrivileges", "GroupView", new { groupId = int.Parse(mm.SelectedGroup) });
             }
             return View(mm);
         }
