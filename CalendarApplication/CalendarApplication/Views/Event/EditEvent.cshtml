@@ -25,14 +25,14 @@
                 @Html.HiddenFor(m => m.Approved)
                 @Html.HiddenFor(m => m.State)
 
-                @Html.LabelFor(m => m.Name)
+                @Html.LabelFor(m => m.Name, new { style = "font-weight:bold" })
                 @Html.TextBoxFor(m => m.Name, new { onchange="{ setState(); validateInput('Name','Text',true,true); }" })
                 <div class="validation-summary-errors" id="Name_Error" style="display:none">
                     The event must have a Name!
                 </div>
                 <br />
                 <br />
-                @Html.LabelFor(m => m.SelectedEventType)
+                @Html.LabelFor(m => m.SelectedEventType, new { style = "font-weight:bold" })
                 @Html.DropDownListFor(m => Model.SelectedEventType,
                                         new SelectList(Model.EventTypes, "Value", "Text"),
                                         new { onchange="{ getSpecifics(this.value); }" })
@@ -42,7 +42,7 @@
                 <br />
                 <br />
                 
-                State: <span id="state_text" style="color:@Model.getColor()">@Model.getStateText()</span>
+                <b>State:</b> <span id="state_text" style="color:@Model.getColor()">@Model.getStateText()</span>
                 @if (UserModel.GetCurrent().Admin)
                 {
                     <!-- Admins may approved/disapprove the event -->
@@ -52,14 +52,32 @@
                 <br />
                 <br />
 
-                @Html.LabelFor(m => m.Start) <br />
-                @Html.DateTimeEditorFor(m => m.Start, "g.today,l.End", "dateRoomUpdate()")
+                @Html.LabelFor(m => m.Start, new { style = "font-weight:bold" }) <br />
+                @if(Model.Start > DateTime.Now)
+                {
+                    @Html.DateTimeEditorFor(m => m.Start, "g.today,l.End", "dateRoomUpdate()")
+                }
+                else
+                {
+                    @Model.Start.ToString("dd/MM/yyyy HH:mm");
+                    @Html.HiddenFor(m => m.Start);
+                    <br />
+                }
                 <br />
-                @Html.LabelFor(m => m.End) <br />
-                @Html.DateTimeEditorFor(m => m.End, "g.today,g.Start", "dateRoomUpdate()")
+                @Html.LabelFor(m => m.End, new { style = "font-weight:bold" }) <br />
+                @if(Model.End > DateTime.Now)
+                {
+                    @Html.DateTimeEditorFor(m => m.End, "g.today,g.Start", "dateRoomUpdate()")
+                }
+                else
+                {
+                    @Model.End.ToString("dd/MM/yyyy HH:mm");
+                    @Html.HiddenFor(m => m.End);
+                    <br />
+                }
                 <br />
 
-                @Html.LabelFor(m => m.RoomSelectList)
+                @Html.LabelFor(m => m.RoomSelectList, new { style = "font-weight:bold" })
                 @Html.ListEditorFor(m => m.RoomSelectList, "Rooms Selected", "Rooms Available",
                         "dateRoomUpdate(); setState(); validateInput('RoomSelectList','List',true,true)",
                         "dateRoomUpdate(); setState()")

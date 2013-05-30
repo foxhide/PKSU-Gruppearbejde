@@ -218,13 +218,15 @@ namespace CalendarApplication.Controllers
             DataTable dt = null;
             if (eventId == -1)
             {
+                DateTime start = new DateTime(year, month, day, 10, 0, 0);
+                start = start < DateTime.Now.AddMinutes(10) ? DateTime.Now.AddMinutes(10) : start;
                 eem = new EventEditModel
                 {
                     ID = eventId,
                     EventTypes = new List<SelectListItem>(),
                     SelectedEventType = "0", // Initial value -> Basic event
-                    Start = new DateTime(year, month, day, 10, 0, 0),
-                    End = new DateTime(year, month, day, 18, 0, 0),
+                    Start = start,
+                    End = start.AddHours(2),
                     Visible = true
                 };
             }

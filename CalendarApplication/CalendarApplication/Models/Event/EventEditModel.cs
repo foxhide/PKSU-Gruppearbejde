@@ -13,6 +13,7 @@ namespace CalendarApplication.Models.Event
         public string SelectedEventType { get; set; }
         public List<SelectListItem> EventTypes { get; set; }
 
+        [Display(Name = "Rooms")]
         public List<SelectListItem> RoomSelectList { get; set; }
 
         public List<SelectListItem> UserEditorList { get; set; }
