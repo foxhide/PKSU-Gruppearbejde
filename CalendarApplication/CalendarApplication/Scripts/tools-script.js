@@ -92,6 +92,26 @@ function updateUser(field, id, value) {
     });
 }
 
+/* Resets the user password (only allowed if admin) */
+function resetPassword(id) {
+    $.ajax({
+        url: "/Account/PasswordReset",
+        type: 'POST',
+        data: { userId: id },
+        dataType: 'html',
+        success: function (result) {
+            if (result && result != "null") {
+                result = "New password: " + result;
+                $("#new_pass").html(result);
+            }
+            else {
+                $("#new_pass").html("An error occurred, could not reset password!");
+            }
+            $("#new_pass").show();
+        }
+    });
+}
+
 /* Redirect to the given url */
 function gotoUrl(url) {
     window.location = url;

@@ -11,6 +11,7 @@ using Recaptcha;
 using CalendarApplication.Models.Account;
 using CalendarApplication.Models.User;
 using CalendarApplication.Database;
+using System.Windows.Forms;
 
 namespace CalendarApplication.Controllers
 {
@@ -174,7 +175,7 @@ namespace CalendarApplication.Controllers
             msu.EditUser(userId, value, field);
         }
 
-        /* Edit the password -WIP */
+        /* Edit the password */
         [HttpPost]
         public int EditUserPassword(int userId, string oldPass, string newPass)
         {
@@ -199,6 +200,29 @@ namespace CalendarApplication.Controllers
             string newPassHashed = PasswordHashing.CreateHash(newPass);
             if (!msu.EditUser(userId, newPassHashed, "password")) { return -13; }
             return 0;
+        }
+
+        /* Reset a user password */
+        [HttpPost]
+        public string PasswordReset(int userId)
+        {
+            // Only admins may request a password reset.
+            if (UserModel.GetCurrentUserID() == -1 || !UserModel.GetCurrent().Admin) { return null; }
+
+            MySqlUser msu = new MySqlUser();
+
+            // Generate a new password
+            char[] chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_*?!#%".ToCharArray();
+            string newPass = "";
+            Random r = new Random();
+            for (int i = 0; i < 16; i++)
+            {
+                newPass += chars[r.Next(chars.Length)];
+            }
+            string hashedPass = PasswordHashing.CreateHash(newPass);
+            if (!msu.EditUser(userId, hashedPass, "password")) { return null; }
+
+            return newPass;
         }
 
         /* Delete a user (only if he/she is not approved yet) - only admins */
