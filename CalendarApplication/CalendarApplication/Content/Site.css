@@ -153,11 +153,30 @@ table.gridtable td {
     padding:0;
     border-collapse:collapse;
 }
-
 .custom-style-1 td {
     padding:0;
     padding-left:5px;
     padding-right:5px;
+}
+
+/* Styles for displaying ticks,yellow triangles and red crosses */
+.tick {
+    width:28px;
+    height:28px;
+    background-image:url('/Content/images/ok.png');
+    display:inline-block;
+}
+.yellow_triangle {
+    width:28px;
+    height:28px;
+    background-image:url('/Content/images/warning.png');
+    display:inline-block;
+}
+.red_cross {
+    width:28px;
+    height:28px;
+    background-image:url('/Content/images/error.png');
+    display:inline-block;
 }
 
 /* Styles for basic forms

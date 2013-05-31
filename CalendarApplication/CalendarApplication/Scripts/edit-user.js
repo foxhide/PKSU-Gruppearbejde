@@ -66,14 +66,56 @@ function showUser(list) {
     window.location.href = "/User/Index?userId=" + id;
 }
 
+/* Function for setting status changed */
+function statusChanged(id) {
+    $("#" + id).removeClass();
+    $("#" + id).addClass("yellow_triangle");
+}
+
+/* Function for updating name */
+function updateName(userId, value) {
+    $("#name-input").removeClass();
+    $.ajax({
+        url: "/Account/EditUserString",
+        type: 'POST',
+        data: { field: 'realName', userId: userId, value: value },
+        success: function (result) {
+            if (result) { $("#name-input").addClass("tick"); }
+            else { $("#name-input").addClass("red_cross"); }
+        },
+        error: function (result) {
+            $("#name-input").addClass("red_cross");
+        }
+    });
+}
+
+/* Function for updating email */
+function updateEmail(userId, value) {
+    $("#email-input").removeClass();
+    $.ajax({
+        url: "/Account/EditUserString",
+        type: 'POST',
+        data: { field: 'email', userId: userId, value: value },
+        success: function (result) {
+            if (result) { $("#email-input").addClass("tick"); }
+            else { $("#email-input").addClass("red_cross"); }
+        },
+        error: function (result) {
+            $("#email-input").addClass("red_cross");
+        }
+    });
+}
+
 /* Function used for editing password in edit profile */
 function updatePassword(id) {
     var op = $("#OldPassword").val();
     var np = $("#Password").val();
     var rep = $("#PasswordConfirm").val();
+    $("#password-input").removeClass();
     if (np != rep) {
         $("#match_error").html("Confirmation password does not match!");
         $("#PasswordConfirm").addClass("input-validation-error");
+        $("#password-input").addClass("red_cross");
         return;
     }
     $("#match_error").html("");
@@ -105,11 +147,10 @@ function updatePassword(id) {
                     $('#basic_error').html("Could not save new password!");
                     break;
             }
-            if (i != 0) {
-                $("#OldPassword").val("");
-                $("#Password").val("");
-                $("#PasswordConfirm").val("");
-            }
+            $("#OldPassword").val("");
+            $("#Password").val("");
+            $("#PasswordConfirm").val("");
+            $("#password-input").addClass(i != 0 ? "red_cross" : "tick");
         }
     });
 }

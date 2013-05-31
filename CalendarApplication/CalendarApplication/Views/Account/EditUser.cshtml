@@ -24,14 +24,16 @@
 
 <fieldset>
     <legend>Name</legend>
-    @Html.EditorFor(m => m.RealName)
-    <input type="button" value="Save" onclick="updateUser('realName',@Model.ID,$('#RealName').val())"/>
+    @Html.TextBoxFor(m => m.RealName, new { onkeydown = "statusChanged('name-input')" })
+    <input type="button" value="Save" onclick="updateName(@Model.ID,$('#RealName').val())"/>
+    <div id="name-input" class="tick"></div>
 </fieldset>
    
 <fieldset>
-    <legend>E-mail</legend> 
-    @Html.EditorFor(m => m.Email)
-    <input type="button" value="Save" onclick="updateUser('email',@Model.ID,$('#Email').val())"/>
+    <legend>E-mail</legend>
+    @Html.TextBoxFor(m => m.Email, new { onkeydown = "statusChanged('email-input')" })
+    <input type="button" value="Save" onclick="updateEmail(@Model.ID,$('#Email').val())"/>
+    <div id="email-input" class="tick"></div>
 </fieldset>
 
 <fieldset>
@@ -45,6 +47,7 @@
             </td>
             <td rowspan="3">
                 <input type="button" value="Save" onclick="updatePassword(@Model.ID)"/>
+                <div id="password-input" class="tick"></div>
             </td>
         </tr>
         <tr>
