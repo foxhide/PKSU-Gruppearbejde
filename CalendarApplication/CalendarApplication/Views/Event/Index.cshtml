@@ -170,16 +170,16 @@ else {
     
     <button onclick="printEvent(@(Model.ID))">Print Event</button>
     
-    if (UserModel.GetCurrent().Admin && Model.Start > DateTime.Now)
+   @* if (UserModel.GetCurrent().Admin && Model.Start > DateTime.Now)
     {
-        @Html.HiddenFor(model => Model.ID)
-        @*<input type="hidden" value="@Model.ID" name="eventId" />*@
+        @*Html.HiddenFor(model => Model.ID)@
+        @*<input type="hidden" value="@Model.ID" name="eventId" />@
         <br />
         <br />
         @:Permanent deletion options:
         <br />
         @:Delete all files associated with event<input type="checkbox" value="true" name="delFiles" />
         <br />
-        <input type="submit" value="Delete Event" />
+        <input type="submit" value="Delete Event" />*@
     }
 }
