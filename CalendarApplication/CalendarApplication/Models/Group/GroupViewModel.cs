@@ -12,16 +12,22 @@ namespace CalendarApplication.Models.Group
     {
         public string Name { get; set; }
         public int ID { get; set; }
-        public List<UserModel> Members { get; set; }
-        public List<UserModel> Leaders { get; set; }
-        public List<UserModel> Creators { get; set; }
+        public List<GroupUserModel> Members { get; set; }
         public List<EventTypeModel> EventTypes { get; set; }
+
+        public class GroupUserModel 
+        {
+            public string Name { get; set; }
+            public int ID { get; set; }
+            public bool Creator { get; set; }
+            public bool Leader { get; set; }
+        }
 
         public bool IsLeader(int id)
         {
-            foreach(UserModel usr in Leaders)
+            foreach(GroupUserModel usr in Members)
             {
-                if (usr.ID == id)
+                if (usr.Leader)
                 {
                     return true;
                 }
@@ -31,7 +37,7 @@ namespace CalendarApplication.Models.Group
 
         public bool IsMember(int id)
         {
-            foreach (UserModel usr in Members)
+            foreach (GroupUserModel usr in Members)
             {
                 if (usr.ID == id)
                 {

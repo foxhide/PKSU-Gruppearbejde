@@ -43,8 +43,8 @@ namespace CalendarApplication.Controllers
             {
                 ID = eventId
             };
-            string eventinfo = "SELECT * FROM pksudb.events NATURAL JOIN pksudb.eventroomsused " +
-                               "NATURAL JOIN pksudb.rooms NATURAL JOIN pksudb.eventtypes NATURAL JOIN pksudb.users " +
+            string eventinfo = "SELECT * FROM pksudb.events NATURAL LEFT JOIN pksudb.eventroomsused " +
+                               "NATURAL LEFT JOIN pksudb.rooms NATURAL JOIN pksudb.eventtypes NATURAL JOIN pksudb.users " +
                                "WHERE eventId = " + eventId;
             MySqlConnect con = new MySqlConnect();
             DataTable table = con.ExecuteQuery(eventinfo);
@@ -64,11 +64,14 @@ namespace CalendarApplication.Controllers
                 result.Rooms = new List<Room>();
                 for (int i = 0; i < rows.Count; i++)
                 {
-                    result.Rooms.Add(new Room
+                    if(!(rows[i]["roomId"] is DBNull || rows[i]["roomName"] is DBNull))
                     {
-                        ID = (int)rows[i]["roomId"],
-                        Name = (string)rows[i]["roomName"]
-                    });
+                        result.Rooms.Add(new Room
+                        {
+                            ID = (int)rows[i]["roomId"],
+                            Name = (string)rows[i]["roomName"]
+                        });
+                    }
                 }
                 CustomQuery query0 = new CustomQuery();
                 query0.Cmd = "SELECT * FROM table_" + result.TypeId + " WHERE eventId = @eventId";

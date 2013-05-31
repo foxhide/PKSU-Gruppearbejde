@@ -55,7 +55,7 @@ else {
                     </tr>
                     <tr>
                         <td>Event Visible</td>
-                        <td>@Model.Visible</td>
+                        <td class="@(Model.Visible ? "tick" : "red_cross")"></td>
                     </tr>
                 </table>
             </td>
@@ -77,6 +77,8 @@ else {
                         {
                             <tr>
                                 <td>@fm.Name</td>
+                                @if(fm.Datatype == Fieldtype.Bool){<td class="@(fm.BoolValue ? "tick" : "red_cross")"></td>}
+                                else{
                                 <td>
                                     @switch(fm.Datatype)
                                     {
@@ -88,7 +90,6 @@ else {
                                         case Fieldtype.Text:        @fm.StringValue break;
                                         case Fieldtype.File:        @fm.IntValue break;
                                         case Fieldtype.Datetime:    @fm.DateValue break;
-                                        case Fieldtype.Bool:        @(fm.BoolValue ? "Yes" : "No") break;
                                         case Fieldtype.UserList:    <table>
                                                                     @foreach (SelectListItem user in fm.List)
                                                                     {
@@ -98,8 +99,17 @@ else {
                                                                     }
                                                                     </table>
                                                                     break;
-                                        case Fieldtype.FileList:
-                                        case Fieldtype.GroupList:    <table>
+                                        case Fieldtype.FileList:    <table>
+                                                                    @foreach (SelectListItem group in fm.List)
+                                                                    {
+                                                                        <tr><td>
+                                                                            @fm.IntValue
+                                                                        </td></tr>
+                                                                    }
+                                                                    </table>
+                                                                    break;
+
+                                        case Fieldtype.GroupList:   <table>
                                                                     @foreach (SelectListItem group in fm.List)
                                                                     {
                                                                         <tr><td>
@@ -109,7 +119,7 @@ else {
                                                                     </table>
                                                                     break;
                                     }
-                                </td>
+                                </td>}
                             </tr>
                         }
                     }
@@ -118,10 +128,10 @@ else {
             </td>
         </tr>
     </table>
-    if(UserModel.EditAuthentication(Model.ID,UserModel.GetCurrentUserID()))
-    {
+                    if (UserModel.EditAuthentication(Model.ID, UserModel.GetCurrentUserID()))
+                    {
         @Html.ActionLink("Edit event", "EditEvent", "Event", new { eventId = Model.ID, year = 0, month = 0, day = 0 }, null)
-    }
+                    }
 
     <script>
         function printEvent(eventId) {
