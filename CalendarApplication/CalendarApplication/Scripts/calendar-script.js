@@ -58,3 +58,23 @@ function hidePopup(name) {
 function hidePopupBig(name) {
     $('#' + name + '_big').hide();
 }
+
+function changeCheckboxes(element) {
+    for (var i = 0; $("#Filter_Eventtypes_" + i + "__Selected").length > 0 && $("#Filter_Eventtypes_" + i + "__Selected") != null; i++) {
+        $("#Filter_Eventtypes_"+i+"__Selected").attr("checked", element.checked);
+    }
+}
+
+function checkBoxes() {
+    var checked = 0;
+    var unchecked = 0;
+    for (var i = 0; $("#Filter_Eventtypes_" + i + "__Selected").length > 0 && $("#Filter_Eventtypes_" + i + "__Selected") != null; i++) {
+        if ($("#Filter_Eventtypes_" + i + "__Selected").attr("checked")) {
+            checked++;
+        }
+        else {
+            unchecked++;
+        }
+    }
+    $("#checkAll").attr("checked", checked > unchecked);
+}
