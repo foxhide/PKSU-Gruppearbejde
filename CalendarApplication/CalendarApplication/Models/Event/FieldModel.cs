@@ -32,7 +32,7 @@ namespace CalendarApplication.Models.Event
                 case Fieldtype.Bool: return this.BoolValue; //bool
                 case Fieldtype.FileList:
                 case Fieldtype.GroupList:
-                case Fieldtype.UserList: return false;
+                case Fieldtype.UserList: return false; // Lists are handled in seperate tables, just insert dummy value
             }
             return "";
         }

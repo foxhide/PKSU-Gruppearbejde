@@ -86,7 +86,7 @@ namespace CalendarApplication.Models.EventType
                 case Fieldtype.Bool: return "tinyint(1)";    //Yes/No
                 case Fieldtype.UserList:
                 case Fieldtype.GroupList:
-                case Fieldtype.FileList: return "tinyint(1)";  //Dummy value for lists
+                case Fieldtype.FileList: return "tinyint(1)";  //Dummy type for lists
                 default: return "int";
             }
         }
