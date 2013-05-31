@@ -232,5 +232,50 @@ namespace CalendarApplication.Database
                 return false;
             }
         }
+
+
+        /// <summary>
+        /// Delete existing group
+        /// </summary>
+        /// <param name="id">group id</param>
+        /// <returns>bool indicating success or failure</returns>
+        public bool DeleteGroup(int id)
+        {
+            if (this.OpenConnection() == true)
+            {
+                MySqlTransaction mst = null;
+                MySqlCommand cmd = null;
+                cmd = new MySqlCommand();
+
+                try
+                {
+                    mst = connection.BeginTransaction();
+                    cmd.Connection = connection;
+                    cmd.Transaction = mst;
+                    
+                    cmd.CommandText = "DELETE FROM pksudb.groups WHERE groupId = @groupId";
+                    cmd.Parameters.AddWithValue("@groupId", id);
+                    cmd.Prepare();
+                    cmd.ExecuteNonQuery();
+
+                    mst.Commit();
+
+                    this.CloseConnection();
+                    return true;
+                }
+                catch (MySqlException ex)
+                {
+                    this.ErrorMessage = ex.Message + " caused by: " + cmd.CommandText;
+                    mst.Rollback();
+                    this.CloseConnection();
+                    return false;
+                }
+            }
+            else
+            {
+                //could not open connection
+                return false;
+            }
+        }
     }
 }

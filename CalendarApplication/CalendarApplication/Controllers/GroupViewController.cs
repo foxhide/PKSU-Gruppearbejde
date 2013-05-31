@@ -19,6 +19,9 @@ namespace CalendarApplication.Controllers
         /// <returns>view of list of GroupModel</returns>
         public ActionResult Index()
         {
+            //Only for users
+            if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
+
             GroupListModel model = new GroupListModel { GroupList = new List<GroupModel>() };
             MySqlConnect msc = new MySqlConnect();
             string grcmd = "SELECT * FROM pksudb.groups";
@@ -48,12 +51,13 @@ namespace CalendarApplication.Controllers
         /// <returns>view of GroupViewModel</returns>
         public ActionResult ViewGroup(int groupId)
         {
+            //Only for users
+            if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
+
             GroupViewModel model = new GroupViewModel
             {
                 ID = groupId,
-                Members = new List<Models.User.UserModel>(),
-                Leaders = new List<Models.User.UserModel>(),
-                Creators = new List<Models.User.UserModel>(),
+                Members = new List<GroupViewModel.GroupUserModel>(),
                 EventTypes = new List<EventTypeModel>()
             };
             string cmd1 = "SELECT eventTypeId, eventTypeName FROM pksudb.eventcreationgroups "
@@ -81,29 +85,21 @@ namespace CalendarApplication.Controllers
 
             foreach (DataRow dr in dt0.Rows)
             {
-                model.EventTypes.Add(new EventTypeModel { ID = (int)dr["eventTypeId"], Name = (string)dr["eventTypeName"].ToString() });
+                model.EventTypes.Add(new EventTypeModel { 
+                    ID = (int)dr["eventTypeId"], 
+                    Name = (string)dr["eventTypeName"].ToString() 
+                });
             }
 
             foreach (DataRow dr in dt1.Rows)
             {
-                //should maybe only add each to their own list instead of having all leaders in
-                //creator list and having everybody in the memberlist
-                if ((bool)dr["groupLeader"])
+                model.Members.Add(new GroupViewModel.GroupUserModel
                 {
-                    model.Leaders.Add(new UserModel { ID = (int)dr["userId"], UserName = (string)dr["userName"].ToString() });
-                    model.Creators.Add(new UserModel { ID = (int)dr["userId"], UserName = (string)dr["userName"].ToString() });
-                    model.Members.Add(new UserModel { ID = (int)dr["userId"], UserName = (string)dr["userName"].ToString() });
-                }
-                else if ((bool)dr["canCreate"])
-                {
-                    model.Creators.Add(new UserModel { ID = (int)dr["userId"], UserName = (string)dr["userName"].ToString() });
-                    model.Members.Add(new UserModel { ID = (int)dr["userId"], UserName = (string)dr["userName"].ToString() });
-                }
-                else
-                {
-                    model.Members.Add(new UserModel { ID = (int)dr["userId"], UserName = (string)dr["userName"].ToString() });
-                }
-
+                    ID = (int)dr["userId"],
+                    Name = (string)dr["userName"].ToString(),
+                    Leader = (bool)dr["groupLeader"],
+                    Creator = (bool)dr["canCreate"]
+                });
             }
             return View(model);
         }

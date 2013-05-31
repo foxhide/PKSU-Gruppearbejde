@@ -30,8 +30,8 @@ else {
                         <td>@Model.RealName</td>
                     </tr>
                     <tr>
-                        <td>Is Admin</td>
-                        <td>@Model.Admin</td>
+                        <td>Admin</td>
+                        <td class="@(Model.Admin ? "tick" : "red_cross")"></td>
                     </tr>
                     <tr>
                         <td>Email</td>

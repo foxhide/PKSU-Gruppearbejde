@@ -55,7 +55,7 @@ else {
                     </tr>
                     <tr>
                         <td>Event Visible</td>
-                        <td>@Model.Visible</td>
+                        <td class="@(Model.Visible ? "tick" : "red_cross")"></td>
                     </tr>
                 </table>
             </td>
@@ -77,17 +77,19 @@ else {
                         {
                             <tr>
                                 <td>@fm.Name</td>
+                                @if(fm.Datatype == Fieldtype.Bool){<td class="@(fm.BoolValue ? "tick" : "red_cross")"></td>}
+                                else{
                                 <td>
                                     @switch(fm.Datatype)
                                     {
                                         case Fieldtype.Float:       @fm.FloatValue break;
                                         case Fieldtype.User:        if(fm.IntValue != 0) { @Html.ActionLink(fm.StringValue, "Index", "User", new { UserId = fm.IntValue }, null) }
                                                                     else { @fm.StringValue } break;
-                                        case Fieldtype.Group:       @fm.StringValue break;
+                                        case Fieldtype.Group:       if(fm.IntValue != 0) { @Html.ActionLink(fm.StringValue, "ViewGroup", "GroupView", new { groupId = fm.IntValue }, null) }
+                                                                    else { @fm.StringValue } break;
                                         case Fieldtype.Text:        @fm.StringValue break;
                                         case Fieldtype.File:        @fm.IntValue break;
                                         case Fieldtype.Datetime:    @fm.DateValue break;
-                                        case Fieldtype.Bool:        @(fm.BoolValue ? "Yes" : "No") break;
                                         case Fieldtype.UserList:    <table>
                                                                     @foreach (SelectListItem user in fm.List)
                                                                     {
@@ -97,18 +99,27 @@ else {
                                                                     }
                                                                     </table>
                                                                     break;
-                                        case Fieldtype.FileList:
-                                        case Fieldtype.GroupList:    <table>
-                                                                    @foreach (SelectListItem item in fm.List)
+                                        case Fieldtype.FileList:    <table>
+                                                                    @foreach (SelectListItem group in fm.List)
                                                                     {
                                                                         <tr><td>
-                                                                            @item.Text
+                                                                            @fm.IntValue
+                                                                        </td></tr>
+                                                                    }
+                                                                    </table>
+                                                                    break;
+
+                                        case Fieldtype.GroupList:   <table>
+                                                                    @foreach (SelectListItem group in fm.List)
+                                                                    {
+                                                                        <tr><td>
+                                                                            @Html.ActionLink(group.Text, "ViewGroup", "GroupView", new { groupId = Convert.ToInt32(group.Value) }, null)
                                                                         </td></tr>
                                                                     }
                                                                     </table>
                                                                     break;
                                     }
-                                </td>
+                                </td>}
                             </tr>
                         }
                     }
@@ -117,10 +128,10 @@ else {
             </td>
         </tr>
     </table>
-    if(UserModel.EditAuthentication(Model.ID,UserModel.GetCurrentUserID()))
-    {
+                    if (UserModel.EditAuthentication(Model.ID, UserModel.GetCurrentUserID()))
+                    {
         @Html.ActionLink("Edit event", "EditEvent", "Event", new { eventId = Model.ID, year = 0, month = 0, day = 0 }, null)
-    }
+                    }
 
     <script>
         function printEvent(eventId) {
