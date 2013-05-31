@@ -155,24 +155,24 @@ namespace CalendarApplication.Controllers
 
         /* Edit a user string value (other than password) */
         [HttpPost]
-        public void EditUserString(string field, int userId, string value)
+        public bool EditUserString(string field, int userId, string value)
         {
             // If no user or user trying to edit other user's profile -> return
-            if (UserModel.GetCurrentUserID() == -1 || UserModel.GetCurrentUserID() != userId) { return; }
+            if (UserModel.GetCurrentUserID() == -1 || UserModel.GetCurrentUserID() != userId) { return false; }
 
             MySqlUser msu = new MySqlUser();
-            msu.EditUser(userId, value, field);
+            return msu.EditUser(userId, value, field);
         }
 
         /* Edit a user boolean value - only admins! */
         [HttpPost]
-        public void EditUserBool(string field, int userId, bool value)
+        public bool EditUserBool(string field, int userId, bool value)
         {
             // If no user or non-admin trying to edit other user's boolean -> return
-            if (UserModel.GetCurrentUserID() == -1 || !UserModel.GetCurrent().Admin) { return; }
+            if (UserModel.GetCurrentUserID() == -1 || !UserModel.GetCurrent().Admin) { return false; }
 
             MySqlUser msu = new MySqlUser();
-            msu.EditUser(userId, value, field);
+            return msu.EditUser(userId, value, field);
         }
 
         /* Edit the password */

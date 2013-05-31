@@ -110,10 +110,13 @@ namespace CalendarApplication.Helpers
                 AddField(builder, id, f, val, w, validateStr); // Add the field
                 builder.Append("</td>");
             }
+
             string function = string.IsNullOrEmpty(onchange) ? "null" : onchange.Substring(0, onchange.Length - 2);
-            builder.Append("<td><script>createDatePicker('" + id + "','" + compare + "'," + function + ")</script>");
+            builder.Append("<td rowspan = 2><script>createDatePicker('" + id + "','" + compare + "'," + function + ")</script>");
             builder.Append("<input type='hidden' id='" + id + "_picker'>");
-            builder.Append("<input type='button' value='Select Date' id='" + id + "_but' onclick=showDatePicker('" + id + "_picker') /></td>");
+            builder.AppendLine("<img src='/Content/images/calendar.png' style='cursor:pointer' onclick=showDatePicker('" + id + "_picker')></td>");
+            
+            //builder.Append("<input type='button' value='Select Date' id='" + id + "_but' onclick=showDatePicker('" + id + "_picker') /></td>");
             builder.AppendLine("</tr></table>");
             return MvcHtmlString.Create(builder.ToString());
         }

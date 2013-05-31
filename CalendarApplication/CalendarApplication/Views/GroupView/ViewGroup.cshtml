@@ -12,39 +12,17 @@
         <tr>
             <td>
                 <table class="gridtable">
-                        <tr>
-                            <td>Group Leaders</td>
-                        </tr>
-                    @for (int i = 0; i < Model.Leaders.Count; i++)
-                    {
-                        <tr>
-                            <td>@Html.ActionLink(Model.Leaders[i].UserName, "Index", "User", new { userId = Model.Leaders[i].ID }, null)</td>
-                        </tr>
-                    }
-                </table>
-            </td>
-            <td>
-                <table class="gridtable">
-                    <tr>
-                        <td>Event Creators</td>
-                    </tr>
-                    @for (int i = 0; i < Model.Creators.Count; i++)
-                    {
-                        <tr>
-                            <td>@Html.ActionLink(Model.Creators[i].UserName, "Index", "User", new { userId = Model.Creators[i].ID }, null)</td>
-                        </tr>
-                    }
-                </table>
-            </td>
-            <td>
-                <table class="gridtable">
                     <tr>
                         <td>Group Members</td>
+                        <td>Event Creator</td>
+                        <td>Leader</td>
                     </tr>
                     @for (int i = 0; i < Model.Members.Count; i++)
                     {
                         <tr>
-                            <td>@Html.ActionLink(Model.Members[i].UserName, "Index", "User", new { userId = Model.Members[i].ID }, null)</td>
+                            <td>@Html.ActionLink(Model.Members[i].Name, "Index", "User", new { userId = Model.Members[i].ID }, null)</td>
+                            <td class="@(Model.Members[i].Creator ? "tick" : "red_cross")"></td>
+                            <td class="@(Model.Members[i].Leader ? "tick" : "red_cross")"></td>
                         </tr>
                     }
                 </table>

@@ -212,18 +212,18 @@ namespace CalendarApplication.Controllers
         private DateTime parseString(string date)
         {
             // Check null
-            if(string.IsNullOrEmpty(date)) { return DateTime.Now; }
+            if(string.IsNullOrEmpty(date)) { return DateTime.Today; }
 
             // Regex check
             Match m = Regex.Match(date, @"[0-9]{4}-[0-9]{2}(-[0-9]{2})?");
-            if (!m.Success) { TempData["errorMsg"] = "Bad date string!"; return DateTime.Now; }
+            if (!m.Success) { TempData["errorMsg"] = "Bad date string!"; return DateTime.Today; }
 
             string[] vals = date.Split('-');
             int year = Convert.ToInt32(vals[0]);
             int month = Convert.ToInt32(vals[1]);
             int day = vals.Length > 2 ? Convert.ToInt32(vals[2]) : 1;
 
-            DateTime result = DateTime.Now;
+            DateTime result = DateTime.Today;
             // Try to create the dateTime (checks if valid date)
             try
             {
