@@ -26,14 +26,14 @@
     <legend>Name</legend>
     @Html.TextBoxFor(m => m.RealName, new { onkeydown = "statusChanged('name-input')" })
     <input type="button" value="Save" onclick="updateName(@Model.ID,$('#RealName').val())"/>
-    <div id="name-input" class="tick"></div>
+    <div id="name-input" class="tick" style="height:26px;width:26px;display:inline-block"></div>
 </fieldset>
    
 <fieldset>
     <legend>E-mail</legend>
     @Html.TextBoxFor(m => m.Email, new { onkeydown = "statusChanged('email-input')" })
     <input type="button" value="Save" onclick="updateEmail(@Model.ID,$('#Email').val())"/>
-    <div id="email-input" class="tick"></div>
+    <div id="email-input" class="tick" style="height:26px;width:26px;display:inline-block"></div>
 </fieldset>
 
 <fieldset>
@@ -47,7 +47,7 @@
             </td>
             <td rowspan="3">
                 <input type="button" value="Save" onclick="updatePassword(@Model.ID)"/>
-                <div id="password-input" class="tick"></div>
+                <div id="password-input" class="tick" style="height:26px;width:26px;display:inline-block"></div>
             </td>
         </tr>
         <tr>

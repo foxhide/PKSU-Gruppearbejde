@@ -161,22 +161,19 @@ table.gridtable td {
 
 /* Styles for displaying ticks,yellow triangles and red crosses */
 .tick {
-    width:28px;
-    height:28px;
     background-image:url('/Content/images/ok.png');
-    display:inline-block;
+    background-repeat:no-repeat;
+    background-position:center; 
 }
 .yellow_triangle {
-    width:28px;
-    height:28px;
     background-image:url('/Content/images/warning.png');
-    display:inline-block;
+    background-repeat:no-repeat;
+    background-position:center; 
 }
 .red_cross {
-    width:28px;
-    height:28px;
     background-image:url('/Content/images/error.png');
-    display:inline-block;
+    background-repeat:no-repeat;
+    background-position:center; 
 }
 
 /* Styles for basic forms
