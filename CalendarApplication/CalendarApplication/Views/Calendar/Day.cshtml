@@ -124,7 +124,7 @@
             <td>
                 @Html.Partial("_FilterPartial", Model)
 
-                @if (UserModel.GetCurrentUserID() != -1)
+                @if (UserModel.GetCurrentUserID() != -1 && DateTime.Today <= Model.Date)
                 {
                     @* A user is signed in... *@
                     <input type="button" value="New event!" onclick="window.location='@Url.Action("EditEvent", "Event",
