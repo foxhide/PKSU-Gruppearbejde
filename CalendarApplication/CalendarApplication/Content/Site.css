@@ -145,6 +145,21 @@ table.gridtable td {
     background-color: #ffffff;
 }
 
+/* Scrollable div */
+div.scrolldiv {
+    border:1px solid black;
+    height:200px;
+    overflow-y:scroll;
+}
+div.scrolldiv table {
+    border-collapse:collapse;
+}
+div.scrolldiv tr td {
+    padding:3px;
+    background-color:#DBDBDB;
+    border:1px solid white;
+}
+
 /* Used for the datetime editor */
 .custom-style-1 {
     margin-left:0;

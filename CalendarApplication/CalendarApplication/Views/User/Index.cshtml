@@ -1,10 +1,12 @@
 ﻿@model CalendarApplication.Models.User.UserViewModel
 
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "View User";
 }
 
 @using CalendarApplication.Models.User
+@using CalendarApplication.Models.Group
+@using CalendarApplication.Models.Event
 
 <h3 style="color:red">@TempData["errorMsg"]</h3>
 
@@ -12,84 +14,90 @@
     <h2>Error loading user!</h2>
 }
 else {
-    <h2>User Info</h2>
+    <h2>User: @Model.UserName</h2>
     if(!Model.Active)
     {
-    <h3 style="color:red">This user is no longer active!</h3>
+        <h3 style="color:red">This user is no longer active!</h3>
     }
-    <table>
+    <table style="margin-left:40px;margin-right:auto">
         <tr>
-            <td>
-                <table class="gridtable">
-                    <tr>
-                        <td>User Name</td>
-                        <td>@Model.UserName</td>
-                    </tr>
-                    <tr>
-                        <td>Real Name</td>
-                        <td>@Model.RealName</td>
-                    </tr>
-                    <tr>
-                        <td>Admin</td>
-                        <td class="@(Model.Admin ? "tick" : "red_cross")"></td>
-                    </tr>
-                    <tr>
-                        <td>Email</td>
-                        <td><a href='@("mailto:"+Model.Email)'>@Model.Email</a></td>
-                    </tr>
-                </table>
-            </td>
-            <td>
-                <table class="gridtable">
-                    <tr>
-                        <td>User Groups</td>
-                    </tr>
-                    @for (int i = 0; i < Model.Groups.Count; i++)
+            <td id="data" style="padding-right:120px">
+                <b>Name</b><br />
+                @Model.RealName<br />
+                <br />
+                <b>Email</b><br />
+                @Model.Email<br />
+                <br />
+                @if (Model.Admin)
+                {
+                    @:User is admin
+                    <br />
+                    <br />
+                }
+                @if (UserModel.GetCurrentUserID() == Model.ID)
+                {
+                    @Html.ActionLink("Edit Profile", "EditUser", "Account", new { userId = Model.ID }, null)
+                }
+                else if (UserModel.GetCurrentUserID() != -1 && UserModel.GetCurrent().Admin)
+                {
+                    if (Model.Active)
                     {
-                        <tr>
-                            <!-- Add Html.ActionLink when Group view is implemented -->
-                            <td>@Model.Groups[i].Name</td>
-                        </tr>
+                        if (Model.Admin)
+                        {
+                            <input type="button" value="Remove admin rights" onclick="updateUser('admin',@(Model.ID),false)"/>
+                        }
+                        else
+                        {
+                            <input type="button" value="Make admin" onclick="updateUser('admin',@(Model.ID),true)"/>
+                        }
+                        <input type="button" value="Reset password" onclick="resetPassword(@(Model.ID))">
+                        <input type="button" value="Deactivate user" onclick="updateUser('active',@(Model.ID),false)"/>
+                        <br />
+                        <div id="new_pass" style="background-color:blue;color:white;width:300px;
+                                height:50px;text-align:center;display:none"></div>
                     }
-                </table>
-            </td>
-            <td>
-                <table class="gridtable">
-                    <tr>
-                        <td>Events created by user</td>
-                    </tr>
-                    @for (int i = 0; i < Model.Events.Count; i++)
+                    else
                     {
-                        <tr>
-                            <td style="background-color:@(Model.Events[i].getColor())">@Html.ActionLink(Model.Events[i].Name, "Index", "Event", new { eventId = Model.Events[i].ID }, null)
-                        </tr>
+                        <input type="button" value="Activate user" onclick="updateUser('active',@(Model.ID),true)"/>
                     }
-                </table>
+                }
+            </td>
+            <td id="groups" style="padding-right:120px">
+                <b>Groups</b>
+                <div class="scrolldiv">
+                    <table>
+                        @foreach (GroupModel g in Model.Groups)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.ActionLink(g.Name, "ViewGroup", "GroupView", new { groupId = g.ID }, null)
+                                </td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+            </td>
+            <td id="events">
+                <b>Events created</b>
+                <div class="scrolldiv">
+                    <table>
+                        @foreach (BasicEvent e in Model.Events)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.ActionLink(e.Name, "Index", "Event", new { eventId = e.ID }, null)
+                                </td>
+                                <td>
+                                    @e.TypeName
+                                </td>
+                                <td style="background-color:@e.getColor()">
+                                    @e.getStateText()
+                                </td>
+                            </tr>
+                        }
+                    </table>
+                </div>
             </td>
         </tr>
     </table>
-    if(UserModel.GetCurrentUserID() != -1 && UserModel.GetCurrentUserID() == Model.ID)
-    {
-        @Html.ActionLink("Edit Profile","EditUser", "Account", new { userId = Model.ID }, null)
-    }
-    else if (UserModel.GetCurrentUserID() != -1 && UserModel.GetCurrent().Admin)
-    {
-        if(Model.Active) {
-            if(Model.Admin) {
-                <input type="button" value="Remove admin rights" onclick="updateUser('admin',@(Model.ID),false)"/>
-            }
-            else {
-                <input type="button" value="Make admin" onclick="updateUser('admin',@(Model.ID),true)"/>
-            }
-            <input type="button" value="Reset password" onclick="resetPassword(@(Model.ID))">
-            <input type="button" value="Deactivate user" onclick="updateUser('active',@(Model.ID),false)"/>
-            <br />
-            <div id="new_pass" style="background-color:blue;color:white;width:300px;
-                  height:50px;text-align:center;display:none"></div>
-        }
-        else
-        {
-            <input type="button" value="Activate user" onclick="updateUser('active',@(Model.ID),true)"/>
-        }
-    }
 }

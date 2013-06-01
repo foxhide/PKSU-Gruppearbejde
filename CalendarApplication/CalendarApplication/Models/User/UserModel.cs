@@ -95,7 +95,7 @@ namespace CalendarApplication.Models.User
             object[] args = { ID };
             CustomQuery query = new CustomQuery
             {
-                Cmd = "SELECT * FROM groups NATURAL JOIN groupmembers NATURAL JOIN users WHERE userId = @userId ORDER BY groupId DESC", 
+                Cmd = "SELECT * FROM groups NATURAL JOIN groupmembers WHERE userId = @userId ORDER BY groupName DESC", 
                 ArgNames = argnames,
                 Args = args
             };
@@ -117,9 +117,6 @@ namespace CalendarApplication.Models.User
         /// <returns>List of basic events created by this user</returns>
         public List<BasicEvent> GetEvents()
         {
-            //MySqlConnect msc = new MySqlConnect();
-            //return msc.GetEvents(false,"userId = "+ID,"eventStart");
-
             return GetEvents(this.ID);
         }
 
@@ -140,21 +137,21 @@ namespace CalendarApplication.Models.User
             if (currentUser == -1)
             {
                 // No user -> only visible events
-                command = "SELECT eventId,eventName,state"
+                command = "SELECT eventId,eventName,eventTypeName,state"
                             + "FROM (events NATURAL JOIN users NATURAL JOIN eventtypes)"
                             + "WHERE userId = @userId AND visible = 1 ORDER BY eventStart";
             }
             else if (currentUser == userId || UserModel.GetCurrent().Admin)
             {
                 // User is looking at his/her own events or user is admin
-                command = "SELECT eventId,eventName,state"
+                command = "SELECT eventId,eventName,eventTypeName,state"
                             + " FROM (events NATURAL JOIN users NATURAL JOIN eventtypes)"
                             + " WHERE userId = @userId ORDER BY eventStart";
             }
             else
             {
                 // Check if user in edit-group/user or visible-group or if event is visible.
-                command = "SELECT e.eventId, e.eventName, e.state"
+                command = "SELECT e.eventId, e.eventName,eventTypeName, e.state"
                                 + " FROM pksudb.events AS e"
                                 + " LEFT JOIN (SELECT eventId,userId"
                                 + " FROM eventeditorsusers"
@@ -188,6 +185,7 @@ namespace CalendarApplication.Models.User
                         {
                             ID = (int)dt["eventId"],
                             Name = (string)dt["eventName"],
+                            TypeName = (string)dt["eventTypeName"],
                             State = (int)dt["state"]
                         });
                 }
