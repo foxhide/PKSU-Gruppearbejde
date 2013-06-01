@@ -20,7 +20,7 @@ function removeField(id,mid,datatype) {
         var newField = document.createElement('div');
         var fieldId = 'field_' + id;
         newField.id = fieldId;
-        newField.innerHTML = "<input type='hidden' id='viewid_rem_" + id + "' name='TypeSpecific[" + id + "].ViewID' value='-1' />"
+        newField.innerHTML = "<input type='hidden' id='ViewID_" + id + "' name='TypeSpecific[" + id + "].ViewID' value='-1' />"
                                 + "<input type='hidden' id='id_rem_" + id + "' name='TypeSpecific[" + id + "].ID' value='" + mid + "'/>"
                                 + "<input type='hidden' id='id_rem_" + id + "' name='TypeSpecific[" + id + "].Datatype' value='" + datatype + "'/>";
         list.appendChild(newField);
@@ -73,5 +73,23 @@ function varCharLimit(id, limit) {
     var value = input.value;
     if (value < limit) {
         input.value = limit;
+    }
+}
+
+function checkFields(form) {
+    var ok = true;
+    for (var i = 0; i < field_count; i++) {
+        if ($("#ViewID_" + i).attr("id") != -1) {
+            if ($("#Name_" + i).attr("value") == "") {
+                $("#Name_" + i).addClass("input-validation-error");
+                ok = false;
+            }
+        }
+    }
+    if (ok) {
+        form.submit();
+    }
+    else {
+        $("#event-type-submit-error").show();
     }
 }

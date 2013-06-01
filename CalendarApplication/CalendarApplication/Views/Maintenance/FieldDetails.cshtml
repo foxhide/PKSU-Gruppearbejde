@@ -12,7 +12,7 @@
         </th>
     </tr>
     <tr>
-        <td><input type='text' id='Name_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].Name' value="@(Model.Name)"></td>
+        <td><input type='text' id='Name_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].Name' value="@(Model.Name)" onkeypress="$('#Name_@(Model.ViewID)').removeClass('input-validation-error')"></td>
         <td>
         @if(Model.ID == -1)
         {

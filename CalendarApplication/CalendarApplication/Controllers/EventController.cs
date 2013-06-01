@@ -96,7 +96,7 @@ namespace CalendarApplication.Controllers
                         };
                         switch (fm.Datatype)
                         {
-                            case Fieldtype.Float: fm.FloatValue = (float)ds.Tables[0].Rows[0]["field_" + fm.ID]; break;
+                            case Fieldtype.Float: fm.FloatValue = ds.Tables[0].Rows[0]["field_" + fm.ID] as float? ?? 0; break;
 
                             case Fieldtype.File: if (DBNull.Value.Equals(ds.Tables[0].Rows[0]["field_" + fm.ID])) { fm.IntValue = 0; }
                                 else { fm.IntValue = (int)ds.Tables[0].Rows[0]["field_" + fm.ID]; }
@@ -104,9 +104,9 @@ namespace CalendarApplication.Controllers
 
                             case Fieldtype.Text: fm.StringValue = ds.Tables[0].Rows[0]["field_" + fm.ID] as string; break;
 
-                            case Fieldtype.Bool: fm.BoolValue = (bool)ds.Tables[0].Rows[0]["field_" + fm.ID]; break;
+                            case Fieldtype.Bool: fm.BoolValue = ds.Tables[0].Rows[0]["field_" + fm.ID] as bool? ?? false; break;
 
-                            case Fieldtype.Datetime: fm.DateValue = (DateTime)ds.Tables[0].Rows[0]["field_" + fm.ID]; break;
+                            case Fieldtype.Datetime: fm.DateValue = ds.Tables[0].Rows[0]["field_" + fm.ID] as DateTime? ?? new DateTime(1,1,1); break;
 
                             case Fieldtype.User: if (DBNull.Value.Equals(ds.Tables[0].Rows[0]["field_" + fm.ID]))
                                 {
@@ -571,8 +571,8 @@ namespace CalendarApplication.Controllers
                                                 break;
                             //case Fieldtype.FileList:
                             case Fieldtype.File: fm.StringValue = ""; fm.IntValue = (int)row["field_" + fm.ID]; break;
-                            case Fieldtype.Datetime: fm.DateValue = (DateTime)row["field_" + fm.ID]; break;
-                            case Fieldtype.Bool: fm.BoolValue = (bool)row["field_" + fm.ID]; break; //bool
+                            case Fieldtype.Datetime: fm.DateValue = row["field_" + fm.ID] is DBNull ? new DateTime(1, 1, 1) : (DateTime)row["field_" + fm.ID]; break;
+                            case Fieldtype.Bool: fm.BoolValue = row["field_" + fm.ID] is DBNull ? false : (bool)row["field_" + fm.ID]; break; //bool
                         }
                     }
                     result.Add(fm);
@@ -811,5 +811,68 @@ namespace CalendarApplication.Controllers
         {
             return JsonConvert.SerializeObject(this.CheckDates(eventId, start, end, rooms));
         }
+
+/*
+        /// <summary>
+        /// Deletes an event
+        /// </summary>
+        /// <param name="model">Model containing Id of the event to be deleted</param>
+        /// <param name="delFiles">Whether all files associated with the event should also be deleted</param>
+        /// <returns>calendar view, view of this event on error</returns>
+        [HttpPost]
+        public ActionResult Index(EventWithDetails model, bool delFiles)
+        {
+            // Check if user is logged in and is admin
+            if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
+            else if (!(UserModel.GetCurrent().Admin))
+            {
+                return RedirectToAction("Index", "Home", null);
+            }
+
+            if (delFiles)
+            {
+                return DeleteEventAndFiles(model.ID);
+            }
+            else
+            {
+                return DeleteEvent(model.ID);
+            }
+        }
+
+        /// <summary>
+        /// Deletes an event
+        /// </summary>
+        /// <param name="eventId">Id of the event to be deleted</param>
+        /// <returns>calendar view, view of this event on error</returns>
+        private ActionResult DeleteEvent(int eventId)
+        {
+            MySqlEvent mse = new MySqlEvent();
+            bool ok = mse.DeleteEvent(eventId);
+            if (!ok)
+            {
+                TempData["errorMsg"] = mse.ErrorMessage;
+                return View(GetEvent(eventId));
+            }
+
+            return RedirectToAction("", "Calender", null);
+        }
+
+        /// <summary>
+        /// Deletes an event and all files associated with event (DOESN'T WORK)
+        /// </summary>
+        /// <param name="eventId">Id of the event to be deleted</param>
+        /// <returns>calendar view, view of this event on error</returns>
+        private ActionResult DeleteEventAndFiles(int eventId)
+        {
+            MySqlEvent mse = new MySqlEvent();
+            bool ok = mse.DeleteEvent(eventId);
+            if (!ok)
+            {
+                TempData["errorMsg"] = mse.ErrorMessage;
+                return View(GetEvent(eventId));
+            }
+
+            return RedirectToAction("", "Calender", null);
+        }*/
     }
 }

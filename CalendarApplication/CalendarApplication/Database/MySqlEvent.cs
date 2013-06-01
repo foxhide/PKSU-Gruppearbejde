@@ -612,5 +612,50 @@ namespace CalendarApplication.Database
             }
             return true;
         }
+
+
+        /// <summary>
+        /// Delete existing event
+        /// </summary>
+        /// <param name="id">event id</param>
+        /// <returns>bool indicating success or failure</returns>
+        public bool DeleteEvent(int id)
+        {
+            if (this.OpenConnection() == true)
+            {
+                MySqlTransaction mst = null;
+                MySqlCommand cmd = null;
+                cmd = new MySqlCommand();
+
+                try
+                {
+                    mst = connection.BeginTransaction();
+                    cmd.Connection = connection;
+                    cmd.Transaction = mst;
+
+                    cmd.CommandText = "DELETE FROM pksudb.events WHERE eventId = @evid";
+                    cmd.Parameters.AddWithValue("@evid", id);
+                    cmd.Prepare();
+                    cmd.ExecuteNonQuery();
+
+                    mst.Commit();
+
+                    this.CloseConnection();
+                    return true;
+                }
+                catch (MySqlException ex)
+                {
+                    this.ErrorMessage = ex.Message + " caused by: " + cmd.CommandText;
+                    mst.Rollback();
+                    this.CloseConnection();
+                    return false;
+                }
+            }
+            else
+            {
+                //could not open connection
+                return false;
+            }
+        }
     }
 }

@@ -44,6 +44,6 @@
     
     <br />
     <br />
-    
-    <input type="submit" value="@(Model.ID != -1 ? "Save changes" : "Create Event Type")"/>
+    <input type="button" onclick="checkFields(this.form)" value="@(Model.ID != -1 ? "Save changes" : "Create Event Type")"/>
+    <div id="event-type-submit-error" class="validation-summary-errors" style="display:none">Some fields are not filled out!</div>
 }
