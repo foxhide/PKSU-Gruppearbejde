@@ -812,7 +812,7 @@ namespace CalendarApplication.Controllers
             return JsonConvert.SerializeObject(this.CheckDates(eventId, start, end, rooms));
         }
 
-/*
+
         /// <summary>
         /// Deletes an event
         /// </summary>
@@ -854,11 +854,11 @@ namespace CalendarApplication.Controllers
                 return View(GetEvent(eventId));
             }
 
-            return RedirectToAction("", "Calender", null);
+            return RedirectToAction("", "Calendar", null);
         }
 
         /// <summary>
-        /// Deletes an event and all files associated with event (DOESN'T WORK)
+        /// Deletes an event and all files associated with event (FILE DELETION NOT IMPLEMENTED YET)
         /// </summary>
         /// <param name="eventId">Id of the event to be deleted</param>
         /// <returns>calendar view, view of this event on error</returns>
@@ -872,7 +872,7 @@ namespace CalendarApplication.Controllers
                 return View(GetEvent(eventId));
             }
 
-            return RedirectToAction("", "Calender", null);
-        }*/
+            return RedirectToAction("", "Calendar", null);
+        }
     }
 }
