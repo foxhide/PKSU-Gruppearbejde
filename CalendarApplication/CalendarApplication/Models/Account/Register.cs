@@ -17,13 +17,17 @@ namespace CalendarApplication.Models.Account
         [Display(Name = "E-mail")]
         public string Email { get; set; }
 
+        [StringLength(45, ErrorMessage = "The {0} field must be at less than {1} characters.")]
+        [Display(Name = "Phone number")]
+        public string Phone { get; set; }
+
         [Required]
         [StringLength(45, ErrorMessage = "The {0} field must be less than {1} characters long.")]
         [Display(Name = "User name")]
         public string UserName { get; set; }
 
         [Required]
-        [StringLength(45, ErrorMessage = "The {0} field must be at least {2} characters long and less than {1}.", MinimumLength = 6)]
+        [StringLength(100, ErrorMessage = "The {0} field must be at least {2} characters long.", MinimumLength = 6)]
         [DataType(DataType.Password)]
         [Display(Name = "Password")]
         public string Password { get; set; }

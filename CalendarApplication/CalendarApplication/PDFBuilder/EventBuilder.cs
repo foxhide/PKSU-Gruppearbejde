@@ -228,6 +228,7 @@ namespace CalendarApplication.PDFBuilder
             result.AppendLine(@"Admin & " + um.Admin + @"\\\hline");
             result.AppendLine(@"Active & " + um.Active + @"\\\hline");
             result.AppendLine(@"Email & " + um.Email + @"\\\hline");
+            result.AppendLine(@"Phone Number & " + um.Phone + @"\\\hline");
             result.AppendLine(@"\end{tabular}\\");
 
             return result.ToString();

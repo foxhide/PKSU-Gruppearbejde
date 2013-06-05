@@ -37,6 +37,7 @@ namespace CalendarApplication.Controllers
                 //result.Password = (string)row["password"];
                 result.RealName = row["realName"] is DBNull ? "Not available" : (string)row["realName"];
                 result.Admin = (bool)row["admin"];
+                result.Phone = row["phoneNum"] is DBNull ? "Not available" : (string)row["phoneNum"];
                 result.Email = row["email"] is DBNull ? "Not available" : (string)row["email"];
                 result.Active = (bool)row["active"];
                 //result.NeedsApproval = (bool)row["needsApproval"];

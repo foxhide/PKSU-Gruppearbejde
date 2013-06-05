@@ -98,14 +98,16 @@ namespace CalendarApplication.Controllers
         [RecaptchaControlMvc.CaptchaValidator]
         public ActionResult Register(Register model, bool captchaValid)
         {
-            if(!captchaValid)
+            // Check if user is logged in
+            if (UserModel.GetCurrentUserID() != -1) { return RedirectToAction("Index", "Home", null); }
+
+            // Check if captcha was validated
+            if (!captchaValid)
             {
                 TempData["message"] = "Captcha invalid.";
 
                 return View();
             }
-            // Check if user is logged in
-            if (UserModel.GetCurrentUserID() != -1) { return RedirectToAction("Index", "Home", null); }
             
             MySqlUser msu = new MySqlUser();
             int userId = msu.CreateUser(model);
@@ -143,6 +145,7 @@ namespace CalendarApplication.Controllers
                 result.RealName = row["realName"] is DBNull ? "" : (string)row["realName"];
                 result.Admin = (bool)row["admin"];
                 result.Email = row["email"] is DBNull ? "" : (string)row["email"];
+                result.Phone = row["phoneNum"] is DBNull ? "" : (string)row["phoneNum"];
             }
             else
             {

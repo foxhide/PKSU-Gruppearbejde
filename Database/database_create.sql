@@ -17,6 +17,7 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`users` (
   `password` VARCHAR(70) NOT NULL ,
   `realName` VARCHAR(45) NULL DEFAULT NULL ,
   `admin` TINYINT(1) NULL DEFAULT 0 ,
+  `phoneNum` VARCHAR(45) NULL DEFAULT NULL ,
   `email` VARCHAR(45) NULL DEFAULT NULL ,
   `active` TINYINT(1) NULL DEFAULT 0 ,
   `needsApproval` TINYINT(1) NULL DEFAULT 1 ,
@@ -28,6 +29,7 @@ userName: Unique login/screen name tied to userId. Required, 45 chars.
 password: Password tied to a userId. Required, 45 chars.
 realname: real name of the user. Required, 45 chars.
 admin: whether or not this user has admin status.
+phoneNum: user phone number, as a varchar. Not required, 45 chars.
 email: user email address. Not required, 45 chars.
 active: whether the user is active, inactive users cannot login.
 needsApproval: whether the user needs initial approval from an administrator.*/';
@@ -94,11 +96,18 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`files` (
   `fileId` INT NOT NULL AUTO_INCREMENT ,
   `fileName` VARCHAR(45) NOT NULL ,
   `pathToFile` VARCHAR(150) NOT NULL ,
-  PRIMARY KEY (`fileId`) )
+  `eventId` INT NULL ,
+  PRIMARY KEY (`fileId`) ,
+  INDEX `fileeventid_idx` (`eventId` ASC) ,
+  CONSTRAINT `fileeventid`
+    FOREIGN KEY (`eventId` )
+    REFERENCES `pksudb`.`events` (`eventId` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
 AUTO_INCREMENT = 1
 COMMENT = 'Table for files.\n\nfileId: unique primary key for files.\nfile /* comment truncated */ /*Name: name of the file, e.g. mytextfile.txt.
 pathToFile: path to file (duh), e.g. /root/myfolder/mytextfile.txt.
-eventId: event that the file is associated with.*/';
+eventId: foreign key, event that the file is associated with. stays when events are deleted.*/';
 
 
 -- -----------------------------------------------------

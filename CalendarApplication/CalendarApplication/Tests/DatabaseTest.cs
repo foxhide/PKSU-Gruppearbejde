@@ -127,6 +127,7 @@ namespace CalendarApplication.Tests
                 RealName = "Newton",
                 UserName = null,
                 Email = "newton@gravity.com",
+                Phone = "012345678",
                 Password = "Apple"
             };
 
@@ -166,6 +167,7 @@ namespace CalendarApplication.Tests
 
             Assert.AreEqual("Einstein", dt.Rows[0]["realName"]);
             Assert.AreEqual("newton1337", dt.Rows[0]["userName"]);
+            Assert.AreEqual("012345678", dt.Rows[0]["phoneNum"]);
             Assert.AreEqual("newton@gravity.com", dt.Rows[0]["email"]);
             Assert.AreEqual(false, dt.Rows[0]["needsApproval"]);
             Assert.AreEqual(false, dt.Rows[0]["admin"]);

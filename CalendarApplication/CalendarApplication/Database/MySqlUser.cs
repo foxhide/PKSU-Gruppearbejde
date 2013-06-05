@@ -12,8 +12,8 @@ namespace CalendarApplication.Database
     {
         public int CreateUser(Register data)
         {
-            string insert = "INSERT INTO pksudb.users (userName,password,realName,email,active,needsApproval) " +
-                            "VALUES (@username, @password, @realname, @email, 1, 1);"
+            string insert = "INSERT INTO pksudb.users (userName,password,realName,phoneNum,email,active,needsApproval) " +
+                            "VALUES (@username, @password, @realname, @phone, @email, 1, 1);"
                             + " SELECT last_insert_id();";
 
             if (this.OpenConnection() == true)
@@ -34,6 +34,7 @@ namespace CalendarApplication.Database
                     cmd.Parameters.AddWithValue("@username", data.UserName);
                     cmd.Parameters.AddWithValue("@password", hashedPassword);
                     cmd.Parameters.AddWithValue("@realname", data.RealName);
+                    cmd.Parameters.AddWithValue("@phone", data.Phone);
                     cmd.Parameters.AddWithValue("@email", data.Email);
                     cmd.Prepare();
                     result = Convert.ToInt32(cmd.ExecuteScalar());

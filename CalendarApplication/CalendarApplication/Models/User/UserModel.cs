@@ -27,6 +27,9 @@ namespace CalendarApplication.Models.User
         [Display(Name = "E-mail")]
         public string Email { set; get; }
 
+        [Display(Name = "Phone number")]
+        public string Phone { set; get; }
+
         public bool Admin { set; get; }
         public bool Active { set; get; }
 
@@ -38,7 +41,7 @@ namespace CalendarApplication.Models.User
         public static UserModel GetUser(int ID)
         {
             MySqlConnect msc = new MySqlConnect();
-            DataTable dt = msc.ExecuteQuery("SELECT userId,userName,realName,email,admin FROM pksudb.users WHERE userId = " + ID);
+            DataTable dt = msc.ExecuteQuery("SELECT userId,userName,realName,phoneNum,email,admin FROM pksudb.users WHERE userId = " + ID);
             if(dt == null) { return null; }
 
             UserModel result = new UserModel
@@ -46,6 +49,7 @@ namespace CalendarApplication.Models.User
                 ID = ID,
                 UserName = (string)dt.Rows[0]["userName"],
                 RealName = dt.Rows[0]["realName"] as string,
+                Phone = dt.Rows[0]["phoneNum"] as string,
                 Email = dt.Rows[0]["email"] as string,
                 Admin = (bool)dt.Rows[0]["admin"]
             };
