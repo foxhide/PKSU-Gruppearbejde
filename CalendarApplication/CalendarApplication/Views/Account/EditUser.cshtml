@@ -28,12 +28,19 @@
     <input type="button" value="Save" onclick="updateName(@Model.ID,$('#RealName').val())"/>
     <div id="name-input" class="tick" style="height:26px;width:26px;display:inline-block"></div>
 </fieldset>
-   
+
 <fieldset>
     <legend>E-mail</legend>
     @Html.TextBoxFor(m => m.Email, new { onkeydown = "statusChanged('email-input')" })
     <input type="button" value="Save" onclick="updateEmail(@Model.ID,$('#Email').val())"/>
     <div id="email-input" class="tick" style="height:26px;width:26px;display:inline-block"></div>
+</fieldset>
+
+<fieldset>
+    <legend>Phone number</legend>
+    @Html.TextBoxFor(m => m.Phone, new { onkeydown = "statusChanged('phone-input')" })
+    <input type="button" value="Save" onclick="updatePhone(@Model.ID,$('#Phone').val())"/>
+    <div id="phone-input" class="tick" style="height:26px;width:26px;display:inline-block"></div>
 </fieldset>
 
 <fieldset>
@@ -68,4 +75,4 @@
     </table>
 </fieldset>
     
-@if(Model.Admin) { <span style="color:green">You are admin</span> }
+@if(Model.Admin) { <span style="color:green">You are an admin</span> }

@@ -106,6 +106,23 @@ function updateEmail(userId, value) {
     });
 }
 
+/* Function for updating phone number */
+function updatePhone(userId, value) {
+    $("#phone-input").removeClass();
+    $.ajax({
+        url: "/Account/EditUserString",
+        type: 'POST',
+        data: { field: 'phoneNum', userId: userId, value: value },
+        success: function (result) {
+            if (result) { $("#phone-input").addClass("tick"); }
+            else { $("#phone-input").addClass("red_cross"); }
+        },
+        error: function (result) {
+            $("#phone-input").addClass("red_cross");
+        }
+    });
+}
+
 /* Function used for editing password in edit profile */
 function updatePassword(id) {
     var op = $("#OldPassword").val();
