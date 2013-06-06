@@ -170,7 +170,7 @@ else {
     
     <button onclick="printEvent(@(Model.ID))">Print Event</button>
     
-    if (UserModel.GetCurrent().Admin && Model.Start > DateTime.Now)
+    if (UserModel.GetCurrentUserID() != -1 && UserModel.GetCurrent().Admin && Model.Start > DateTime.Now)
     {
         using (Html.BeginForm(new { ReturnUrl = ViewBag.ReturnUrl }))
         {
