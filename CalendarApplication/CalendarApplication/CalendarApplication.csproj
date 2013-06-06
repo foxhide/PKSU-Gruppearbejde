@@ -128,6 +128,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\ListView.cs" />
     <Compile Include="Helpers\DateTimeEditor.cs" />
     <Compile Include="Helpers\FieldEditor.cs" />
     <Compile Include="Helpers\DoubleListEditor.cs" />

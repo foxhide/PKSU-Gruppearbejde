@@ -67,39 +67,37 @@ else {
             </td>
             <td id="groups" style="padding-right:120px">
                 <b>Groups</b>
-                <div class="scrolldiv">
-                    <table>
-                        @foreach (GroupModel g in Model.Groups)
-                        {
-                            <tr>
-                                <td>
-                                    @Html.ActionLink(g.Name, "ViewGroup", "GroupView", new { groupId = g.ID }, null)
-                                </td>
-                            </tr>
-                        }
-                    </table>
-                </div>
+                @using (Html.BeginListView("Groups", new string[] { "Name" }))
+                {
+                    foreach (GroupModel g in Model.Groups)
+                    {
+                        <tr>
+                            <td>
+                                @Html.ActionLink(g.Name, "ViewGroup", "GroupView", new { groupId = g.ID }, null)
+                            </td>
+                        </tr>
+                    }
+                }
             </td>
             <td id="events">
                 <b>Events created</b>
-                <div class="scrolldiv">
-                    <table>
-                        @foreach (BasicEvent e in Model.Events)
-                        {
-                            <tr>
-                                <td>
-                                    @Html.ActionLink(e.Name, "Index", "Event", new { eventId = e.ID }, null)
-                                </td>
-                                <td>
-                                    @e.TypeName
-                                </td>
-                                <td style="background-color:@e.getColor()">
-                                    @e.getStateText()
-                                </td>
-                            </tr>
-                        }
-                    </table>
-                </div>
+                @using(Html.BeginListView("Events",new string[] { "Name", "Type", "State" }))
+                {
+                    foreach (BasicEvent e in Model.Events)
+                    {
+                        <tr>
+                            <td>
+                                @Html.ActionLink(e.Name, "Index", "Event", new { eventId = e.ID }, null)
+                            </td>
+                            <td>
+                                @e.TypeName
+                            </td>
+                            <td style="background-color:@e.getColor()">
+                                @e.getStateText()
+                            </td>
+                        </tr>
+                    }
+                }
             </td>
         </tr>
     </table>

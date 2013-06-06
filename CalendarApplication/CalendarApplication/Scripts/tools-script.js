@@ -116,3 +116,31 @@ function resetPassword(id) {
 function gotoUrl(url) {
     window.location = url;
 }
+
+/* Function used for generating the list view. */
+function updateList(id, cols) {
+    // For each column, synk the widths, taking padding into account
+    for (var i = 0; i < cols; i++) {
+        var header = $("#" + id + "_hd_" + i);
+        var hpad = parseInt(header.css('padding-left'), 10) + parseInt(header.css('padding-right'), 10);
+        var column = $("#" + id + "_td_" + i);
+        var cpad = parseInt(column.css('padding-left'), 10) + parseInt(column.css('padding-right'), 10);
+
+        var hw = header.width() + hpad;
+        var cw = column.width() + cpad;
+        if (hw > cw) {
+            column.width(hw - cpad + 1);
+        }
+        else {
+            header.width(cw - hpad + 1);
+        }
+    }
+    // Offset the first header width with two (1px div frame and 1px th frame)
+    var firsthd = $("#" + id + "_hd_0");
+    firsthd.width(firsthd.width() + 2);
+
+    // Calculate the missing width (scrollbar) and offset the last header width
+    var scrollbar = $("#" + id).width() - $("#" + id + "_hrow").width();
+    var lasthd = $("#" + id + "_hd_" + (i - 1));
+    lasthd.width(lasthd.width() + scrollbar);
+}

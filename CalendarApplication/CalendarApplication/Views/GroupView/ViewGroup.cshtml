@@ -11,21 +11,17 @@
     <table>
         <tr>
             <td>
-                <table class="gridtable">
-                    <tr>
-                        <td>Group Members</td>
-                        <td>Event Creator</td>
-                        <td>Leader</td>
-                    </tr>
-                    @for (int i = 0; i < Model.Members.Count; i++)
+                @using(Html.BeginListView("Members", new string[] { "Name", "Creator", "Leader" }))
+                {
+                    for (int i = 0; i < Model.Members.Count; i++)
                     {
                         <tr>
                             <td>@Html.ActionLink(Model.Members[i].Name, "Index", "User", new { userId = Model.Members[i].ID }, null)</td>
-                            <td class="@(Model.Members[i].Creator ? "tick" : "red_cross")"></td>
-                            <td class="@(Model.Members[i].Leader ? "tick" : "red_cross")"></td>
+                            <td><div class="@(Model.Members[i].Creator ? "tick" : "red_cross")" style="width:26px;height:26px;margin:auto"></div></td>
+                            <td><div class="@(Model.Members[i].Leader ? "tick" : "red_cross")" style="width:26px;height:26px;margin:auto"></div></td>
                         </tr>
                     }
-                </table>
+                }
             </td>
            <!-- Perhaps not show this to everyone? e.g.: if (user.Admin || Model.IsMember(user.ID)){ -->
             <td>

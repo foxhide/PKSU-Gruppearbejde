@@ -145,19 +145,30 @@ table.gridtable td {
     background-color: #ffffff;
 }
 
-/* Scrollable div */
-div.scrolldiv {
+/* Scrollable list */
+table.scrollheader {
+    border-collapse:collapse;
+}
+table.scrollheader th {
+    padding:6px;
+    background-color:black;
+    color:white;
+    border-left:1px solid black;
+    text-align:left;
+}
+div.scroll {
     border:1px solid black;
     height:200px;
     overflow-y:scroll;
 }
-div.scrolldiv table {
+div.scroll table {
     border-collapse:collapse;
 }
-div.scrolldiv tr td {
+div.scroll tr td {
     padding:3px;
     background-color:#DBDBDB;
     border:1px solid white;
+    vertical-align:middle;
 }
 
 /* Used for the datetime editor */
