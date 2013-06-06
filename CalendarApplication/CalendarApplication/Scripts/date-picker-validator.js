@@ -1,25 +1,80 @@
 ﻿/* Function for validating a date input */
 function validateDate(name, compare) {
-    var year = document.getElementById(name + "_Year");
-    var month = document.getElementById(name + "_Month");
-    var day = document.getElementById(name + "_Day");
-    var hour = document.getElementById(name + "_Hour");
-    var minute = document.getElementById(name + "_Minute");
+    var yearInput = $("#" + name + "_Year");
+    var year = yearInput.val();
+    var monthInput = $("#" + name + "_Month");
+    var month = monthInput.val();
+    var dayInput = $("#" + name + "_Day");
+    var day = dayInput.val();
+    var hourInput = $("#" + name + "_Hour");
+    var hour = hourInput.val();
+    var minuteInput = $("#" + name + "_Minute");
+    var minute = minuteInput.val();
 
-    // Check year
-    year.value = year.value < 1 ? 1 : (year.value > 9999 ? 9999 : year.value);
+    // Minutes
+    if (minute < 0) {
+        hour--;
+        minute = 59;
+    }
+    else if (minute > 59) {
+        hour++;
+        minute = 0;
+    }
 
-    // Check month
-    month.value = month.value < 1 ? 1 : (month.value > 12 ? 12 : month.value);
+    // Hours
+    if (hour < 0) {
+        day--;
+        hour = 23;
+    }
+    else if (hour > 23) {
+        day++;
+        hour = 0;
+    }
 
-    var date = new Date(year.value,month.value,0);
-    
-    // Check day
-    day.value = day.value < 1 ? 1 : (day.value > date.getDate() ? date.getDate() : day.value);
- 
-    // Check hours and minutes
-    hour.value = hour.value < 0 ? 0 : (hour.value > 23 ? 23 : hour.value);
-    minute.value = minute.value < 0 ? 0 : (minute.value > 59 ? 59 : minute.value);
+    // Days
+    if (month > 0 && month <= 12) {
+        if (day < 1) {
+            month--;
+            day = daysInMonth(month, year);
+        }
+        else if (day > daysInMonth(month,year)) {
+            month++;
+            day = 1;
+        }
+    }
+
+    // Months
+    if (month <= 0) {
+        month = 12;
+        year--;
+    }
+    else if (month > 12) {
+        month = 1;
+        year++;
+    }
+
+    // Years
+    if (year < 1) {
+        year = 1;
+        month = 1;
+        day = 1;
+        hour = 0;
+        minute = 0;
+    }
+    else if (year > 9999) {
+        year = 9999;
+        month = 12;
+        day = 31;
+        hour = 0;
+        minute = 0;
+    }
+
+    // Writeback to editor fields
+    yearInput.val(year);
+    monthInput.val(month);
+    dayInput.val(day);
+    hourInput.val(hour);
+    minuteInput.val(minute);
 
     // Apply compare validation.
     var compareArr = compare.split(",");
@@ -33,9 +88,9 @@ function validateDate(name, compare) {
     }
 
     //Writeback to the hidden field:
-    var date_hidden = document.getElementById(name);
-    date_hidden.value = pad(day.value) + "-" + pad(month.value) + "-" + year.value + " "
-                        + pad(hour.value) + ":" + pad(minute.value) + ":00";
+    var date_hidden = $("#" + name);
+    date_hidden.val(pad(dayInput.val()) + "-" + pad(monthInput.val()) + "-" + yearInput.val() + " "
+                        + pad(hourInput.val()) + ":" + pad(minuteInput.val()) + ":00");
 }
 
 /* Padding function: pads a single digit with a leading zero */
@@ -48,41 +103,42 @@ function pad(val) {
     }
 }
 
+/* Returns number of days in a given month */
+function daysInMonth(month,year) {
+    if (month < 1 || month > 12) { return 31; }
+    else {
+        return (new Date(year, month, 0)).getDate();
+    }
+}
+
 /* Compares to another DateTimeEditor or to todays date */
 function validateCompare(name,other,compGreater) {
-    var year = document.getElementById(name + "_Year");
-    var month = document.getElementById(name + "_Month");
-    var day = document.getElementById(name + "_Day");
-    var hour = document.getElementById(name + "_Hour");
-    var minute = document.getElementById(name + "_Minute");
+    var year = $("#" + name + "_Year");
+    var month = $("#" + name + "_Month");
+    var day = $("#" + name + "_Day");
+    var hour = $("#" + name + "_Hour");
+    var minute = $("#" + name + "_Minute");
     var date = new Date();
 
     // Check if we should compare by today or other date
     if (other != "today") {
-        date = new Date(year.value,month.value-1,day.value,hour.value,minute.value);
-
-        year = document.getElementById(other + "_Year");
-        month = document.getElementById(other + "_Month");
-        day = document.getElementById(other + "_Day");
-        hour = document.getElementById(other + "_Hour");
-        minute = document.getElementById(other + "_Minute");
-
-        // Reverse since we want to change the other date on error
-        compGreater = !compGreater;
+        // Parse date from hidden field, this is safe since the value is written by C#
+        var arr = $("#" + other).val().split(/\s|:|-/);
+        date = new Date(arr[2], arr[1]-1, arr[0], arr[3], arr[4]);
     }
 
     // Compare greater or less
     if (compGreater) {
-        if (year.value >= date.getFullYear()) {
-            year.value = date.getFullYear();
-            if (month.value >= date.getMonth() + 1) {
-                month.value = date.getMonth() + 1;
-                if (day.value >= date.getDate()) {
-                    day.value = date.getDate();
-                    if (hour.value >= date.getHours()) {
-                        hour.value = date.getHours();
-                        if (minute.value < date.getMinutes()) {
-                            minute.value = date.getMinutes();
+        if (year.val() >= date.getFullYear()) {
+            year.val(date.getFullYear());
+            if (month.val() >= date.getMonth()+1) {
+                month.val(date.getMonth()+1);
+                if (day.val() >= date.getDate()) {
+                    day.val(date.getDate());
+                    if (hour.val() >= date.getHours()) {
+                        hour.val(date.getHours());
+                        if (minute.val() > date.getMinutes()) {
+                            minute.val(date.getMinutes());
                         }
                     }
                 }
@@ -90,16 +146,16 @@ function validateCompare(name,other,compGreater) {
         }
     }
     else {
-        if (year.value <= date.getFullYear()) {
-            year.value = date.getFullYear();
-            if (month.value <= date.getMonth() + 1) {
-                month.value = date.getMonth() + 1;
-                if (day.value <= date.getDate()) {
-                    day.value = date.getDate();
-                    if (hour.value <= date.getHours()) {
-                        hour.value = date.getHours();
-                        if (minute.value < date.getMinutes()) {
-                            minute.value = date.getMinutes();
+        if (year.val() <= date.getFullYear()) {
+            year.val(date.getFullYear());
+            if (month.val() <= date.getMonth()+1) {
+                month.val(date.getMonth()+1);
+                if (day.val() <= date.getDate()) {
+                    day.val(date.getDate());
+                    if (hour.val() <= date.getHours()) {
+                        hour.val(date.getHours());
+                        if (minute.val() < date.getMinutes()) {
+                            minute.val(date.getMinutes());
                         }
                     }
                 }
