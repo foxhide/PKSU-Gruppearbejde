@@ -30,7 +30,7 @@ namespace CalendarApplication.Helpers
         {
             TextWriter w = helper.ViewContext.Writer;
 
-            w.WriteLine("<div id='" + id + "'>");
+            w.WriteLine("<div id='" + id + "' style='display:inline-block'>");
 
             w.WriteLine("<table class='scrollheader'><tr id='" + id + "_hrow'>");
             int i = 0;

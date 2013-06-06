@@ -159,7 +159,9 @@ table.scrollheader th {
 div.scroll {
     border:1px solid black;
     height:200px;
+    width:auto;
     overflow-y:scroll;
+    display:inline-block;
 }
 div.scroll table {
     border-collapse:collapse;

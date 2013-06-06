@@ -11,7 +11,7 @@ using CalendarApplication.Models.EventType;
 
 namespace CalendarApplication.Controllers
 {
-    public class GroupViewController : Controller
+    public class GroupController : Controller
     {
         /// <summary>
         /// Making the group list
@@ -189,7 +189,7 @@ namespace CalendarApplication.Controllers
                 return View(model);
             }
 
-            return RedirectToAction("ViewGroup", "GroupView", new {groupId = model.ID});
+            return RedirectToAction("ViewGroup", "Group", new {groupId = model.ID});
         }
     }
 }

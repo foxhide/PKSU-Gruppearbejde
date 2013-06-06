@@ -67,13 +67,14 @@ else {
             </td>
             <td id="groups" style="padding-right:120px">
                 <b>Groups</b>
+                <br />
                 @using (Html.BeginListView("Groups", new string[] { "Name" }))
                 {
                     foreach (GroupModel g in Model.Groups)
                     {
                         <tr>
                             <td>
-                                @Html.ActionLink(g.Name, "ViewGroup", "GroupView", new { groupId = g.ID }, null)
+                                @Html.ActionLink(g.Name, "ViewGroup", "Group", new { groupId = g.ID }, null)
                             </td>
                         </tr>
                     }
@@ -81,6 +82,7 @@ else {
             </td>
             <td id="events">
                 <b>Events created</b>
+                <br />
                 @using(Html.BeginListView("Events",new string[] { "Name", "Type", "State" }))
                 {
                     foreach (BasicEvent e in Model.Events)

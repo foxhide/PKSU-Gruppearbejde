@@ -117,7 +117,7 @@ namespace CalendarApplication.Controllers
                 //Cancelled deletion of group
                 case 9: return RedirectToAction("Index", "Maintenance", "");
                 //Set group privileges
-                case 10: return RedirectToAction("SetPrivileges", "GroupView", new { groupId = int.Parse(mm.SelectedGroup) });
+                case 10: return RedirectToAction("SetPrivileges", "Group", new { groupId = int.Parse(mm.SelectedGroup) });
             }
             return View(mm);
         }

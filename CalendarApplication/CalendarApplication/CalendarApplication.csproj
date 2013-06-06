@@ -113,7 +113,7 @@
   <ItemGroup>
     <Compile Include="Controllers\CalendarController.cs" />
     <Compile Include="Controllers\EventController.cs" />
-    <Compile Include="Controllers\GroupViewController.cs" />
+    <Compile Include="Controllers\GroupController.cs" />
     <Compile Include="Controllers\MaintenanceController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\AccountController.cs" />
@@ -252,9 +252,9 @@
     <Content Include="Views\Calendar\List.cshtml" />
     <Content Include="Views\Maintenance\EditRoom.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
-    <Content Include="Views\GroupView\Index.cshtml" />
-    <Content Include="Views\GroupView\ViewGroup.cshtml" />
-    <Content Include="Views\GroupView\SetPrivileges.cshtml" />
+    <Content Include="Views\Group\Index.cshtml" />
+    <Content Include="Views\Group\ViewGroup.cshtml" />
+    <Content Include="Views\Group\SetPrivileges.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
