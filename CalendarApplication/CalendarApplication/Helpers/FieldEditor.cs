@@ -108,13 +108,13 @@ namespace CalendarApplication.Helpers
             {
                 builder.AppendLine(DoubleListEditor.ListEditorFor(model.List, id, name + ".List",
                                      "Users selected", "Users available",
-                                     "setState(); validateInput('" + id + "','List',true,true)", "").ToString());
+                                     "setState(); validateInput('" + id + "','List',true,true)", "setState()").ToString());
             }
             else if (model.Datatype == Fieldtype.GroupList)
             {
                 builder.AppendLine(DoubleListEditor.ListEditorFor(model.List, id, name + ".List",
                                      "Groups selected", "Groups available",
-                                     "setState(); validateInput('" + id + "','List',true,true)", "").ToString());
+                                     "setState(); validateInput('" + id + "','List',true,true)", "setState()").ToString());
             }
             else if (model.Datatype == Fieldtype.FileList)
             {
