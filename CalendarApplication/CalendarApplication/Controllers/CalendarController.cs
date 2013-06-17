@@ -151,6 +151,8 @@ namespace CalendarApplication.Controllers
             cl.Limit = limitInt;
             cl.OldLimit = limitInt;
             cl.EventFrom = efromInt;
+            cl.Order = eo;
+            cl.Descending = descend;
             // If both are null, set the all checkbox.
             cl.All = from == null && to == null;
 
