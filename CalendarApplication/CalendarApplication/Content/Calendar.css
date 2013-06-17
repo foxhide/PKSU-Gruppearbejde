@@ -144,3 +144,26 @@ table.event-list th:hover {
     background-color:black;
     color:white;
 }
+
+/* Arrows inside divs, for displaying ordering and desc/asc */
+div.up-arrow {
+        display:inline-block;
+        width:30px;
+        height:16px;
+        background-image:url("/Content/images/up.png");
+        background-repeat:no-repeat;
+        background-size:14px;
+        background-position-x:center;
+        background-position-y:bottom;
+}
+
+div.down-arrow {
+    display:inline-block;
+    width:30px;
+    height:16px;
+    background-image:url("/Content/images/down.png");
+    background-repeat:no-repeat;
+    background-size:14px;
+    background-position-x:center;
+    background-position-y:bottom;
+}

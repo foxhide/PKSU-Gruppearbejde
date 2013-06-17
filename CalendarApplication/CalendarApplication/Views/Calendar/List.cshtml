@@ -10,30 +10,6 @@
 <script src="@Url.Content("~/Scripts/calendar-script.js")" type="text/javascript"></script>
 <link href="@Url.Content("~/Content/Calendar.css")" rel="stylesheet" type="text/css" />
 
-<style>
-    div.up-arrow {
-        display:inline-block;
-        width:30px;
-        height:16px;
-        background-image:url("/Content/images/up.png");
-        background-repeat:no-repeat;
-        background-size:14px;
-        background-position-x:center;
-        background-position-y:bottom;
-    }
-
-    div.down-arrow {
-        display:inline-block;
-        width:30px;
-        height:16px;
-        background-image:url("/Content/images/down.png");
-        background-repeat:no-repeat;
-        background-size:14px;
-        background-position-x:center;
-        background-position-y:bottom;
-    }
-</style>
-
 <h3 style="color:red">@TempData["errorMsg"]</h3>
 
 <form id="list_form" method="post">
@@ -55,7 +31,8 @@
                             </td>
                             <td id="all">
                                 Show all events:
-                                @Html.CheckBoxFor(model => model.All)
+                                @Html.CheckBoxFor(model => model.All,
+                                    new { onclick = "{ setDateTimeEditorEnabled('Start', !this.checked); setDateTimeEditorEnabled('End', !this.checked); }" })
                             </td>
                         </tr>
                         <tr>
@@ -65,6 +42,14 @@
                             </td>
                         </tr>
                     </table>
+                    @if (Model.All)
+                    {
+                        <script>
+                            // Disable the datetime editors
+                            setDateTimeEditorEnabled('Start', false);
+                            setDateTimeEditorEnabled('End', false);
+                        </script>
+                    }
 
                     <table id="limit">
                         <tr>

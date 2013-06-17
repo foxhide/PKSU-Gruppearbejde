@@ -112,9 +112,9 @@ namespace CalendarApplication.Helpers
             }
 
             string function = string.IsNullOrEmpty(onchange) ? "null" : onchange.Substring(0, onchange.Length - 2);
-            builder.Append("<td rowspan = 2><script>createDatePicker('" + id + "','" + compare + "'," + function + ")</script>");
+            builder.Append("<td rowspan = 2><script>createDatePicker('" + id + "','" + compare + "'," + function + ", '" + edt.ToString("yyyy-MM-dd") + "')</script>");
             builder.Append("<input type='hidden' id='" + id + "_picker'>");
-            builder.AppendLine("<img src='/Content/images/calendar.png' style='cursor:pointer' onclick=showDatePicker('" + id + "_picker')></td>");
+            builder.AppendLine("<img id='" + id + "_picker_button' src='/Content/images/calendar.png' style='cursor:pointer' onclick=showDatePicker('" + id + "_picker')></td>");
             
             //builder.Append("<input type='button' value='Select Date' id='" + id + "_but' onclick=showDatePicker('" + id + "_picker') /></td>");
             builder.AppendLine("</tr></table>");
