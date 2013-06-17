@@ -812,6 +812,62 @@ namespace CalendarApplication.Controllers
             return JsonConvert.SerializeObject(this.CheckDates(eventId, start, end, rooms));
         }
 
+        /// <summary>
+        /// Function for setting the state of an event. Called through ajax
+        /// </summary>
+        /// <param name="eventId">ID of the event</param>
+        /// <param name="approved">If the event should be approved or not</param>
+        /// <returns>New state on success, -1 on error</returns>
+        public int SetState(int eventId, bool approved)
+        {
+            // Authority check
+            if (UserModel.GetCurrentUserID() == -1 || !UserModel.GetCurrent().Admin) { return -1; }
+
+            MySqlEvent mse = new MySqlEvent();
+            // Remove approval
+            if (!approved)
+            {
+                return mse.SetEventState(eventId, 0) ? 0 : -1;
+            }
+
+            // Get event and field data
+            CustomQuery query = new CustomQuery
+            {
+                Cmd = "SELECT * FROM pksudb.events NATURAL JOIN pksudb.eventtypefields WHERE eventId = @eid AND requiredApproval = 1",
+                ArgNames = new string[] { "@eid" },
+                Args = new object[] { eventId }
+            };
+            DataTable eventData = mse.ExecuteQuery(query);
+
+            // Check for error
+            if (eventData == null) { return -1; }
+
+            // Check if event has any required for approval specific fields
+            if (eventData.Rows.Count == 0)
+            {
+                return mse.SetEventState(eventId,2) ? 2 : -1;
+            }
+
+            // Get specific values
+            query.Cmd = "SELECT * FROM pksudb.table_" + (int)eventData.Rows[0]["eventTypeId"] + " WHERE eventId = @eid";
+            DataTable specifics = mse.ExecuteQuery(query);
+
+            // Check for error
+            if (specifics == null || specifics.Rows.Count == 0) { return -1; }
+
+            foreach (DataRow dr in eventData.Rows)
+            {
+                // Check if required field is not set
+                if (specifics.Rows[0]["field_" + (int)dr["fieldId"]] is DBNull)
+                {
+                    // Was not set, set state = 1 and return
+                    return mse.SetEventState(eventId, 1) ? 1 : -1;
+                }
+            }
+
+            // All fields filled, set state = 2 and return
+            return mse.SetEventState(eventId, 2) ? 2 : -1;
+        }
 
         /// <summary>
         /// Deletes an event

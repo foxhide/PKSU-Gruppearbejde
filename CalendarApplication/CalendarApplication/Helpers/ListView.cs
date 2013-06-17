@@ -28,9 +28,31 @@ namespace CalendarApplication.Helpers
         /// <returns>A scroll list. You should input the rows between the curly brackets as shown above</returns>
         public static ScrollList BeginListView<TModel>(this HtmlHelper<TModel> helper, string id, string[] labels)
         {
+            return ListView.BeginListView(helper, id, labels, "200px", "auto");
+        }
+
+        /// <summary>
+        /// Creates the Scroll-list structure. This method should be called with the using syntax:
+        /// 
+        /// @using(Html.BeginListView(id,labels))
+        /// {
+        ///     html tr-rows
+        /// }
+        /// </summary>
+        /// <param name="id">A unique identifier, not used for any other element</param>
+        /// <param name="labels">A string array with the labels for the rows</param>
+        /// <param name="height">css: height of list</param>
+        /// <param name="width">css: width of list</param>
+        /// <returns>A scroll list. You should input the rows between the curly brackets as shown above</returns>
+        public static ScrollList BeginListView<TModel>(this HtmlHelper<TModel> helper,
+                                                        string id,
+                                                        string[] labels,
+                                                        string height,
+                                                        string width)
+        {
             TextWriter w = helper.ViewContext.Writer;
 
-            w.WriteLine("<div id='" + id + "' style='display:inline-block'>");
+            w.WriteLine("<div id='" + id + "' style='display:inline-block;width:" + width + ";border:1px black solid'>");
 
             w.WriteLine("<table class='scrollheader'><tr id='" + id + "_hrow'>");
             int i = 0;
@@ -41,13 +63,13 @@ namespace CalendarApplication.Helpers
             }
             w.WriteLine("</tr></table>");
 
-            w.WriteLine("<div id='" + id + "_innerdiv' class='scroll'>");
+            w.WriteLine("<div id='" + id + "_innerdiv' class='scroll' style='height:" + height + "'>");
 
             w.WriteLine("<table><tr>");
 
             for (i = 0; i < labels.Length; i++)
             {
-                w.WriteLine("<td id='" + id + "_td_" + i + "' style='padding:0'></td>");
+                w.WriteLine("<td id='" + id + "_td_" + i + "' style='padding-top:0;padding-bottom:0'></td>");
             }
 
             w.WriteLine("</tr>");
