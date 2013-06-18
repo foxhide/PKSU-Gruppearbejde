@@ -7,18 +7,16 @@
 @using CalendarApplication.Models.Event
 @using CalendarApplication.Models.User
 
-<h2>Create Event</h2>
+<h2>@(Model.ID == -1 ? "Create new event" : "Edit event: " + Model.Name)</h2>
 
 <h3 style="color:red">@TempData["errorMsg"]</h3>
 
 <script src="@Url.Content("~/Scripts/edit-event.js")" type="text/javascript"></script>
 
 @using (Html.BeginForm()) {
-<fieldset style="width:80%">
-    <legend>Create New Event</legend>
     @Html.HiddenFor(m => m.ID)
 
-    <table style="margin-left:0;margin-right:0;width:100%">
+    <table style="margin-left:40px;margin-right:auto;width:70%;border:1px lightgrey solid">
         <tr>
             <td style="width:60%">
                 <h3>Basic event details:</h3>
@@ -118,5 +116,4 @@
         </tr>
     </table>
 
-</fieldset>
 }

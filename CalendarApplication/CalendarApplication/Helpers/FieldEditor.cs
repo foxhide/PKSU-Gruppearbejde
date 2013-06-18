@@ -37,7 +37,9 @@ namespace CalendarApplication.Helpers
             builder.AppendLine("<input type='hidden' id='" + id + "_RequiredCreate' name='" + name + ".RequiredCreate' value='" + model.RequiredCreate + "'>");
             builder.AppendLine("<input type='hidden' id='" + id + "_RequiredApprove' name='" + name + ".RequiredApprove' value='" + model.RequiredApprove + "'>");
 
-            builder.AppendLine("<label for='" + name + "' style='font-weight:bold'>" + model.Name + "</label><br>");
+            builder.AppendLine("<label for='" + name + "' style='font-weight:bold'>" + model.Name + "</label>");
+            builder.AppendLine(model.RequiredCreate ? "<span style='color:red'>**</span>" : model.RequiredApprove ? "<span style='color:red'>*</span>" : "");
+            builder.AppendLine("<br>");
             if (!string.IsNullOrEmpty(model.Description))
             {
                 builder.AppendLine("<span style='color:grey;font-size:80%;text-align:left'>" + model.Description + "</span><br>");
@@ -128,14 +130,9 @@ namespace CalendarApplication.Helpers
 
             if (model.RequiredCreate)
             {
-                builder.Append("<span style='color:red'>**</span>");
                 builder.AppendLine("<div id='" + id + "_Error' class='validation-summary-errors' style='display:none'>");
                 builder.Append(model.Name + " is required!");
                 builder.Append("</div>");
-            }
-            else if (model.RequiredApprove)
-            {
-                builder.Append("<span style='color:red'>*</span>");
             }
 
             return MvcHtmlString.Create(builder.ToString());
