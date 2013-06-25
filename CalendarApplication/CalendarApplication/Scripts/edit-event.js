@@ -66,20 +66,20 @@ function setState() {
     var approved = $("#Approved").val().toLowerCase() == "true" ? true : false;
     if (!approved) {
         $("#State").val(0);
-        $("#state_text").html("Incomplete");
-        $("#state_text").css("color", "red");
+        $("#state_text").removeClass();
+        $("#state_text").addClass("state_0");
     }
     else {
         /* Note: RequiredApprove should be set whenever RequiredCreate is set (so we avoid to run both checks) */
         if (!checkApprove()) {
             $("#State").val(1);
-            $("#state_text").html("Approved");
-            $("#state_text").css("color", "yellow");
+            $("#state_text").removeClass();
+            $("#state_text").addClass("state_1");
         }
         else {
             $("#State").val(2);
-            $("#state_text").html("Finished");
-            $("#state_text").css("color", "#40FF00");
+            $("#state_text").removeClass();
+            $("#state_text").addClass("state_2");
         }
     }
 }

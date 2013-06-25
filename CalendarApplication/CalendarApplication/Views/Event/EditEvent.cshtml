@@ -75,7 +75,7 @@
                 <br />
                 <br />
                 
-                <b>State:</b> <span id="state_text" style="color:@Model.getColor()">@Model.getStateText()</span>
+                <b>State:</b> <span id="state_text" class="state_@Model.State"></span>
                 @if (UserModel.GetCurrent().Admin)
                 {
                     <!-- Admins may approved/disapprove the event -->
