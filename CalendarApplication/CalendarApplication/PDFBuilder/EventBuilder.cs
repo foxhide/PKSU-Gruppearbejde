@@ -265,6 +265,7 @@ namespace CalendarApplication.PDFBuilder
             sb.AppendLine(@"\begin{document}");
 
             //basic event info
+            sb.AppendLine(@"\section*{Productionplan");
             sb.AppendLine(@"\section*{" + evm.Name + @"}");
             sb.AppendLine(@"\begin{tabular}{|l|l|l|}\hline");
             sb.AppendLine(@"Type: " + evm.TypeName + @" & Creator: " + evm.Creator + @" & " +

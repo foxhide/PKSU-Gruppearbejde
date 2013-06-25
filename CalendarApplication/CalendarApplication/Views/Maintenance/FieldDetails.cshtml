@@ -29,14 +29,14 @@
             <input type="hidden" name='TypeSpecific[@(Model.ViewID)].Datatype' value="@((int)Model.Datatype)" />
         }
         </td>
-        <td rowspan="3"><div id="Desc_@(Model.ViewID)_char_counter">Characters left: 100</div>
+        <td rowspan="3"><div id="Desc_@(Model.ViewID)_char_counter">Characters left: @(100 - Model.Description.Length)</div>
             <textarea id='Desc_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].Description'
                cols="40" rows="4" onkeyup="updateCounter('Desc_@(Model.ViewID)',100);">@(Model.Description)</textarea></td>
     </tr>
     <tr>
         <td>
             <input type='checkbox' id='Reqc_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].RequiredCreate'
-            @(Model.RequiredCreate?" checked":"") value="true">
+            @(Model.RequiredCreate?" checked":"") value="true" onclick='updateReqForAppr(@(Model.ViewID))'>
             <label for='Reqc_@(Model.ViewID)'>Required for creation</label>
         </td>
         <td>
@@ -51,7 +51,7 @@
     <tr>
         <td style="text-align:center">
             <input type='checkbox' id='Reqa_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].RequiredApprove'
-            @(Model.RequiredApprove?" checked":"") value="true">
+            @(Model.RequiredApprove?" checked":"") value="true" @(Model.RequiredCreate?" disabled='true'":"")>
             <label for='Reqa_@(Model.ViewID)'>Required for approval</label>
         </td>
         <td>

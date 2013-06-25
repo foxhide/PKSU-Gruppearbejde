@@ -47,7 +47,7 @@
                     </tr>
                     <tr style="padding:0">
                         <td style="text-align:left;padding:0;width:15%">
-                            <input type="button" value="@(Model.Date.AddMonths(-1).ToString("<- MMMM"))"
+                            <input type="button" value="@("<- " + CalendarApplication.Models.Calendar.Calendar.MONTHS[(Model.Date.AddMonths(-1).Month - 1) % 12])"
                                 onclick="goto('@(Model.Date.AddMonths(-1).ToString("yyyy-MM"))')" />
                         </td>
                         <td style="padding:0;text-align:center">
@@ -63,7 +63,7 @@
                             </select>
                         </td>
                         <td style="text-align:right;padding:0;width:15%">
-                            <input type="button" value="@(Model.Date.AddMonths(1).ToString("MMMM ->"))"
+                            <input type="button" value="@(CalendarApplication.Models.Calendar.Calendar.MONTHS[(Model.Date.AddMonths(1).Month - 1) % 12] + " ->")"
                                 onclick="goto('@(Model.Date.AddMonths(1).ToString("yyyy-MM"))')" />
                         </td>
                     </tr>
