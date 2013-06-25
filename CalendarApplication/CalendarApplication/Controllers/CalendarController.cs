@@ -272,7 +272,10 @@ namespace CalendarApplication.Controllers
             // Get event types
             MySqlConnect msc = new MySqlConnect();
             string etget = "SELECT eventTypeId, eventTypeName FROM pksudb.eventtypes";
-            DataTable dt = msc.ExecuteQuery(etget);
+            object[] argval = { };
+            string[] argnam = { };
+            CustomQuery query = new CustomQuery { Cmd = etget, ArgNames = argnam, Args = argval };
+            DataTable dt = msc.ExecuteQuery(query);
 
             char[] typeArr = types != null ? types.ToCharArray() : null;
             int tCount = 0;
@@ -517,7 +520,13 @@ namespace CalendarApplication.Controllers
             List<BasicEvent> events = new List<BasicEvent>();
 
             MySqlConnect msc = new MySqlConnect();
-            DataTable dt = msc.ExecuteQuery(query);
+
+            //silly use of custom query
+            //should try and create a list of all arguments used in the query instead
+            //or perhaps restructure the way this query works.
+            CustomQuery calquery = new CustomQuery { Cmd = query, ArgNames = new string[] { } , Args = new object[] { } };
+            
+            DataTable dt = msc.ExecuteQuery(calquery);
             if (dt != null)
             {
                 int r = 0;

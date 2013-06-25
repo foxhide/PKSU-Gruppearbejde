@@ -158,7 +158,7 @@ namespace CalendarApplication.Database
             }
 
         }
-
+        /*
         /// <summary>
         /// Executes a query and returns the result in a datatable
         /// </summary>
@@ -218,7 +218,7 @@ namespace CalendarApplication.Database
                 return null;
             }
 
-        }
+        }*/
 
         /// <summary>
         /// Executes several queries and returns the result in a dataset with several tables.
@@ -300,7 +300,7 @@ namespace CalendarApplication.Database
             }
 
         }
-
+        /*
          /// <summary>
          /// Executes several queries and returns the result in a dataset with several tables.
          /// </summary>
@@ -371,6 +371,6 @@ namespace CalendarApplication.Database
                 return null;
             }
 
-        }
+        }*/
     }
 }

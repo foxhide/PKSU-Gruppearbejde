@@ -26,7 +26,8 @@ else {
                 @Model.RealName<br />
                 <br />
                 <b>Email</b><br />
-                @Model.Email<br />
+                <a href=@("mailto:"+Model.Email)>@Model.Email</a>
+<br />
                 <br />
                 <b>Phone Number</b><br />
                 @Model.Phone<br />
@@ -47,21 +48,21 @@ else {
                     {
                         if (Model.Admin)
                         {
-                            <input type="button" value="Remove admin rights" onclick="updateUser('admin',@(Model.ID),false)"/>
+                            <input type="button" value="Remove admin rights" onclick="updateUser(2,@(Model.ID),false)"/>
                         }
                         else
                         {
-                            <input type="button" value="Make admin" onclick="updateUser('admin',@(Model.ID),true)"/>
+                            <input type="button" value="Make admin" onclick="updateUser(2,@(Model.ID),true)"/>
                         }
                         <input type="button" value="Reset password" onclick="resetPassword(@(Model.ID))">
-                        <input type="button" value="Deactivate user" onclick="updateUser('active',@(Model.ID),false)"/>
+                        <input type="button" value="Deactivate user" onclick="updateUser(0,@(Model.ID),false)"/>
                         <br />
                         <div id="new_pass" style="background-color:blue;color:white;width:300px;
                                 height:50px;text-align:center;display:none"></div>
                     }
                     else
                     {
-                        <input type="button" value="Activate user" onclick="updateUser('active',@(Model.ID),true)"/>
+                        <input type="button" value="Activate user" onclick="updateUser(0,@(Model.ID),true)"/>
                     }
                 }
             </td>
