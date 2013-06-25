@@ -2,6 +2,32 @@
   This js-script contains the js-functions needed for event create/edit.
  */
 
+// Has the popup appeared?
+var popup = false;
+
+/* Function for showing popup, if not disabled, or getting type specifics if disabled */
+function typeCheck(type) {
+    if (popup) {
+        getSpecifics(type);
+    }
+    else {
+        $("#type_warning").show();
+    }
+}
+
+/* Response from type warning. Hides the popup and disableds the popup on true */
+function typeCheckResponse(response,old) {
+    $("#type_warning").hide();
+    popup = response;
+    if (!response) {
+        $("#SelectedEventType").val(old);
+    }
+    else {
+        getSpecifics($("#SelectedEventType").val());
+    }
+}
+
+// Number of fields variable
 var numberOfFields = 0;
 
 /* Get the partial view for the given event type. If type == 0 (non selected),

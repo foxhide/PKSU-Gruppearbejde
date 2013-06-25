@@ -353,7 +353,7 @@ namespace CalendarApplication.Controllers
             }
 
             // Get event types and type specifics
-            eem.EventTypes = this.GetEventTypes(eem, msc);
+            this.GetEventTypes(eem, msc);
 
             TempData["errorMsg"] = msc.ErrorMessage;
             if (eventId != -1)
@@ -453,7 +453,7 @@ namespace CalendarApplication.Controllers
             // Error //
 
             // Get the types again for the view
-            eem.EventTypes = this.GetEventTypes(eem, mse);
+            this.GetEventTypes(eem, mse);
 
             // Fill all the dropdown lists again, if any.
             List<SelectListItem> users = null;
@@ -717,10 +717,10 @@ namespace CalendarApplication.Controllers
         /// </summary>
         /// <param name="msc">MySqlConnect</param>
         /// <returns>A list of SelectListItems with event type names and ids</returns>
-        private List<SelectListItem> GetEventTypes(EventEditModel eem, MySqlConnect msc)
+        private void GetEventTypes(EventEditModel eem, MySqlConnect msc)
         {
-            List<SelectListItem> result = new List<SelectListItem>();
-            result.Add(new SelectListItem { Value = "0", Text = "Select event type" });
+            eem.EventTypes = new List<SelectListItem>();
+            if (eem.ID == -1) { eem.EventTypes.Add(new SelectListItem { Value = "0", Text = "Select event type" }); }
             CustomQuery userquery = new CustomQuery();
             if (UserModel.GetCurrentUserID() != -1 && UserModel.GetCurrent().Admin)
             {
@@ -741,7 +741,7 @@ namespace CalendarApplication.Controllers
             {
                 foreach (DataRow dr in dt.Rows)
                 {
-                    result.Add(new SelectListItem
+                    eem.EventTypes.Add(new SelectListItem
                     {
                         Value = ((int)dr["eventTypeId"]).ToString(),
                         Text = (string)dr["eventTypeName"]
@@ -772,8 +772,6 @@ namespace CalendarApplication.Controllers
                 }
             }
             else { eem.CanChangeType = true; } // New event or admin
-
-            return result;
         }
 
         /// <summary>
