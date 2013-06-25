@@ -202,7 +202,15 @@ namespace CalendarApplication.Controllers
             return msu.EditUser(userId, value, fieldName);
         }
 
-        /* Edit the password */
+        /* Edit the password
+         * Return codes:
+         *  0:   Success
+         *  -1:  User authoritative error
+         *  -2:  Incorrect password
+         *  -11: Database error
+         *  -12: User not found
+         *  -13: Database error -> could not change.
+         */
         [HttpPost]
         public int EditUserPassword(int userId, string oldPass, string newPass)
         {

@@ -80,7 +80,7 @@ function getListSelected(listName) {
     return list;
 }
 
-/* Function used for editing a user string or bool value, used in several pages */
+/* Function used for editing a user bool value, used in several pages */
 function updateUser(field, id, value) {
     var url = "/Account/EditUserBool";
     $.ajax({
@@ -99,13 +99,12 @@ function resetPassword(id) {
         dataType: 'html',
         success: function (result) {
             if (result && result != "null") {
-                result = "New password: " + result;
                 $("#new_pass").html(result);
             }
             else {
                 $("#new_pass").html("An error occurred, could not reset password!");
             }
-            $("#new_pass").show();
+            $("#new_pass_box").show();
         }
     });
 }
