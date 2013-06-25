@@ -28,7 +28,7 @@ namespace CalendarApplication.Controllers
                 if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
                 else { return RedirectToAction("Index", "Home", null); }
             }
-            return View(GetEvent(eventId));
+            return View(this.GetEvent(eventId));
         }
 
         [HttpPost]
@@ -352,7 +352,9 @@ namespace CalendarApplication.Controllers
                 }
             }
 
-            eem.EventTypes = this.GetEventTypes(msc);
+            // Get event types and type specifics
+            eem.EventTypes = this.GetEventTypes(eem, msc);
+
             TempData["errorMsg"] = msc.ErrorMessage;
             if (eventId != -1)
             {
@@ -451,7 +453,7 @@ namespace CalendarApplication.Controllers
             // Error //
 
             // Get the types again for the view
-            eem.EventTypes = this.GetEventTypes(mse);
+            eem.EventTypes = this.GetEventTypes(eem, mse);
 
             // Fill all the dropdown lists again, if any.
             List<SelectListItem> users = null;
@@ -711,26 +713,28 @@ namespace CalendarApplication.Controllers
         }
 
         /// <summary>
-        /// Getter for a list of all event types. This should be extended to check for create-authentication
+        /// Getter for a list of all event types.
         /// </summary>
         /// <param name="msc">MySqlConnect</param>
         /// <returns>A list of SelectListItems with event type names and ids</returns>
-        private List<SelectListItem> GetEventTypes(MySqlConnect msc)
+        private List<SelectListItem> GetEventTypes(EventEditModel eem, MySqlConnect msc)
         {
             List<SelectListItem> result = new List<SelectListItem>();
             result.Add(new SelectListItem { Value = "0", Text = "Select event type" });
             CustomQuery userquery = new CustomQuery();
             if (UserModel.GetCurrentUserID() != -1 && UserModel.GetCurrent().Admin)
             {
+                // Admin -> get all events
                 userquery.Cmd = "SELECT eventTypeId,eventTypeName FROM pksudb.eventtypes";
             }
             else
             {
+                // Not admin -> get events allowed for creation by this user + the current selected type.
                 userquery.Cmd = "SELECT DISTINCT(eventTypeId),eventTypeName "
-                        + "FROM pksudb.eventtypes NATURAL JOIN pksudb.eventcreationgroups NATURAL JOIN pksudb.groupmembers "
-                        + "WHERE userId = @uid AND canCreate = 1";
-                userquery.ArgNames = new[] { "@uid" };
-                userquery.Args = new[] { (object)UserModel.GetCurrentUserID() };
+                        + "FROM pksudb.eventtypes NATURAL LEFT JOIN pksudb.eventcreationgroups NATURAL LEFT JOIN pksudb.groupmembers "
+                        + "WHERE (userId = @uid AND canCreate = 1) OR eventTypeId = @ti";
+                userquery.ArgNames = new[] { "@uid", "@ti" };
+                userquery.Args = new[] { (object)UserModel.GetCurrentUserID(), Convert.ToInt32(eem.SelectedEventType) };
             }
             DataTable dt = msc.ExecuteQuery(userquery);
             if (dt != null)
@@ -744,6 +748,31 @@ namespace CalendarApplication.Controllers
                     });
                 }
             }
+
+            // If old event and not admin, check if we are allowed to create the current event type
+            if (eem.ID != -1 && !UserModel.GetCurrent().Admin)
+            {
+                CustomQuery cq = new CustomQuery
+                {
+                    Cmd = "SELECT eventTypeId FROM pksudb.eventcreationgroups NATURAL JOIN pksudb.groupmembers "
+                            + "WHERE eventTypeId = @eti AND userId = @uid AND canCreate = 1",
+                    ArgNames = new[] { "@eti", "@uid" },
+                    Args = new object[] { Convert.ToInt32(eem.SelectedEventType), UserModel.GetCurrentUserID() }
+                };
+                dt = msc.ExecuteQuery(cq);
+                if (dt != null)
+                {
+                    // Set can change type - if any eventTypeIds were found, we may change the type, else not.
+                    // The extra type has been added in GetEventTypes(...), no matter if we have creation rights or not
+                    eem.CanChangeType = dt.Rows.Count != 0;
+                }
+                else
+                {
+                    TempData["errorMsg"] = msc.ErrorMessage;
+                }
+            }
+            else { eem.CanChangeType = true; } // New event or admin
+
             return result;
         }
 

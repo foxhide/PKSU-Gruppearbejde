@@ -1,7 +1,7 @@
 ﻿@model CalendarApplication.Models.Event.EventEditModel
 
 @{
-    ViewBag.Title = "CreateEvent";
+    ViewBag.Title = Model.ID == -1 ? "Create event" : "Edit event";
 }
 
 @using CalendarApplication.Models.Event
@@ -31,9 +31,19 @@
                 <br />
                 <br />
                 @Html.LabelFor(m => m.SelectedEventType, new { style = "font-weight:bold" })
-                @Html.DropDownListFor(m => Model.SelectedEventType,
-                                        new SelectList(Model.EventTypes, "Value", "Text"),
-                                        new { onchange="{ getSpecifics(this.value); }" })
+                @if(Model.CanChangeType)
+                {
+                    @Html.DropDownListFor(m => Model.SelectedEventType,
+                                            new SelectList(Model.EventTypes, "Value", "Text"),
+                                            new { onchange="{ getSpecifics(this.value); }" })
+                }
+                else
+                {
+                    @Html.DropDownListFor(m => Model.SelectedEventType,
+                                            new SelectList(Model.EventTypes, "Value", "Text"),
+                                            new { onchange="{ getSpecifics(this.value); }", disabled="disabled" })
+                    @Html.HiddenFor(m => m.SelectedEventType);
+                }
                 <div class="validation-summary-errors" id="SelectedEventType_Error" style="display:none">
                     The event must have a Type!
                 </div>

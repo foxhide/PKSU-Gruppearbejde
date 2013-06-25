@@ -22,5 +22,8 @@ namespace CalendarApplication.Models.Event
         public List<SelectListItem> GroupVisibleList { get; set; }
 
         public List<FieldModel> TypeSpecifics { get; set; }
+        public bool CanChangeType { get; set; }
+
+        public bool DeleteFiles { get; set; }
     }
 }
