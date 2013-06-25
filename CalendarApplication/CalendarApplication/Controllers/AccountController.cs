@@ -158,24 +158,48 @@ namespace CalendarApplication.Controllers
 
         /* Edit a user string value (other than password) */
         [HttpPost]
-        public bool EditUserString(string field, int userId, string value)
+        public bool EditUserString(int field, int userId, string value)
         {
             // If no user or user trying to edit other user's profile -> return
             if (UserModel.GetCurrentUserID() == -1 || UserModel.GetCurrentUserID() != userId) { return false; }
 
+            string fieldName = null;
+            switch (field)
+            {
+                //Edit email
+                case 0: fieldName = "email"; break;
+                //Edit phone
+                case 1: fieldName = "phoneNum"; break;
+                //Edit real name
+                case 2: fieldName = "realName"; break;
+            }
+
             MySqlUser msu = new MySqlUser();
-            return msu.EditUser(userId, value, field);
+            return msu.EditUser(userId, value, fieldName);
         }
 
         /* Edit a user boolean value - only admins! */
         [HttpPost]
-        public bool EditUserBool(string field, int userId, bool value)
+        public bool EditUserBool(int field, int userId, bool value)
         {
             // If no user or non-admin trying to edit other user's boolean -> return
             if (UserModel.GetCurrentUserID() == -1 || !UserModel.GetCurrent().Admin) { return false; }
 
+            string fieldName = null;
+            switch (field)
+            {
+                //not set
+                case -1: return false;
+                //set active
+                case 0: fieldName = "active"; break;
+                //set needsApproval
+                case 1: fieldName = "needsApproval"; break;
+                //set admin
+                case 2: fieldName = "admin"; break;
+            }
+
             MySqlUser msu = new MySqlUser();
-            return msu.EditUser(userId, value, field);
+            return msu.EditUser(userId, value, fieldName);
         }
 
         /* Edit the password */

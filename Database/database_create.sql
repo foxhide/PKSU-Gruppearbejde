@@ -97,17 +97,27 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`files` (
   `fileName` VARCHAR(45) NOT NULL ,
   `pathToFile` VARCHAR(150) NOT NULL ,
   `eventId` INT NULL ,
+  `userId` INT NULL ,
+  `uploaded` DATETIME NULL ,
   PRIMARY KEY (`fileId`) ,
   INDEX `fileeventid_idx` (`eventId` ASC) ,
+  INDEX `fileuseris_idx` (`userId` ASC) ,
   CONSTRAINT `fileeventid`
     FOREIGN KEY (`eventId` )
     REFERENCES `pksudb`.`events` (`eventId` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fileuseris`
+    FOREIGN KEY (`userId` )
+    REFERENCES `pksudb`.`users` (`userId` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 AUTO_INCREMENT = 1
 COMMENT = 'Table for files.\n\nfileId: unique primary key for files.\nfile /* comment truncated */ /*Name: name of the file, e.g. mytextfile.txt.
 pathToFile: path to file (duh), e.g. /root/myfolder/mytextfile.txt.
-eventId: foreign key, event that the file is associated with. stays when events are deleted.*/';
+eventId: foreign key, event that the file is associated with. stays when events are deleted.
+userId: foreign key, user that uploaded the file.
+uploaded: time and date when file was uploaded.*/';
 
 
 -- -----------------------------------------------------

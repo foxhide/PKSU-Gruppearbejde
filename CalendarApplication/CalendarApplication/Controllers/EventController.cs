@@ -45,9 +45,12 @@ namespace CalendarApplication.Controllers
             };
             string eventinfo = "SELECT * FROM pksudb.events NATURAL LEFT JOIN pksudb.eventroomsused " +
                                "NATURAL LEFT JOIN pksudb.rooms NATURAL JOIN pksudb.eventtypes NATURAL JOIN pksudb.users " +
-                               "WHERE eventId = " + eventId;
+                               "WHERE eventId = @eid";
             MySqlConnect con = new MySqlConnect();
-            DataTable table = con.ExecuteQuery(eventinfo);
+            object[] argval = { eventId };
+            string[] argnam = { "@eid" };
+            CustomQuery query = new CustomQuery { Cmd = eventinfo, ArgNames = argnam, Args = argval };
+            DataTable table = con.ExecuteQuery(query);
 
             if (table != null)
             {
@@ -261,9 +264,15 @@ namespace CalendarApplication.Controllers
             }
             // Get list of rooms //
             eem.RoomSelectList = new List<SelectListItem>();
-            string roomquery = eem.ID == -1 ? "SELECT roomId,roomName FROM pksudb.rooms"
+            string roomcmd = eem.ID == -1 ? "SELECT roomId,roomName FROM pksudb.rooms"
                                : "SELECT roomId,roomName,eventId FROM pksudb.rooms NATURAL LEFT JOIN "
-                                    + "(SELECT * FROM pksudb.eventroomsused WHERE eventId = " + eem.ID + ") AS r";
+                                    + " ( SELECT * FROM pksudb.eventroomsused WHERE eventId = @eid ) AS r";
+            CustomQuery roomquery = new CustomQuery
+            {
+                Cmd = roomcmd,
+                ArgNames = new[] { "@eid" },
+                Args = new[] { (object)eem.ID }
+            };
             dt = msc.ExecuteQuery(roomquery);
             if (dt != null)
             {
@@ -284,9 +293,16 @@ namespace CalendarApplication.Controllers
 
             // Get list of users
             eem.UserEditorList = new List<SelectListItem>();
-            string userquery = eem.ID == -1 ? "SELECT userId,userName FROM pksudb.users ORDER BY userName"
+            string usercmd = eem.ID == -1 ? "SELECT userId,userName FROM pksudb.users ORDER BY userName"
                                : "SELECT userId,userName,eventId FROM pksudb.users NATURAL LEFT JOIN "
-                                + "(SELECT * FROM pksudb.eventeditorsusers WHERE eventId = " + eem.ID + ") AS e ORDER BY userName";
+                                + " ( SELECT * FROM pksudb.eventeditorsusers WHERE eventId = @eid ) AS e ORDER BY userName";
+            CustomQuery userquery = new CustomQuery
+            {
+                Cmd = usercmd,
+                ArgNames = new[] { "@eid" },
+                Args = new[] { (object)eem.ID }
+            };
+
             dt = msc.ExecuteQuery(userquery);
             if (dt != null)
             {
@@ -307,7 +323,14 @@ namespace CalendarApplication.Controllers
             eem.GroupVisibleList = new List<SelectListItem>();
             if (eem.ID == -1)
             {
-                string groupquery = "SELECT groupId,groupName FROM pksudb.groups ORDER BY groupName";
+                string groupcmd = "SELECT groupId,groupName FROM pksudb.groups ORDER BY groupName";
+                CustomQuery groupquery = new CustomQuery
+                {
+                    Cmd = groupcmd,
+                    ArgNames = new string[] { },
+                    Args = new object[] { }
+                };
+
                 dt = msc.ExecuteQuery(groupquery);
                 if (dt != null)
                 {
@@ -324,10 +347,24 @@ namespace CalendarApplication.Controllers
             }
             else
             {
-                string query0 = "SELECT groupId,groupName,eventId FROM pksudb.groups NATURAL LEFT JOIN "
-                                    + "(SELECT * FROM pksudb.eventeditorsgroups WHERE eventId = " + eem.ID + ") AS g ORDER BY groupName";
-                string query1 = "SELECT groupId,groupName,eventId FROM pksudb.groups NATURAL LEFT JOIN "
-                                    + "(SELECT * FROM pksudb.eventvisibility WHERE eventId = " + eem.ID + ") AS g ORDER BY groupName";
+                string cmd0 = "SELECT groupId,groupName,eventId FROM pksudb.groups NATURAL LEFT JOIN "
+                                    + "(SELECT * FROM pksudb.eventeditorsgroups WHERE eventId = @eid ) AS g ORDER BY groupName";
+                string cmd1 = "SELECT groupId,groupName,eventId FROM pksudb.groups NATURAL LEFT JOIN "
+                                    + "(SELECT * FROM pksudb.eventvisibility WHERE eventId = @eid ) AS g ORDER BY groupName";
+                CustomQuery query0 = new CustomQuery
+                {
+                    Cmd = cmd0,
+                    ArgNames = new[] { "@eid" },
+                    Args = new[] { (object)eem.ID }
+                };
+
+                CustomQuery query1 = new CustomQuery
+                {
+                    Cmd = cmd1,
+                    ArgNames = new[] { "@eid" },
+                    Args = new[] { (object)eem.ID }
+                };
+
                 DataSet ds = msc.ExecuteQuery(new[] { query0, query1 });
                 if (ds != null)
                 {
@@ -507,12 +544,19 @@ namespace CalendarApplication.Controllers
             List<SelectListItem> groups = null;      // List for group list
             List<SelectListItem> usersDrop = null;   // List for user dropdown
             List<SelectListItem> groupsDrop = null;  // List for group dropdown
-            string specQuery = "SELECT * FROM eventtypefields WHERE eventTypeId = " + type;
-            DataTable dt = msc.ExecuteQuery(specQuery);
+            string specQuery = "SELECT * FROM eventtypefields WHERE eventTypeId = @etid";
+            object[] argval = { type };
+            string[] argnam = { "@etid" };
+            CustomQuery query = new CustomQuery { Cmd = specQuery, ArgNames = argnam, Args = argval };
+            DataTable dt = msc.ExecuteQuery(query);
             DataTable value = null;
             if (eventId != -1)
             {
-                value = msc.ExecuteQuery("SELECT * FROM table_" + type + " WHERE eventId = " + eventId);
+                string valcmd = "SELECT * FROM table_" + type + " WHERE eventId = @eid";
+                object[] args = { eventId };
+                string[] argnm = { "@eid" };
+                CustomQuery valquery = new CustomQuery { Cmd = valcmd, ArgNames = argnm, Args = args };
+                value = msc.ExecuteQuery(valquery);
             }
             if (dt != null)
             {
@@ -592,7 +636,8 @@ namespace CalendarApplication.Controllers
         {
             List<SelectListItem> result = new List<SelectListItem>();
             if (nullVal) { result.Insert(0,new SelectListItem { Value = "0", Text = "Select group" }); }
-            string groupquery = "SELECT groupId,groupName FROM pksudb.groups ORDER BY groupName";
+            string groupcmd = "SELECT groupId,groupName FROM pksudb.groups ORDER BY groupName";
+            CustomQuery groupquery = new CustomQuery { Cmd = groupcmd, ArgNames = new string[] { }, Args = new object[] { } };
             DataTable dt = msc.ExecuteQuery(groupquery);
             if (dt != null)
             {
@@ -618,7 +663,8 @@ namespace CalendarApplication.Controllers
         {
             List<SelectListItem> result = new List<SelectListItem>();
             if (nullVal) { result.Insert(0, new SelectListItem { Value = "0", Text = "Select user" }); }
-            string userquery = "SELECT userId,userName FROM pksudb.users ORDER BY userName";
+            string usercmd = "SELECT userId,userName FROM pksudb.users ORDER BY userName";
+            CustomQuery userquery = new CustomQuery { Cmd = usercmd, ArgNames = new string[] { }, Args = new object[] { } };
             DataTable dt = msc.ExecuteQuery(userquery);
             if (dt != null)
             {

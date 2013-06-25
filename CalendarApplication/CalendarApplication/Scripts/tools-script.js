@@ -82,9 +82,7 @@ function getListSelected(listName) {
 
 /* Function used for editing a user string or bool value, used in several pages */
 function updateUser(field, id, value) {
-    var url = "/Account/EditUser";
-    if (typeof value === "string") { url += "String"; }
-    else { url += "Bool"; }
+    var url = "/Account/EditUserBool";
     $.ajax({
         url: url,
         type: 'POST',
