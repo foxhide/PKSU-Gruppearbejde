@@ -93,3 +93,13 @@ function checkFields(form) {
         $("#event-type-submit-error").show();
     }
 }
+
+function updateReqForAppr(id) {
+    if ($("#Reqc_" + id).attr("checked")) {
+        $("#Reqa_" + id).attr("checked", true)
+        $("#Reqa_" + id).attr("disabled", true)
+    }
+    else {
+        $("#Reqa_" + id).attr("disabled", false)
+    }
+}
