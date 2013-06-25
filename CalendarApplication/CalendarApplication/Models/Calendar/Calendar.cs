@@ -14,7 +14,7 @@ namespace CalendarApplication.Models.Calendar
 
     public class Calendar
     {
-        public static string[] MONTHS = { "January", "Feburary", "March", "April", "May", "June", "July",
+        public static string[] MONTHS = { "January", "February", "March", "April", "May", "June", "July",
                                             "August", "September", "October", "November", "December" };
 
         public static string[] DAYS = { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
