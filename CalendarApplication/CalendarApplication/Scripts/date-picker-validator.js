@@ -165,7 +165,12 @@ function validateCompare(name,other,compGreater) {
 }
 
 /* Function for creating datepicker */
-function createDatePicker(name, compare, onchange) {
+function createDatePicker(name, compare, onchange, dateString) {
+    // Parse selected date, given as argument
+    var dateArr = dateString.split("-");
+    var date = new Date(parseInt(dateArr[0], 10), parseInt(dateArr[1], 10) - 1, parseInt(dateArr[2], 10));
+
+    // Create jQuery datepicker
     $(function () {
         $("#" + name + "_picker").datepicker({
             beforeShow: function (input, inst) {
@@ -179,7 +184,7 @@ function createDatePicker(name, compare, onchange) {
                 validateDate(name, compare);
                 if (onchange) { onchange(); } // Call the onchange function
             }
-        });
+        }).datepicker("setDate",date); // Set the date.
     });
 }
 
@@ -214,4 +219,24 @@ function getRange(cmpStr) {
 /* Function for showing date picker */
 function showDatePicker(name) {
     $("#" + name).datepicker("show")
+}
+
+/* Function for disabling/enabling date picker */
+function setDateTimeEditorEnabled(id, enabled) {
+    if (enabled) {
+        $("#" + id + "_Year").removeAttr('disabled');
+        $("#" + id + "_Month").removeAttr('disabled');
+        $("#" + id + "_Day").removeAttr('disabled');
+        $("#" + id + "_Hour").removeAttr('disabled');
+        $("#" + id + "_Minute").removeAttr('disabled');
+        $("#" + id + "_picker_button").show();
+    }
+    else {
+        $("#" + id + "_Year").attr('disabled', 'disabled');
+        $("#" + id + "_Month").attr('disabled', 'disabled');
+        $("#" + id + "_Day").attr('disabled', 'disabled');
+        $("#" + id + "_Hour").attr('disabled', 'disabled');
+        $("#" + id + "_Minute").attr('disabled', 'disabled');
+        $("#" + id + "_picker_button").hide();
+    }
 }

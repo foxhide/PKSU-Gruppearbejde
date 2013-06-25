@@ -3,6 +3,9 @@
 @if(Model.TypeSpecifics.Count > 0)
 {
     <h3>Event Type Specifics:</h3>
+    <span style="color:red">*</span>@: means that the field is required for approval<br />
+    <span style="color:red">**</span>@: means that the field is required to create the event<br /><br />
+    
     <table style="margin-left:0;margin-right:auto">
         @for (int i = 0; i < Model.TypeSpecifics.Count; i++)
         {

@@ -130,7 +130,7 @@ namespace CalendarApplication.Controllers
             // Get filter and dates
             EventFilter f = this.GetFilter(state, types);
             DateTime dtFrom = from == null ? new DateTime(1,1,1) : this.parseString(from);
-            DateTime dtTo = to == null ? new DateTime(9999,1,1) : this.parseString(to);
+            DateTime dtTo = to == null ? new DateTime(9999,12,31) : this.parseString(to);
             
             // Get limit and efrom
             int limitInt = limit == null ? 10 : Convert.ToInt32(limit);
@@ -146,13 +146,21 @@ namespace CalendarApplication.Controllers
 
             CalendarList cl = this.GetList(dtFrom, dtTo, f, limitInt, efromInt, eo, descend);
 
+            if (from == null && to == null)
+            {
+                // Display some nice dates to the user
+                cl.All = true;
+                cl.Start = DateTime.Today;
+                cl.End = cl.Start.AddDays(10);
+            }
+
             cl.Filter = f;
             cl.Mode = CalendarMode.LIST;
             cl.Limit = limitInt;
             cl.OldLimit = limitInt;
             cl.EventFrom = efromInt;
-            // If both are null, set the all checkbox.
-            cl.All = from == null && to == null;
+            cl.Order = eo;
+            cl.Descending = descend;
 
             return View(cl);
         }

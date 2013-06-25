@@ -27,9 +27,9 @@ namespace CalendarApplication.Models.Group
         {
             foreach(GroupUserModel usr in Members)
             {
-                if (usr.Leader)
+                if (usr.ID == id)
                 {
-                    return true;
+                    return usr.Leader;
                 }
             }
             return false;

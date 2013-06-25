@@ -613,6 +613,52 @@ namespace CalendarApplication.Database
             return true;
         }
 
+        /// <summary>
+        /// Method for setting state for a given event
+        /// </summary>
+        /// <param name="eventId">ID of the event</param>
+        /// <param name="newState">The new state, state must be in [0,2]</param>
+        /// <returns>True on success, false on error</returns>
+        public bool SetEventState(int eventId, int newState)
+        {
+            // Sanity check of states
+            if (newState < 0 || newState > 2) { return false; }
+
+            if (this.OpenConnection())
+            {
+                MySqlTransaction mst = null;
+                MySqlCommand cmd = new MySqlCommand();
+                try
+                {
+                    // Try to update the state
+                    mst = this.connection.BeginTransaction();
+                    cmd.Connection = this.connection;
+                    cmd.CommandText = "UPDATE pksudb.events SET state = @state WHERE eventId = @eid";
+                    cmd.Parameters.AddWithValue("@state", newState);
+                    cmd.Parameters.AddWithValue("@eid", eventId);
+                    cmd.Prepare();
+                    cmd.ExecuteNonQuery();
+                    mst.Commit();
+
+                    this.CloseConnection();
+                    return true;
+                }
+                catch (MySqlException ex)
+                {
+                    // Error
+                    this.ErrorMessage = ex.Message + " caused by: " + cmd.CommandText;
+                    mst.Rollback();
+                    this.CloseConnection();
+                    return false;
+                }
+            }
+            else
+            {
+                // Error
+                return false;
+            }
+        }
+
 
         /// <summary>
         /// Delete existing event

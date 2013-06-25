@@ -153,17 +153,14 @@ table.scrollheader th {
     padding:6px;
     background-color:black;
     color:white;
-    border-left:1px solid black;
     text-align:left;
 }
 div.scroll {
-    border:1px solid black;
-    height:200px;
-    width:auto;
+    width:100%;
     overflow-y:scroll;
-    display:inline-block;
 }
 div.scroll table {
+    width:100%;
     border-collapse:collapse;
 }
 div.scroll tr td {
@@ -202,6 +199,32 @@ div.scroll tr td {
     background-image:url('/Content/images/error.png');
     background-repeat:no-repeat;
     background-position:center; 
+}
+
+/* States */
+span.state_0 {
+    background-color: #FFEEEE;
+    border:1px red solid;
+    padding:0px 2px 0px 2px;
+}
+span.state_0:before {
+    content:"Incomplete";
+}
+span.state_1 {
+    background-color: #FFFFCE;
+    border:1px #EDED47 solid;
+    padding:0px 2px 0px 2px;
+}
+span.state_1:before {
+    content:"Approved";
+}
+span.state_2 {
+    background-color: #D6FFDA;
+    border:1px green solid;
+    padding:0px 2px 0px 2px;
+}
+span.state_2:before {
+    content:"Finished";
 }
 
 /* Styles for basic forms

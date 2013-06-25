@@ -129,15 +129,15 @@ function updateList(id, cols) {
         var hw = header.width() + hpad;
         var cw = column.width() + cpad;
         if (hw > cw) {
-            column.width(hw - cpad + 1);
+            column.width(hw - cpad - 1);
         }
         else {
             header.width(cw - hpad + 1);
         }
     }
-    // Offset the first header width with two (1px div frame and 1px th frame)
+    // Offset the first header width with 1
     var firsthd = $("#" + id + "_hd_0");
-    firsthd.width(firsthd.width() + 2);
+    firsthd.width(firsthd.width() + 1);
 
     // Calculate the missing width (scrollbar) and offset the last header width
     var scrollbar = $("#" + id).width() - $("#" + id + "_hrow").width();

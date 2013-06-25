@@ -167,8 +167,10 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Content Include="Content\Calendar.css" />
     <Content Include="Content\images\calendar.png" />
+    <Content Include="Content\images\down.png" />
     <Content Include="Content\images\error.png" />
     <Content Include="Content\images\ok.png" />
+    <Content Include="Content\images\up.png" />
     <Content Include="Content\images\warning.png" />
     <Content Include="Content\Site.css" />
     <Content Include="Content\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />
