@@ -52,14 +52,14 @@
                         @if(Model.ID != -1)
                         {
                             <div id="type_warning">
-                                Warning! Changing the type will delete the data previously added for this event.
+                                Warning! Changing the type will delete the data previously added for this event when changes are saved.
                                 Are you sure?<br />
                                 <input type="button" value="Yes" onclick="typeCheckResponse(true,@Model.SelectedEventType)" />
                                 <input type="button" value="No" onclick="typeCheckResponse(false,@Model.SelectedEventType)" />
                                 <br />
-                                @Html.CheckBoxFor(m => m.DeleteFiles)<span style="font-size:8pt">delete files too.</span>
+                                @Html.CheckBoxFor(m => m.DeleteFiles)<span style="font-size:8pt">Delete files too.</span>
                             </div>
-                        }
+                        }else{<script>typeCheckResponse(true,@Model.SelectedEventType)</script>}
                     </div>
                 }
                 else

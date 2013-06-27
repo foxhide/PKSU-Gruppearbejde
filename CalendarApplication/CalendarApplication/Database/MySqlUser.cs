@@ -5,6 +5,7 @@ using System.Web;
 using MySql.Data.MySqlClient;
 
 using CalendarApplication.Models.Account;
+using System.Data;
 
 namespace CalendarApplication.Database
 {
@@ -173,5 +174,46 @@ namespace CalendarApplication.Database
                 return false;
             }
         }
+
+
+        public int GetUnapprovedCount()
+        {
+            int result = -1;
+
+            if (this.OpenConnection() == true)
+            {
+                MySqlTransaction mst = null;
+                MySqlCommand cmd = null;
+                
+                try
+                {
+                    mst = this.connection.BeginTransaction();
+                    cmd = new MySqlCommand();
+                    cmd.Connection = this.connection;
+                    cmd.Transaction = mst;
+
+                    string count = "SELECT COUNT(userId) FROM users WHERE needsApproval = 1";
+
+                    cmd.CommandText = count;
+                    cmd.Prepare();
+
+                    result = Convert.ToInt32(cmd.ExecuteScalar());
+                    this.CloseConnection();
+                }
+                catch (MySqlException ex0)
+                {
+                    this.CloseConnection();
+                    ErrorMessage = "Some database error occured: Error message: " + ex0.Message
+                                    + ", Caused by: " + cmd.CommandText;
+                    return result;
+                }
+                return result;
+            }
+            else
+            {
+                return result;
+            }
+        }
+         
     }
 }
