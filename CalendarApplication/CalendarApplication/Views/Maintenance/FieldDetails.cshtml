@@ -29,7 +29,7 @@
             <input type="hidden" name='TypeSpecific[@(Model.ViewID)].Datatype' value="@((int)Model.Datatype)" />
         }
         </td>
-        <td rowspan="3"><div id="Desc_@(Model.ViewID)_char_counter">Characters left: @(100 - Model.Description.Length)</div>
+        <td rowspan="3"><div id="Desc_@(Model.ViewID)_char_counter">Characters left: @(100 - (String.IsNullOrEmpty(Model.Description) ? 0 : Model.Description.Length))</div>
             <textarea id='Desc_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].Description'
                cols="40" rows="4" onkeyup="updateCounter('Desc_@(Model.ViewID)',100);">@(Model.Description)</textarea></td>
     </tr>

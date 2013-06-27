@@ -57,7 +57,7 @@ INSERT INTO eventtypefields (eventTypeId, fieldName, fieldDescription, requiredC
 
 CREATE TABLE pksudb.table_2 (
 	eventId int NOT NULL,
-	field_1 VARCHAR(50) NOT NULL,
+	field_1 VARCHAR(50),
 	PRIMARY KEY (eventId),
     CONSTRAINT table_2eventid
     FOREIGN KEY (eventId)
@@ -77,28 +77,33 @@ INSERT INTO eventroomsused (eventId, roomId) VALUES (1,3);
 	-- Poker
 INSERT INTO events (userId, eventTypeId, eventName, eventStart, eventEnd, visible, state)
 	VALUES (1,1,"Poker","2013-03-22 22:00:00","2013-03-24 10:00:00",true,1);
+INSERT INTO table_2 (eventId) VALUES (2);
 INSERT INTO eventroomsused (eventId, roomId) VALUES (2,4);
 
 	-- Kerbal
 INSERT INTO events (userId, eventTypeId, eventName, eventStart, eventEnd, visible, state)
 	VALUES (2,1,"Kerbal","2013-03-02 22:00:00","2013-04-20 02:30:00",true,2);
+INSERT INTO table_2 (eventId) VALUES (3);
 INSERT INTO eventroomsused (eventId, roomId) VALUES (3,1);
 INSERT INTO eventroomsused (eventId, roomId) VALUES (3,6);
 
 	-- MineCon
 INSERT INTO events (userId, eventTypeId, eventName, eventStart, eventEnd, visible, state)
 	VALUES (2,1,"MineCon 2013","2013-03-02 10:00:00","2013-03-02 18:30:00",true,1);
+INSERT INTO table_2 (eventId) VALUES (4);
 INSERT INTO eventroomsused (eventId, roomId) VALUES (4,5);
    
     -- Visible event
 INSERT INTO events (userId, eventTypeId, eventName, eventStart, eventEnd, visible, state)
 	VALUES (1,1,"Visible","2013-05-10 10:00:00","2013-05-12 10:00:00",true,1);
+INSERT INTO table_2 (eventId) VALUES (5);
 INSERT INTO eventroomsused (eventId, roomId) VALUES (5,1);
 INSERT INTO eventroomsused (eventId, roomId) VALUES (5,2);
 
     -- VisibleToL04 event
 INSERT INTO events (userId, eventTypeId, eventName, eventStart, eventEnd, visible, state)
 	VALUES (1,1,"L04 event","2013-05-12 10:00:00","2013-05-13 10:00:00",false,2);
+INSERT INTO table_2 (eventId) VALUES (6);
 INSERT INTO eventroomsused (eventId, roomId) VALUES (6,1);
 INSERT INTO eventroomsused (eventId, roomId) VALUES (6,3);
 INSERT INTO eventvisibility (eventId, groupId) VALUES (6,4);
@@ -106,6 +111,7 @@ INSERT INTO eventvisibility (eventId, groupId) VALUES (6,4);
     -- VisibleToMinecraftGurus event
 INSERT INTO events (userId, eventTypeId, eventName, eventStart, eventEnd, visible, state)
 	VALUES (3,1,"Minecraft1337","2013-05-13 10:00:00","2013-05-16 10:00:00",false,0);
+INSERT INTO table_2 (eventId) VALUES (7);
 INSERT INTO eventroomsused (eventId, roomId) VALUES (7,4);
 INSERT INTO eventroomsused (eventId, roomId) VALUES (7,5);
 INSERT INTO eventvisibility (eventId, groupId) VALUES (7,3);
