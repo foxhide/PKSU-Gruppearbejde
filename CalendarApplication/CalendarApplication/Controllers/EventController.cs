@@ -28,7 +28,7 @@ namespace CalendarApplication.Controllers
                 if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
                 else { return RedirectToAction("Index", "Home", null); }
             }
-            return View(GetEvent(eventId));
+            return View(this.GetEvent(eventId));
         }
 
         [HttpPost]
@@ -45,9 +45,12 @@ namespace CalendarApplication.Controllers
             };
             string eventinfo = "SELECT * FROM events NATURAL LEFT JOIN eventroomsused " +
                                "NATURAL LEFT JOIN rooms NATURAL JOIN eventtypes NATURAL JOIN users " +
-                               "WHERE eventId = " + eventId;
+                               "WHERE eventId = @eid";
             MySqlConnect con = new MySqlConnect();
-            DataTable table = con.ExecuteQuery(eventinfo);
+            object[] argval = { eventId };
+            string[] argnam = { "@eid" };
+            CustomQuery query = new CustomQuery { Cmd = eventinfo, ArgNames = argnam, Args = argval };
+            DataTable table = con.ExecuteQuery(query);
 
             if (table != null)
             {
@@ -261,9 +264,15 @@ namespace CalendarApplication.Controllers
             }
             // Get list of rooms //
             eem.RoomSelectList = new List<SelectListItem>();
-            string roomquery = eem.ID == -1 ? "SELECT roomId,roomName FROM rooms"
+            string roomcmd = eem.ID == -1 ? "SELECT roomId,roomName FROM rooms"
                                : "SELECT roomId,roomName,eventId FROM rooms NATURAL LEFT JOIN "
-                                    + "(SELECT * FROM eventroomsused WHERE eventId = " + eem.ID + ") AS r";
+                                    + "(SELECT * FROM eventroomsused WHERE eventId = @eid ) AS r";
+            CustomQuery roomquery = new CustomQuery
+            {
+                Cmd = roomcmd,
+                ArgNames = new[] { "@eid" },
+                Args = new[] { (object)eem.ID }
+            };
             dt = msc.ExecuteQuery(roomquery);
             if (dt != null)
             {
@@ -284,9 +293,16 @@ namespace CalendarApplication.Controllers
 
             // Get list of users
             eem.UserEditorList = new List<SelectListItem>();
-            string userquery = eem.ID == -1 ? "SELECT userId,userName FROM users ORDER BY userName"
+            string usercmd = eem.ID == -1 ? "SELECT userId,userName FROM users ORDER BY userName"
                                : "SELECT userId,userName,eventId FROM users NATURAL LEFT JOIN "
-                                + "(SELECT * FROM eventeditorsusers WHERE eventId = " + eem.ID + ") AS e ORDER BY userName";
+                                + " ( SELECT * FROM eventeditorsusers WHERE eventId = @eid ) AS e ORDER BY userName";
+            CustomQuery userquery = new CustomQuery
+            {
+                Cmd = usercmd,
+                ArgNames = new[] { "@eid" },
+                Args = new[] { (object)eem.ID }
+            };
+
             dt = msc.ExecuteQuery(userquery);
             if (dt != null)
             {
@@ -307,7 +323,14 @@ namespace CalendarApplication.Controllers
             eem.GroupVisibleList = new List<SelectListItem>();
             if (eem.ID == -1)
             {
-                string groupquery = "SELECT groupId,groupName FROM groups ORDER BY groupName";
+                string groupcmd = "SELECT groupId,groupName FROM groups ORDER BY groupName";
+                CustomQuery groupquery = new CustomQuery
+                {
+                    Cmd = groupcmd,
+                    ArgNames = new string[] { },
+                    Args = new object[] { }
+                };
+
                 dt = msc.ExecuteQuery(groupquery);
                 if (dt != null)
                 {
@@ -324,10 +347,24 @@ namespace CalendarApplication.Controllers
             }
             else
             {
-                string query0 = "SELECT groupId,groupName,eventId FROM groups NATURAL LEFT JOIN "
-                                    + "(SELECT * FROM eventeditorsgroups WHERE eventId = " + eem.ID + ") AS g ORDER BY groupName";
-                string query1 = "SELECT groupId,groupName,eventId FROM groups NATURAL LEFT JOIN "
-                                    + "(SELECT * FROM eventvisibility WHERE eventId = " + eem.ID + ") AS g ORDER BY groupName";
+                string cmd0 = "SELECT groupId,groupName,eventId FROM groups NATURAL LEFT JOIN "
+                                    + "(SELECT * FROM eventeditorsgroups WHERE eventId = @eid ) AS g ORDER BY groupName";
+                string cmd1 = "SELECT groupId,groupName,eventId FROM groups NATURAL LEFT JOIN "
+                                    + "(SELECT * FROM eventvisibility WHERE eventId = @eid ) AS g ORDER BY groupName";
+                CustomQuery query0 = new CustomQuery
+                {
+                    Cmd = cmd0,
+                    ArgNames = new[] { "@eid" },
+                    Args = new[] { (object)eem.ID }
+                };
+
+                CustomQuery query1 = new CustomQuery
+                {
+                    Cmd = cmd1,
+                    ArgNames = new[] { "@eid" },
+                    Args = new[] { (object)eem.ID }
+                };
+
                 DataSet ds = msc.ExecuteQuery(new[] { query0, query1 });
                 if (ds != null)
                 {
@@ -352,7 +389,9 @@ namespace CalendarApplication.Controllers
                 }
             }
 
-            eem.EventTypes = this.GetEventTypes(msc);
+            // Get event types and type specifics
+            this.GetEventTypes(eem, msc);
+
             TempData["errorMsg"] = msc.ErrorMessage;
             if (eventId != -1)
             {
@@ -451,7 +490,7 @@ namespace CalendarApplication.Controllers
             // Error //
 
             // Get the types again for the view
-            eem.EventTypes = this.GetEventTypes(mse);
+            this.GetEventTypes(eem, mse);
 
             // Fill all the dropdown lists again, if any.
             List<SelectListItem> users = null;
@@ -507,12 +546,19 @@ namespace CalendarApplication.Controllers
             List<SelectListItem> groups = null;      // List for group list
             List<SelectListItem> usersDrop = null;   // List for user dropdown
             List<SelectListItem> groupsDrop = null;  // List for group dropdown
-            string specQuery = "SELECT * FROM eventtypefields WHERE eventTypeId = " + type;
-            DataTable dt = msc.ExecuteQuery(specQuery);
+            string specQuery = "SELECT * FROM eventtypefields WHERE eventTypeId = @etid";
+            object[] argval = { type };
+            string[] argnam = { "@etid" };
+            CustomQuery query = new CustomQuery { Cmd = specQuery, ArgNames = argnam, Args = argval };
+            DataTable dt = msc.ExecuteQuery(query);
             DataTable value = null;
             if (eventId != -1)
             {
-                value = msc.ExecuteQuery("SELECT * FROM table_" + type + " WHERE eventId = " + eventId);
+                string valcmd = "SELECT * FROM table_" + type + " WHERE eventId = @eid";
+                object[] args = { eventId };
+                string[] argnm = { "@eid" };
+                CustomQuery valquery = new CustomQuery { Cmd = valcmd, ArgNames = argnm, Args = args };
+                value = msc.ExecuteQuery(valquery);
             }
             if (dt != null)
             {
@@ -592,7 +638,8 @@ namespace CalendarApplication.Controllers
         {
             List<SelectListItem> result = new List<SelectListItem>();
             if (nullVal) { result.Insert(0,new SelectListItem { Value = "0", Text = "Select group" }); }
-            string groupquery = "SELECT groupId,groupName FROM groups ORDER BY groupName";
+            string groupcmd = "SELECT groupId,groupName FROM groups ORDER BY groupName";
+            CustomQuery groupquery = new CustomQuery { Cmd = groupcmd, ArgNames = new string[] { }, Args = new object[] { } };
             DataTable dt = msc.ExecuteQuery(groupquery);
             if (dt != null)
             {
@@ -618,7 +665,8 @@ namespace CalendarApplication.Controllers
         {
             List<SelectListItem> result = new List<SelectListItem>();
             if (nullVal) { result.Insert(0, new SelectListItem { Value = "0", Text = "Select user" }); }
-            string userquery = "SELECT userId,userName FROM users ORDER BY userName";
+            string usercmd = "SELECT userId,userName FROM users ORDER BY userName";
+            CustomQuery userquery = new CustomQuery { Cmd = usercmd, ArgNames = new string[] { }, Args = new object[] { } };
             DataTable dt = msc.ExecuteQuery(userquery);
             if (dt != null)
             {
@@ -711,40 +759,65 @@ namespace CalendarApplication.Controllers
         }
 
         /// <summary>
-        /// Getter for a list of all event types. This should be extended to check for create-authentication
+        /// Getter for a list of all event types.
         /// </summary>
         /// <param name="msc">MySqlConnect</param>
         /// <returns>A list of SelectListItems with event type names and ids</returns>
-        private List<SelectListItem> GetEventTypes(MySqlConnect msc)
+        private void GetEventTypes(EventEditModel eem, MySqlConnect msc)
         {
-            List<SelectListItem> result = new List<SelectListItem>();
-            result.Add(new SelectListItem { Value = "0", Text = "Select event type" });
+            eem.EventTypes = new List<SelectListItem>();
+            if (eem.ID == -1) { eem.EventTypes.Add(new SelectListItem { Value = "0", Text = "Select event type" }); }
             CustomQuery userquery = new CustomQuery();
             if (UserModel.GetCurrentUserID() != -1 && UserModel.GetCurrent().Admin)
             {
+                // Admin -> get all events
                 userquery.Cmd = "SELECT eventTypeId,eventTypeName FROM eventtypes";
             }
             else
             {
+                // Not admin -> get events allowed for creation by this user + the current selected type.
                 userquery.Cmd = "SELECT DISTINCT(eventTypeId),eventTypeName "
-                        + "FROM eventtypes NATURAL JOIN eventcreationgroups NATURAL JOIN groupmembers "
-                        + "WHERE userId = @uid AND canCreate = 1";
-                userquery.ArgNames = new[] { "@uid" };
-                userquery.Args = new[] { (object)UserModel.GetCurrentUserID() };
+                        + "FROM eventtypes NATURAL LEFT JOIN eventcreationgroups NATURAL LEFT JOIN groupmembers "
+                        + "WHERE (userId = @uid AND canCreate = 1) OR eventTypeId = @ti";
+                userquery.ArgNames = new[] { "@uid", "@ti" };
+                userquery.Args = new[] { (object)UserModel.GetCurrentUserID(), Convert.ToInt32(eem.SelectedEventType) };
             }
             DataTable dt = msc.ExecuteQuery(userquery);
             if (dt != null)
             {
                 foreach (DataRow dr in dt.Rows)
                 {
-                    result.Add(new SelectListItem
+                    eem.EventTypes.Add(new SelectListItem
                     {
                         Value = ((int)dr["eventTypeId"]).ToString(),
                         Text = (string)dr["eventTypeName"]
                     });
                 }
             }
-            return result;
+
+            // If old event and not admin, check if we are allowed to create the current event type
+            if (eem.ID != -1 && !UserModel.GetCurrent().Admin)
+            {
+                CustomQuery cq = new CustomQuery
+                {
+                    Cmd = "SELECT eventTypeId FROM pksudb.eventcreationgroups NATURAL JOIN pksudb.groupmembers "
+                            + "WHERE eventTypeId = @eti AND userId = @uid AND canCreate = 1",
+                    ArgNames = new[] { "@eti", "@uid" },
+                    Args = new object[] { Convert.ToInt32(eem.SelectedEventType), UserModel.GetCurrentUserID() }
+                };
+                dt = msc.ExecuteQuery(cq);
+                if (dt != null)
+                {
+                    // Set can change type - if any eventTypeIds were found, we may change the type, else not.
+                    // The extra type has been added in GetEventTypes(...), no matter if we have creation rights or not
+                    eem.CanChangeType = dt.Rows.Count != 0;
+                }
+                else
+                {
+                    TempData["errorMsg"] = msc.ErrorMessage;
+                }
+            }
+            else { eem.CanChangeType = true; } // New event or admin
         }
 
         /// <summary>

@@ -24,9 +24,9 @@ namespace CalendarApplication.Controllers
 
             GroupListModel model = new GroupListModel { GroupList = new List<GroupModel>() };
             MySqlConnect msc = new MySqlConnect();
-            string grcmd = "SELECT * FROM groups";
+            string grcmd = "SELECT * FROM groups ORDER BY groupName";
             CustomQuery grquery = new CustomQuery { Cmd = grcmd, ArgNames = { }, Args = { } };
-            DataTable dt = msc.ExecuteQuery(grcmd);
+            DataTable dt = msc.ExecuteQuery(grquery);
 
             foreach (DataRow dr in dt.Rows)
             {
@@ -61,14 +61,14 @@ namespace CalendarApplication.Controllers
                 EventTypes = new List<EventTypeModel>()
             };
             string cmd1 = "SELECT eventTypeId, eventTypeName FROM eventcreationgroups "
-                          + "NATURAL JOIN eventtypes WHERE groupId = @gid";
+                          + "NATURAL JOIN eventtypes WHERE groupId = @gid ORDER BY eventTypeName";
             string[] argnam1 = new string[] { "@gid" };
             object[] args1 = new object[] { groupId };
             CustomQuery query1 = new CustomQuery { Cmd = cmd1, ArgNames = argnam1, Args = args1 };
 
             string cmd2 = "SELECT groupId, groupName, groupLeader, canCreate, userName, userId "
                          + "FROM groups NATURAL JOIN groupmembers NATURAL JOIN users "
-                         + "WHERE groupId = @gid AND active = 1";
+                         + "WHERE groupId = @gid AND active = 1 ORDER BY userName";
             //perhaps inactive members should be shown anyway?
             string[] argnam2 = { "@gid" };
             object[] args2 = { groupId };

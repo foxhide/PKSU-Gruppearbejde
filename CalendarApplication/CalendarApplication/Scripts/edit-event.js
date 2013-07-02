@@ -2,6 +2,32 @@
   This js-script contains the js-functions needed for event create/edit.
  */
 
+// Has the popup appeared?
+var popup = false;
+
+/* Function for showing popup, if not disabled, or getting type specifics if disabled */
+function typeCheck(type) {
+    if (popup) {
+        getSpecifics(type);
+    }
+    else {
+        $("#type_warning").show();
+    }
+}
+
+/* Response from type warning. Hides the popup and disableds the popup on true */
+function typeCheckResponse(response,old) {
+    $("#type_warning").hide();
+    popup = response;
+    if (!response) {
+        $("#SelectedEventType").val(old);
+    }
+    else {
+        getSpecifics($("#SelectedEventType").val());
+    }
+}
+
+// Number of fields variable
 var numberOfFields = 0;
 
 /* Get the partial view for the given event type. If type == 0 (non selected),
@@ -40,20 +66,20 @@ function setState() {
     var approved = $("#Approved").val().toLowerCase() == "true" ? true : false;
     if (!approved) {
         $("#State").val(0);
-        $("#state_text").html("Incomplete");
-        $("#state_text").css("color", "red");
+        $("#state_text").removeClass();
+        $("#state_text").addClass("state_0");
     }
     else {
         /* Note: RequiredApprove should be set whenever RequiredCreate is set (so we avoid to run both checks) */
         if (!checkApprove()) {
             $("#State").val(1);
-            $("#state_text").html("Approved");
-            $("#state_text").css("color", "yellow");
+            $("#state_text").removeClass();
+            $("#state_text").addClass("state_1");
         }
         else {
             $("#State").val(2);
-            $("#state_text").html("Finished");
-            $("#state_text").css("color", "#40FF00");
+            $("#state_text").removeClass();
+            $("#state_text").addClass("state_2");
         }
     }
 }

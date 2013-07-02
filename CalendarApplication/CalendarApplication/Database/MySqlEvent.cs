@@ -463,6 +463,17 @@ namespace CalendarApplication.Database
                         cmd.Prepare();
                         cmd.ExecuteNonQuery();
                     }
+                    else
+                    {
+                        //when there are no specifics, just insert eventId when creating
+                        if (eem.ID == -1)
+                        {                            
+                            string insert = "INSERT INTO pksudb.table_" + eem.SelectedEventType + " ( eventId ) VALUES ( @nid )";
+                            cmd.CommandText = insert;
+                            cmd.Prepare();
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
 
                     //Handle room edit/create here.
                     //Currently deletes everything and inserts again, even if unchanged.

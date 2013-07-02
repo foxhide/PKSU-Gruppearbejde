@@ -136,9 +136,12 @@ namespace CalendarApplication.Controllers
             }
             else
             {
-                string getType = "SELECT * FROM (eventtypes NATURAL LEFT JOIN eventtypefields) WHERE eventTypeId = " + eventId;
+                string getType = "SELECT * FROM (eventtypes NATURAL LEFT JOIN eventtypefields) WHERE eventTypeId = @eid";
                 MySqlConnect msc = new MySqlConnect();
-                DataTable dt = msc.ExecuteQuery(getType);
+                object[] argval = { eventId };
+                string[] argnam = { "@eid" };
+                CustomQuery query = new CustomQuery { Cmd = getType, ArgNames = argnam, Args = argval };
+                DataTable dt = msc.ExecuteQuery(query);
                 etm.ID = eventId;
                 etm.Name = (string)dt.Rows[0]["eventTypeName"];
                 etm.ActiveFields = 0;

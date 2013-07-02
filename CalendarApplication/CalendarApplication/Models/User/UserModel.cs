@@ -41,7 +41,11 @@ namespace CalendarApplication.Models.User
         public static UserModel GetUser(int ID)
         {
             MySqlConnect msc = new MySqlConnect();
-            DataTable dt = msc.ExecuteQuery("SELECT userId,userName,realName,phoneNum,email,admin FROM users WHERE userId = " + ID);
+            string cmd = "SELECT userId,userName,realName,phoneNum,email,admin FROM users WHERE userId = @uid";
+            object[] argval = { ID };
+            string[] argnam = { "@uid" };
+            CustomQuery query = new CustomQuery { Cmd = cmd, ArgNames = argnam, Args = argval };
+            DataTable dt = msc.ExecuteQuery(query);
             if(dt == null) { return null; }
 
             UserModel result = new UserModel

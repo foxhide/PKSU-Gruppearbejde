@@ -15,57 +15,106 @@
 }
 else {
     <h2>User: @Model.UserName</h2>
-    if(!Model.Active)
-    {
-        <h3 style="color:red">This user is no longer active!</h3>
-    }
+    <h3 id="active_msg" style="color:red;display:@(Model.Active?"none":"normal")">This user is no longer active!</h3>
+    
+    <script>
+        var isAdmin = @(Model.Admin.ToString().ToLowerInvariant());
+        var isActive = @(Model.Active.ToString().ToLowerInvariant());
+
+        function setAdmin(userId) {
+            $.ajax({
+                url: "/Account/EditUserBool",
+                type: 'POST',
+                data: { field: 2, userId: userId, value: !isAdmin },
+                success: function(result) {
+                    if(result) {
+                        isAdmin = !isAdmin;
+                        $("#admin").removeClass();
+                        $("#admin").addClass(isAdmin ? "tick" : "red_cross");
+                        $("#admin_button").val(isAdmin ? "Degrade" : "Make admin");
+                    }
+                }
+            });
+        }
+
+        function setActive(userId) {
+            $.ajax({
+                url: "/Account/EditUserBool",
+                type: 'POST',
+                data: { field: 0, userId: userId, value: !isActive },
+                success: function(result) {
+                    if(result) {
+                        isActive = !isActive;
+                        if(isActive) {
+                            $("#pswd_reset").removeAttr("disabled");
+                            $("#admin_button").removeAttr("disabled");
+                            $("#active_msg").hide();
+                            $("#active_button").val("Deactivate user");
+                        }
+                        else {
+                            $("#pswd_reset").attr("disabled","disabled");
+                            $("#admin_button").attr("disabled","disabled");
+                            $("#active_msg").show();
+                            $("#active_button").val("Activate user");
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+    
+    <style>
+        #new_pass_box {
+            display:none;
+            position:absolute;
+            top:140px;
+            
+        }
+        #new_pass_box table {
+            border-collapse:collapse;
+            border:1px black solid;
+        }
+        #new_pass_box th {
+            padding:5px;
+            color:white;
+            background-color:black;
+        }
+        #new_pass_box tr td {
+            padding:0;
+            background-color:lightgrey;
+            white-space: nowrap;
+        }
+    </style>
+    
     <table style="margin-left:40px;margin-right:auto">
         <tr>
-            <td id="data" style="padding-right:120px">
-                <b>Name</b><br />
-                @Model.RealName<br />
+            <td id="data" style="padding-right:100px">
+                <b>Name</b>
                 <br />
-                <b>Email</b><br />
-                @Model.Email<br />
+                @Model.RealName
                 <br />
-                <b>Phone Number</b><br />
-                @Model.Phone<br />
                 <br />
-                @if (Model.Admin)
-                {
-                    @:User is admin
-                    <br />
-                    <br />
-                }
+                <b>Email</b>
+                <br />
+                <a href=@("mailto:"+Model.Email)>@Model.Email</a>
+                <br />
+                <br />
+                <b>Phone Number</b>
+                <br />
+                @Model.Phone
+                <br />
+                <br />
+                <b>Admin</b>
+                <br />
+                <div id="admin" class="@(Model.Admin?"tick":"red_cross")" style="width:26px;height:26px"></div>
+                <br />
+                <br />
                 @if (UserModel.GetCurrentUserID() == Model.ID)
                 {
                     @Html.ActionLink("Edit Profile", "EditUser", "Account", new { userId = Model.ID }, null)
                 }
-                else if (UserModel.GetCurrentUserID() != -1 && UserModel.GetCurrent().Admin)
-                {
-                    if (Model.Active)
-                    {
-                        if (Model.Admin)
-                        {
-                            <input type="button" value="Remove admin rights" onclick="updateUser('admin',@(Model.ID),false)"/>
-                        }
-                        else
-                        {
-                            <input type="button" value="Make admin" onclick="updateUser('admin',@(Model.ID),true)"/>
-                        }
-                        <input type="button" value="Reset password" onclick="resetPassword(@(Model.ID))">
-                        <input type="button" value="Deactivate user" onclick="updateUser('active',@(Model.ID),false)"/>
-                        <br />
-                        <div id="new_pass" style="background-color:blue;color:white;width:300px;
-                                height:50px;text-align:center;display:none"></div>
-                    }
-                    else
-                    {
-                        <input type="button" value="Activate user" onclick="updateUser('active',@(Model.ID),true)"/>
-                    }
-                }
             </td>
-            <td id="groups" style="padding-right:120px">
+            <td id="groups" style="padding-right:100px">
                 <b>Groups</b>
                 <br />
                 @using (Html.BeginListView("Groups", new string[] { "Name" }))
@@ -80,7 +129,7 @@ else {
                     }
                 }
             </td>
-            <td id="events">
+            <td id="events" style="padding-right:100px">
                 <b>Events created</b>
                 <br />
                 @using(Html.BeginListView("Events",new string[] { "Name", "Type", "State" }))
@@ -101,6 +150,40 @@ else {
                     }
                 }
             </td>
+            @if (UserModel.GetCurrentUserID() != -1 && UserModel.GetCurrent().Admin && UserModel.GetCurrentUserID() != Model.ID)
+            {
+                <td id="options" style="width:150px;position:relative">
+                    <b>Admin options</b>
+                    <br />
+
+                    <input id="admin_button" type="button" value="@(Model.Admin?"Remove admin rights":"Make admin")"
+                        onclick="setAdmin(@(Model.ID))"
+                        style="width:100%"
+                        @(Model.Active?"":"disabled='disabled'") />
+                    <br />
+
+                    <input id="pswd_reset" type="button" value="Reset password" onclick="resetPassword(@(Model.ID))"
+                        style="width:100%"
+                        @(Model.Active?"":"disabled='disabled'") />
+                    <br />
+
+                    <input id="active_button" type="button"
+                        value="@(Model.Active?"Deactivate user":"Activate user")"
+                        onclick="setActive(@(Model.ID))"
+                        style="width:100%"/>
+
+                    <br />
+                    <div id="new_pass_box">
+                        <table>
+                            <tr>
+                                <th style="text-align:left">New password:</th>
+                                <th style="text-align:right"><a style="cursor:pointer" onclick="$('#new_pass_box').hide()">X</a></th>
+                            </tr>
+                            <tr><td id="new_pass" colspan="2" style="padding:16px;font-size:24pt"></td></tr>
+                        </table>
+                    </div>
+                </td>
+            }
         </tr>
     </table>
 }

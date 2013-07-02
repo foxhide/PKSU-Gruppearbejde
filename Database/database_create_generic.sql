@@ -2,16 +2,13 @@ SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
 
-DROP SCHEMA IF EXISTS `pksudb` ;
-CREATE SCHEMA IF NOT EXISTS `pksudb` DEFAULT CHARACTER SET utf8 ;
-USE `pksudb` ;
 
 -- -----------------------------------------------------
--- Table `pksudb`.`users`
+-- Table `users`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `pksudb`.`users` ;
+DROP TABLE IF EXISTS `users` ;
 
-CREATE  TABLE IF NOT EXISTS `pksudb`.`users` (
+CREATE  TABLE IF NOT EXISTS `users` (
   `userId` INT NOT NULL AUTO_INCREMENT ,
   `userName` VARCHAR(45) NOT NULL ,
   `password` VARCHAR(70) NOT NULL ,
@@ -36,11 +33,11 @@ needsApproval: whether the user needs initial approval from an administrator.*/'
 
 
 -- -----------------------------------------------------
--- Table `pksudb`.`eventtypes`
+-- Table `eventtypes`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `pksudb`.`eventtypes` ;
+DROP TABLE IF EXISTS `eventtypes` ;
 
-CREATE  TABLE IF NOT EXISTS `pksudb`.`eventtypes` (
+CREATE  TABLE IF NOT EXISTS `eventtypes` (
   `eventTypeId` INT NOT NULL AUTO_INCREMENT ,
   `eventTypeName` VARCHAR(45) NOT NULL ,
   PRIMARY KEY (`eventTypeId`) )
@@ -50,11 +47,11 @@ eventTypeName: name of a event type*/';
 
 
 -- -----------------------------------------------------
--- Table `pksudb`.`events`
+-- Table `events`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `pksudb`.`events` ;
+DROP TABLE IF EXISTS `events` ;
 
-CREATE  TABLE IF NOT EXISTS `pksudb`.`events` (
+CREATE  TABLE IF NOT EXISTS `events` (
   `eventId` INT NOT NULL AUTO_INCREMENT ,
   `userId` INT NOT NULL ,
   `eventTypeId` INT NULL ,
@@ -68,12 +65,12 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`events` (
   INDEX `eventTypeId_idx` (`eventTypeId` ASC) ,
   CONSTRAINT `eventCreator`
     FOREIGN KEY (`userId` )
-    REFERENCES `pksudb`.`users` (`userId` )
+    REFERENCES `users` (`userId` )
     ON DELETE RESTRICT
     ON UPDATE NO ACTION,
   CONSTRAINT `eventTypeId`
     FOREIGN KEY (`eventTypeId` )
-    REFERENCES `pksudb`.`eventtypes` (`eventTypeId` )
+    REFERENCES `eventtypes` (`eventTypeId` )
     ON DELETE RESTRICT
     ON UPDATE NO ACTION)
 AUTO_INCREMENT = 1
@@ -88,11 +85,11 @@ state: current state of the event (not defined in database).*/';
 
 
 -- -----------------------------------------------------
--- Table `pksudb`.`files`
+-- Table `files`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `pksudb`.`files` ;
+DROP TABLE IF EXISTS `files` ;
 
-CREATE  TABLE IF NOT EXISTS `pksudb`.`files` (
+CREATE  TABLE IF NOT EXISTS `files` (
   `fileId` INT NOT NULL AUTO_INCREMENT ,
   `fileName` VARCHAR(45) NOT NULL ,
   `pathToFile` VARCHAR(150) NOT NULL ,
@@ -104,12 +101,12 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`files` (
   INDEX `fileuseris_idx` (`userId` ASC) ,
   CONSTRAINT `fileeventid`
     FOREIGN KEY (`eventId` )
-    REFERENCES `pksudb`.`events` (`eventId` )
+    REFERENCES `events` (`eventId` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fileuseris`
     FOREIGN KEY (`userId` )
-    REFERENCES `pksudb`.`users` (`userId` )
+    REFERENCES `users` (`userId` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 AUTO_INCREMENT = 1
@@ -121,11 +118,11 @@ uploaded: time and date when file was uploaded.*/';
 
 
 -- -----------------------------------------------------
--- Table `pksudb`.`groups`
+-- Table `groups`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `pksudb`.`groups` ;
+DROP TABLE IF EXISTS `groups` ;
 
-CREATE  TABLE IF NOT EXISTS `pksudb`.`groups` (
+CREATE  TABLE IF NOT EXISTS `groups` (
   `groupId` INT NOT NULL AUTO_INCREMENT ,
   `groupName` VARCHAR(45) NOT NULL ,
   PRIMARY KEY (`groupId`) )
@@ -135,23 +132,23 @@ groupName: the name of the group.*/';
 
 
 -- -----------------------------------------------------
--- Table `pksudb`.`eventvisibility`
+-- Table `eventvisibility`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `pksudb`.`eventvisibility` ;
+DROP TABLE IF EXISTS `eventvisibility` ;
 
-CREATE  TABLE IF NOT EXISTS `pksudb`.`eventvisibility` (
+CREATE  TABLE IF NOT EXISTS `eventvisibility` (
   `eventId` INT NOT NULL ,
   `groupId` INT NOT NULL ,
   PRIMARY KEY (`eventId`, `groupId`) ,
   INDEX `visigroup_idx` (`groupId` ASC) ,
   CONSTRAINT `visievent`
     FOREIGN KEY (`eventId` )
-    REFERENCES `pksudb`.`events` (`eventId` )
+    REFERENCES `events` (`eventId` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION,
   CONSTRAINT `visigroup`
     FOREIGN KEY (`groupId` )
-    REFERENCES `pksudb`.`groups` (`groupId` )
+    REFERENCES `groups` (`groupId` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
@@ -163,11 +160,11 @@ primary key is both together.*/';
 
 
 -- -----------------------------------------------------
--- Table `pksudb`.`eventeditorsusers`
+-- Table `eventeditorsusers`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `pksudb`.`eventeditorsusers` ;
+DROP TABLE IF EXISTS `eventeditorsusers` ;
 
-CREATE  TABLE IF NOT EXISTS `pksudb`.`eventeditorsusers` (
+CREATE  TABLE IF NOT EXISTS `eventeditorsusers` (
   `eventId` INT NOT NULL ,
   `userId` INT NOT NULL ,
   PRIMARY KEY (`eventId`, `userId`) ,
@@ -175,12 +172,12 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`eventeditorsusers` (
   INDEX `edituser_idx` (`userId` ASC) ,
   CONSTRAINT `editeventusers`
     FOREIGN KEY (`eventId` )
-    REFERENCES `pksudb`.`events` (`eventId` )
+    REFERENCES `events` (`eventId` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION,
   CONSTRAINT `edituserid`
     FOREIGN KEY (`userId` )
-    REFERENCES `pksudb`.`users` (`userId` )
+    REFERENCES `users` (`userId` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
@@ -192,11 +189,11 @@ primary key is both together.*/';
 
 
 -- -----------------------------------------------------
--- Table `pksudb`.`groupmembers`
+-- Table `groupmembers`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `pksudb`.`groupmembers` ;
+DROP TABLE IF EXISTS `groupmembers` ;
 
-CREATE  TABLE IF NOT EXISTS `pksudb`.`groupmembers` (
+CREATE  TABLE IF NOT EXISTS `groupmembers` (
   `groupId` INT NOT NULL ,
   `userId` INT NOT NULL ,
   `groupLeader` TINYINT(1) NULL DEFAULT 0 ,
@@ -206,12 +203,12 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`groupmembers` (
   INDEX `memberuserid_idx` (`userId` ASC) ,
   CONSTRAINT `membergroupid`
     FOREIGN KEY (`groupId` )
-    REFERENCES `pksudb`.`groups` (`groupId` )
+    REFERENCES `groups` (`groupId` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION,
   CONSTRAINT `memberuserid`
     FOREIGN KEY (`userId` )
-    REFERENCES `pksudb`.`users` (`userId` )
+    REFERENCES `users` (`userId` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
@@ -223,11 +220,11 @@ primary key is both together.*/';
 
 
 -- -----------------------------------------------------
--- Table `pksudb`.`rooms`
+-- Table `rooms`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `pksudb`.`rooms` ;
+DROP TABLE IF EXISTS `rooms` ;
 
-CREATE  TABLE IF NOT EXISTS `pksudb`.`rooms` (
+CREATE  TABLE IF NOT EXISTS `rooms` (
   `roomId` INT NOT NULL AUTO_INCREMENT ,
   `roomName` VARCHAR(45) NOT NULL ,
   PRIMARY KEY (`roomId`) )
@@ -236,11 +233,11 @@ COMMENT = 'Table for rooms.\n\nroomId: Primary key identifying the room.\n /* co
 
 
 -- -----------------------------------------------------
--- Table `pksudb`.`eventeditorsgroups`
+-- Table `eventeditorsgroups`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `pksudb`.`eventeditorsgroups` ;
+DROP TABLE IF EXISTS `eventeditorsgroups` ;
 
-CREATE  TABLE IF NOT EXISTS `pksudb`.`eventeditorsgroups` (
+CREATE  TABLE IF NOT EXISTS `eventeditorsgroups` (
   `eventId` INT NOT NULL ,
   `groupId` INT NOT NULL ,
   PRIMARY KEY (`eventId`, `groupId`) ,
@@ -248,12 +245,12 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`eventeditorsgroups` (
   INDEX `editgroupid_idx` (`groupId` ASC) ,
   CONSTRAINT `editgroupevent`
     FOREIGN KEY (`eventId` )
-    REFERENCES `pksudb`.`events` (`eventId` )
+    REFERENCES `events` (`eventId` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION,
   CONSTRAINT `editgroupid`
     FOREIGN KEY (`groupId` )
-    REFERENCES `pksudb`.`groups` (`groupId` )
+    REFERENCES `groups` (`groupId` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
@@ -265,11 +262,11 @@ primary key is both together.*/';
 
 
 -- -----------------------------------------------------
--- Table `pksudb`.`eventtypefields`
+-- Table `eventtypefields`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `pksudb`.`eventtypefields` ;
+DROP TABLE IF EXISTS `eventtypefields` ;
 
-CREATE  TABLE IF NOT EXISTS `pksudb`.`eventtypefields` (
+CREATE  TABLE IF NOT EXISTS `eventtypefields` (
   `fieldId` INT NOT NULL AUTO_INCREMENT ,
   `eventTypeId` INT NOT NULL ,
   `fieldName` VARCHAR(45) NOT NULL ,
@@ -282,7 +279,7 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`eventtypefields` (
   INDEX `eventtypenameid_idx` (`eventTypeId` ASC) ,
   CONSTRAINT `eventtypenameid`
     FOREIGN KEY (`eventTypeId` )
-    REFERENCES `pksudb`.`eventtypes` (`eventTypeId` )
+    REFERENCES `eventtypes` (`eventTypeId` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 AUTO_INCREMENT = 1
@@ -299,11 +296,11 @@ varCharLength: length of string if type is string, 0 if not string.*/';
 
 
 -- -----------------------------------------------------
--- Table `pksudb`.`eventroomsused`
+-- Table `eventroomsused`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `pksudb`.`eventroomsused` ;
+DROP TABLE IF EXISTS `eventroomsused` ;
 
-CREATE  TABLE IF NOT EXISTS `pksudb`.`eventroomsused` (
+CREATE  TABLE IF NOT EXISTS `eventroomsused` (
   `eventId` INT NOT NULL ,
   `roomId` INT NOT NULL ,
   PRIMARY KEY (`eventId`, `roomId`) ,
@@ -311,12 +308,12 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`eventroomsused` (
   INDEX `roomsusedroomid_idx` (`roomId` ASC) ,
   CONSTRAINT `roomsusedevid`
     FOREIGN KEY (`eventId` )
-    REFERENCES `pksudb`.`events` (`eventId` )
+    REFERENCES `events` (`eventId` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION,
   CONSTRAINT `roomsusedroomid`
     FOREIGN KEY (`roomId` )
-    REFERENCES `pksudb`.`rooms` (`roomId` )
+    REFERENCES `rooms` (`roomId` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
@@ -326,11 +323,11 @@ primary key is both together.*/';
 
 
 -- -----------------------------------------------------
--- Table `pksudb`.`eventcreationgroups`
+-- Table `eventcreationgroups`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `pksudb`.`eventcreationgroups` ;
+DROP TABLE IF EXISTS `eventcreationgroups` ;
 
-CREATE  TABLE IF NOT EXISTS `pksudb`.`eventcreationgroups` (
+CREATE  TABLE IF NOT EXISTS `eventcreationgroups` (
   `eventTypeId` INT NOT NULL ,
   `groupId` INT NOT NULL ,
   PRIMARY KEY (`eventTypeId`, `groupId`) ,
@@ -338,12 +335,12 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`eventcreationgroups` (
   INDEX `creationgroupid_idx` (`groupId` ASC) ,
   CONSTRAINT `creationeventtypeid`
     FOREIGN KEY (`eventTypeId` )
-    REFERENCES `pksudb`.`eventtypes` (`eventTypeId` )
+    REFERENCES `eventtypes` (`eventTypeId` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION,
   CONSTRAINT `creationgroupid`
     FOREIGN KEY (`groupId` )
-    REFERENCES `pksudb`.`groups` (`groupId` )
+    REFERENCES `groups` (`groupId` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
@@ -353,11 +350,11 @@ groupId: Foreign and primary key, not null.*/';
 
 
 -- -----------------------------------------------------
--- Table `pksudb`.`filelist`
+-- Table `filelist`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `pksudb`.`filelist` ;
+DROP TABLE IF EXISTS `filelist` ;
 
-CREATE  TABLE IF NOT EXISTS `pksudb`.`filelist` (
+CREATE  TABLE IF NOT EXISTS `filelist` (
   `fieldId` INT NOT NULL ,
   `fileId` INT NOT NULL ,
   `eventId` INT NOT NULL ,
@@ -367,17 +364,17 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`filelist` (
   INDEX `filelistevent_idx` (`eventId` ASC) ,
   CONSTRAINT `filelistfield`
     FOREIGN KEY (`fieldId` )
-    REFERENCES `pksudb`.`eventtypefields` (`fieldId` )
+    REFERENCES `eventtypefields` (`fieldId` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION,
   CONSTRAINT `filelistfile`
     FOREIGN KEY (`fileId` )
-    REFERENCES `pksudb`.`files` (`fileId` )
+    REFERENCES `files` (`fileId` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION,
   CONSTRAINT `filelistevent`
     FOREIGN KEY (`eventId` )
-    REFERENCES `pksudb`.`events` (`eventId` )
+    REFERENCES `events` (`eventId` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
@@ -387,11 +384,11 @@ eventId: Foreign key referencing event*/';
 
 
 -- -----------------------------------------------------
--- Table `pksudb`.`userlist`
+-- Table `userlist`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `pksudb`.`userlist` ;
+DROP TABLE IF EXISTS `userlist` ;
 
-CREATE  TABLE IF NOT EXISTS `pksudb`.`userlist` (
+CREATE  TABLE IF NOT EXISTS `userlist` (
   `fieldId` INT NOT NULL ,
   `userId` INT NOT NULL ,
   `eventId` INT NOT NULL ,
@@ -401,17 +398,17 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`userlist` (
   INDEX `userlistevent_idx` (`eventId` ASC) ,
   CONSTRAINT `userlistfield`
     FOREIGN KEY (`fieldId` )
-    REFERENCES `pksudb`.`eventtypefields` (`fieldId` )
+    REFERENCES `eventtypefields` (`fieldId` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION,
   CONSTRAINT `userlistuser`
     FOREIGN KEY (`userId` )
-    REFERENCES `pksudb`.`users` (`userId` )
+    REFERENCES `users` (`userId` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION,
   CONSTRAINT `userlistevent`
     FOREIGN KEY (`eventId` )
-    REFERENCES `pksudb`.`events` (`eventId` )
+    REFERENCES `events` (`eventId` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
@@ -421,11 +418,11 @@ eventId: Foreign key referencing events*/';
 
 
 -- -----------------------------------------------------
--- Table `pksudb`.`grouplist`
+-- Table `grouplist`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `pksudb`.`grouplist` ;
+DROP TABLE IF EXISTS `grouplist` ;
 
-CREATE  TABLE IF NOT EXISTS `pksudb`.`grouplist` (
+CREATE  TABLE IF NOT EXISTS `grouplist` (
   `fieldId` INT NOT NULL ,
   `groupId` INT NOT NULL ,
   `eventId` INT NOT NULL ,
@@ -435,17 +432,17 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`grouplist` (
   INDEX `grouplistevent_idx` (`eventId` ASC) ,
   CONSTRAINT `grouplistfield`
     FOREIGN KEY (`fieldId` )
-    REFERENCES `pksudb`.`eventtypefields` (`fieldId` )
+    REFERENCES `eventtypefields` (`fieldId` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION,
   CONSTRAINT `grouplistgroup`
     FOREIGN KEY (`groupId` )
-    REFERENCES `pksudb`.`groups` (`groupId` )
+    REFERENCES `groups` (`groupId` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION,
   CONSTRAINT `grouplistevent`
     FOREIGN KEY (`eventId` )
-    REFERENCES `pksudb`.`events` (`eventId` )
+    REFERENCES `events` (`eventId` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
@@ -453,7 +450,6 @@ COMMENT = 'Table for lists of groups.\n\nfieldId: Foreign key referencing /* com
 groupId: Foreign key referencing group
 eventId: Foreign key referencing events*/';
 
-USE `pksudb` ;
 
 
 SET SQL_MODE=@OLD_SQL_MODE;

@@ -3,23 +3,23 @@
 function sendData(type) {
     var fromList = "";
     var toList = "";
-    var field = "";
+    var field = -1;
     var value = false;
     if (type == "active-add") {
         fromList = "UISelect";
         toList = "UASelect";
-        field = "active";
+        field = 0;
         value = true;
     }
     else if (type == "active-rem") {
         fromList = "UASelect";
         toList = "UISelect";
-        field = "active";
+        field = 0;
     }
     else if (type == "approval") {
         fromList = "UNASelect";
         toList = "UASelect";
-        field = "needsApproval";
+        field = 1;
     }
     var list = document.getElementById(fromList);
     var id = list.options[list.selectedIndex].value;
@@ -78,7 +78,7 @@ function updateName(userId, value) {
     $.ajax({
         url: "/Account/EditUserString",
         type: 'POST',
-        data: { field: 'realName', userId: userId, value: value },
+        data: { field: 2, userId: userId, value: value },
         success: function (result) {
             if (result) { $("#name-input").addClass("tick"); }
             else { $("#name-input").addClass("red_cross"); }
@@ -95,7 +95,7 @@ function updateEmail(userId, value) {
     $.ajax({
         url: "/Account/EditUserString",
         type: 'POST',
-        data: { field: 'email', userId: userId, value: value },
+        data: { field: 0, userId: userId, value: value },
         success: function (result) {
             if (result) { $("#email-input").addClass("tick"); }
             else { $("#email-input").addClass("red_cross"); }
@@ -112,7 +112,7 @@ function updatePhone(userId, value) {
     $.ajax({
         url: "/Account/EditUserString",
         type: 'POST',
-        data: { field: 'phoneNum', userId: userId, value: value },
+        data: { field: 1, userId: userId, value: value },
         success: function (result) {
             if (result) { $("#phone-input").addClass("tick"); }
             else { $("#phone-input").addClass("red_cross"); }

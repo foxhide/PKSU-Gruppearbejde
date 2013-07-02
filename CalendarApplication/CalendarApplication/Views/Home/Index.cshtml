@@ -5,6 +5,7 @@
 
 @using CalendarApplication.Models.User;
 @using CalendarApplication.Models.Calendar;
+@using CalendarApplication.Database;
 
 @if(!Request.IsAuthenticated) {
     <h2>Welcome to Stengade CalendarApplication</h2>
@@ -18,13 +19,28 @@
     </text>
 }
 else {
-    <h2>Welcome @UserModel.GetCurrent().RealName</h2>
-
+    UserModel user = UserModel.GetCurrent();
+    <h2>Welcome @user.RealName</h2>
+    
     <text>
         You may view upcoming events using the
         @Html.ActionLink("calendar menu", "", "Calendar", null, null).<br />
         Use the @Html.ActionLink("profile page", "", "User", new { userId = UserModel.GetCurrentUserID() }, null)
         to view or edit your profile.
     </text>
+    
+    if (user.Admin)
+    {
+        MySqlUser msu = new MySqlUser();
+        int count = msu.GetUnapprovedCount();
+        bool eqone = count == 1;
+        <text>
+            <br />
+            <br />
+              There @(eqone ? "is" : "are") currently
+              @Html.ActionLink("" + count + (eqone ? " user" : " users" ),"ManageUsers","Maintenance",null,null)
+              awaiting activation.
+        </text>
+    }
     
 }
