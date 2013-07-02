@@ -31,9 +31,12 @@ namespace CalendarApplication.Models.Calendar
         public string GetTypeString()
         {
             string types = "";
-            foreach (EventTypeModel etm in this.Eventtypes)
+            if (this.Eventtypes != null)
             {
-                types += etm.Selected ? "1" : "0";
+                foreach (EventTypeModel etm in this.Eventtypes)
+                {
+                    types += etm.Selected ? "1" : "0";
+                }
             }
             return types;
         }
