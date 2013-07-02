@@ -468,7 +468,7 @@ namespace CalendarApplication.Database
                         //when there are no specifics, just insert eventId when creating
                         if (eem.ID == -1)
                         {                            
-                            string insert = "INSERT INTO pksudb.table_" + eem.SelectedEventType + " ( eventId ) VALUES ( @nid )";
+                            string insert = "INSERT INTO table_" + eem.SelectedEventType + " ( eventId ) VALUES ( @nid )";
                             cmd.CommandText = insert;
                             cmd.Prepare();
                             cmd.ExecuteNonQuery();

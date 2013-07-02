@@ -800,7 +800,7 @@ namespace CalendarApplication.Controllers
             {
                 CustomQuery cq = new CustomQuery
                 {
-                    Cmd = "SELECT eventTypeId FROM pksudb.eventcreationgroups NATURAL JOIN pksudb.groupmembers "
+                    Cmd = "SELECT eventTypeId FROM eventcreationgroups NATURAL JOIN groupmembers "
                             + "WHERE eventTypeId = @eti AND userId = @uid AND canCreate = 1",
                     ArgNames = new[] { "@eti", "@uid" },
                     Args = new object[] { Convert.ToInt32(eem.SelectedEventType), UserModel.GetCurrentUserID() }
