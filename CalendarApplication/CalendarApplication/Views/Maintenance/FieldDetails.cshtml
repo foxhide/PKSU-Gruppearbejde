@@ -19,7 +19,11 @@
             <select id='Type_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].Datatype' onchange="updateVarChar(@(Model.ViewID));">
                 @for (int i = 0; i < FieldDataModel.DATA_TYPES.Count; i++)
                 {
-                    <option value="@(i)" @(i == (int)Model.Datatype?"Selected":"")>@FieldDataModel.DATA_TYPES[i]</option>
+                    //disable files and filelists until they work properly
+                    if(i != 5 && i != 9)
+                    { 
+                        <option value="@(i)" @(i == (int)Model.Datatype?"Selected":"")>@FieldDataModel.DATA_TYPES[i]</option>
+                    }
                 }
             </select>
         }
