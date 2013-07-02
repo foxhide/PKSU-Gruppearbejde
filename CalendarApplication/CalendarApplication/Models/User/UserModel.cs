@@ -41,7 +41,7 @@ namespace CalendarApplication.Models.User
         public static UserModel GetUser(int ID)
         {
             MySqlConnect msc = new MySqlConnect();
-            DataTable dt = msc.ExecuteQuery("SELECT userId,userName,realName,phoneNum,email,admin FROM pksudb.users WHERE userId = " + ID);
+            DataTable dt = msc.ExecuteQuery("SELECT userId,userName,realName,phoneNum,email,admin FROM users WHERE userId = " + ID);
             if(dt == null) { return null; }
 
             UserModel result = new UserModel
@@ -156,7 +156,7 @@ namespace CalendarApplication.Models.User
             {
                 // Check if user in edit-group/user or visible-group or if event is visible.
                 command = "SELECT e.eventId, e.eventName,eventTypeName, e.state"
-                                + " FROM pksudb.events AS e"
+                                + " FROM events AS e"
                                 + " LEFT JOIN (SELECT eventId,userId"
                                 + " FROM eventeditorsusers"
                                 + " WHERE userId = @uid) AS edt_user ON e.eventId = edt_user.eventId"
@@ -210,7 +210,7 @@ namespace CalendarApplication.Models.User
             {
                 CustomQuery checkVisibility = new CustomQuery
                 {
-                    Cmd = "SELECT visible FROM pksudb.events WHERE eventId = @eid",
+                    Cmd = "SELECT visible FROM events WHERE eventId = @eid",
                     ArgNames = new[] { "@eid" },
                     Args = new[] { (object)eventId }
                 };
@@ -221,7 +221,7 @@ namespace CalendarApplication.Models.User
             {
                 string command = "SELECT e.visible,e.userId,vis_group.userId AS group_vis,"
                                     + "edt_group.userId AS group_edt, edt_user.userId AS user_edt"
-                                    + " FROM pksudb.events AS e"
+                                    + " FROM events AS e"
                                     + " LEFT JOIN (SELECT eventId,userId"
                                     + " FROM eventeditorsusers"
                                     + " WHERE userId = @uid) AS edt_user ON e.eventId = edt_user.eventId"
@@ -260,7 +260,7 @@ namespace CalendarApplication.Models.User
         {
             if (userId == -1) { return false; }
             string command = "SELECT e.userId,edt_group.userId AS group_edt, edt_user.userId AS user_edt"
-                                + " FROM pksudb.events AS e"
+                                + " FROM events AS e"
                                 + " LEFT JOIN (SELECT eventId,userId"
                                 + " FROM eventeditorsusers"
                                 + " WHERE userId = @uid) AS edt_user ON e.eventId = edt_user.eventId"

@@ -29,7 +29,7 @@ namespace CalendarApplication.Database
                     cmd.Connection = connection;
                     cmd.Transaction = mst;
 
-                    string insert = "INSERT INTO pksudb.eventtypes (eventTypeName) VALUES (@name); "
+                    string insert = "INSERT INTO eventtypes (eventTypeName) VALUES (@name); "
                                 + "SELECT last_insert_id();";
 
                     string foreignkeys = "";
@@ -39,13 +39,13 @@ namespace CalendarApplication.Database
                     cmd.Prepare();
                     result = Convert.ToInt32(cmd.ExecuteScalar());
 
-                    string createTable = "CREATE TABLE pksudb.table_" + result + "("
+                    string createTable = "CREATE TABLE table_" + result + "("
                                                 + "eventId int NOT NULL, ";
 
                     if (data.TypeSpecific != null)
                     {
 
-                        string insertField = "INSERT INTO pksudb.eventtypefields "
+                        string insertField = "INSERT INTO eventtypefields "
                                              + "(eventTypeId, fieldName, fieldDescription, requiredCreation, requiredApproval, fieldType, varCharLength) "
                                              + "VALUES (@typeid , @fieldname , @descr , @reqc , @reqa , @datatype , @varch ); "
                                              + "SELECT last_insert_id();";
@@ -78,21 +78,21 @@ namespace CalendarApplication.Database
                                 case Fieldtype.User:
                                     foreignkeys += ", "
                                      + "CONSTRAINT fieldIdCons_" + id
-                                     + " FOREIGN KEY (field_" + id + ") REFERENCES pksudb.users (userId) "
+                                     + " FOREIGN KEY (field_" + id + ") REFERENCES users (userId) "
                                      + "ON DELETE SET NULL "
                                      + "ON UPDATE NO ACTION ";
                                     break;
                                 case Fieldtype.Group:
                                     foreignkeys += ", "
                                      + "CONSTRAINT fieldIdCons_" + id
-                                     + " FOREIGN KEY (field_" + id + ") REFERENCES pksudb.groups (groupId) "
+                                     + " FOREIGN KEY (field_" + id + ") REFERENCES groups (groupId) "
                                      + "ON DELETE SET NULL "
                                      + "ON UPDATE NO ACTION ";
                                     break;
                                 case Fieldtype.File:
                                     foreignkeys += ", "
                                      + "CONSTRAINT fieldIdCons_" + id
-                                     + " FOREIGN KEY (field_" + id + ") REFERENCES pksudb.files (fileId) "
+                                     + " FOREIGN KEY (field_" + id + ") REFERENCES files (fileId) "
                                      + "ON DELETE SET NULL "
                                      + "ON UPDATE NO ACTION ";
                                     break;
@@ -103,7 +103,7 @@ namespace CalendarApplication.Database
 
                     createTable += "PRIMARY KEY (eventId), "
                                      + "CONSTRAINT eventIdCons_" + result + " "
-                                     + "FOREIGN KEY (eventId) REFERENCES pksudb.events (eventId) "
+                                     + "FOREIGN KEY (eventId) REFERENCES events (eventId) "
                                      + "ON DELETE CASCADE "
                                      + "ON UPDATE NO ACTION " + foreignkeys
                                      + ");";
@@ -173,16 +173,16 @@ namespace CalendarApplication.Database
                         cmd.Parameters.AddWithValue("@fdattyp", null);
                         cmd.Parameters.AddWithValue("@fvarchr", null);
 
-                        string updateField = "UPDATE pksudb.eventtypefields SET fieldName = @fname , fieldDescription = @fdescr"
+                        string updateField = "UPDATE eventtypefields SET fieldName = @fname , fieldDescription = @fdescr"
                                              + " , requiredCreation = @freqc , requiredApproval = @freqa , varCharLength = @fvarchr WHERE eventTypeId = @etid"
                                              + " AND fieldId = @fid;";
 
-                        string insertField = "INSERT INTO pksudb.eventtypefields"
+                        string insertField = "INSERT INTO eventtypefields"
                                              + " (eventTypeId, fieldName, fieldDescription, requiredCreation, requiredApproval , fieldType, varCharLength)"
                                              + " VALUES ( @etid , @fname , @fdescr , @freqc , @freqa , @fdattyp , @fvarchr);"
                                              + "SELECT last_insert_id();";
 
-                        string removeField = "DELETE FROM pksudb.eventtypefields WHERE fieldId = @fid";
+                        string removeField = "DELETE FROM eventtypefields WHERE fieldId = @fid";
 
                         foreach (FieldDataModel fdm in data.TypeSpecific)
                         {
@@ -246,21 +246,21 @@ namespace CalendarApplication.Database
                                     case Fieldtype.User:
                                         alterEventTable += " , ADD CONSTRAINT "
                                                            + "fieldIdCons_" + id
-                                                           + " FOREIGN KEY (field_" + id + ") REFERENCES pksudb.users (userId) "
+                                                           + " FOREIGN KEY (field_" + id + ") REFERENCES users (userId) "
                                                            + "ON DELETE SET NULL "
                                                            + "ON UPDATE NO ACTION ;";
                                         break;
                                     case Fieldtype.Group:
                                         alterEventTable += " , ADD CONSTRAINT "
                                                            + "fieldIdCons_" + id
-                                                           + " FOREIGN KEY (field_" + id + ") REFERENCES pksudb.groups (groupId) "
+                                                           + " FOREIGN KEY (field_" + id + ") REFERENCES groups (groupId) "
                                                            + "ON DELETE SET NULL "
                                                            + "ON UPDATE NO ACTION ;";
                                         break;
                                     case Fieldtype.File:
                                         alterEventTable += " , ADD CONSTRAINT "
                                                            + "fieldIdCons_" + id
-                                                           + " FOREIGN KEY (field_" + id + ") REFERENCES pksudb.files (fileId) "
+                                                           + " FOREIGN KEY (field_" + id + ") REFERENCES files (fileId) "
                                                            + "ON DELETE SET NULL "
                                                            + "ON UPDATE NO ACTION ;";
                                         break;
@@ -278,7 +278,7 @@ namespace CalendarApplication.Database
                                 if (fdm.Datatype == Fieldtype.Text)
                                 {
                                     // Get the old length
-                                    cmd.CommandText = "SELECT varCharLength FROM pksudb.eventtypefields WHERE fieldId = " + fdm.ID;
+                                    cmd.CommandText = "SELECT varCharLength FROM eventtypefields WHERE fieldId = " + fdm.ID;
                                     int oldLength = Convert.ToInt32(cmd.ExecuteScalar());
                                     if (oldLength < fdm.VarcharLength)
                                     {
@@ -361,18 +361,18 @@ namespace CalendarApplication.Database
                     string prevType = eem.SelectedEventType;
                     if (eem.ID != -1)
                     {
-                        cmd.CommandText = "SELECT eventTypeId FROM pksudb.events WHERE eventId = @eid";
+                        cmd.CommandText = "SELECT eventTypeId FROM events WHERE eventId = @eid";
                         cmd.Parameters.AddWithValue("@eid", eem.ID);
                         cmd.Prepare();
                         prevType = "" + Convert.ToInt32(cmd.ExecuteScalar());
                     }
 
                     string updateEventTable = eem.ID == -1 ? (
-                                                "INSERT INTO pksudb.events" +
+                                                "INSERT INTO events" +
                                                 "(userId,eventTypeId,eventName,eventStart,eventEnd,visible,state) VALUES " +
                                                 "( @ecreatorid , @eselectet , @ename , @estart , @eend , @evisible , @estate );"
                                                 + "SELECT last_insert_id();") : (
-                                                "UPDATE pksudb.events SET eventTypeId = @eselectet , eventName = @ename , "
+                                                "UPDATE events SET eventTypeId = @eselectet , eventName = @ename , "
                                                 + "eventStart = @estart , eventEnd = @eend , visible = @evisible , "
                                                 + " state = @estate WHERE eventId = @eid;");
 
@@ -412,7 +412,7 @@ namespace CalendarApplication.Database
                         if (eem.ID == -1 || changed)
                         {
                             // We have to insert because it is a create, or we have changed the type...
-                            string prologue = "INSERT INTO pksudb.table_" + eem.SelectedEventType + " ( eventId , ";
+                            string prologue = "INSERT INTO table_" + eem.SelectedEventType + " ( eventId , ";
                             string epilogue = " VALUES ( @nid , ";
 
                             for (int i = 0; i < eem.TypeSpecifics.Count; i++)
@@ -439,7 +439,7 @@ namespace CalendarApplication.Database
                         else
                         {
                             // We only have to update
-                            updateTable = "UPDATE pksudb.table_" + eem.SelectedEventType + " SET ";
+                            updateTable = "UPDATE table_" + eem.SelectedEventType + " SET ";
                             for (int i = 0; i < eem.TypeSpecifics.Count; i++)
                             {
                                 FieldModel fm = eem.TypeSpecifics[i];
@@ -467,9 +467,9 @@ namespace CalendarApplication.Database
                     //Handle room edit/create here.
                     //Currently deletes everything and inserts again, even if unchanged.
                     //Could maybe be handled better.
-                    string roomInsert = "INSERT INTO pksudb.eventroomsused(eventId,roomId) VALUES ( @nid , @rmval );";
+                    string roomInsert = "INSERT INTO eventroomsused(eventId,roomId) VALUES ( @nid , @rmval );";
                     cmd.Parameters.AddWithValue("@rmval", null);
-                    cmd.CommandText = "DELETE FROM pksudb.eventroomsused WHERE eventId = @nid ;";
+                    cmd.CommandText = "DELETE FROM eventroomsused WHERE eventId = @nid ;";
                     cmd.Prepare();
                     cmd.ExecuteNonQuery();
 
@@ -487,11 +487,11 @@ namespace CalendarApplication.Database
 
                     // Handle the editor rights. The below is a primitive implementation. Simply deletes
                     // all date previously there and inserts the new data. Works for creation and edit
-                    cmd.CommandText = "DELETE FROM pksudb.eventeditorsusers WHERE eventId = @nid";
+                    cmd.CommandText = "DELETE FROM eventeditorsusers WHERE eventId = @nid";
                     cmd.Prepare();
                     cmd.ExecuteNonQuery();
 
-                    cmd.CommandText = "INSERT INTO pksudb.eventeditorsusers(eventId,userId)"
+                    cmd.CommandText = "INSERT INTO eventeditorsusers(eventId,userId)"
                                                   + " VALUES ( @nid , @editusr );";
                     cmd.Parameters.AddWithValue("@editusr", null);
                     cmd.Prepare();
@@ -504,11 +504,11 @@ namespace CalendarApplication.Database
                         }
                     }
 
-                    cmd.CommandText = "DELETE FROM pksudb.eventeditorsgroups WHERE eventId = @nid";
+                    cmd.CommandText = "DELETE FROM eventeditorsgroups WHERE eventId = @nid";
                     cmd.Prepare();
                     cmd.ExecuteNonQuery();
 
-                    cmd.CommandText = "INSERT INTO pksudb.eventeditorsgroups(eventId,groupId)"
+                    cmd.CommandText = "INSERT INTO eventeditorsgroups(eventId,groupId)"
                                                   + " VALUES ( @nid , @edtgrpid );";
                     cmd.Parameters.AddWithValue("@edtgrpid", null);
                     cmd.Prepare();
@@ -522,12 +522,12 @@ namespace CalendarApplication.Database
                     }
 
                     // Handle visibility, same way as above, except that we check if the event has global visibility
-                    cmd.CommandText = "DELETE FROM pksudb.eventvisibility WHERE eventId = @nid";
+                    cmd.CommandText = "DELETE FROM eventvisibility WHERE eventId = @nid";
                     cmd.Prepare();
                     cmd.ExecuteNonQuery();
                     if (!eem.Visible)
                     {
-                        cmd.CommandText = "INSERT INTO pksudb.eventvisibility(eventId,groupId)"
+                        cmd.CommandText = "INSERT INTO eventvisibility(eventId,groupId)"
                                                       + " VALUES ( @nid , @visgrpid );";
                         cmd.Parameters.AddWithValue("@visgrpid", null);
                         cmd.Prepare();
@@ -591,14 +591,14 @@ namespace CalendarApplication.Database
                 case Fieldtype.GroupList: table = "group"; break;
                 default: return false;
             }
-            cmd.CommandText = "DELETE FROM pksudb." + table + "list WHERE eventId = @eid AND fieldId = @fid";
+            cmd.CommandText = "DELETE FROM " + table + "list WHERE eventId = @eid AND fieldId = @fid";
             cmd.Parameters.AddWithValue("@eid", eventId);
             cmd.Parameters.AddWithValue("@fid", fm.ID);
             cmd.Parameters.AddWithValue("@item", null);
             cmd.Prepare();
             cmd.ExecuteNonQuery();
 
-            cmd.CommandText = "INSERT INTO pksudb." + table + "list (eventId,fieldId," + table + "Id)"
+            cmd.CommandText = "INSERT INTO " + table + "list (eventId,fieldId," + table + "Id)"
                                       + " VALUES (@eid,@fid,@item)";
             cmd.Prepare();
 
@@ -633,7 +633,7 @@ namespace CalendarApplication.Database
                     // Try to update the state
                     mst = this.connection.BeginTransaction();
                     cmd.Connection = this.connection;
-                    cmd.CommandText = "UPDATE pksudb.events SET state = @state WHERE eventId = @eid";
+                    cmd.CommandText = "UPDATE events SET state = @state WHERE eventId = @eid";
                     cmd.Parameters.AddWithValue("@state", newState);
                     cmd.Parameters.AddWithValue("@eid", eventId);
                     cmd.Prepare();
@@ -679,7 +679,7 @@ namespace CalendarApplication.Database
                     cmd.Connection = connection;
                     cmd.Transaction = mst;
 
-                    cmd.CommandText = "DELETE FROM pksudb.events WHERE eventId = @evid";
+                    cmd.CommandText = "DELETE FROM events WHERE eventId = @evid";
                     cmd.Parameters.AddWithValue("@evid", id);
                     cmd.Prepare();
                     cmd.ExecuteNonQuery();

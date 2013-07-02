@@ -30,7 +30,7 @@ namespace CalendarApplication.Database
                     cmd.Connection = connection;
                     cmd.Transaction = mst;
 
-                    string insert = "INSERT INTO pksudb.rooms (roomName) VALUES (@name); "
+                    string insert = "INSERT INTO rooms (roomName) VALUES (@name); "
                                 + "SELECT last_insert_id();";
 
                     cmd.CommandText = insert;
@@ -88,7 +88,7 @@ namespace CalendarApplication.Database
                     cmd.Connection = connection;
                     cmd.Transaction = mst;
 
-                    string rename = "UPDATE pksudb.rooms SET roomName = @name WHERE roomId = @id";
+                    string rename = "UPDATE rooms SET roomName = @name WHERE roomId = @id";
 
                     cmd.CommandText = rename;
                     cmd.Parameters.AddWithValue("@name", newName);
@@ -145,7 +145,7 @@ namespace CalendarApplication.Database
                     cmd.Connection = connection;
                     cmd.Transaction = mst;
 
-                    string delete = "DELETE FROM pksudb.rooms WHERE roomId = @id";
+                    string delete = "DELETE FROM rooms WHERE roomId = @id";
 
                     cmd.CommandText = delete;
                     cmd.Parameters.AddWithValue("@id", id);

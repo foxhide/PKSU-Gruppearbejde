@@ -38,11 +38,11 @@ namespace CalendarApplication.Controllers
             };
 
             MySqlConnect msc = new MySqlConnect();
-            string etcmd = "SELECT eventTypeId,eventTypeName FROM pksudb.eventtypes";
+            string etcmd = "SELECT eventTypeId,eventTypeName FROM eventtypes";
             CustomQuery etquery = new CustomQuery { Cmd = etcmd };
-            string grcmd = "SELECT * FROM pksudb.groups";
+            string grcmd = "SELECT * FROM groups";
             CustomQuery grquery = new CustomQuery { Cmd = grcmd, ArgNames = { }, Args = { } };
-            string rmcmd = "SELECT * FROM pksudb.rooms";
+            string rmcmd = "SELECT * FROM rooms";
             CustomQuery rmquery = new CustomQuery { Cmd = rmcmd, ArgNames = { }, Args = { } };
             CustomQuery[] queries = { etquery, grquery, rmquery };
             DataSet ds = msc.ExecuteQuery(queries);
@@ -314,7 +314,7 @@ namespace CalendarApplication.Controllers
             MySqlConnect msc = new MySqlConnect();
             CustomQuery query = new CustomQuery
             {
-                Cmd = "SELECT groupLeader FROM pksudb.groupmembers WHERE groupId = @gid AND userId = @uid",
+                Cmd = "SELECT groupLeader FROM groupmembers WHERE groupId = @gid AND userId = @uid",
                 ArgNames = new[] { "@gid", "@uid" },
                 Args = new[] { (object)groupId, (object)userId }
             };
@@ -343,7 +343,7 @@ namespace CalendarApplication.Controllers
             };
 
             MySqlConnect msc = new MySqlConnect();
-            CustomQuery query = new CustomQuery { Cmd = "SELECT userId,userName,needsApproval,active FROM pksudb.users ORDER BY userName" };
+            CustomQuery query = new CustomQuery { Cmd = "SELECT userId,userName,needsApproval,active FROM users ORDER BY userName" };
             DataTable dt = msc.ExecuteQuery(query);
 
             foreach (DataRow dr in dt.Rows)
@@ -372,7 +372,7 @@ namespace CalendarApplication.Controllers
             if (roomId != -1)
             {
                 MySqlConnect sql = new MySqlConnect();
-                string que = "SELECT roomName FROM pksudb.rooms WHERE roomId = @id";
+                string que = "SELECT roomName FROM rooms WHERE roomId = @id";
                 string[] argsn = { "@id" };
                 object[] args = { roomId };
                 CustomQuery query = new CustomQuery { Cmd = que, Args = args, ArgNames = argsn };

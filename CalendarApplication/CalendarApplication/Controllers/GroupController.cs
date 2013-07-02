@@ -24,7 +24,7 @@ namespace CalendarApplication.Controllers
 
             GroupListModel model = new GroupListModel { GroupList = new List<GroupModel>() };
             MySqlConnect msc = new MySqlConnect();
-            string grcmd = "SELECT * FROM pksudb.groups";
+            string grcmd = "SELECT * FROM groups";
             CustomQuery grquery = new CustomQuery { Cmd = grcmd, ArgNames = { }, Args = { } };
             DataTable dt = msc.ExecuteQuery(grcmd);
 
@@ -60,14 +60,14 @@ namespace CalendarApplication.Controllers
                 Members = new List<GroupViewModel.GroupUserModel>(),
                 EventTypes = new List<EventTypeModel>()
             };
-            string cmd1 = "SELECT eventTypeId, eventTypeName FROM pksudb.eventcreationgroups "
-                          + "NATURAL JOIN pksudb.eventtypes WHERE groupId = @gid";
+            string cmd1 = "SELECT eventTypeId, eventTypeName FROM eventcreationgroups "
+                          + "NATURAL JOIN eventtypes WHERE groupId = @gid";
             string[] argnam1 = new string[] { "@gid" };
             object[] args1 = new object[] { groupId };
             CustomQuery query1 = new CustomQuery { Cmd = cmd1, ArgNames = argnam1, Args = args1 };
 
             string cmd2 = "SELECT groupId, groupName, groupLeader, canCreate, userName, userId "
-                         + "FROM pksudb.groups NATURAL JOIN pksudb.groupmembers NATURAL JOIN pksudb.users "
+                         + "FROM groups NATURAL JOIN groupmembers NATURAL JOIN users "
                          + "WHERE groupId = @gid AND active = 1";
             //perhaps inactive members should be shown anyway?
             string[] argnam2 = { "@gid" };
@@ -125,12 +125,12 @@ namespace CalendarApplication.Controllers
                 EventTypes = new List<SelectListItem>()
             };
 
-            string cmd1 = "SELECT eventTypeId FROM pksudb.eventcreationgroups WHERE groupId = @gid";
+            string cmd1 = "SELECT eventTypeId FROM eventcreationgroups WHERE groupId = @gid";
             string[] argnam1 = new string[] { "@gid" };
             object[] args1 = new object[] { groupId };
             CustomQuery query1 = new CustomQuery { Cmd = cmd1, ArgNames = argnam1, Args = args1 };
 
-            string cmd2 = "SELECT * FROM pksudb.eventtypes";
+            string cmd2 = "SELECT * FROM eventtypes";
             CustomQuery query2 = new CustomQuery { Cmd = cmd2, ArgNames = { }, Args = { } };
 
             CustomQuery[] queries = new CustomQuery[] { query1, query2 };

@@ -195,12 +195,12 @@ namespace CalendarApplication.Database
                     cmd.Connection = connection;
                     cmd.Transaction = mst;
 
-                    cmd.CommandText = "DELETE FROM pksudb.eventcreationgroups WHERE groupId = @groupId";
+                    cmd.CommandText = "DELETE FROM eventcreationgroups WHERE groupId = @groupId";
                     cmd.Parameters.AddWithValue("@groupId", model.ID);
                     cmd.Prepare();
                     cmd.ExecuteNonQuery();
 
-                    cmd.CommandText = "INSERT INTO pksudb.eventcreationgroups (groupId, eventTypeId) VALUES (@groupId, @eventTypeId)";
+                    cmd.CommandText = "INSERT INTO eventcreationgroups (groupId, eventTypeId) VALUES (@groupId, @eventTypeId)";
                     cmd.Parameters.AddWithValue("@eventTypeId", null);
                     cmd.Prepare();
 
@@ -253,7 +253,7 @@ namespace CalendarApplication.Database
                     cmd.Connection = connection;
                     cmd.Transaction = mst;
                     
-                    cmd.CommandText = "DELETE FROM pksudb.groups WHERE groupId = @groupId";
+                    cmd.CommandText = "DELETE FROM groups WHERE groupId = @groupId";
                     cmd.Parameters.AddWithValue("@groupId", id);
                     cmd.Prepare();
                     cmd.ExecuteNonQuery();

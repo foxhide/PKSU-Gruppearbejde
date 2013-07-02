@@ -33,7 +33,7 @@ namespace CalendarApplication.Tests
             // Test ExecuteQuery with a single query
             CustomQuery query = new CustomQuery
             {
-                Cmd = "SELECT userName,email,admin FROM pksudb.users WHERE userId = @uid",
+                Cmd = "SELECT userName,email,admin FROM users WHERE userId = @uid",
                 ArgNames = new[] { "@uid" },
                 Args = new[] { (object)4 }
             };
@@ -54,19 +54,19 @@ namespace CalendarApplication.Tests
             queries[0] = new CustomQuery
             {
                 Cmd = "SELECT eventName,userId,eventTypeId,eventStart,eventEnd,visible,state"
-                        + " FROM pksudb.events WHERE eventId = @eid",
+                        + " FROM events WHERE eventId = @eid",
                 ArgNames = new[] { "@eid" },
                 Args = new[] { (object)1 }
             };
             queries[1] = new CustomQuery
             {
-                Cmd = "SELECT fieldId FROM pksudb.eventtypefields WHERE eventTypeId = @tid",
+                Cmd = "SELECT fieldId FROM eventtypefields WHERE eventTypeId = @tid",
                 ArgNames = new[] { "@tid" },
                 Args = new[] { (object)2 }
             };
             queries[2] = new CustomQuery
             {
-                Cmd = "SELECT * FROM pksudb.table_2 WHERE eventId = @eid",
+                Cmd = "SELECT * FROM table_2 WHERE eventId = @eid",
                 ArgNames = new[] { "@eid" },
                 Args = new[] { (object)1 }
             };
@@ -102,7 +102,7 @@ namespace CalendarApplication.Tests
             // Test a failure
             query = new CustomQuery
             {
-                Cmd = "SELECT * FROM pksudb.no_table WHERE userId = @uid",
+                Cmd = "SELECT * FROM no_table WHERE userId = @uid",
                 ArgNames = new[] { "@uid" },
                 Args = new[] { (object)2 }
             };
@@ -155,7 +155,7 @@ namespace CalendarApplication.Tests
             // Check that changes are made in the db.
             CustomQuery query = new CustomQuery
             {
-                Cmd = "SELECT * FROM pksudb.users WHERE userId = @uid",
+                Cmd = "SELECT * FROM users WHERE userId = @uid",
                 ArgNames = new[] { "@uid" },
                 Args = new[] { (object)i }
             };
@@ -200,7 +200,7 @@ namespace CalendarApplication.Tests
             // Check that new room is in db
             CustomQuery query = new CustomQuery
             {
-                Cmd = "SELECT * FROM pksudb.rooms WHERE roomId = @rid",
+                Cmd = "SELECT * FROM rooms WHERE roomId = @rid",
                 ArgNames = new[] { "@rid" }, Args = new[] { (object)id }
             };
             DataTable dt = msr.ExecuteQuery(query);
@@ -258,7 +258,7 @@ namespace CalendarApplication.Tests
             // Check that no group has been added (rollback successful)
             CustomQuery query = new CustomQuery
             {
-                Cmd = "SELECT * FROM pksudb.groups WHERE groupName = @gname",
+                Cmd = "SELECT * FROM groups WHERE groupName = @gname",
                 ArgNames = new[] { "@gname" }, Args = new[] { (object)"MyTestGroup" }
             };
             DataTable dt = msg.ExecuteQuery(query);
@@ -297,7 +297,7 @@ namespace CalendarApplication.Tests
             // Test that members and leaders are added correctly
             CustomQuery queryMembers = new CustomQuery
             {
-                Cmd = "SELECT * FROM pksudb.groupmembers WHERE groupId = @gid",
+                Cmd = "SELECT * FROM groupmembers WHERE groupId = @gid",
                 ArgNames = new[] { "@gid" }, Args = new[] { (object)id }
             };
             dt = msg.ExecuteQuery(queryMembers);
@@ -339,7 +339,7 @@ namespace CalendarApplication.Tests
             // Find it in the db
             query = new CustomQuery
             {
-                Cmd = "SELECT * FROM pksudb.groups WHERE groupId = @gid",
+                Cmd = "SELECT * FROM groups WHERE groupId = @gid",
                 ArgNames = new[] { "@gid" },
                 Args = new[] { (object)id }
             };
@@ -351,7 +351,7 @@ namespace CalendarApplication.Tests
             // Test that members are added correctly
             queryMembers = new CustomQuery
             {
-                Cmd = "SELECT * FROM pksudb.groupmembers WHERE groupId = @gid",
+                Cmd = "SELECT * FROM groupmembers WHERE groupId = @gid",
                 ArgNames = new[] { "@gid" },
                 Args = new[] { (object)id }
             };
@@ -437,7 +437,7 @@ namespace CalendarApplication.Tests
             // Check that nothing is added to the db.
             CustomQuery query = new CustomQuery
             {
-                Cmd = "SELECT * FROM pksudb.eventtypes WHERE eventTypeName = @etn",
+                Cmd = "SELECT * FROM eventtypes WHERE eventTypeName = @etn",
                 ArgNames = new[] { "@etn" }, Args = new[] { (object)"MyTestEventType" }
             };
             DataTable dt = mse.ExecuteQuery(query);
@@ -460,7 +460,7 @@ namespace CalendarApplication.Tests
             etm.ID = id;
 
             // Check, that the fields are added
-            query.Cmd = "SELECT * FROM pksudb.eventtypefields WHERE eventTypeId = @eid ORDER BY fieldId";
+            query.Cmd = "SELECT * FROM eventtypefields WHERE eventTypeId = @eid ORDER BY fieldId";
             query.ArgNames = new[] { "@eid" };
             query.Args = new[] { (object)id };
             dt = mse.ExecuteQuery(query);
@@ -479,7 +479,7 @@ namespace CalendarApplication.Tests
             }
 
             // Check if table is set up correct
-            CustomQuery queryTable = new CustomQuery { Cmd = "SELECT * FROM pksudb.table_" + id };
+            CustomQuery queryTable = new CustomQuery { Cmd = "SELECT * FROM table_" + id };
             dt = mse.ExecuteQuery(queryTable);
             Assert.IsNotNull(dt);
             Assert.AreEqual(5, dt.Columns.Count);
@@ -499,7 +499,7 @@ namespace CalendarApplication.Tests
             // Check that it is added to the db
             CustomQuery query1 = new CustomQuery
             {
-                Cmd = "SELECT * FROM pksudb.eventtypes WHERE eventTypeId = @eid",
+                Cmd = "SELECT * FROM eventtypes WHERE eventTypeId = @eid",
                 ArgNames = new[] { "@eid" },
                 Args = new[] { (object)etm.ID }
             };
@@ -596,8 +596,8 @@ namespace CalendarApplication.Tests
 
             // Check that changes were rolled back:
             CustomQuery[] queries = new CustomQuery[2];
-            queries[0] = new CustomQuery { Cmd = "SELECT * FROM pksudb.events WHERE eventName = 'MyTestEvent'" };
-            queries[1] = new CustomQuery { Cmd = "SELECT * FROM pksudb.table_2 WHERE field_1 = 'Killers'" };
+            queries[0] = new CustomQuery { Cmd = "SELECT * FROM events WHERE eventName = 'MyTestEvent'" };
+            queries[1] = new CustomQuery { Cmd = "SELECT * FROM table_2 WHERE field_1 = 'Killers'" };
 
             DataSet ds = mse.ExecuteQuery(queries);
             Assert.IsNotNull(ds);
@@ -612,12 +612,12 @@ namespace CalendarApplication.Tests
             Assert.IsNull(mse.ErrorMessage);
 
             queries = new CustomQuery[6];
-            queries[0] = new CustomQuery { Cmd = "SELECT * FROM pksudb.events WHERE eventId = " + id };
-            queries[1] = new CustomQuery { Cmd = "SELECT * FROM pksudb.table_2 WHERE eventId = " + id };
-            queries[2] = new CustomQuery { Cmd = "SELECT * FROM pksudb.eventroomsused WHERE eventId = " + id + " ORDER BY roomId" };
-            queries[3] = new CustomQuery { Cmd = "SELECT * FROM pksudb.eventeditorsgroups WHERE eventId = " + id + " ORDER BY groupId" };
-            queries[4] = new CustomQuery { Cmd = "SELECT * FROM pksudb.eventeditorsusers WHERE eventId = " + id + " ORDER BY userId" };
-            queries[5] = new CustomQuery { Cmd = "SELECT * FROM pksudb.eventvisibility WHERE eventId = " + id + " ORDER BY groupId" };
+            queries[0] = new CustomQuery { Cmd = "SELECT * FROM events WHERE eventId = " + id };
+            queries[1] = new CustomQuery { Cmd = "SELECT * FROM table_2 WHERE eventId = " + id };
+            queries[2] = new CustomQuery { Cmd = "SELECT * FROM eventroomsused WHERE eventId = " + id + " ORDER BY roomId" };
+            queries[3] = new CustomQuery { Cmd = "SELECT * FROM eventeditorsgroups WHERE eventId = " + id + " ORDER BY groupId" };
+            queries[4] = new CustomQuery { Cmd = "SELECT * FROM eventeditorsusers WHERE eventId = " + id + " ORDER BY userId" };
+            queries[5] = new CustomQuery { Cmd = "SELECT * FROM eventvisibility WHERE eventId = " + id + " ORDER BY groupId" };
             ds = mse.ExecuteQuery(queries);
             Assert.IsNotNull(ds);
             DataTable dt = ds.Tables[0];

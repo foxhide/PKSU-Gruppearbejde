@@ -12,7 +12,7 @@ namespace CalendarApplication.Database
     {
         public int CreateUser(Register data)
         {
-            string insert = "INSERT INTO pksudb.users (userName,password,realName,phoneNum,email,active,needsApproval) " +
+            string insert = "INSERT INTO users (userName,password,realName,phoneNum,email,active,needsApproval) " +
                             "VALUES (@username, @password, @realname, @phone, @email, 1, 1);"
                             + " SELECT last_insert_id();";
 
@@ -83,7 +83,7 @@ namespace CalendarApplication.Database
                     cmd.Connection = this.connection;
                     cmd.Transaction = mst;
 
-                    string update = "UPDATE pksudb.users SET " + change + " = @value WHERE userId = @uid";
+                    string update = "UPDATE users SET " + change + " = @value WHERE userId = @uid";
                     cmd.Parameters.AddWithValue("@value", newValue);
                     cmd.Parameters.AddWithValue("@uid", id);
 
@@ -136,7 +136,7 @@ namespace CalendarApplication.Database
                     cmd.Connection = this.connection;
                     cmd.Transaction = mst;
 
-                    string delete = "DELETE FROM pksudb.users WHERE userId = @uid";
+                    string delete = "DELETE FROM users WHERE userId = @uid";
                     cmd.Parameters.AddWithValue("@uid", userId);
 
                     cmd.CommandText = delete;

@@ -271,7 +271,7 @@ namespace CalendarApplication.Controllers
 
             // Get event types
             MySqlConnect msc = new MySqlConnect();
-            string etget = "SELECT eventTypeId, eventTypeName FROM pksudb.eventtypes";
+            string etget = "SELECT eventTypeId, eventTypeName FROM eventtypes";
             DataTable dt = msc.ExecuteQuery(etget);
 
             char[] typeArr = types != null ? types.ToCharArray() : null;
@@ -365,7 +365,7 @@ namespace CalendarApplication.Controllers
 
             // Get all the rooms
             MySqlConnect msc = new MySqlConnect();
-            CustomQuery query = new CustomQuery { Cmd = "SELECT * FROM pksudb.rooms" };
+            CustomQuery query = new CustomQuery { Cmd = "SELECT * FROM rooms" };
             DataTable dt = msc.ExecuteQuery(query);
             if (dt != null)
             {
@@ -439,7 +439,7 @@ namespace CalendarApplication.Controllers
         {
             string select = "SELECT e.eventId,e.userId,u.userName,e.eventTypeId,e.eventName,e.eventStart,"
                             + "e.eventEnd,e.state,e.visible,et.eventTypeName";
-            string from = "FROM pksudb.events AS e NATURAL JOIN pksudb.users AS u NATURAL JOIN pksudb.eventtypes AS et";
+            string from = "FROM events AS e NATURAL JOIN users AS u NATURAL JOIN eventtypes AS et";
 
             // Build the where string
             //   - Input from filter:
@@ -473,7 +473,7 @@ namespace CalendarApplication.Controllers
             if (day)
             {
                 select += ",r.roomId,r.roomName";
-                from += " NATURAL JOIN pksudb.eventroomsused AS eru NATURAL JOIN pksudb.rooms AS r";
+                from += " NATURAL JOIN eventroomsused AS eru NATURAL JOIN rooms AS r";
             }
 
             //   User authentication

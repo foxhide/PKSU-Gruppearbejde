@@ -21,7 +21,7 @@ namespace CalendarApplication.Controllers
             if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Index", "Home", null); }
 
             UserViewModel result = new UserViewModel { ID = userId };
-            string userinfo = "SELECT * FROM pksudb.users WHERE userId = @userId";
+            string userinfo = "SELECT * FROM users WHERE userId = @userId";
 
             MySqlConnect con = new MySqlConnect();
             CustomQuery query = new CustomQuery();

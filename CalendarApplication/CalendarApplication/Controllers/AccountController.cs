@@ -33,7 +33,7 @@ namespace CalendarApplication.Controllers
             if (UserModel.GetCurrentUserID() != -1) { return RedirectToAction("Index", "Home", null); }
 
             CustomQuery query = new CustomQuery();
-            query.Cmd = "SELECT userId,needsApproval,active,password FROM pksudb.users WHERE userName = @usrnam";
+            query.Cmd = "SELECT userId,needsApproval,active,password FROM users WHERE userName = @usrnam";
             query.ArgNames = new string[] { "@usrnam" };
             query.Args = new object[] { login.UserName };
             MySqlConnect con = new MySqlConnect();
@@ -129,7 +129,7 @@ namespace CalendarApplication.Controllers
                 || UserModel.GetCurrentUserID() != userId) { return RedirectToAction("Index", "Home", null); }
 
             AccountEditModel result = new AccountEditModel { ID = userId };
-            string userinfo = "SELECT * FROM pksudb.users WHERE userId = @userId";
+            string userinfo = "SELECT * FROM users WHERE userId = @userId";
 
             MySqlConnect con = new MySqlConnect();
             CustomQuery query = new CustomQuery();
@@ -189,7 +189,7 @@ namespace CalendarApplication.Controllers
             MySqlUser msu = new MySqlUser();
             CustomQuery query = new CustomQuery
             {
-                Cmd = "SELECT password FROM pksudb.users WHERE userId = @uid",
+                Cmd = "SELECT password FROM users WHERE userId = @uid",
                 ArgNames = new[] { "@uid" },
                 Args = new[] { (object)userId }
             };
@@ -238,7 +238,7 @@ namespace CalendarApplication.Controllers
             MySqlUser msu = new MySqlUser();
             CustomQuery query = new CustomQuery
             {
-                Cmd = "SELECT needsApproval FROM pksudb.users WHERE userId = @uid",
+                Cmd = "SELECT needsApproval FROM users WHERE userId = @uid",
                 ArgNames = new[] { "@uid" },
                 Args = new[] { (object)userId }
             };
