@@ -381,6 +381,7 @@ namespace CalendarApplication.Tests
         /*
          * Tests the creation and edit of eventtypes in the db.
          * Remember to run the script before testing
+         * Remember to delete table_4 (or whatever the new table name is) afterwards
          */
         [TestMethod]
         public void TestMySqlEvent_Types()

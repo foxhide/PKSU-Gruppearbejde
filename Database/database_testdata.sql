@@ -41,12 +41,14 @@ INSERT INTO groupmembers(groupId,userId,groupLeader,canCreate) VALUES (4,4,0,0);
 	-- Basic event (no fields)
 INSERT INTO eventtypes (eventTypeName) VALUES ("Basic Event");
 
-CREATE TABLE pksudb.table_1 (
+DROP TABLE IF EXISTS table_1;
+
+CREATE TABLE table_1 (
 	eventId int NOT NULL,
 	PRIMARY KEY (eventId),
     CONSTRAINT table_1eventid
     FOREIGN KEY (eventId)
-    REFERENCES pksudb.events (eventId)
+    REFERENCES events (eventId)
     ON DELETE CASCADE
     ON UPDATE NO ACTION
 );
@@ -55,13 +57,15 @@ CREATE TABLE pksudb.table_1 (
 INSERT INTO eventtypes (eventTypeName) VALUES ("Concert");
 INSERT INTO eventtypefields (eventTypeId, fieldName, fieldDescription, requiredCreation, requiredApproval, fieldType, varCharLength) VALUES (2, "Band-name","Name of the band that's playing",1,1,1,50);
 
-CREATE TABLE pksudb.table_2 (
+DROP TABLE IF EXISTS table_2;
+
+CREATE TABLE table_2 (
 	eventId int NOT NULL,
 	field_1 VARCHAR(50),
 	PRIMARY KEY (eventId),
     CONSTRAINT table_2eventid
     FOREIGN KEY (eventId)
-    REFERENCES pksudb.events (eventId)
+    REFERENCES events (eventId)
     ON DELETE CASCADE
     ON UPDATE NO ACTION
 );
