@@ -47,7 +47,9 @@ namespace CalendarApplication.Helpers
             
             if (model.Datatype == Fieldtype.Float)
             {
-                builder.AppendLine("<input type='number' name='" + name + ".FloatValue' value='" + model.FloatValue + "' step='any' >");
+                //builder.AppendLine("<input type='number' name='" + name + ".FloatValue' value='" + model.FloatValue + "' step='any' >");
+                builder.AppendLine("<div id='" + id + "_number_warning'>Input other than numbers will be disregarded. Use commas as decimal points.</div>");
+                builder.AppendLine("<input type='text' name='" + name + ".FloatValue' value='" + model.FloatValue + "' >");
             }
             else if (model.Datatype == Fieldtype.Text)
             {

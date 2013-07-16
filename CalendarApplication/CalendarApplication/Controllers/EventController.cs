@@ -99,7 +99,7 @@ namespace CalendarApplication.Controllers
                         };
                         switch (fm.Datatype)
                         {
-                            case Fieldtype.Float: fm.FloatValue = ds.Tables[0].Rows[0]["field_" + fm.ID] as float? ?? 0; break;
+                            case Fieldtype.Float: fm.FloatValue = ds.Tables[0].Rows[0]["field_" + fm.ID] as float?; break;
 
                             case Fieldtype.File: if (DBNull.Value.Equals(ds.Tables[0].Rows[0]["field_" + fm.ID])) { fm.IntValue = 0; }
                                 else { fm.IntValue = (int)ds.Tables[0].Rows[0]["field_" + fm.ID]; }
@@ -579,7 +579,7 @@ namespace CalendarApplication.Controllers
                         // We just set the values to standard values.
                         switch (fm.Datatype)
                         {
-                            case Fieldtype.Float: fm.FloatValue = 0; break; //float
+                            case Fieldtype.Float: fm.FloatValue = null; break; //float
                             case Fieldtype.UserList: if (users == null) { users = this.GetUsers(msc, false); }
                                 fm.List = users; break;
                             case Fieldtype.User: if (usersDrop == null) { usersDrop = this.GetUsers(msc, true); }
@@ -601,7 +601,7 @@ namespace CalendarApplication.Controllers
                         DataRow row = value.Rows[0];
                         switch (fm.Datatype)
                         {
-                            case Fieldtype.Float: fm.FloatValue = row["field_" + fm.ID] is DBNull ? 0 : (float)row["field_" + fm.ID];
+                            case Fieldtype.Float: fm.FloatValue = row["field_" + fm.ID] is DBNull ? null : (float?)row["field_" + fm.ID];
                                                 break; //float
                             case Fieldtype.UserList: fm.List = this.GetUsersValues(msc, eventId, fm.ID); break;
                             case Fieldtype.User: if (usersDrop == null) { usersDrop = this.GetUsers(msc, true); }
