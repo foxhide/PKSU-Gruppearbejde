@@ -10,7 +10,6 @@ namespace CalendarApplication.Models.Calendar
     {
         public DateTime Date { set; get; }
         public List<BasicEvent> Events { set; get; }
-        public List<Room> Rooms { set; get; }
         public Boolean Active { set; get; }
     }
 }

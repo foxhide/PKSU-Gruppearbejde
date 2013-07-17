@@ -400,21 +400,9 @@ namespace CalendarApplication.Controllers
             CalendarDay result = new CalendarDay
             {
                 Date = date.AddHours(Config.GetStartingHourOfDay()),
-                Rooms = new List<Room>(),
                 Events = events
             };
 
-            // Get all the rooms
-            MySqlConnect msc = new MySqlConnect();
-            CustomQuery query = new CustomQuery { Cmd = "SELECT * FROM rooms" };
-            DataTable dt = msc.ExecuteQuery(query);
-            if (dt != null)
-            {
-                foreach (DataRow dr in dt.Rows)
-                {
-                    result.Rooms.Add(new Room { ID = (int)dr["roomId"], Name = (string)dr["roomName"] });
-                }
-            }
             return result;
         }
 

@@ -45,65 +45,71 @@
                 <table class="day-view">
                     <tr>
                         <td style="border-left:none;border-top:none"></td>
-                        @foreach (Room r in Model.Rooms)
+                        @foreach (SelectListItem room in Model.Filter.Rooms)
                         {
-                            <th>
-                                @r.Name
-                            </th>
+                            if(room.Selected)
+                            {
+                                <th>
+                                    @room.Text
+                                </th>
+                            }
                         }
                     </tr>
                     <tr>
                         @{
                             DateTime offset = Model.Date;
                             <td class="timestamp" rowspan="2">@offset.ToString("HH:mm")</td>
-                            foreach (Room r in Model.Rooms)
+                            foreach (SelectListItem room in Model.Filter.Rooms)
                             {
-                                <td class="row">
-                                    <div style="position:relative">
-                                        @foreach (BasicEvent e in Model.Events)
-                                        {
-                                            if (e.Rooms.Contains(r))
+                                if(room.Selected)
+                                {
+                                    <td class="row">
+                                        <div style="position:relative">
+                                            @foreach (BasicEvent e in Model.Events)
                                             {
-                                                @* Calculate painting start and height *@
-                                                int start = 0;
-                                                if(e.Start > offset)
+                                                if (e.Rooms.Contains(new Room { ID = Convert.ToInt32(room.Value) }))
                                                 {
-                                                    TimeSpan s = e.Start - offset;
-                                                    start = (s.Hours * 60 + s.Minutes) / 2;
-                                                }
-                                                int height = 720 - start;
-                                                if(e.End < offset.AddDays(1))
-                                                {
-                                                    if(start == 0)
+                                                    @* Calculate painting start and height *@
+                                                    int start = 0;
+                                                    if (e.Start > offset)
                                                     {
-                                                        TimeSpan s = e.End - offset;
-                                                        height = (s.Hours * 60 + s.Minutes) / 2;
+                                                        TimeSpan s = e.Start - offset;
+                                                        start = (s.Hours * 60 + s.Minutes) / 2;
                                                     }
-                                                    else
+                                                    int height = 720 - start;
+                                                    if (e.End < offset.AddDays(1))
                                                     {
-                                                        TimeSpan s = e.End - e.Start;
-                                                        height = (s.Hours * 60 + s.Minutes) / 2;
+                                                        if (start == 0)
+                                                        {
+                                                            TimeSpan s = e.End - offset;
+                                                            height = (s.Hours * 60 + s.Minutes) / 2;
+                                                        }
+                                                        else
+                                                        {
+                                                            TimeSpan s = e.End - e.Start;
+                                                            height = (s.Hours * 60 + s.Minutes) / 2;
+                                                        }
                                                     }
-                                                }
                                             
-                                                <div class="day-event"
-                                                    style="position:absolute;z-index:1;top:@(start)px;left:4px;width:92px;height:@(height)px;
-                                                            background-color:@(e.getColor());@(e.ViewVisible?"cursor:pointer":"")"
-                                                    @(e.ViewVisible?"onclick=window.location='" + Url.Action("Index","Event", new { eventId = e.ID }) + "'":"")>
-                                                    @if(e.ViewVisible)
-                                                    {
-                                                        @e.Name <br />
-                                                        @* Creator: e.Creator and more fields *@
-                                                    }
-                                                    else
-                                                    {
-                                                        @:Room occupied!
-                                                    }
-                                                </div>
-                                            }
-                                        }  
-                                    </div>
-                                </td>
+                                                    <div class="day-event"
+                                                        style="position:absolute;z-index:1;top:@(start)px;left:4px;width:92px;height:@(height)px;
+                                                                background-color:@(e.getColor());@(e.ViewVisible ? "cursor:pointer" : "")"
+                                                        @(e.ViewVisible ? "onclick=window.location='" + Url.Action("Index", "Event", new { eventId = e.ID }) + "'" : "")>
+                                                        @if (e.ViewVisible)
+                                                        {
+                                                            @e.Name <br />
+                                                            @* Creator: e.Creator and more fields *@
+                                                        }
+                                                        else
+                                                        {
+                                                            @:Room occupied!
+                                                        }
+                                                    </div>
+                                                }
+                                            }  
+                                        </div>
+                                    </td>
+                                }
                             }
                         }
                     </tr>
@@ -115,8 +121,10 @@
                                 offset = offset.AddHours(1);
                                 <td class="timestamp" rowspan="2">@offset.ToString("HH:mm")</td>
                             }
-                            @for (int i = 0; i < Model.Rooms.Count; i++)
-                            { <td class="row"></td> }
+                            @foreach (SelectListItem room in Model.Filter.Rooms)
+                            { 
+                                if (room.Selected) { <td class="row"></td> }
+                            }
                         </tr>
                     }
                 </table>
