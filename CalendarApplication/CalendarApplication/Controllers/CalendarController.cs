@@ -12,6 +12,7 @@ using CalendarApplication.Models.User;
 using CalendarApplication.Models.EventType;
 using CalendarApplication.Models.Maintenance;
 using CalendarApplication.Database;
+using System.Text;
 
 namespace CalendarApplication.Controllers
 {
@@ -466,10 +467,17 @@ namespace CalendarApplication.Controllers
         /// <returns>List of events</returns>
         private List<BasicEvent> GetEvents(EventFilter f, DateTime start, DateTime end, bool day, EventOrder order, bool desc)
         {
-            string select = "SELECT e.eventId,e.userId,u.userName,e.eventTypeId,e.eventName,e.eventStart,"
-                            + "e.eventEnd,e.state,e.visible,et.eventTypeName,r.roomId,r.roomName";
-            string from = "FROM events AS e NATURAL JOIN users AS u NATURAL JOIN eventtypes AS et"
-                            + " NATURAL JOIN eventroomsused AS eru NATURAL JOIN rooms AS r";
+            StringBuilder select = new StringBuilder();
+            StringBuilder from = new StringBuilder();
+            StringBuilder where = new StringBuilder();
+
+            select.Append("SELECT e.eventId,e.userId,u.userName,e.eventTypeId,e.eventName,e.eventStart,");
+            select.Append("e.eventEnd,e.state,e.visible,et.eventTypeName,r.roomId,r.roomName");
+            from.Append("FROM events AS e NATURAL JOIN users AS u NATURAL JOIN eventtypes AS et");
+            from.Append(" NATURAL JOIN eventroomsused AS eru NATURAL JOIN rooms AS r");
+
+            List<string> argNames = new List<String>();
+            List<object> args = new List<Object>();
 
             // Build the where string
             //   - Input from filter:
@@ -480,79 +488,100 @@ namespace CalendarApplication.Controllers
 
             //     Calculate offset
             int offset = Config.GetStartingHourOfDay();
-            string morning = start.AddHours(offset).ToString("yyyy-MM-dd HH:00:00");
-            string night = end.AddHours(offset).ToString("yyyy-MM-dd HH:00:00");
-            string where = "WHERE ((eventStart <= '" + night + "' AND eventStart >= '" + morning
-                            + "') OR (eventEnd <= '" + night + "' AND eventEnd >= '" + morning
-                            + "') OR (eventEnd >= '" + night + "' AND eventStart <= '" + morning + "'))";
+            start = start.AddHours(offset);
+            end = end.AddHours(offset);
 
+            //     Add the date limits (with offset)
+            where.Append("WHERE ((eventStart <= @end AND eventStart >= @start)");
+            where.Append(" OR (eventEnd <= @end AND eventEnd >= @start)");
+            where.Append(" OR (eventEnd >= @end AND eventStart <= @start))");
+
+            argNames.Add("@end");
+            args.Add(end);
+            argNames.Add("@start");
+            args.Add(start);
+
+            //    Event types
             foreach (EventTypeModel etm in f.Eventtypes)
             {
                 if (!etm.Selected)
                 {
-                    where += " AND ";
-                    where += "(eventTypeId != " + etm.ID + ")";
+                    string arg = "@etm_" + etm.ID;
+                    where.Append(" AND (eventTypeId != " + arg + ")");
+                    argNames.Add(arg);
+                    args.Add(etm.ID);
                 }
             }
 
+            //    Rooms
             foreach (SelectListItem room in f.Rooms)
             {
                 if (!room.Selected)
                 {
-                    where += " AND (roomId != " + room.Value + ")";
+                    string arg = "@room_" + room.Value;
+                    where.Append(" AND (roomId != " + arg + ")");
+                    argNames.Add(arg);
+                    args.Add(Convert.ToInt32(room.Value));
                 }
             }
 
-            where += (f.ViewState0 ? "" : " AND (state != 0)");
-            where += (f.ViewState1 ? "" : " AND (state != 1)");
-            where += (f.ViewState2 ? "" : " AND (state != 2)");
+            //   States
+            where.Append((f.ViewState0 ? "" : " AND (state != 0)"));
+            where.Append((f.ViewState1 ? "" : " AND (state != 1)"));
+            where.Append((f.ViewState2 ? "" : " AND (state != 2)"));
 
             //   User authentication
             UserModel cur = UserModel.GetCurrent();
             if(cur == null)
             {
                 // no user -> show visible events
-                where += " AND (visible = 1)";
+                where.Append(" AND (visible = 1)");
             }
             else if (!cur.Admin)
             {
                 // A user, that is not an admin -> get events that are authenticated.
-                from += " LEFT JOIN (SELECT eventId,userId"
-                        + " FROM eventeditorsusers"
-                        + " WHERE userId = " + cur.ID + ") AS edt_user ON e.eventId = edt_user.eventId"
-                        + " LEFT JOIN (SELECT eventId,userId"
-                        + " FROM eventvisibility NATURAL JOIN groupmembers"
-                        + " WHERE userId = " + cur.ID + ") AS vis_group ON e.eventId = vis_group.eventId"
-                        + "	LEFT JOIN (SELECT eventId,userId"
-                        + " FROM eventeditorsgroups NATURAL JOIN groupmembers"
-                        + "	WHERE userId = " + cur.ID + ") AS edt_group ON e.eventId = edt_group.eventId";
+                from.Append(" LEFT JOIN (SELECT eventId,userId");
+                from.Append(" FROM eventeditorsusers");
+                from.Append(" WHERE userId = @uid) AS edt_user ON e.eventId = edt_user.eventId");
+                from.Append(" LEFT JOIN (SELECT eventId,userId");
+                from.Append(" FROM eventvisibility NATURAL JOIN groupmembers");
+                from.Append(" WHERE userId = @uid) AS vis_group ON e.eventId = vis_group.eventId");
+                from.Append("	LEFT JOIN (SELECT eventId,userId");
+                from.Append(" FROM eventeditorsgroups NATURAL JOIN groupmembers");
+                from.Append("	WHERE userId = @uid) AS edt_group ON e.eventId = edt_group.eventId");
                 // Add extra fields for view authentication
-                select += ",vis_group.userId AS group_vis,edt_group.userId AS group_edt, edt_user.userId AS user_edt";
+                select.Append(",vis_group.userId AS group_vis,edt_group.userId AS group_edt, edt_user.userId AS user_edt");
+
+                argNames.Add("@uid");
+                args.Add(cur.ID);
             }
             //If admin, show all events.
 
-            string query = select + " " + from + " " + where + " ORDER BY ";
+            // Combine the select, from and where
+            select.Append(" ");
+            select.Append(from);
+            select.Append(" ");
+            select.Append(where);
+            select.Append(" ORDER BY ");
 
+            // Add ORDER BY
             switch (order)
             {
-                case EventOrder.START: query += "e.eventStart"; break;
-                case EventOrder.END: query += "e.eventEnd"; break;
-                case EventOrder.NAME: query += "e.eventName"; break;
-                case EventOrder.TYPE: query += "et.eventTypeName"; break;
-                case EventOrder.STATE: query += "e.state"; break;
-                case EventOrder.CREATOR: query += "u.userName"; break;
-                default: query += "e.eventStart"; break;
+                case EventOrder.START: select.Append("e.eventStart"); break;
+                case EventOrder.END: select.Append("e.eventEnd"); break;
+                case EventOrder.NAME: select.Append("e.eventName"); break;
+                case EventOrder.TYPE: select.Append("et.eventTypeName"); break;
+                case EventOrder.STATE: select.Append("e.state"); break;
+                case EventOrder.CREATOR: select.Append("u.userName"); break;
+                default: select.Append("e.eventStart"); break;
             }
-            if (desc) { query += " DESC"; }
+            // Check for descending
+            if (desc) { select.Append(" DESC"); }
 
             List<BasicEvent> events = new List<BasicEvent>();
 
             MySqlConnect msc = new MySqlConnect();
-
-            //silly use of custom query
-            //should try and create a list of all arguments used in the query instead
-            //or perhaps restructure the way this query works.
-            CustomQuery calquery = new CustomQuery { Cmd = query, ArgNames = new string[] { } , Args = new object[] { } };
+            CustomQuery calquery = new CustomQuery { Cmd = select.ToString(), ArgNames = argNames.ToArray() , Args = args.ToArray() };
             
             DataTable dt = msc.ExecuteQuery(calquery);
             if (dt != null)
@@ -605,7 +634,7 @@ namespace CalendarApplication.Controllers
                         events.Add(e);
                     }
 
-                    // Align to next event
+                    // Align to next event (this is done if in day view, and we will never enter the while).
                     while (r < dt.Rows.Count && (int)dt.Rows[r]["eventId"] == e.ID)
                     {
                         r++;

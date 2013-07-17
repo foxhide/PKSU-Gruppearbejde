@@ -67,106 +67,113 @@
                     <input type="submit" value="Search" />
                 </fieldset>
             </td>
-            <td>
+            <td rowspan="2">
                 @Html.Partial("_FilterPartial", Model)
             </td>
         </tr>
         <tr>
-            <td colspan="2">
-                <h3>Showing events @(Model.EventFrom+1)-@(Model.EventFrom+Model.Limit > Model.TotalEventCount ?
-                                                            Model.TotalEventCount : Model.EventFrom+Model.Limit)
-                    out of a total of @Model.TotalEventCount!</h3>
+            <td>
+                @if(Model.TotalEventCount > 0)
+                {
+                    <h3>Showing events @(Model.EventFrom+1)-@(Model.EventFrom+Model.Limit > Model.TotalEventCount ?
+                                                                Model.TotalEventCount : Model.EventFrom+Model.Limit)
+                        out of a total of @Model.TotalEventCount!</h3>
 
-                <table class="navigator" id="navi-high">
-                    <tr>
-                        <td onclick="gotoOtherPage(@(Model.EventFrom-Model.Limit < 0 ? 0 : Model.EventFrom-Model.Limit))"><-</td>
-                        @for (int i = 0; Model.TotalEventCount > 0 && i <= (Model.TotalEventCount-1) / Model.Limit; i++)
-                        {
-                            int gotoVal = i * Model.Limit;
-                            if(gotoVal != Model.EventFrom) { <td  onclick="gotoOtherPage(@(gotoVal))">@(i+1)</td> }
-                            else { <td class="selected">@(i+1)</td> }
-                        }
-                        <td onclick="gotoOtherPage(@(Model.EventFrom+Model.Limit > Model.TotalEventCount
-                                                    ? Model.TotalEventCount
-                                                    : Model.EventFrom+Model.Limit))">-></td>
-                    </tr>
-                </table>
-
-                <br />
-
-                <table class="event-list" id ="list">
-                    <tr>
-                        <th onclick="sortBy('NAME')">
-                            Event name
-                            @if (Model.Order == EventOrder.NAME)
-                            {
-                                <div class="@(Model.Descending ? "up-arrow" : "down-arrow")"></div>
-                            }
-                        </th>
-                        <th onclick="sortBy('TYPE')">
-                            Type
-                            @if (Model.Order == EventOrder.TYPE)
-                            {
-                                <div class="@(Model.Descending ? "up-arrow" : "down-arrow")"></div>
-                            }
-                        </th>
-                        <th onclick="sortBy('CREATOR')">
-                            Creator
-                            @if (Model.Order == EventOrder.CREATOR)
-                            {
-                                <div class="@(Model.Descending ? "up-arrow" : "down-arrow")"></div>
-                            }
-                        </th>
-                        <th onclick="sortBy('START')">
-                            Starting
-                            @if (Model.Order == EventOrder.START)
-                            {
-                                <div class="@(Model.Descending ? "up-arrow" : "down-arrow")"></div>
-                            }
-                        </th>
-                        <th onclick="sortBy('END')">
-                            Ending
-                            @if (Model.Order == EventOrder.END)
-                            {
-                                <div class="@(Model.Descending ? "up-arrow" : "down-arrow")"></div>
-                            }
-                        </th>
-                        <th onclick="sortBy('STATE')">
-                            State
-                            @if (Model.Order == EventOrder.STATE)
-                            {
-                                <div class="@(Model.Descending ? "up-arrow" : "down-arrow")"></div>
-                            }
-                        </th>
-                    </tr>
-                    @foreach (BasicEvent e in Model.Events)
-                    {
+                    <table class="navigator" id="navi-high">
                         <tr>
-                            <td>@Html.ActionLink(e.Name, "Index", "Event", new { eventId = e.ID }, null)</td>
-                            <td>@e.TypeName</td>
-                            <td>@Html.ActionLink(e.Creator, "Index", "User", new { userId = e.CreatorId }, null)</td>
-                            <td>@e.Start</td>
-                            <td>@e.End</td>
-                            <td style="background-color:@e.getColor()">@e.getStateText()</td>
+                            <td onclick="gotoOtherPage(@(Model.EventFrom-Model.Limit < 0 ? 0 : Model.EventFrom-Model.Limit))"><-</td>
+                            @for (int i = 0; Model.TotalEventCount > 0 && i <= (Model.TotalEventCount-1) / Model.Limit; i++)
+                            {
+                                int gotoVal = i * Model.Limit;
+                                if(gotoVal != Model.EventFrom) { <td  onclick="gotoOtherPage(@(gotoVal))">@(i+1)</td> }
+                                else { <td class="selected">@(i+1)</td> }
+                            }
+                            <td onclick="gotoOtherPage(@(Model.EventFrom+Model.Limit > Model.TotalEventCount
+                                                        ? Model.TotalEventCount
+                                                        : Model.EventFrom+Model.Limit))">-></td>
                         </tr>
-                    }
-                </table>
+                    </table>
 
-                <br />
-                <table class="navigator" id="navi-low">
-                    <tr>
-                        <td onclick="gotoOtherPage(@(Model.EventFrom-Model.Limit < 0 ? 0 : Model.EventFrom-Model.Limit))"><-</td>
-                        @for (int i = 0; Model.TotalEventCount > 0 && i <= (Model.TotalEventCount-1) / Model.Limit; i++)
+                    <br />
+
+                    <table class="event-list" id ="list">
+                        <tr>
+                            <th onclick="sortBy('NAME')">
+                                Event name
+                                @if (Model.Order == EventOrder.NAME)
+                                {
+                                    <div class="@(Model.Descending ? "up-arrow" : "down-arrow")"></div>
+                                }
+                            </th>
+                            <th onclick="sortBy('TYPE')">
+                                Type
+                                @if (Model.Order == EventOrder.TYPE)
+                                {
+                                    <div class="@(Model.Descending ? "up-arrow" : "down-arrow")"></div>
+                                }
+                            </th>
+                            <th onclick="sortBy('CREATOR')">
+                                Creator
+                                @if (Model.Order == EventOrder.CREATOR)
+                                {
+                                    <div class="@(Model.Descending ? "up-arrow" : "down-arrow")"></div>
+                                }
+                            </th>
+                            <th onclick="sortBy('START')">
+                                Starting
+                                @if (Model.Order == EventOrder.START)
+                                {
+                                    <div class="@(Model.Descending ? "up-arrow" : "down-arrow")"></div>
+                                }
+                            </th>
+                            <th onclick="sortBy('END')">
+                                Ending
+                                @if (Model.Order == EventOrder.END)
+                                {
+                                    <div class="@(Model.Descending ? "up-arrow" : "down-arrow")"></div>
+                                }
+                            </th>
+                            <th onclick="sortBy('STATE')">
+                                State
+                                @if (Model.Order == EventOrder.STATE)
+                                {
+                                    <div class="@(Model.Descending ? "up-arrow" : "down-arrow")"></div>
+                                }
+                            </th>
+                        </tr>
+                        @foreach (BasicEvent e in Model.Events)
                         {
-                            int gotoVal = i * Model.Limit;
-                            if(gotoVal != Model.EventFrom) { <td  onclick="gotoOtherPage(@(gotoVal))">@(i+1)</td> }
-                            else { <td class="selected">@(i+1)</td> }
+                            <tr>
+                                <td>@Html.ActionLink(e.Name, "Index", "Event", new { eventId = e.ID }, null)</td>
+                                <td>@e.TypeName</td>
+                                <td>@Html.ActionLink(e.Creator, "Index", "User", new { userId = e.CreatorId }, null)</td>
+                                <td>@e.Start</td>
+                                <td>@e.End</td>
+                                <td style="background-color:@e.getColor()">@e.getStateText()</td>
+                            </tr>
                         }
-                        <td onclick="gotoOtherPage(@(Model.EventFrom+Model.Limit > Model.TotalEventCount
-                                                    ? Model.TotalEventCount
-                                                    : Model.EventFrom+Model.Limit))">-></td>
-                    </tr>
-                </table>
+                    </table>
+
+                    <br />
+                    <table class="navigator" id="navi-low">
+                        <tr>
+                            <td onclick="gotoOtherPage(@(Model.EventFrom-Model.Limit < 0 ? 0 : Model.EventFrom-Model.Limit))"><-</td>
+                            @for (int i = 0; Model.TotalEventCount > 0 && i <= (Model.TotalEventCount-1) / Model.Limit; i++)
+                            {
+                                int gotoVal = i * Model.Limit;
+                                if(gotoVal != Model.EventFrom) { <td  onclick="gotoOtherPage(@(gotoVal))">@(i+1)</td> }
+                                else { <td class="selected">@(i+1)</td> }
+                            }
+                            <td onclick="gotoOtherPage(@(Model.EventFrom+Model.Limit > Model.TotalEventCount
+                                                        ? Model.TotalEventCount
+                                                        : Model.EventFrom+Model.Limit))">-></td>
+                        </tr>
+                    </table>
+                }
+                else
+                {
+                    <h3>No events were found matching the search criteria!</h3>
+                }
             </td>
         </tr>
     </table>
