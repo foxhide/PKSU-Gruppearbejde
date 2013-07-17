@@ -13,7 +13,7 @@
     @Html.CheckBoxFor(model => Model.Filter.ViewState2)
     <span class="state_2"></span><br />
 
-    <b>Event Types:</b><input type="checkbox" id="checkAll" checked="checked" onchange="changeCheckboxes(this)" /><br />
+    <b>Event Types:</b><input type="checkbox" id="Eventtypes_checkAll" checked="checked" onchange="changeCheckboxes('Eventtypes',this)" /><br />
     @for (int i = 0; i < Model.Filter.Eventtypes.Count; i++)
     {
         <div>
@@ -23,7 +23,7 @@
         </div>
     }
 
-    <b>Rooms:</b><input type="checkbox" /><br />
+    <b>Rooms:</b><input type="checkbox" id="Rooms_checkAll" checked="checked" onchange="changeCheckboxes('Rooms',this)" /><br />
     @for (int i = 0; i < Model.Filter.Rooms.Count; i++)
     {
         <div>

@@ -59,12 +59,15 @@ function hidePopupBig(name) {
     $('#' + name + '_big').hide();
 }
 
-function changeCheckboxes(element) {
-    for (var i = 0; $("#Filter_Eventtypes_" + i + "__Selected").length > 0 && $("#Filter_Eventtypes_" + i + "__Selected") != null; i++) {
-        $("#Filter_Eventtypes_"+i+"__Selected").attr("checked", element.checked);
+/* Function for un/checking all boxes for a given list (Eventtypes or Rooms) */
+function changeCheckboxes(list,element) {
+    for (var i = 0; $("#Filter_" + list + "_" + i + "__Selected").length > 0
+            && $("#Filter_" + list + "_" + i + "__Selected") != null; i++) {
+        $("#Filter_" + list + "_" + i + "__Selected").attr("checked", element.checked);
     }
 }
 
+/* Function to be run on filter load. Checks the checkAll box, based on the number of checked boxes (Eventtypes and Rooms) */
 function checkBoxes() {
     var checked = 0;
     var unchecked = 0;
@@ -76,5 +79,17 @@ function checkBoxes() {
             unchecked++;
         }
     }
-    $("#checkAll").attr("checked", checked > unchecked);
+    $("#Eventtypes_checkAll").attr("checked", checked > unchecked);
+
+    checked = 0;
+    unchecked = 0;
+    for (var i = 0; $("#Filter_Rooms_" + i + "__Selected").length > 0 && $("#Filter_Rooms_" + i + "__Selected") != null; i++) {
+        if ($("#Filter_Rooms_" + i + "__Selected").attr("checked")) {
+            checked++;
+        }
+        else {
+            unchecked++;
+        }
+    }
+    $("#Rooms_checkAll").attr("checked", checked > unchecked);
 }
