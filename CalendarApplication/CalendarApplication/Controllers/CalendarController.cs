@@ -32,10 +32,11 @@ namespace CalendarApplication.Controllers
         /// <param name="date">Date in the desired month, if null -> today</param>
         /// <param name="state">State string, e.g. 111 or 010, if null -> all visible</param>
         /// <param name="types">Type string, e.g. 101101..., if null -> all visible</param>
+        /// <param name="rooms">Room string, e.g. 1000111..., if null -> all visible</param>
         /// <returns>The monthly view page</returns>
-        public ActionResult Month(string date, string state, string types)
+        public ActionResult Month(string date, string state, string types, string rooms)
         {
-            EventFilter f = this.GetFilter(state, types);
+            EventFilter f = this.GetFilter(state, types, rooms);
             DateTime dt = this.parseString(date);
             CalendarMonth cm = this.GetMonth(dt, f);
             cm.Filter = f;
@@ -60,10 +61,13 @@ namespace CalendarApplication.Controllers
             // Create type
             string types = cm.Filter.GetTypeString();
 
+            // Create rooms
+            string rooms = cm.Filter.GetRoomString();
+
             // Determine action
             string action = cm.Mode == CalendarMode.MONTH ? "Month" : "Day";
 
-            return RedirectToAction(action, new { date = date, state = state, types = types });
+            return RedirectToAction(action, new { date = date, state = state, types = types, rooms = rooms });
         }
 
         /// <summary>
@@ -72,10 +76,11 @@ namespace CalendarApplication.Controllers
         /// <param name="date">The desired date, today if null</param>
         /// <param name="state">State string, e.g. 111 or 010, if null -> all visible</param>
         /// <param name="types">Type string, e.g. 101101..., if null -> all visible</param>
+        /// <param name="rooms">Room string, e.g. 1000111..., if null -> all visible</param>
         /// <returns>The daily view page</returns>
-        public ActionResult Day(string date, string state, string types)
+        public ActionResult Day(string date, string state, string types, string rooms)
         {
-            EventFilter f = this.GetFilter(state, types);
+            EventFilter f = this.GetFilter(state, types, rooms);
             DateTime dt = this.parseString(date);
             CalendarDay cd = this.GetDay(dt, f);
             cd.Filter = f;
@@ -100,10 +105,13 @@ namespace CalendarApplication.Controllers
             // Create type
             string types = cd.Filter.GetTypeString();
 
+            // Create rooms
+            string rooms = cd.Filter.GetRoomString();
+
             // Determine action
             string action = cd.Mode == CalendarMode.MONTH ? "Month" : "Day";
 
-            return RedirectToAction(action, new { date = date, state = state, types = types });
+            return RedirectToAction(action, new { date = date, state = state, types = types, rooms = rooms });
         }
 
         /// <summary>
@@ -115,6 +123,7 @@ namespace CalendarApplication.Controllers
         /// <param name="efrom">The starting event, if null -> 0 is chosen. efrom is rounded down to a multiplum of limit</param>
         /// <param name="state">State string, e.g. 111 or 010, if null -> all visible</param>
         /// <param name="types">Type string, e.g. 101101..., if null -> all visible</param>
+        /// <param name="rooms">Room string, e.g. 1000111..., if null -> all visible</param>
         /// <param name="order">Determines the sorting of the events, if null -> sort by start date</param>
         /// <param name="desc">Detemines desc/asc, if true the descending, else ascending.</param>
         /// <returns>The list view page</returns>
@@ -124,11 +133,12 @@ namespace CalendarApplication.Controllers
                                  string efrom,
                                  string state,
                                  string types,
+                                 string rooms,
                                  string order,
                                  string desc)
         {
             // Get filter and dates
-            EventFilter f = this.GetFilter(state, types);
+            EventFilter f = this.GetFilter(state, types, rooms);
             DateTime dtFrom = from == null ? new DateTime(1,1,1) : this.parseString(from);
             DateTime dtTo = to == null ? new DateTime(9999,12,31) : this.parseString(to);
             
@@ -179,6 +189,9 @@ namespace CalendarApplication.Controllers
             // Get type string
             string types = cl.Filter.GetTypeString();
 
+            // Create rooms
+            string rooms = cl.Filter.GetRoomString();
+
             // If limit had changed -> set from to 0, else set from accordingly
             int from = cl.Limit != cl.OldLimit ? 0 : cl.EventFrom - (cl.EventFrom % cl.Limit);
 
@@ -191,6 +204,7 @@ namespace CalendarApplication.Controllers
                     efrom = from.ToString(),
                     state = state,
                     types = types,
+                    rooms = rooms,
                     order = cl.Order,
                     desc = cl.Descending.ToString()
                 });
@@ -206,6 +220,7 @@ namespace CalendarApplication.Controllers
                     efrom = from.ToString(),
                     state = state,
                     types = types,
+                    rooms = rooms,
                     order = cl.Order,
                     desc = cl.Descending.ToString()
                 });
@@ -250,14 +265,15 @@ namespace CalendarApplication.Controllers
         /// <param name="state">State string</param>
         /// <param name="types">Type string</param>
         /// <returns>An EventFilter</returns>
-        private EventFilter GetFilter(string state, string types)
+        private EventFilter GetFilter(string state, string types, string rooms)
         {
             EventFilter f = new EventFilter
             {
                 ViewState0 = true,
                 ViewState1 = true,
                 ViewState2 = true,
-                Eventtypes = new List<EventTypeModel>()
+                Eventtypes = new List<EventTypeModel>(),
+                Rooms = new List<SelectListItem>()
             };
 
             // Set state values
@@ -291,6 +307,28 @@ namespace CalendarApplication.Controllers
                 };
                 tCount++;
                 f.Eventtypes.Add(etm);
+            }
+
+            // Add rooms to the filter
+            query.Cmd = "SELECT roomId,roomName FROM rooms";
+            dt = msc.ExecuteQuery(query);
+
+            char[] roomArr = rooms != null ? rooms.ToCharArray() : null;
+            int rCount = 0;
+
+            if (dt != null)
+            {
+                foreach(DataRow dr in dt.Rows)
+                {
+                    SelectListItem room = new SelectListItem
+                    {
+                        Text = (string)dr["roomName"],
+                        Value = ((int)dr["roomId"]).ToString(),
+                        Selected = roomArr != null && rCount < roomArr.Length ? roomArr[rCount] == '1' : true
+                    };
+                    rCount++;
+                    f.Rooms.Add(room);
+                }
             }
 
             return f;
@@ -441,8 +479,9 @@ namespace CalendarApplication.Controllers
         private List<BasicEvent> GetEvents(EventFilter f, DateTime start, DateTime end, bool day, EventOrder order, bool desc)
         {
             string select = "SELECT e.eventId,e.userId,u.userName,e.eventTypeId,e.eventName,e.eventStart,"
-                            + "e.eventEnd,e.state,e.visible,et.eventTypeName";
-            string from = "FROM events AS e NATURAL JOIN users AS u NATURAL JOIN eventtypes AS et";
+                            + "e.eventEnd,e.state,e.visible,et.eventTypeName,r.roomId,r.roomName";
+            string from = "FROM events AS e NATURAL JOIN users AS u NATURAL JOIN eventtypes AS et"
+                            + " NATURAL JOIN eventroomsused AS eru NATURAL JOIN rooms AS r";
 
             // Build the where string
             //   - Input from filter:
@@ -468,16 +507,17 @@ namespace CalendarApplication.Controllers
                 }
             }
 
+            foreach (SelectListItem room in f.Rooms)
+            {
+                if (!room.Selected)
+                {
+                    where += " AND (roomId != " + room.Value + ")";
+                }
+            }
+
             where += (f.ViewState0 ? "" : " AND (state != 0)");
             where += (f.ViewState1 ? "" : " AND (state != 1)");
             where += (f.ViewState2 ? "" : " AND (state != 2)");
-
-            // If it is a day, we want the rooms too.
-            if (day)
-            {
-                select += ",r.roomId,r.roomName";
-                from += " NATURAL JOIN eventroomsused AS eru NATURAL JOIN rooms AS r";
-            }
 
             //   User authentication
             UserModel cur = UserModel.GetCurrent();
@@ -557,6 +597,8 @@ namespace CalendarApplication.Controllers
                                                     || !(dr["group_vis"] is DBNull)
                                                    )
                                                  );
+
+                    
                     // If day: get rooms
                     if (day)
                     {
@@ -574,7 +616,12 @@ namespace CalendarApplication.Controllers
                     {
                         events.Add(e);
                     }
-                    r++;
+
+                    // Align to next event
+                    while (r < dt.Rows.Count && (int)dt.Rows[r]["eventId"] == e.ID)
+                    {
+                        r++;
+                    }
                 }
             }
             else

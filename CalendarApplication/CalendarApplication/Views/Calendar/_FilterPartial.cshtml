@@ -5,24 +5,34 @@
 <body onload="checkBoxes()">
 <fieldset>
     <legend>Filter</legend>
-        <b>Event States:</b><br />
-        @Html.CheckBoxFor(model => Model.Filter.ViewState0)
-        <span class="state_0"></span><br />
-        @Html.CheckBoxFor(model => Model.Filter.ViewState1)
-        <span class="state_1"></span><br />
-        @Html.CheckBoxFor(model => Model.Filter.ViewState2)
-        <span class="state_2"></span><br />
+    <b>Event States:</b><br />
+    @Html.CheckBoxFor(model => Model.Filter.ViewState0)
+    <span class="state_0"></span><br />
+    @Html.CheckBoxFor(model => Model.Filter.ViewState1)
+    <span class="state_1"></span><br />
+    @Html.CheckBoxFor(model => Model.Filter.ViewState2)
+    <span class="state_2"></span><br />
 
-        <b>Event Types:</b><input type="checkbox" id="checkAll" checked="checked" onchange="changeCheckboxes(this)" /><br />
-        @for (int i = 0; i < Model.Filter.Eventtypes.Count; i++)
-        {
-            <div>
-                @Html.HiddenFor(model => Model.Filter.Eventtypes[i].ID)
-                @Html.HiddenFor(model => Model.Filter.Eventtypes[i].Name)
-                @Html.CheckBoxFor(model => Model.Filter.Eventtypes[i].Selected)
-                @Model.Filter.Eventtypes[i].Name
-            </div>
-        }
+    <b>Event Types:</b><input type="checkbox" id="checkAll" checked="checked" onchange="changeCheckboxes(this)" /><br />
+    @for (int i = 0; i < Model.Filter.Eventtypes.Count; i++)
+    {
+        <div>
+            @Html.HiddenFor(model => Model.Filter.Eventtypes[i].ID)
+            @Html.CheckBoxFor(model => Model.Filter.Eventtypes[i].Selected)
+            @Model.Filter.Eventtypes[i].Name
+        </div>
+    }
+
+    <b>Rooms:</b><input type="checkbox" /><br />
+    @for (int i = 0; i < Model.Filter.Rooms.Count; i++)
+    {
+        <div>
+            @Html.HiddenFor(model => Model.Filter.Rooms[i].Value)
+            @Html.CheckBoxFor(model => Model.Filter.Rooms[i].Selected)
+            @Model.Filter.Rooms[i].Text
+        </div>
+    }
+
 <input type="submit" value="Go"/>
 </fieldset>
 </body>

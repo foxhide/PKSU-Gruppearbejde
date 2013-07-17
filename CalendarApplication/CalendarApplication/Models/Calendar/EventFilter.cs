@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 
 using CalendarApplication.Models.EventType;
+using System.Web.Mvc;
 
 namespace CalendarApplication.Models.Calendar
 {
@@ -14,6 +15,8 @@ namespace CalendarApplication.Models.Calendar
         public bool ViewState2 { set; get; }
 
         public List<EventTypeModel> Eventtypes { set; get; }
+
+        public List<SelectListItem> Rooms { set; get; }
 
         /// <summary>
         /// Get the state string
@@ -39,6 +42,23 @@ namespace CalendarApplication.Models.Calendar
                 }
             }
             return types;
+        }
+
+        /// <summary>
+        /// Get the room string
+        /// </summary>
+        /// <returns>A string indicating the selected values of the rooms</returns>
+        public string GetRoomString()
+        {
+            string rooms = "";
+            if (this.Rooms != null)
+            {
+                foreach (SelectListItem r in this.Rooms)
+                {
+                    rooms += r.Selected ? "1" : "0";
+                }
+            }
+            return rooms;
         }
     }
 }
