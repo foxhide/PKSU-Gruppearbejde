@@ -138,7 +138,7 @@ function validateInput(id,type,showError,removeOnly) {
         if (showError) { setValidationMessage(jid, jid + "_Error", result && !removeOnly); }
         return !result;
     }
-    else if (type == "Text") {
+    else if (type == "Text" || type == "Float") {
         var result = $(jid).val() == "";
         if (showError) { setValidationMessage(jid, jid + "_Error", result && !removeOnly); }
         return !result;
