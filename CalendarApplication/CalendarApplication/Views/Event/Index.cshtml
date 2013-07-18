@@ -208,7 +208,7 @@ else
                             case Fieldtype.Text:        @fm.StringValue break;
                             case Fieldtype.File:        @fm.IntValue break;
                             case Fieldtype.Datetime:    @fm.DateValue break;
-                            case Fieldtype.Bool:        <div style="width:26px;height:26px" class="@(fm.BoolValue ? "tick" : "cross")"></div> break;
+                            case Fieldtype.Bool:        <div style="width:26px;height:26px" class="@(fm.BoolValue ? "tick" : "red_cross")"></div> break;
                             case Fieldtype.UserList:    using (Html.BeginListView("list_" + fm.ID, new string[] { "Users" }, "100px", "auto"))
                                                         {
                                                             foreach (SelectListItem user in fm.List)
