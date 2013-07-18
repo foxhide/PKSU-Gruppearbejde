@@ -1,7 +1,7 @@
 ﻿@model CalendarApplication.Models.EventType.EventTypeModel
 
 @{
-    ViewBag.Title = "EditEventType";
+    ViewBag.Title = Model.ID != -1 ? "Edit Event Type" : "Create Event Type";
 }
 
 @using CalendarApplication.Models.EventType;
@@ -19,14 +19,22 @@
     @Html.EditorFor(model => Model.Name)
     @Html.ValidationMessageFor(model => Model.Name)
     <br />
+    <br />
     
     <!--Consider putting some description here!-->
     
     <!--Styles needed for fields view. Putting it here avoids duplication code-->
     <style>
+        #fields table {border-collapse: collapse;}
         #fields td {padding:0;padding-left:5px;padding-right:5px}
-        #fields tr {padding:0;}
-        #fields th {padding:0;}
+        #fields tr th {padding:0;}
+        #fields table.button-pane {
+            border-bottom:1px solid black;
+            border-left:1px solid black;
+            border-top:1px solid black;
+        }
+        #fields table.button-pane td {cursor: pointer;}
+        #fields table.button-pane td:hover {background-color: lightgray;}
     </style>
     
     <script>setIdCounter(@Model.ActiveFields)</script>
