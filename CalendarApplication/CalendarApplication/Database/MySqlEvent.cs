@@ -46,8 +46,8 @@ namespace CalendarApplication.Database
                     {
 
                         string insertField = "INSERT INTO eventtypefields "
-                                             + "(eventTypeId, fieldName, fieldDescription, requiredCreation, requiredApproval, fieldType, varCharLength) "
-                                             + "VALUES (@typeid , @fieldname , @descr , @reqc , @reqa , @datatype , @varch ); "
+                                             + "(eventTypeId, fieldName, fieldDescription, requiredCreation, requiredApproval, fieldType, varCharLength, fieldOrder) "
+                                             + "VALUES (@typeid , @fieldname , @descr , @reqc , @reqa , @datatype , @varch , @order ); "
                                              + "SELECT last_insert_id();";
 
                         cmd.Parameters.AddWithValue("@typeid", result);
@@ -57,16 +57,20 @@ namespace CalendarApplication.Database
                         cmd.Parameters.AddWithValue("@reqa", null);
                         cmd.Parameters.AddWithValue("@datatype", null);
                         cmd.Parameters.AddWithValue("@varch", null);
+                        cmd.Parameters.AddWithValue("@order", null);
                         cmd.CommandText = insertField;
 
-                        foreach (FieldDataModel fdm in data.TypeSpecific)
+                        for (int i = 0; i < data.TypeSpecific.Count; i++)
                         {
+                            FieldDataModel fdm = data.TypeSpecific[i];
+
                             cmd.Parameters["@fieldname"].Value = fdm.Name;
                             cmd.Parameters["@descr"].Value = fdm.Description;
                             cmd.Parameters["@reqc"].Value = fdm.RequiredCreate;
                             cmd.Parameters["@reqa"].Value = fdm.RequiredApprove;
                             cmd.Parameters["@datatype"].Value = fdm.GetTypeAsInt();
                             cmd.Parameters["@varch"].Value = fdm.VarcharLength;
+                            cmd.Parameters["@order"].Value = fdm.ViewID;
 
                             cmd.Prepare();
 
@@ -141,6 +145,11 @@ namespace CalendarApplication.Database
             }
         }
 
+        /// <summary>
+        /// Tries to edit an event type in the database, using the data provided in the EventTypeModel
+        /// </summary>
+        /// <param name="data">The data for the event type</param>
+        /// <returns></returns>
         public bool EditEventType(EventTypeModel data)
         {
             if (this.OpenConnection() == true)
@@ -172,28 +181,32 @@ namespace CalendarApplication.Database
                         cmd.Parameters.AddWithValue("@freqa", null);
                         cmd.Parameters.AddWithValue("@fdattyp", null);
                         cmd.Parameters.AddWithValue("@fvarchr", null);
+                        cmd.Parameters.AddWithValue("@forder", null);
 
                         string updateField = "UPDATE eventtypefields SET fieldName = @fname , fieldDescription = @fdescr"
-                                             + " , requiredCreation = @freqc , requiredApproval = @freqa , varCharLength = @fvarchr WHERE eventTypeId = @etid"
-                                             + " AND fieldId = @fid;";
+                                             + " , requiredCreation = @freqc , requiredApproval = @freqa , varCharLength = @fvarchr, fieldOrder = @forder"
+                                             + " WHERE eventTypeId = @etid AND fieldId = @fid;";
 
                         string insertField = "INSERT INTO eventtypefields"
-                                             + " (eventTypeId, fieldName, fieldDescription, requiredCreation, requiredApproval , fieldType, varCharLength)"
-                                             + " VALUES ( @etid , @fname , @fdescr , @freqc , @freqa , @fdattyp , @fvarchr);"
+                                             + " (eventTypeId, fieldName, fieldDescription, requiredCreation, requiredApproval , fieldType, varCharLength, fieldOrder)"
+                                             + " VALUES ( @etid , @fname , @fdescr , @freqc , @freqa , @fdattyp , @fvarchr, @forder);"
                                              + "SELECT last_insert_id();";
 
                         string removeField = "DELETE FROM eventtypefields WHERE fieldId = @fid";
 
+                        /* fdm.ID holds the ID of the field in the db. If fdm.ID == -1, a new field is created.
+                         * fdm.ViewID holds the ViewID of the field. This is used to determine the order of the fields.
+                         * If a field is removed, the ViewID is set to -1.
+                         */
                         foreach (FieldDataModel fdm in data.TypeSpecific)
                         {
                             string alterEventTable = "";
                             bool altered = false;
                             if (fdm.ViewID == -1)
                             {
-                                //field was removed
-                                //remove foreign keys before dropping column if necessary
+                                //field was removed by user -> remove it from the database
 
-                                //since the fdm is just a dummy when deleting, and thus has no relevant Datatype, this does not work.
+                                //remove foreign keys before dropping column if necessary
                                 bool keyDel = false;
                                 switch (fdm.Datatype)
                                 {
@@ -217,7 +230,6 @@ namespace CalendarApplication.Database
 
                                 if (!keyDel) { alterEventTable = "ALTER TABLE table_" + data.ID + " DROP COLUMN field_" + fdm.ID; }
 
-
                                 //We have to remove the field, as it was found in the db.
                                 cmd.CommandText = removeField;
                                 cmd.Parameters["@fid"].Value = fdm.ID;
@@ -225,9 +237,9 @@ namespace CalendarApplication.Database
                                 cmd.ExecuteNonQuery();
                                 altered = true;
                             }
-                            else if (fdm.ViewID == -2)
+                            else if (fdm.ID == -1)
                             {
-                                //new field was added
+                                //a new field was added
                                 cmd.CommandText = insertField;
                                 cmd.Parameters["@fname"].Value = fdm.Name;
                                 cmd.Parameters["@fdescr"].Value = fdm.Description;
@@ -235,6 +247,7 @@ namespace CalendarApplication.Database
                                 cmd.Parameters["@freqa"].Value = fdm.RequiredApprove;
                                 cmd.Parameters["@fdattyp"].Value = fdm.GetTypeAsInt();
                                 cmd.Parameters["@fvarchr"].Value = fdm.VarcharLength;
+                                cmd.Parameters["@forder"].Value = fdm.ViewID;
                                 cmd.Prepare();
                                 int id = Convert.ToInt32(cmd.ExecuteScalar());
 
@@ -271,7 +284,7 @@ namespace CalendarApplication.Database
                             }
                             else
                             {
-                                //field MIGHT have been changed
+                                //field MIGHT have been changed, since ID != -1 and ViewID != -1
 
                                 //don't allow datatype to be changed
                                 //unless we have a Text-field -> we have to update varCharLength
@@ -295,7 +308,7 @@ namespace CalendarApplication.Database
                                 cmd.Parameters["@freqc"].Value = fdm.RequiredCreate;
                                 cmd.Parameters["@freqa"].Value = fdm.RequiredApprove;
                                 cmd.Parameters["@fvarchr"].Value = fdm.VarcharLength;
-                                //cmd.Parameters["@fdattyp"].Value = fdm.GetTypeAsInt();
+                                cmd.Parameters["@forder"].Value = fdm.ViewID;
                                 cmd.Parameters["@fid"].Value = fdm.ID;
                                 cmd.Prepare();
                                 cmd.ExecuteNonQuery();

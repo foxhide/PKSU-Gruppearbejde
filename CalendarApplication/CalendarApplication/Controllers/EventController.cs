@@ -81,7 +81,7 @@ namespace CalendarApplication.Controllers
                 query0.ArgNames = new string[] { "@eventId" };
                 query0.Args = new object[] { eventId };
                 CustomQuery query1 = new CustomQuery();
-                query1.Cmd = "SELECT * FROM eventtypefields WHERE eventTypeId = @eventTypeId";
+                query1.Cmd = "SELECT * FROM eventtypefields WHERE eventTypeId = @eventTypeId ORDER BY fieldOrder";
                 query1.ArgNames = new string[] { "@eventTypeId" };
                 query1.Args = new object[] { result.TypeId };
                 DataSet ds = con.ExecuteQuery(new CustomQuery[] { query0, query1 });
@@ -546,7 +546,7 @@ namespace CalendarApplication.Controllers
             List<SelectListItem> groups = null;      // List for group list
             List<SelectListItem> usersDrop = null;   // List for user dropdown
             List<SelectListItem> groupsDrop = null;  // List for group dropdown
-            string specQuery = "SELECT * FROM eventtypefields WHERE eventTypeId = @etid";
+            string specQuery = "SELECT * FROM eventtypefields WHERE eventTypeId = @etid ORDER BY fieldOrder";
             object[] argval = { type };
             string[] argnam = { "@etid" };
             CustomQuery query = new CustomQuery { Cmd = specQuery, ArgNames = argnam, Args = argval };

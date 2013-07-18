@@ -132,11 +132,10 @@ namespace CalendarApplication.Controllers
             if (eventId == -1)
             {
                 etm.ID = -1;
-                //etm.Name = "Event type name here";
             }
             else
             {
-                string getType = "SELECT * FROM (eventtypes NATURAL LEFT JOIN eventtypefields) WHERE eventTypeId = @eid";
+                string getType = "SELECT * FROM (eventtypes NATURAL LEFT JOIN eventtypefields) WHERE eventTypeId = @eid ORDER BY fieldOrder";
                 MySqlConnect msc = new MySqlConnect();
                 object[] argval = { eventId };
                 string[] argnam = { "@eid" };

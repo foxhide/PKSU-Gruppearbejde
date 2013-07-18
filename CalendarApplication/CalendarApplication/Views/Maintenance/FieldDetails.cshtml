@@ -68,9 +68,13 @@
             </div>
         </td>
     </tr>
+    <tr>
+        <td><input type="button" value="up" onclick="moveFieldUp(@Model.ViewID)" /></td>
+        <td><input type="button" value="down" onclick="moveFieldDown(@Model.ViewID)" /></td>
+    </tr>
 </table>
 
 <input type="hidden" id="ID_@(Model.ViewID)" name="TypeSpecific[@(Model.ViewID)].ID" value="@Model.ID" />
-<input type="hidden" id="ViewID_@(Model.ViewID)" name="TypeSpecific[@(Model.ViewID)].ViewID" value="@(Model.Name == ""?"-2":"0")" />
+<input type="hidden" id="ViewID_@(Model.ViewID)" name="TypeSpecific[@(Model.ViewID)].ViewID" value="@(Model.ViewID)" />
 
 <br />

@@ -55,7 +55,8 @@ CREATE TABLE table_1 (
 
 	-- Concert event
 INSERT INTO eventtypes (eventTypeName) VALUES ("Concert");
-INSERT INTO eventtypefields (eventTypeId, fieldName, fieldDescription, requiredCreation, requiredApproval, fieldType, varCharLength) VALUES (2, "Band-name","Name of the band that's playing",1,1,1,50);
+INSERT INTO eventtypefields (eventTypeId, fieldName, fieldDescription, requiredCreation, requiredApproval, fieldType, varCharLength, fieldOrder)
+VALUES (2, "Band-name","Name of the band that's playing",1,1,1,50,1);
 
 DROP TABLE IF EXISTS table_2;
 
