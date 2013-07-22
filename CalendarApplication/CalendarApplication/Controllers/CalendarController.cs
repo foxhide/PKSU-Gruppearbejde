@@ -581,6 +581,9 @@ namespace CalendarApplication.Controllers
 
             // Apply second ordering to make sure that duplicate (several rooms) entries for the same event are grouped together.
             select.Append(", e.eventId");
+            
+            // If list view, order by rooms too (to make the room appear ordered in the column)
+            if (mode == CalendarMode.LIST) { select.Append(", r.roomName"); }
 
             // Check for descending
             if (desc) { select.Append(" DESC"); }

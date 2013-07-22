@@ -133,6 +133,9 @@
                                     <div class="@(Model.Descending ? "up-arrow" : "down-arrow")"></div>
                                 }
                             </th>
+                            <th>
+                                Rooms
+                            </th>
                             <th onclick="sortBy('STATE')">
                                 State
                                 @if (Model.Order == EventOrder.STATE)
@@ -149,6 +152,12 @@
                                 <td>@Html.ActionLink(e.Creator, "Index", "User", new { userId = e.CreatorId }, null)</td>
                                 <td>@e.Start</td>
                                 <td>@e.End</td>
+                                <td>
+                                    @foreach (Room r in e.Rooms)
+                                    {
+                                        @r.Name<br />
+                                    }
+                                </td>
                                 <td style="background-color:@e.getColor()">@e.getStateText()</td>
                             </tr>
                         }
