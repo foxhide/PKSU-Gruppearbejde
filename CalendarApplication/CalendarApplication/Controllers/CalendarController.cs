@@ -353,7 +353,7 @@ namespace CalendarApplication.Controllers
             first = first.AddDays(-before);
             
             // Get all events between the calculated days
-            List<BasicEvent> events = this.GetEvents(f, first, first.AddDays(days),false,EventOrder.START, false);
+            List<BasicEvent> events = this.GetEvents(f, first, first.AddDays(days),CalendarMode.MONTH,EventOrder.START, false);
 
             // Create calendar days
             for (int i = 0; i < days; i++)
@@ -396,7 +396,7 @@ namespace CalendarApplication.Controllers
         private CalendarDay GetDay(DateTime date, EventFilter f)
         {
             // Get events
-            List<BasicEvent> events = this.GetEvents(f, date, date.AddDays(1),true,EventOrder.START, false);
+            List<BasicEvent> events = this.GetEvents(f, date, date.AddDays(1),CalendarMode.DAY,EventOrder.START, false);
 
             CalendarDay result = new CalendarDay
             {
@@ -427,7 +427,7 @@ namespace CalendarApplication.Controllers
                                      bool desc)
         {
             // Get all events between the dates
-            List<BasicEvent> eventsFull = this.GetEvents(f,start,end,false,o,desc);
+            List<BasicEvent> eventsFull = this.GetEvents(f,start,end,CalendarMode.LIST,o,desc);
 
             // Sanity checks of starting and limit (limit must be one of the predefined)
             starting = starting < 0 || starting > eventsFull.Count ? 0 : starting;
@@ -465,7 +465,7 @@ namespace CalendarApplication.Controllers
         /// <param name="order">Determines the sorting order</param>
         /// <param name="desc">Determines ascending or descending order (true -> descending)</param>
         /// <returns>List of events</returns>
-        private List<BasicEvent> GetEvents(EventFilter f, DateTime start, DateTime end, bool day, EventOrder order, bool desc)
+        private List<BasicEvent> GetEvents(EventFilter f, DateTime start, DateTime end, CalendarMode mode, EventOrder order, bool desc)
         {
             StringBuilder select = new StringBuilder();
             StringBuilder from = new StringBuilder();
@@ -562,9 +562,12 @@ namespace CalendarApplication.Controllers
             select.Append(from);
             select.Append(" ");
             select.Append(where);
-            select.Append(" ORDER BY ");
+
+            // If monthly view, group by eventId to remove room-duplicates.
+            if (mode == CalendarMode.MONTH) { select.Append(" GROUP BY e.eventId"); }
 
             // Add ORDER BY
+            select.Append(" ORDER BY ");
             switch (order)
             {
                 case EventOrder.START: select.Append("e.eventStart"); break;
@@ -575,6 +578,10 @@ namespace CalendarApplication.Controllers
                 case EventOrder.CREATOR: select.Append("u.userName"); break;
                 default: select.Append("e.eventStart"); break;
             }
+
+            // Apply second ordering to make sure that duplicate (several rooms) entries for the same event are grouped together.
+            select.Append(", e.eventId");
+
             // Check for descending
             if (desc) { select.Append(" DESC"); }
 
@@ -607,7 +614,7 @@ namespace CalendarApplication.Controllers
                     if (cur == null && !e.Visible) { continue; }
                     // Set ViewVisble
                     e.ViewVisible = e.Visible || (cur != null &&
-                                                   (   cur.Admin 
+                                                   (cur.Admin
                                                     || cur.ID == e.CreatorId
                                                     || !(dr["user_edt"] is DBNull)
                                                     || !(dr["group_edt"] is DBNull)
@@ -615,9 +622,8 @@ namespace CalendarApplication.Controllers
                                                    )
                                                  );
 
-                    
-                    // If day: get rooms
-                    if (day)
+                    // If day or list view (and visible) get the rooms and add event
+                    if (mode == CalendarMode.DAY || (mode == CalendarMode.LIST && e.ViewVisible))
                     {
                         e.Rooms = new List<Room>();
                         while (r < dt.Rows.Count && (int)dt.Rows[r]["eventId"] == e.ID)
@@ -626,16 +632,20 @@ namespace CalendarApplication.Controllers
                             r++;
                         }
                         events.Add(e);
-                        continue;
                     }
-                    // If ViewVisible or day, add the event
-                    else if (e.ViewVisible)
+                    // If list view but not ViewVisible -> we have to run through all room duplicate entries
+                    else if (mode == CalendarMode.LIST)
+                    {
+                        for (; r < dt.Rows.Count && (int)dt.Rows[r]["eventId"] == e.ID; r++) ;
+                    }
+                    // if month and visible, simply add the event
+                    else if (mode == CalendarMode.MONTH && e.ViewVisible)
                     {
                         events.Add(e);
+                        r++;
                     }
-
-                    // Align to next event (this is done if in day view, and we will never enter the while).
-                    while (r < dt.Rows.Count && (int)dt.Rows[r]["eventId"] == e.ID)
+                    // Else simply increment counter - we are in monthly view, so there should be no room duplicates because of group by
+                    else
                     {
                         r++;
                     }
