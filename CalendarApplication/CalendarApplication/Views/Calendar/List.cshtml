@@ -119,6 +119,13 @@
                                     <div class="@(Model.Descending ? "up-arrow" : "down-arrow")"></div>
                                 }
                             </th>
+                            <th onclick="sortBy('CREATIONDATE')">
+                                Created
+                                @if (Model.Order == EventOrder.CREATIONDATE)
+                                {
+                                    <div class="@(Model.Descending ? "up-arrow" : "down-arrow")"></div>
+                                }
+                            </th>
                             <th onclick="sortBy('START')">
                                 Starting
                                 @if (Model.Order == EventOrder.START)

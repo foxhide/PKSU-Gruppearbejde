@@ -576,6 +576,7 @@ namespace CalendarApplication.Controllers
                 case EventOrder.TYPE: select.Append("et.eventTypeName"); break;
                 case EventOrder.STATE: select.Append("e.state"); break;
                 case EventOrder.CREATOR: select.Append("u.userName"); break;
+                case EventOrder.CREATIONDATE: select.Append("e.creation"); break;
                 default: select.Append("e.eventStart"); break;
             }
 
@@ -606,6 +607,7 @@ namespace CalendarApplication.Controllers
                         Name = (string)dr["eventName"],
                         CreatorId = (int)dr["userId"],
                         Creator = (string)dr["userName"],
+                        CreationDate = (DateTime)dr["creation"],
                         Start = (DateTime)dr["eventStart"],
                         End = (DateTime)dr["eventEnd"],
                         State = (int)dr["state"],

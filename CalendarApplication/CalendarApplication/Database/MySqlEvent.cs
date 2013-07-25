@@ -382,8 +382,8 @@ namespace CalendarApplication.Database
 
                     string updateEventTable = eem.ID == -1 ? (
                                                 "INSERT INTO events" +
-                                                "(userId,eventTypeId,eventName,eventStart,eventEnd,visible,state) VALUES " +
-                                                "( @ecreatorid , @eselectet , @ename , @estart , @eend , @evisible , @estate );"
+                                                "(userId,creation,eventTypeId,eventName,eventStart,eventEnd,visible,state) VALUES " +
+                                                "( @ecreatorid , @creationdate , @eselectet , @ename , @estart , @eend , @evisible , @estate );"
                                                 + "SELECT last_insert_id();") : (
                                                 "UPDATE events SET eventTypeId = @eselectet , eventName = @ename , "
                                                 + "eventStart = @estart , eventEnd = @eend , visible = @evisible , "
@@ -391,6 +391,7 @@ namespace CalendarApplication.Database
 
                     cmd.CommandText = updateEventTable;
                     cmd.Parameters.AddWithValue("@ecreatorid", eem.CreatorId);
+                    if (eem.ID == -1) { cmd.Parameters.AddWithValue("@creationdate", DateTime.Now); } // Add current date if creation
                     cmd.Parameters.AddWithValue("@eselectet", eem.SelectedEventType);
                     cmd.Parameters.AddWithValue("@ename", eem.Name);
                     cmd.Parameters.AddWithValue("@estart", eem.Start);

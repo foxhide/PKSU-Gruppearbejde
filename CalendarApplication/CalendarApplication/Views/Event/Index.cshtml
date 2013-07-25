@@ -150,6 +150,9 @@ else
         <tr id="creator">
             <td><b>Created by</b></td><td>@Html.ActionLink(Model.Creator, "Index", "User", new { UserId = Model.CreatorId }, null)</td>
         </tr>
+        <tr id="creation_date">
+            <td><b>Creation date</b></td><td>@Calendar.GetDateTimeString(Model.CreationDate)</td>
+        </tr>
         <tr id="from">
             <td><b>From</b></td><td>@Calendar.GetDateTimeString(Model.Start)</td>
         </tr>

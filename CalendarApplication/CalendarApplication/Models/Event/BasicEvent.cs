@@ -29,6 +29,8 @@ namespace CalendarApplication.Models.Event
         public DateTime Start { set; get; }
         [Display(Name = "Ending date")]
         public DateTime End { set; get; }
+        [Display(Name = "Creation date")]
+        public DateTime CreationDate { set; get; }
 
         public int State { set; get; }
         public bool Visible { set; get; }
