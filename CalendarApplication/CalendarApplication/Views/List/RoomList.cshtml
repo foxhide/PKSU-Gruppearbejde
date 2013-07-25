@@ -1,0 +1,25 @@
+﻿@model CalendarApplication.Models.Event.RoomListModel
+
+@{
+    ViewBag.Title = "RoomList";
+}
+
+<h2>Rooms</h2>
+
+@using CalendarApplication.Models.User
+
+@using (Html.BeginForm())
+{
+    using(Html.BeginListView("Rooms", new string[] { "Name", "Capacity", "Description" }))
+                {
+                    UserModel user = UserModel.GetCurrent();
+                    for (int i = 0; i < Model.RoomList.Count; i++)
+                    {
+                        <tr> 
+                            <td>@Model.RoomList[i].Name</td>
+                            <td>@Model.RoomList[i].Capacity</td>
+                            <td>@Model.RoomList[i].Description</td>
+                        </tr>
+                    }
+                }
+}

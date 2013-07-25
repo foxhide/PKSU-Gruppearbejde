@@ -14,8 +14,10 @@ namespace CalendarApplication.Database
         /// Create a new room
         /// </summary>
         /// <param name="name">Name of new room</param>
+        /// <param name="name">Description of new room</param>
+        /// <param name="name">Capacity of new room</param>
         /// <returns>id of new room, -1 in case of failure</returns>
-        public int CreateRoom(string name)
+        public int CreateRoom(string name, string description, int? capacity)
         {
             if (this.OpenConnection() == true)
             {
@@ -30,11 +32,13 @@ namespace CalendarApplication.Database
                     cmd.Connection = connection;
                     cmd.Transaction = mst;
 
-                    string insert = "INSERT INTO rooms (roomName) VALUES (@name); "
+                    string insert = "INSERT INTO rooms (roomName, capacity, description) VALUES (@name, @cap, @descr); "
                                 + "SELECT last_insert_id();";
 
                     cmd.CommandText = insert;
                     cmd.Parameters.AddWithValue("@name", name);
+                    cmd.Parameters.AddWithValue("@cap", capacity);
+                    cmd.Parameters.AddWithValue("@descr", description);
                     cmd.Prepare();
                     result = Convert.ToInt32(cmd.ExecuteScalar());
 
@@ -73,8 +77,10 @@ namespace CalendarApplication.Database
         /// </summary>
         /// <param name="id">room id</param>
         /// <param name="newName">New name of room</param>
+        /// <param name="newDescr">New description of room</param>
+        /// <param name="newCap">New capacity of room</param>
         /// <returns>bool indicating success or failure</returns>
-        public bool RenameRoom(int id, string newName)
+        public bool EditRoom(int id, string newName, string newDescr, int? newCap)
         {
             if (this.OpenConnection() == true)
             {
@@ -88,9 +94,11 @@ namespace CalendarApplication.Database
                     cmd.Connection = connection;
                     cmd.Transaction = mst;
 
-                    string rename = "UPDATE rooms SET roomName = @name WHERE roomId = @id";
+                    string rename = "UPDATE rooms SET roomName = @name , capacity = @cap , description = @descr WHERE roomId = @id";
 
                     cmd.CommandText = rename;
+                    cmd.Parameters.AddWithValue("@cap", newCap);
+                    cmd.Parameters.AddWithValue("@descr", newDescr);
                     cmd.Parameters.AddWithValue("@name", newName);
                     cmd.Parameters.AddWithValue("@id", id);
                     cmd.Prepare();
