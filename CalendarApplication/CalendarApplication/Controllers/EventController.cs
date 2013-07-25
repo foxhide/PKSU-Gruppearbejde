@@ -62,7 +62,7 @@ namespace CalendarApplication.Controllers
                 result.TypeId = (int)rows[0]["eventTypeId"];
                 result.TypeName = (string)rows[0]["eventTypeName"];
                 result.Visible = (bool)rows[0]["visible"];
-                result.Creator = (string)rows[0]["userName"];
+                result.Creator = (string)rows[0]["firstName"] + " " + (string)rows[0]["lastName"];
                 result.CreatorId = (int)rows[0]["userId"];
                 result.Rooms = new List<Room>();
                 for (int i = 0; i < rows.Count; i++)

@@ -19,10 +19,8 @@
     @Html.ValidationSummary(true)
     <fieldset>
         <legend>Create new account</legend>
-        <div><span style="color:red">*</span> means that the field is required<br /></div>
         <div class="editor-label">
             @Html.LabelFor(model => model.UserName)
-            <span style="color:red">*</span>
         </div>
         <div class="editor-field">
             @Html.EditorFor(model => model.UserName)
@@ -31,7 +29,6 @@
 
         <div class="editor-label">
             @Html.LabelFor(model => model.Password)
-            <span style="color:red">*</span>
         </div>
         <div class="editor-field">
             @Html.PasswordFor(model => model.Password)
@@ -40,7 +37,6 @@
 
         <div class="editor-label">
             @Html.LabelFor(model => model.PasswordConfirm)
-            <span style="color:red">*</span>
         </div>
         <div class="editor-field">
             @Html.PasswordFor(model => model.PasswordConfirm)

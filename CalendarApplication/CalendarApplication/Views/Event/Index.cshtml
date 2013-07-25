@@ -148,7 +148,7 @@ else
             <td style="width:100px;"><b>Type</b></td><td>@Model.TypeName</td>
         </tr>
         <tr id="creator">
-            <td><b>Created by</b></td><td>@Html.ActionLink(Model.Creator, "Index", "User", new { UserId = Model.CreatorId }, null)</td>
+            <td><b>Created by</b></td><td>@Html.ActionLink(u.GetFullName(), "Index", "User", new { UserId = Model.CreatorId }, null)</td>
         </tr>
         <tr id="from">
             <td><b>From</b></td><td>@Calendar.GetDateTimeString(Model.Start)</td>
