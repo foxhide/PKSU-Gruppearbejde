@@ -14,6 +14,7 @@ namespace CalendarApplication.Models.Calendar
         TYPE,
         NAME,
         CREATOR,
+        CREATIONDATE,
         STATE
     }
 

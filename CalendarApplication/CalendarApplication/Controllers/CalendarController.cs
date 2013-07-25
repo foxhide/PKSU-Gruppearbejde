@@ -471,7 +471,11 @@ namespace CalendarApplication.Controllers
             StringBuilder from = new StringBuilder();
             StringBuilder where = new StringBuilder();
 
+<<<<<<< HEAD
             select.Append("SELECT e.eventId,e.userId,u.firstName,u.lastName,e.eventTypeId,e.eventName,e.eventStart,");
+=======
+            select.Append("SELECT e.eventId,e.userId,e.creation,u.userName,e.eventTypeId,e.eventName,e.eventStart,");
+>>>>>>> d5ccdaabefdebee7241bc3f05b17b92afc45c57a
             select.Append("e.eventEnd,e.state,e.visible,et.eventTypeName,r.roomId,r.roomName");
             from.Append("FROM events AS e NATURAL JOIN users AS u NATURAL JOIN eventtypes AS et");
             from.Append(" NATURAL JOIN eventroomsused AS eru NATURAL JOIN rooms AS r");
@@ -575,18 +579,23 @@ namespace CalendarApplication.Controllers
                 case EventOrder.NAME: select.Append("e.eventName"); break;
                 case EventOrder.TYPE: select.Append("et.eventTypeName"); break;
                 case EventOrder.STATE: select.Append("e.state"); break;
+<<<<<<< HEAD
                 case EventOrder.CREATOR: select.Append("u.lastName"); break;
+=======
+                case EventOrder.CREATOR: select.Append("u.userName"); break;
+                case EventOrder.CREATIONDATE: select.Append("e.creation"); break;
+>>>>>>> d5ccdaabefdebee7241bc3f05b17b92afc45c57a
                 default: select.Append("e.eventStart"); break;
             }
+
+            // Check for descending
+            if (desc) { select.Append(" DESC"); }
 
             // Apply second ordering to make sure that duplicate (several rooms) entries for the same event are grouped together.
             select.Append(", e.eventId");
             
             // If list view, order by rooms too (to make the room appear ordered in the column)
             if (mode == CalendarMode.LIST) { select.Append(", r.roomName"); }
-
-            // Check for descending
-            if (desc) { select.Append(" DESC"); }
 
             List<BasicEvent> events = new List<BasicEvent>();
 
@@ -606,6 +615,7 @@ namespace CalendarApplication.Controllers
                         Name = (string)dr["eventName"],
                         CreatorId = (int)dr["userId"],
                         Creator = (string)dr["firstName"] + " " + (string)dr["lastName"],
+                        CreationDate = dr["creation"] is DBNull ? new DateTime() : (DateTime)dr["creation"],
                         Start = (DateTime)dr["eventStart"],
                         End = (DateTime)dr["eventEnd"],
                         State = (int)dr["state"],
