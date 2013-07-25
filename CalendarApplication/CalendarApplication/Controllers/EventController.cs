@@ -64,7 +64,7 @@ namespace CalendarApplication.Controllers
                 result.Visible = (bool)rows[0]["visible"];
                 result.Creator = (string)rows[0]["userName"];
                 result.CreatorId = (int)rows[0]["userId"];
-                result.CreationDate = (DateTime)rows[0]["creation"];
+                result.CreationDate = rows[0]["creation"] is DBNull ? new DateTime() : (DateTime)rows[0]["creation"];
                 result.Rooms = new List<Room>();
                 for (int i = 0; i < rows.Count; i++)
                 {
