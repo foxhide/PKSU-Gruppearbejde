@@ -115,29 +115,36 @@ function gotoUrl(url) {
 }
 
 /* Function used for generating the list view. */
-function updateList(id, cols) {
-    // For each column, synk the widths, taking padding into account
-    for (var i = 0; i < cols; i++) {
-        var header = $("#" + id + "_hd_" + i);
-        var hpad = parseInt(header.css('padding-left'), 10) + parseInt(header.css('padding-right'), 10);
-        var column = $("#" + id + "_td_" + i);
-        var cpad = parseInt(column.css('padding-left'), 10) + parseInt(column.css('padding-right'), 10);
+function updateList(id, cols, maxHeight) {
+    
+    // Update the height if it is greater than maximum height.
+    var innerdiv = $("#" + id + "_innerdiv");
+    if (innerdiv.height() > maxHeight) { innerdiv.height(maxHeight); }
 
-        var hw = header.width() + hpad;
-        var cw = column.width() + cpad;
-        if (hw > cw) {
-            column.width(hw - cpad - 1);
+    if (cols > 0) {
+        // For each column, synk the widths, taking padding into account
+        for (var i = 0; i < cols; i++) {
+            var header = $("#" + id + "_hd_" + i);
+            var hpad = parseInt(header.css('padding-left'), 10) + parseInt(header.css('padding-right'), 10);
+            var column = $("#" + id + "_td_" + i);
+            var cpad = parseInt(column.css('padding-left'), 10) + parseInt(column.css('padding-right'), 10);
+
+            var hw = header.width() + hpad;
+            var cw = column.width() + cpad;
+            if (hw > cw) {
+                column.width(hw - cpad - 1);
+            }
+            else {
+                header.width(cw - hpad + 1);
+            }
         }
-        else {
-            header.width(cw - hpad + 1);
-        }
+        // Offset the first header width with 1
+        var firsthd = $("#" + id + "_hd_0");
+        firsthd.width(firsthd.width() + 1);
+
+        // Calculate the missing width (scrollbar) and offset the last header width
+        var scrollbar = $("#" + id).width() - $("#" + id + "_hrow").width();
+        var lasthd = $("#" + id + "_hd_" + (i - 1));
+        lasthd.width(lasthd.width() + scrollbar);
     }
-    // Offset the first header width with 1
-    var firsthd = $("#" + id + "_hd_0");
-    firsthd.width(firsthd.width() + 1);
-
-    // Calculate the missing width (scrollbar) and offset the last header width
-    var scrollbar = $("#" + id).width() - $("#" + id + "_hrow").width();
-    var lasthd = $("#" + id + "_hd_" + (i - 1));
-    lasthd.width(lasthd.width() + scrollbar);
 }

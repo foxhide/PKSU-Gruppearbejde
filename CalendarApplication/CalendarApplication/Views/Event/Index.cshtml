@@ -179,7 +179,7 @@ else
         <tr id="rooms">
             <td><b>Rooms</b></td>
             <td>
-                @using (Html.BeginListView("Rooms_list", new string[] { "Name" }, "120px", "300px"))
+                @using (Html.BeginListView("Rooms_list", null, 100, "auto"))
                 {
                     foreach (Room room in Model.Rooms)
                     {
@@ -212,7 +212,7 @@ else
                             case Fieldtype.File:        @fm.IntValue break;
                             case Fieldtype.Datetime:    @fm.DateValue break;
                             case Fieldtype.Bool:        <div style="width:26px;height:26px" class="@(fm.BoolValue ? "tick" : "red_cross")"></div> break;
-                            case Fieldtype.UserList:    using (Html.BeginListView("list_" + fm.ID, new string[] { "Users" }, "100px", "auto"))
+                            case Fieldtype.UserList:    using (Html.BeginListView("list_" + fm.ID, null, 100, "auto"))
                                                         {
                                                             foreach (SelectListItem user in fm.List)
                                                             {
@@ -222,7 +222,7 @@ else
                                                             }
                                                         }
                                                         break;
-                            case Fieldtype.FileList:    using (Html.BeginListView("list_" + fm.ID, new string[] { "Files" }, "100px", "auto"))
+                            case Fieldtype.FileList:    using (Html.BeginListView("list_" + fm.ID, null, 100, "auto"))
                                                         {
                                                             foreach (SelectListItem group in fm.List)
                                                             {
@@ -232,7 +232,7 @@ else
                                                             }
                                                         }
                                                         break;
-                            case Fieldtype.GroupList:   using (Html.BeginListView("list_" + fm.ID, new string[] { "Groups" }, "100px", "auto"))
+                            case Fieldtype.GroupList:   using (Html.BeginListView("list_" + fm.ID, null, 100, "auto"))
                                                         {
                                                             foreach (SelectListItem group in fm.List)
                                                             {
