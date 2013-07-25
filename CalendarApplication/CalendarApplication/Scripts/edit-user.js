@@ -72,36 +72,44 @@ function statusChanged(id) {
     $("#" + id).addClass("yellow_triangle");
 }
 
-/* Function for updating name */
+/* Function for updating first name */
 function updateFirstName(userId, value) {
-    $("#name-input").removeClass();
+    $("#firstname-input").removeClass();
+    if (value == null || value.length < 1) {
+        $("#firstname-input").addClass("red_cross");
+        return;
+    }
     $.ajax({
         url: "/Account/EditUserString",
         type: 'POST',
         data: { field: 2, userId: userId, value: value },
         success: function (result) {
-            if (result) { $("#name-input").addClass("tick"); }
-            else { $("#name-input").addClass("red_cross"); }
+            if (result) { $("#firstname-input").addClass("tick"); }
+            else { $("#firstname-input").addClass("red_cross"); }
         },
         error: function (result) {
-            $("#name-input").addClass("red_cross");
+            $("#firstname-input").addClass("red_cross");
         }
     });
 }
 
-/* Function for updating name */
+/* Function for updating last name */
 function updateLastName(userId, value) {
-    $("#name-input").removeClass();
+    $("#lastname-input").removeClass();
+    if (value == null || value.length < 1) {
+        $("#lastname-input").addClass("red_cross");
+        return;
+    }
     $.ajax({
         url: "/Account/EditUserString",
         type: 'POST',
         data: { field: 3, userId: userId, value: value },
         success: function (result) {
-            if (result) { $("#name-input").addClass("tick"); }
-            else { $("#name-input").addClass("red_cross"); }
+            if (result) { $("#lastname-input").addClass("tick"); }
+            else { $("#lastname-input").addClass("red_cross"); }
         },
         error: function (result) {
-            $("#name-input").addClass("red_cross");
+            $("#lastname-input").addClass("red_cross");
         }
     });
 }
@@ -109,6 +117,10 @@ function updateLastName(userId, value) {
 /* Function for updating email */
 function updateEmail(userId, value) {
     $("#email-input").removeClass();
+    if (value == null || value.length < 1) {
+        $("#email-input").addClass("red_cross");
+        return;
+    }
     $.ajax({
         url: "/Account/EditUserString",
         type: 'POST',
@@ -126,6 +138,10 @@ function updateEmail(userId, value) {
 /* Function for updating phone number */
 function updatePhone(userId, value) {
     $("#phone-input").removeClass();
+    if (value == null || value.length < 1) {
+        $("#phone-input").addClass("red_cross");
+        return;
+    }
     $.ajax({
         url: "/Account/EditUserString",
         type: 'POST',
@@ -148,6 +164,12 @@ function updatePassword(id) {
     $("#password-input").removeClass();
     if (np != rep) {
         $("#match_error").html("Confirmation password does not match!");
+        $("#PasswordConfirm").addClass("input-validation-error");
+        $("#password-input").addClass("red_cross");
+        return;
+    }
+    if (np.length < 6) {
+        $("#match_error").html("New password too short! Please chose a password with more than 5 characters.");
         $("#PasswordConfirm").addClass("input-validation-error");
         $("#password-input").addClass("red_cross");
         return;
