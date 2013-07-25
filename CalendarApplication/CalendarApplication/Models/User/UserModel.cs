@@ -66,6 +66,15 @@ namespace CalendarApplication.Models.User
         }
 
         /// <summary>
+        /// Gets the full name of the user
+        /// </summary>
+        /// <returns>Full name</returns>
+        public string GetFullName()
+        {
+            return this.FirstName + " " + this.LastName;
+        }
+
+        /// <summary>
         /// Gets the current userId from the cookie
         /// </summary>
         /// <returns>The ID of the currently signed in user</returns>
