@@ -13,6 +13,7 @@ namespace CalendarApplication.Controllers
 {
     public class GroupController : Controller
     {
+        /*
         /// <summary>
         /// Making the group list
         /// </summary>
@@ -33,16 +34,17 @@ namespace CalendarApplication.Controllers
                 model.GroupList.Add( new GroupModel
                 {
                     ID = ((int)dr["groupId"]),
-                    Name = (string)dr["groupName"] /*,
+                    Name = (string)dr["groupName"] ,
                     Selected = false,
                     canCreate = null,
                     groupLeaders = null,
-                    groupMembers = null, */
+                    groupMembers = null
                 });
             }
 
             return View(model);
         }
+        */
 
         /// <summary>
         /// Viewing a specific group from ID

@@ -370,17 +370,18 @@ namespace CalendarApplication.Controllers
             if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
             else if (!UserModel.GetCurrent().Admin) { return RedirectToAction("Index", "Home", null); }
 
-            CalendarApplication.Models.Event.Room room = new CalendarApplication.Models.Event.Room{ ID = roomId, Name = "" };
+            CalendarApplication.Models.Event.Room room = new CalendarApplication.Models.Event.Room{ ID = roomId };
             if (roomId != -1)
             {
                 MySqlConnect sql = new MySqlConnect();
-                string que = "SELECT roomName FROM rooms WHERE roomId = @id";
+                string que = "SELECT roomName,capacity,description FROM rooms WHERE roomId = @id";
                 string[] argsn = { "@id" };
                 object[] args = { roomId };
                 CustomQuery query = new CustomQuery { Cmd = que, Args = args, ArgNames = argsn };
                 DataTable dt = sql.ExecuteQuery(query);
-                string name = (string)dt.Rows[0]["roomName"];
-                room.Name = name;
+                room.Name = dt.Rows[0]["roomName"] as string;
+                room.Description = dt.Rows[0]["description"] as string;
+                room.Capacity = dt.Rows[0]["capacity"] as int?;
             }
             return View(room);
         }
@@ -402,11 +403,11 @@ namespace CalendarApplication.Controllers
             MySqlRoom sqlrm = new MySqlRoom();
             if (roomId == -1)
             {
-                roomId = sqlrm.CreateRoom(room.Name);
+                roomId = sqlrm.CreateRoom(room.Name, room.Description, room.Capacity);
             }
             else
             {
-                worked = sqlrm.RenameRoom(roomId, room.Name);
+                worked = sqlrm.EditRoom(roomId, room.Name, room.Description, room.Capacity);
             }
 
             if ((roomId != room.ID) || worked)

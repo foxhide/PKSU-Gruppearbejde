@@ -114,6 +114,7 @@
     <Compile Include="Controllers\CalendarController.cs" />
     <Compile Include="Controllers\EventController.cs" />
     <Compile Include="Controllers\GroupController.cs" />
+    <Compile Include="Controllers\ListController.cs" />
     <Compile Include="Controllers\MaintenanceController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\AccountController.cs" />
@@ -146,6 +147,7 @@
     <Compile Include="Models\Event\FieldModel.cs" />
     <Compile Include="Models\Event\Room.cs" />
     <Compile Include="Models\Account\LoginModel.cs" />
+    <Compile Include="Models\Event\RoomListModel.cs" />
     <Compile Include="Models\Group\GroupPrivilegesModel.cs" />
     <Compile Include="Models\Group\GroupViewModel.cs" />
     <Compile Include="Models\Group\GroupListModel.cs" />
@@ -154,6 +156,7 @@
     <Compile Include="Models\Group\GroupModel.cs" />
     <Compile Include="Models\Maintenance\ManageUserModel.cs" />
     <Compile Include="Models\Account\AccountEditModel.cs" />
+    <Compile Include="Models\User\UserListModel.cs" />
     <Compile Include="Models\User\UserModel.cs" />
     <Compile Include="Models\User\UserViewModel.cs" />
     <Compile Include="PDFBuilder\EventBuilder.cs" />
@@ -254,9 +257,11 @@
     <Content Include="Views\Calendar\List.cshtml" />
     <Content Include="Views\Maintenance\EditRoom.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
-    <Content Include="Views\Group\Index.cshtml" />
     <Content Include="Views\Group\ViewGroup.cshtml" />
     <Content Include="Views\Group\SetPrivileges.cshtml" />
+    <Content Include="Views\List\GroupList.cshtml" />
+    <Content Include="Views\List\UserList.cshtml" />
+    <Content Include="Views\List\RoomList.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
