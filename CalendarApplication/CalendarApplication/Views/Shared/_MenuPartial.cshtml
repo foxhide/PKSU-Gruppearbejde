@@ -148,9 +148,15 @@
                                 </td>
                             </tr>
                             <tr>
+                                <td  @(curCtrl == "maintenance" && curActn == "manageeventtypes" ? "class=selected" : "")
+                                    onclick="gotoUrl('@Url.Action("ManageEventTypes","Maintenance",null)')">
+                                    Event Types
+                                </td>
+                            </tr>
+                            <tr>
                                 <td  @(curCtrl == "maintenance" && curActn == "manageusers" ? "class=selected" : "")
                                     onclick="gotoUrl('@Url.Action("ManageUsers","Maintenance",null)')">
-                                    Manage users
+                                    Users
                                 </td>
                             </tr>
                         </table>
