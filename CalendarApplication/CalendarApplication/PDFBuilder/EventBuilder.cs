@@ -224,7 +224,8 @@ namespace CalendarApplication.PDFBuilder
 
             result.AppendLine(@"\begin{tabular}{|c|c|}\hline");
             result.AppendLine(@"User Name & " + um.UserName + @"\\\hline");
-            result.AppendLine(@"Real Name & " + um.RealName + @"\\\hline");
+            result.AppendLine(@"First Name & " + um.FirstName + @"\\\hline");
+            result.AppendLine(@"Last Name & " + um.LastName + @"\\\hline");
             result.AppendLine(@"Admin & " + um.Admin + @"\\\hline");
             result.AppendLine(@"Active & " + um.Active + @"\\\hline");
             result.AppendLine(@"Email & " + um.Email + @"\\\hline");

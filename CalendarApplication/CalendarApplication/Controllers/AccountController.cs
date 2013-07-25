@@ -142,7 +142,8 @@ namespace CalendarApplication.Controllers
             {
                 DataRow row = table.Rows[0];
                 result.UserName = (string)row["userName"];
-                result.RealName = row["realName"] is DBNull ? "" : (string)row["realName"];
+                result.FirstName = row["firstName"] is DBNull ? "" : (string)row["firstName"];
+                result.LastName = row["lastName"] is DBNull ? "" : (string)row["lastName"];
                 result.Admin = (bool)row["admin"];
                 result.Email = row["email"] is DBNull ? "" : (string)row["email"];
                 result.Phone = row["phoneNum"] is DBNull ? "" : (string)row["phoneNum"];
@@ -170,8 +171,10 @@ namespace CalendarApplication.Controllers
                 case 0: fieldName = "email"; break;
                 //Edit phone
                 case 1: fieldName = "phoneNum"; break;
-                //Edit real name
-                case 2: fieldName = "realName"; break;
+                //Edit first name
+                case 2: fieldName = "firstName"; break;
+                //Edit last name
+                case 3: fieldName = "lastName"; break;
             }
 
             MySqlUser msu = new MySqlUser();
