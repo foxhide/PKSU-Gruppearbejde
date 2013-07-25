@@ -471,7 +471,7 @@ namespace CalendarApplication.Controllers
             StringBuilder from = new StringBuilder();
             StringBuilder where = new StringBuilder();
 
-            select.Append("SELECT e.eventId,e.userId,e.creation,u.userName,e.eventTypeId,e.eventName,e.eventStart,");
+            select.Append("SELECT e.eventId,e.userId,e.creation,u.firstName,u.lastName,e.eventTypeId,e.eventName,e.eventStart,");
             select.Append("e.eventEnd,e.state,e.visible,et.eventTypeName,r.roomId,r.roomName");
             from.Append("FROM events AS e NATURAL JOIN users AS u NATURAL JOIN eventtypes AS et");
             from.Append(" NATURAL JOIN eventroomsused AS eru NATURAL JOIN rooms AS r");
@@ -575,7 +575,7 @@ namespace CalendarApplication.Controllers
                 case EventOrder.NAME: select.Append("e.eventName"); break;
                 case EventOrder.TYPE: select.Append("et.eventTypeName"); break;
                 case EventOrder.STATE: select.Append("e.state"); break;
-                case EventOrder.CREATOR: select.Append("u.userName"); break;
+                case EventOrder.CREATOR: select.Append("u.lastName"); break;
                 case EventOrder.CREATIONDATE: select.Append("e.creation"); break;
                 default: select.Append("e.eventStart"); break;
             }
@@ -606,7 +606,7 @@ namespace CalendarApplication.Controllers
                         ID = (int)dr["eventId"],
                         Name = (string)dr["eventName"],
                         CreatorId = (int)dr["userId"],
-                        Creator = (string)dr["userName"],
+                        Creator = (string)dr["firstName"] + " " + (string)dr["lastName"],
                         CreationDate = dr["creation"] is DBNull ? new DateTime() : (DateTime)dr["creation"],
                         Start = (DateTime)dr["eventStart"],
                         End = (DateTime)dr["eventEnd"],
