@@ -152,6 +152,7 @@
     <Compile Include="Models\Maintenance\Config.cs" />
     <Compile Include="Models\Maintenance\MaintenanceModel.cs" />
     <Compile Include="Models\Group\GroupModel.cs" />
+    <Compile Include="Models\Maintenance\ManageEventTypeModel.cs" />
     <Compile Include="Models\Maintenance\ManageUserModel.cs" />
     <Compile Include="Models\Account\AccountEditModel.cs" />
     <Compile Include="Models\User\UserModel.cs" />
@@ -219,6 +220,7 @@
     <Content Include="Scripts\jquery.validate.min.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
+    <Content Include="Scripts\maintenance.js" />
     <Content Include="Scripts\MicrosoftAjax.debug.js" />
     <Content Include="Scripts\MicrosoftAjax.js" />
     <Content Include="Scripts\MicrosoftMvcAjax.debug.js" />
@@ -257,6 +259,7 @@
     <Content Include="Views\Group\Index.cshtml" />
     <Content Include="Views\Group\ViewGroup.cshtml" />
     <Content Include="Views\Group\SetPrivileges.cshtml" />
+    <Content Include="Views\Maintenance\ManageEventTypes.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

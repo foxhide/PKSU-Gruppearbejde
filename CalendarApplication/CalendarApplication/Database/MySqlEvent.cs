@@ -356,6 +356,61 @@ namespace CalendarApplication.Database
 
         }
 
+        /// <summary>
+        /// Function for updating the active state of an event type
+        /// </summary>
+        /// <param name="eventTypeId">The ID of the event type to update</param>
+        /// <param name="active">The new state (true or false)</param>
+        /// <returns>True on success, otherwise false</returns>
+        public bool SetEventTypeActive(int eventTypeId, bool active)
+        {
+            if (this.OpenConnection())
+            {
+                MySqlTransaction mst = null;
+                MySqlCommand cmd = null;
+
+                try
+                {
+                    mst = this.connection.BeginTransaction();
+                    cmd = new MySqlCommand();
+                    cmd.Connection = this.connection;
+                    cmd.Transaction = mst;
+
+                    cmd.CommandText = "UPDATE eventtypes SET active = @act WHERE eventTypeId = @id";
+                    cmd.Parameters.AddWithValue("@act", active);
+                    cmd.Parameters.AddWithValue("@id", eventTypeId);
+                    cmd.Prepare();
+
+                    cmd.ExecuteNonQuery();
+
+                    mst.Commit();
+
+                    this.CloseConnection();
+                    return true;
+                }
+                catch (MySqlException ex1)
+                {
+                    try
+                    {
+                        mst.Rollback();
+                        this.CloseConnection();
+                        this.ErrorMessage = ex1.ErrorCode.ToString();
+                        return false;
+                    }
+                    catch (MySqlException ex2)
+                    {
+                        this.CloseConnection();
+                        this.ErrorMessage = ex2.ErrorCode.ToString();
+                        return false;
+                    }
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         public int EditEvent(EventEditModel eem)
         {
             if (this.OpenConnection() == true)
