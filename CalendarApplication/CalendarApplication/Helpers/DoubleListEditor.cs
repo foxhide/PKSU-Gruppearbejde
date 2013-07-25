@@ -21,9 +21,9 @@ namespace CalendarApplication.Helpers
         /// <param name="labelList2">Label of the available list</param>
         /// <returns>A MvcHtmlString with the html for the editor</returns>
         public static MvcHtmlString ListEditorFor<TModel, TValue>(this HtmlHelper<TModel> helper,
-            Expression<Func<TModel, TValue>> expression, string labelList1, string labelList2)
+            Expression<Func<TModel, TValue>> expression, string selectedLabel, string availableLabal)
         {
-            return DoubleListEditor.ListEditorFor(helper, expression, labelList1, labelList2, "", "");
+            return DoubleListEditor.ListEditorFor(helper, expression, selectedLabel, availableLabal, "", "");
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace CalendarApplication.Helpers
         /// <param name="onRem">JS-function to be called on remove</param>
         /// <returns>A MvcHtmlString with the html for the editor</returns>
         public static MvcHtmlString ListEditorFor<TModel, TValue>(this HtmlHelper<TModel> helper,
-            Expression<Func<TModel, TValue>> expression, string labelList1, string labelList2, string onAdd, string onRem)
+            Expression<Func<TModel, TValue>> expression, string selectedLabel, string availableLabal, string onAdd, string onRem)
         {
             // Get model
             ModelMetadata metadata = ModelMetadata.FromLambdaExpression(expression, helper.ViewData);
@@ -48,11 +48,11 @@ namespace CalendarApplication.Helpers
             // Get Name
             string name = ExpressionHelper.GetExpressionText(expression).Split('.').Last();
 
-            return ListEditorFor(list, name, name, labelList1, labelList2, onAdd, onRem);
+            return ListEditorFor(list, name, name, selectedLabel, availableLabal, onAdd, onRem);
         }
 
         public static MvcHtmlString ListEditorFor(List<SelectListItem> list, string id, string name,
-                                                  string labelList1, string labelList2, string onAdd, string onRem)
+                                                  string selectedLabel, string availableLabal, string onAdd, string onRem)
         {
 
             if (list == null)
@@ -74,30 +74,31 @@ namespace CalendarApplication.Helpers
 
             builder.AppendLine("<table class='custom-style-1'><tr>");
 
-            builder.AppendLine("<td>" + labelList1 + "</td><td></td><td>" + labelList2 + "</td>");
+            builder.AppendLine("<td>" + availableLabal + "</td><td></td><td>" + selectedLabel + "</td>");
 
             builder.AppendLine("</tr><tr>");
-            builder.AppendLine("<td>");
-            builder.AppendLine("<select id='" + id + "_select' name='" + name + "' size='5' style='min-width:100px'>");
-            foreach (SelectListItem sli in list)
-            {
-                if(sli.Selected) builder.AppendLine("<option value='" + sli.Value + "'>" + sli.Text + "</option>");
-            }
-            builder.AppendLine("</select>");
-            builder.AppendLine("</td>");
-
-            builder.AppendLine("<td style='vertical-align:middle'>");
-            builder.Append("<input type='button' id='" + name + "_add_button' value='<--' onclick=\"moveSelected('" + id + "',true);");
-            builder.Append(onAdd + "\" ><br>");
-            builder.Append("<input type='button' id='" + name + "_rem_button' value='-->' onclick=\"moveSelected('" + id + "',false);");
-            builder.Append(onRem + "\" >");
-            builder.AppendLine("</td>");
 
             builder.AppendLine("<td>");
             builder.AppendLine("<select id='" + id + "_available' name='" + name + "' size='5' style='min-width:100px'>");
             foreach (SelectListItem sli in list)
             {
                 if (!sli.Selected) builder.AppendLine("<option value='" + sli.Value + "'>" + sli.Text + "</option>");
+            }
+            builder.AppendLine("</select>");
+            builder.AppendLine("</td>");
+
+            builder.AppendLine("<td style='vertical-align:middle'>");
+            builder.Append("<input type='button' id='" + name + "_add_button' value='<--' onclick=\"moveSelected('" + id + "',false);");
+            builder.Append(onAdd + "\" ><br>");
+            builder.Append("<input type='button' id='" + name + "_rem_button' value='-->' onclick=\"moveSelected('" + id + "',true);");
+            builder.Append(onRem + "\" >");
+            builder.AppendLine("</td>");
+
+            builder.AppendLine("<td>");
+            builder.AppendLine("<select id='" + id + "_select' name='" + name + "' size='5' style='min-width:100px'>");
+            foreach (SelectListItem sli in list)
+            {
+                if (sli.Selected) builder.AppendLine("<option value='" + sli.Value + "'>" + sli.Text + "</option>");
             }
             builder.AppendLine("</select>");
             builder.AppendLine("</td>");
