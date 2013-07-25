@@ -140,7 +140,7 @@
                                     <div class="@(Model.Descending ? "up-arrow" : "down-arrow")"></div>
                                 }
                             </th>
-                            <th>
+                            <th class="no-click">
                                 Rooms
                             </th>
                             <th onclick="sortBy('STATE')">
@@ -157,6 +157,7 @@
                                 <td>@Html.ActionLink(e.Name, "Index", "Event", new { eventId = e.ID }, null)</td>
                                 <td>@e.TypeName</td>
                                 <td>@Html.ActionLink(e.Creator, "Index", "User", new { userId = e.CreatorId }, null)</td>
+                                <td>@e.CreationDate</td>
                                 <td>@e.Start</td>
                                 <td>@e.End</td>
                                 <td>

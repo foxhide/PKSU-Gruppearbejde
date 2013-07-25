@@ -144,3 +144,10 @@ table.event-list th:hover {
     background-color:black;
     color:white;
 }
+table.event-list th.no-click {
+    cursor:default;
+}
+table.event-list th.no-click:hover {
+    background-color:lightgray;
+    color:black;
+}
