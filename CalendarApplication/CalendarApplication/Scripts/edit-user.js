@@ -73,12 +73,29 @@ function statusChanged(id) {
 }
 
 /* Function for updating name */
-function updateName(userId, value) {
+function updateFirstName(userId, value) {
     $("#name-input").removeClass();
     $.ajax({
         url: "/Account/EditUserString",
         type: 'POST',
         data: { field: 2, userId: userId, value: value },
+        success: function (result) {
+            if (result) { $("#name-input").addClass("tick"); }
+            else { $("#name-input").addClass("red_cross"); }
+        },
+        error: function (result) {
+            $("#name-input").addClass("red_cross");
+        }
+    });
+}
+
+/* Function for updating name */
+function updateLastName(userId, value) {
+    $("#name-input").removeClass();
+    $.ajax({
+        url: "/Account/EditUserString",
+        type: 'POST',
+        data: { field: 3, userId: userId, value: value },
         success: function (result) {
             if (result) { $("#name-input").addClass("tick"); }
             else { $("#name-input").addClass("red_cross"); }

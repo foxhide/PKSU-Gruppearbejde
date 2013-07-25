@@ -21,8 +21,11 @@ namespace CalendarApplication.Models.User
         [Display(Name = "User name:")]
         public string UserName { set; get; }
 
-        [Display(Name = "Real name:")]
-        public string RealName { set; get; }
+        [Display(Name = "First name:")]
+        public string FirstName { set; get; }
+
+        [Display(Name = "Last name:")]
+        public string LastName { set; get; }
 
         [Display(Name = "E-mail")]
         public string Email { set; get; }
@@ -41,7 +44,7 @@ namespace CalendarApplication.Models.User
         public static UserModel GetUser(int ID)
         {
             MySqlConnect msc = new MySqlConnect();
-            string cmd = "SELECT userId,userName,realName,phoneNum,email,admin FROM users WHERE userId = @uid";
+            string cmd = "SELECT userId,userName,firstName,lastName,phoneNum,email,admin FROM users WHERE userId = @uid";
             object[] argval = { ID };
             string[] argnam = { "@uid" };
             CustomQuery query = new CustomQuery { Cmd = cmd, ArgNames = argnam, Args = argval };
@@ -52,13 +55,23 @@ namespace CalendarApplication.Models.User
             {
                 ID = ID,
                 UserName = (string)dt.Rows[0]["userName"],
-                RealName = dt.Rows[0]["realName"] as string,
+                FirstName = dt.Rows[0]["firstName"] as string,
+                LastName = dt.Rows[0]["lastName"] as string,
                 Phone = dt.Rows[0]["phoneNum"] as string,
                 Email = dt.Rows[0]["email"] as string,
                 Admin = (bool)dt.Rows[0]["admin"]
             };
 
             return result;
+        }
+
+        /// <summary>
+        /// Gets the full name of the user
+        /// </summary>
+        /// <returns>Full name</returns>
+        public string GetFullName()
+        {
+            return this.FirstName + " " + this.LastName;
         }
 
         /// <summary>

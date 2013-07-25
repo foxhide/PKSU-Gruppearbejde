@@ -9,14 +9,22 @@ namespace CalendarApplication.Models.Account
     public class Register
     {
         
+        [Required]
         [StringLength(45, ErrorMessage = "The {0} field must be less than {1} characters long.")]
-        [Display(Name = "Your real name")]
-        public string RealName { get; set; }
+        [Display(Name = "First name")]
+        public string FirstName { get; set; }
 
+        [Required]
+        [StringLength(45, ErrorMessage = "The {0} field must be less than {1} characters long.")]
+        [Display(Name = "Last name")]
+        public string LastName { get; set; }
+
+        [Required]
         [StringLength(45, ErrorMessage = "The {0} field must be at less than {1} characters.")]
         [Display(Name = "E-mail")]
         public string Email { get; set; }
 
+        [Required]
         [StringLength(45, ErrorMessage = "The {0} field must be at less than {1} characters.")]
         [Display(Name = "Phone number")]
         public string Phone { get; set; }

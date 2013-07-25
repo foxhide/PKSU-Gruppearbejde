@@ -124,7 +124,8 @@ namespace CalendarApplication.Tests
             // Try to make a user with no user name
             Register reg = new Register
             {
-                RealName = "Newton",
+                FirstName = "Isaac",
+                LastName = "Newton",
                 UserName = null,
                 Email = "newton@gravity.com",
                 Phone = "012345678",
@@ -147,7 +148,9 @@ namespace CalendarApplication.Tests
 
             // Update newtons Real Name and approval
 
-            bool ok = msu.EditUser(i, "Einstein", "realName");
+            bool ok = msu.EditUser(i, "Albert", "firstName");
+            Assert.IsTrue(ok);
+            ok = msu.EditUser(i, "Einstein", "lastName");
             Assert.IsTrue(ok);
             ok = msu.EditUser(i, false, "needsApproval");
             Assert.IsTrue(ok);
@@ -165,7 +168,8 @@ namespace CalendarApplication.Tests
             Assert.IsNotNull(dt);
             Assert.AreEqual(1, dt.Rows.Count);
 
-            Assert.AreEqual("Einstein", dt.Rows[0]["realName"]);
+            Assert.AreEqual("Albert", dt.Rows[0]["firstName"]);
+            Assert.AreEqual("Einstein", dt.Rows[0]["lastName"]);
             Assert.AreEqual("newton1337", dt.Rows[0]["userName"]);
             Assert.AreEqual("012345678", dt.Rows[0]["phoneNum"]);
             Assert.AreEqual("newton@gravity.com", dt.Rows[0]["email"]);
