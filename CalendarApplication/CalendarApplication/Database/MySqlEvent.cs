@@ -67,7 +67,7 @@ namespace CalendarApplication.Database
                             cmd.Parameters["@fieldname"].Value = fdm.Name;
                             cmd.Parameters["@descr"].Value = fdm.Description;
                             cmd.Parameters["@reqc"].Value = fdm.RequiredCreate;
-                            cmd.Parameters["@reqa"].Value = fdm.RequiredApprove;
+                            cmd.Parameters["@reqa"].Value = fdm.RequiredApprove || fdm.RequiredCreate;
                             cmd.Parameters["@datatype"].Value = fdm.GetTypeAsInt();
                             cmd.Parameters["@varch"].Value = fdm.VarcharLength;
                             cmd.Parameters["@order"].Value = fdm.ViewID;
@@ -244,7 +244,7 @@ namespace CalendarApplication.Database
                                 cmd.Parameters["@fname"].Value = fdm.Name;
                                 cmd.Parameters["@fdescr"].Value = fdm.Description;
                                 cmd.Parameters["@freqc"].Value = fdm.RequiredCreate;
-                                cmd.Parameters["@freqa"].Value = fdm.RequiredApprove;
+                                cmd.Parameters["@freqa"].Value = fdm.RequiredApprove || fdm.RequiredCreate;
                                 cmd.Parameters["@fdattyp"].Value = fdm.GetTypeAsInt();
                                 cmd.Parameters["@fvarchr"].Value = fdm.VarcharLength;
                                 cmd.Parameters["@forder"].Value = fdm.ViewID;
@@ -306,7 +306,7 @@ namespace CalendarApplication.Database
                                 cmd.Parameters["@fname"].Value = fdm.Name;
                                 cmd.Parameters["@fdescr"].Value = fdm.Description;
                                 cmd.Parameters["@freqc"].Value = fdm.RequiredCreate;
-                                cmd.Parameters["@freqa"].Value = fdm.RequiredApprove;
+                                cmd.Parameters["@freqa"].Value = fdm.RequiredApprove || fdm.RequiredCreate;
                                 cmd.Parameters["@fvarchr"].Value = fdm.VarcharLength;
                                 cmd.Parameters["@forder"].Value = fdm.ViewID;
                                 cmd.Parameters["@fid"].Value = fdm.ID;

@@ -163,7 +163,7 @@ function updateVarChar(id) {
         // It is a text field.
         label.innerHTML = "<label>Max size of input:</label>";
         input.innerHTML = "<input type='text' id='varchar_size_" + id + "' name='TypeSpecific[" + id + "].VarcharLength'"
-                            + " style='width:50px'>";
+                            + " style='width:50px' value='250'>";
     }
     else {
         // It is not a text field
@@ -202,7 +202,7 @@ function checkFields(form) {
 function updateReqForAppr(id) {
     if ($("#Reqc_" + id).attr("checked")) {
         $("#Reqa_" + id).attr("checked", "checked");
-        //$("#Reqa_" + id).attr("disabled", true);
+        $("#Reqa_" + id).attr("disabled", true);
     }
     else {
         $("#Reqa_" + id).removeAttr("disabled");
