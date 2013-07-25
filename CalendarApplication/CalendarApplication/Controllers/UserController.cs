@@ -35,7 +35,8 @@ namespace CalendarApplication.Controllers
                 DataRow row = table.Rows[0];
                 result.UserName = (string)row["userName"];
                 //result.Password = (string)row["password"];
-                result.RealName = row["realName"] is DBNull ? "Not available" : (string)row["realName"];
+                result.FirstName = row["firstName"] is DBNull ? "Not available" : (string)row["firstName"];
+                result.LastName = row["lastName"] is DBNull ? "Not available" : (string)row["lastName"];
                 result.Admin = (bool)row["admin"];
                 result.Phone = row["phoneNum"] is DBNull ? "Not available" : (string)row["phoneNum"];
                 result.Email = row["email"] is DBNull ? "Not available" : (string)row["email"];
