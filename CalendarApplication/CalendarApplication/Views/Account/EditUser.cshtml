@@ -24,16 +24,16 @@
 
 <fieldset>
     <legend>First Name</legend>
-    @Html.TextBoxFor(m => m.FirstName, new { onkeydown = "statusChanged('name-input')" })
+    @Html.TextBoxFor(m => m.FirstName, new { onkeydown = "statusChanged('firstname-input')" })
     <input type="button" value="Save" onclick="updateFirstName(@Model.ID,$('#FirstName').val())"/>
-    <div id="name-input" class="tick" style="height:26px;width:26px;display:inline-block"></div>
+    <div id="firstname-input" class="tick" style="height:26px;width:26px;display:inline-block"></div>
 </fieldset>
 
 <fieldset>
     <legend>Last Name</legend>
-    @Html.TextBoxFor(m => m.LastName, new { onkeydown = "statusChanged('name-input')" })
+    @Html.TextBoxFor(m => m.LastName, new { onkeydown = "statusChanged('lastname-input')" })
     <input type="button" value="Save" onclick="updateLastName(@Model.ID,$('#LastName').val())"/>
-    <div id="name-input" class="tick" style="height:26px;width:26px;display:inline-block"></div>
+    <div id="lastname-input" class="tick" style="height:26px;width:26px;display:inline-block"></div>
 </fieldset>
 
 <fieldset>

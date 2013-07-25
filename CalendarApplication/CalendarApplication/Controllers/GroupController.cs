@@ -68,7 +68,7 @@ namespace CalendarApplication.Controllers
             object[] args1 = new object[] { groupId };
             CustomQuery query1 = new CustomQuery { Cmd = cmd1, ArgNames = argnam1, Args = args1 };
 
-            string cmd2 = "SELECT groupId, groupName, groupLeader, canCreate, userName, userId "
+            string cmd2 = "SELECT groupId, groupName, groupLeader, canCreate, firstName, lastName, userId "
                          + "FROM groups NATURAL JOIN groupmembers NATURAL JOIN users "
                          + "WHERE groupId = @gid AND active = 1 ORDER BY userName";
             //perhaps inactive members should be shown anyway?
@@ -98,7 +98,7 @@ namespace CalendarApplication.Controllers
                 model.Members.Add(new GroupViewModel.GroupUserModel
                 {
                     ID = (int)dr["userId"],
-                    Name = (string)dr["userName"].ToString(),
+                    Name = (string)dr["firstName"].ToString() + " " + (string)dr["lastName"].ToString(),
                     Leader = (bool)dr["groupLeader"],
                     Creator = (bool)dr["canCreate"]
                 });

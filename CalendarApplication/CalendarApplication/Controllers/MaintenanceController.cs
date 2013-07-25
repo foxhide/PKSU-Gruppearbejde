@@ -240,13 +240,13 @@ namespace CalendarApplication.Controllers
                     result.groupLeaders.Add(new SelectListItem
                     {
                         Value = ((int)dt1.Rows[i]["userId"]).ToString(),
-                        Text = (string)dt1.Rows[i]["userName"],
+                        Text = (string)dt1.Rows[i]["firstName"] + " " + (string)dt1.Rows[i]["lastName"],
                         Selected = (bool)dt1.Rows[i]["groupLeader"]
                     });
                     result.canCreate.Add(new SelectListItem
                     {
                         Value = ((int)dt1.Rows[i]["userId"]).ToString(),
-                        Text = (string)dt1.Rows[i]["userName"],
+                        Text = (string)dt1.Rows[i]["firstName"] + " " + (string)dt1.Rows[i]["lastName"],
                         Selected = (bool)dt1.Rows[i]["canCreate"] || (bool)dt1.Rows[i]["groupLeader"]
                     });
                 }
@@ -261,7 +261,7 @@ namespace CalendarApplication.Controllers
                     result.groupMembers.Add(new SelectListItem
                         {
                             Value = ((int)dt0.Rows[i]["userId"]).ToString(),
-                            Text = (string)dt0.Rows[i]["userName"],
+                            Text = (string)dt0.Rows[i]["firstName"] + " " + (string)dt0.Rows[i]["lastName"],
                             Selected = groupMembers.Contains((int)dt0.Rows[i]["userId"])
                         });
                 }
@@ -345,12 +345,12 @@ namespace CalendarApplication.Controllers
             };
 
             MySqlConnect msc = new MySqlConnect();
-            CustomQuery query = new CustomQuery { Cmd = "SELECT userId,userName,needsApproval,active FROM users ORDER BY userName" };
+            CustomQuery query = new CustomQuery { Cmd = "SELECT userId,firstName,lastName,needsApproval,active FROM users ORDER BY lastName" };
             DataTable dt = msc.ExecuteQuery(query);
 
             foreach (DataRow dr in dt.Rows)
             {
-                SelectListItem sli = new SelectListItem { Value = ((int)dr["userId"]).ToString(), Text = (string)dr["userName"] };
+                SelectListItem sli = new SelectListItem { Value = ((int)dr["userId"]).ToString(), Text = (string)dr["firstName"] + " " + (string)dr["lastName"] };
                 if (!((bool)dr["active"])) { mum.UsersInactive.Add(sli); }
                 else if ((bool)dr["needsApproval"]) { mum.UsersNotApproved.Add(sli); }
                 else { mum.UsersApproved.Add(sli); }
