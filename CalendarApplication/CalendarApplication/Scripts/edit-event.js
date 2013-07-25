@@ -169,6 +169,13 @@ function setValidationMessage(id, errId, isError) {
 function checkRooms() {
     var rooms = getListSelected("RoomSelectList");
 
+    if (rooms.length == 0) {
+        $("#rd_but").css("background-color", "red");
+        $("#rd_but").val("Error!");
+        $("#room_date_feedback").html("No rooms selected!");
+        return;
+    }
+
     var eventId = $("#ID").val();
     var start = $("#Start").val();
     var end = $("#End").val();

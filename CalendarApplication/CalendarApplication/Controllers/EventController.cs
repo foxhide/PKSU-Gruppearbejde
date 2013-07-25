@@ -831,6 +831,9 @@ namespace CalendarApplication.Controllers
         /// <returns>List of rooms used</returns>
         public List<RoomWithTimes> CheckDates(int eventId, DateTime start, DateTime end, List<SelectListItem> rooms)
         {
+            // Sanity check
+            if (rooms == null) { return null; }
+
             List<RoomWithTimes> result = new List<RoomWithTimes>();
             string cmd = "SELECT roomName, eventStart, eventEnd FROM events NATURAL JOIN eventroomsused NATURAL JOIN rooms"
                             + " WHERE ((@start >= eventStart AND @start < eventEnd) OR "
