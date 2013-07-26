@@ -64,49 +64,52 @@
                                 if(room.Selected)
                                 {
                                     <td class="row">
-                                        <div style="position:relative">
-                                            @foreach (BasicEvent e in Model.Events)
-                                            {
-                                                if (e.Rooms.Contains(new Room { ID = Convert.ToInt32(room.Value) }))
+                                        <div id="wrapper" style="position:relative">
+                                            <div id="room_@room.Value" class="room" style="position:absolute;z-index:1;width:100%;height:720px;">
+                                                <script>addRoom(@(room.Value))</script>
+                                                @foreach (BasicEvent e in Model.Events)
                                                 {
-                                                    @* Calculate painting start and height *@
-                                                    int start = 0;
-                                                    if (e.Start > offset)
+                                                    if (e.Rooms.Contains(new Room { ID = Convert.ToInt32(room.Value) }))
                                                     {
-                                                        TimeSpan s = e.Start - offset;
-                                                        start = (s.Hours * 60 + s.Minutes) / 2;
-                                                    }
-                                                    int height = 720 - start;
-                                                    if (e.End < offset.AddDays(1))
-                                                    {
-                                                        if (start == 0)
+                                                        @* Calculate painting start and height *@
+                                                        int start = 0;
+                                                        if (e.Start > offset)
                                                         {
-                                                            TimeSpan s = e.End - offset;
-                                                            height = (s.Hours * 60 + s.Minutes) / 2;
+                                                            TimeSpan s = e.Start - offset;
+                                                            start = (s.Hours * 60 + s.Minutes) / 2;
                                                         }
-                                                        else
+                                                        int height = 720 - start;
+                                                        if (e.End < offset.AddDays(1))
                                                         {
-                                                            TimeSpan s = e.End - e.Start;
-                                                            height = (s.Hours * 60 + s.Minutes) / 2;
+                                                            if (start == 0)
+                                                            {
+                                                                TimeSpan s = e.End - offset;
+                                                                height = (s.Hours * 60 + s.Minutes) / 2;
+                                                            }
+                                                            else
+                                                            {
+                                                                TimeSpan s = e.End - e.Start;
+                                                                height = (s.Hours * 60 + s.Minutes) / 2;
+                                                            }
                                                         }
-                                                    }
                                             
-                                                    <div class="day-event"
-                                                        style="position:absolute;z-index:1;top:@(start)px;left:4px;width:92px;height:@(height)px;
-                                                                background-color:@(e.getColor());@(e.ViewVisible ? "cursor:pointer" : "")"
-                                                        @(e.ViewVisible ? "onclick=window.location='" + Url.Action("Index", "Event", new { eventId = e.ID }) + "'" : "")>
-                                                        @if (e.ViewVisible)
-                                                        {
-                                                            @e.Name <br />
-                                                            @* Creator: e.Creator and more fields *@
-                                                        }
-                                                        else
-                                                        {
-                                                            @:Room occupied!
-                                                        }
-                                                    </div>
+                                                        <div class="day-event"
+                                                            style="top:@(start)px;height:@(height)px;
+                                                                    background-color:@(e.getColor());@(e.ViewVisible ? "cursor:pointer" : "")"
+                                                            @(e.ViewVisible ? "onclick=window.location='" + Url.Action("Index", "Event", new { eventId = e.ID }) + "'" : "")>
+                                                            @if (e.ViewVisible)
+                                                            {
+                                                                @e.Name <br />
+                                                                @* Creator: e.Creator and more fields *@
+                                                            }
+                                                            else
+                                                            {
+                                                                @:Room occupied!
+                                                            }
+                                                        </div>
+                                                    }
                                                 }
-                                            }  
+                                            </div>
                                         </div>
                                     </td>
                                 }
@@ -144,6 +147,7 @@
                                                                         day = Model.Date.Day
                                                                     })'"/>
                 }
+                <input type="button" value="Clear" onclick="removeAllSelections()" />
             </td>
         </tr>
     </table>

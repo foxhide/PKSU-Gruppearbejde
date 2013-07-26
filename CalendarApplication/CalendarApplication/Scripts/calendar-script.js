@@ -93,3 +93,111 @@ function checkBoxes() {
     }
     $("#Rooms_checkAll").attr("checked", checked > unchecked);
 }
+
+var roomList = [];
+var roomIds = [];
+var selection = false;
+var dragFlag = false;
+var mouseDown = false;
+var s_top = 0;
+var s_bottom = 0;
+
+function addRoom(id) {
+    roomList[id] = false;
+    roomIds.push(id);
+    roomFunctionsBeforeSelection(id);
+}
+
+function roomFunctionsBeforeSelection(roomId) {
+    $("#room_" + roomId)
+    .mousedown(function (e) {
+        if (!selection) {
+            dragFlag = false;
+            mouseDown = true;
+            s_top = e.pageY - $("#wrapper").position().top;
+            s_bottom = s_top;
+            $(this).html($(this).html() + createSelection(roomId, s_top, s_bottom - s_top));
+            addDrawFunctions(roomId);
+        }
+        else if(!roomList[roomId]) {
+            $(this).html($(this).html() + createSelection(roomId, s_top, s_bottom - s_top));
+            addDrawFunctions(roomId);
+        }
+        roomList[roomId] = true;
+    })
+    .mousemove(function (e) {
+        if (!selection) {
+            dragFlag = mouseDown;
+            if (mouseDown) {
+                var y = e.pageY - $("#wrapper").position().top;
+                if (y > s_top) { s_bottom = y; }
+                else { s_top = y; }
+                
+                $(".selection").css({ top: s_top + "px" });
+                $(".selection").height(s_bottom - s_top);
+            }
+        }
+    })
+    .mouseup(function (e) {
+        if (!selection) {
+            mouseDown = false;
+            if (dragFlag) { // drag
+                dragFlag = false;
+                if (s_bottom - s_top < 15) {
+                    s_bottom = s_top + 15;
+                    $(".selection").height(s_bottom - s_top);
+                }
+            }
+            else { // click
+                s_bottom = s_top + 60;
+                $(".selection").height(60);
+            }
+            selection = true;
+        }
+    });
+}
+
+function createSelection(roomId, top, height) {
+    var div = "<div id='selection_" + roomId + "' class='day-event selection'";
+    div += "style='top:" + top + "px;height:" + height + "px;'>"
+    div += "<div class='drawer' id='" + roomId + "_b_drawer' style='bottom:2px'></div>";
+    div += "<div class='drawer' id='" + roomId + "_t_drawer' style='top:2px'></div>";
+    div += "</div>";
+    return div;
+}
+
+var flagDown = false;
+var flagUp = false;
+
+function addDrawFunctions(roomId) {
+    $("#" + roomId + "_b_drawer")
+    .mousedown(function (e) {
+        flagDown = true;
+    })
+    $("#" + roomId + "_t_drawer")
+    .mousedown(function (e) {
+        flagUp = true;
+    })
+    $("#room_" + roomId)
+    .mousemove(function (e) {
+        if (flagDown) {
+            s_bottom = e.pageY - $("#wrapper").position().top;
+            $(".selection").height(s_bottom - s_top);
+        }
+        else if (flagUp) {
+            s_top = e.pageY - $("#wrapper").position().top;
+            $(".selection").css({ top: s_top + "px" });
+            $(".selection").height(s_bottom - s_top);
+        }
+    })
+    .mouseup(function (e) {
+        flagDown = false;
+        flagUp = false;
+    });
+}
+
+function removeAllSelections() {
+    $(".selection").remove();
+    for (var i = 0; i < roomIds.length; i++) { roomList[roomIds[i]] = false; }
+    selection = false;
+}
