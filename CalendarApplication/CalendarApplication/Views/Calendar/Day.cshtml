@@ -14,6 +14,8 @@
 
 <h3 style="color:red">@TempData["errorMsg"]</h3>
 
+<div id="time_counter" class="time_counter"></div>
+
 <form id="cal_form" method="post">
     <input type="hidden" name="Date" id="Date" value="@Model.Date.ToString("yyyy-MM-dd")" />
     @Html.HiddenFor(model => model.Mode)
@@ -64,7 +66,8 @@
                                 if(room.Selected)
                                 {
                                     <td class="row">
-                                        <div id="wrapper" style="position:relative">
+                                        @* div needed for positioning of the other divs (events and selection) *@
+                                        <div id="room_wrap_@room.Value" style="position:relative">
                                             <div id="room_@room.Value" class="room" style="position:absolute;z-index:1;width:100%;height:720px;">
                                                 <script>addRoom(@(room.Value))</script>
                                                 @foreach (BasicEvent e in Model.Events)
@@ -134,20 +137,28 @@
             </td>
             <td>
                 @Html.Partial("_FilterPartial", Model)
-
-                @if (UserModel.GetCurrentUserID() != -1 && DateTime.Today <= Model.Date)
+                @*UserModel.GetCurrentUserID() != -1 && DateTime.Today <= Model.Date)*@
+                @if (true) 
                 {
-                    @* A user is signed in... *@
-                    <input type="button" value="New event!" onclick="window.location='@Url.Action("EditEvent", "Event",
-                                                                    new
-                                                                    {
-                                                                        eventId = -1,
-                                                                        year = Model.Date.Year,
-                                                                        month = Model.Date.Month,
-                                                                        day = Model.Date.Day
-                                                                    })'"/>
+                    <fieldset style="text-align:center">
+                        <legend>Create event</legend>
+                        <br />
+                        @* A user is signed in... *@
+                        <input type="button" value="Create event!" onclick="window.location='@Url.Action("EditEvent", "Event",
+                                                                        new
+                                                                        {
+                                                                            eventId = -1,
+                                                                            year = Model.Date.Year,
+                                                                            month = Model.Date.Month,
+                                                                            day = Model.Date.Day
+                                                                        })'"/>
+                        <br />
+                        <br />
+                        <span style="color:gray;font-size:12px">Tip: click and drag to select<br />rooms and time.</span>
+                        <br />
+                        <input type="button" id="clear_button" value="Clear selection" onclick="removeAllSelections()" disabled="disabled" />
+                    </fieldset>
                 }
-                <input type="button" value="Clear" onclick="removeAllSelections()" />
             </td>
         </tr>
     </table>

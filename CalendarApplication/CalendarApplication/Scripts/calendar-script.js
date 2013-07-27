@@ -110,26 +110,30 @@ function addRoom(id) {
 
 function roomFunctionsBeforeSelection(roomId) {
     $("#room_" + roomId)
+    .unbind("mousedown")
+    .unbind("mousemove")
+    .unbind("mouseup")
     .mousedown(function (e) {
         if (!selection) {
             dragFlag = false;
             mouseDown = true;
-            s_top = e.pageY - $("#wrapper").position().top;
+            s_top = e.pageY - $("#room_wrap_" + roomId).position().top;
             s_bottom = s_top;
             $(this).html($(this).html() + createSelection(roomId, s_top, s_bottom - s_top));
+            roomList[roomId] = true;
             addDrawFunctions(roomId);
         }
         else if(!roomList[roomId]) {
             $(this).html($(this).html() + createSelection(roomId, s_top, s_bottom - s_top));
+            roomList[roomId] = true;
             addDrawFunctions(roomId);
         }
-        roomList[roomId] = true;
     })
     .mousemove(function (e) {
         if (!selection) {
             dragFlag = mouseDown;
             if (mouseDown) {
-                var y = e.pageY - $("#wrapper").position().top;
+                var y = e.pageY - $("#room_wrap_" + roomId).position().top;
                 if (y > s_top) { s_bottom = y; }
                 else { s_top = y; }
                 
@@ -153,6 +157,7 @@ function roomFunctionsBeforeSelection(roomId) {
                 $(".selection").height(60);
             }
             selection = true;
+            $("#clear_button").removeAttr("disabled");
         }
     });
 }
@@ -160,10 +165,21 @@ function roomFunctionsBeforeSelection(roomId) {
 function createSelection(roomId, top, height) {
     var div = "<div id='selection_" + roomId + "' class='day-event selection'";
     div += "style='top:" + top + "px;height:" + height + "px;'>"
-    div += "<div class='drawer' id='" + roomId + "_b_drawer' style='bottom:2px'></div>";
+
     div += "<div class='drawer' id='" + roomId + "_t_drawer' style='top:2px'></div>";
+    div += "<div class='remove' onclick='removeSelection(" + roomId + ")'>X</div>"
+    div += "<div class='drawer' id='" + roomId + "_b_drawer' style='bottom:2px'></div>";
+
     div += "</div>";
     return div;
+}
+
+function getTime(y) {
+    var hour = y / 30;
+    hour = (hour - (hour % 1) + 6) % 24;
+    var min = (y % 30) * 2;
+    min = min - (min % 1);
+    return (hour < 10 ? "0" + hour : hour) + ":" + (min < 10 ? "0" + min : min);
 }
 
 var flagDown = false;
@@ -173,31 +189,60 @@ function addDrawFunctions(roomId) {
     $("#" + roomId + "_b_drawer")
     .mousedown(function (e) {
         flagDown = true;
+        $("#time_counter").show();
     })
     $("#" + roomId + "_t_drawer")
+    .unbind("mousedown")
+    .unbind("mousemove")
+    .unbind("mouseup")
     .mousedown(function (e) {
         flagUp = true;
+        $("#time_counter").show();
     })
     $("#room_" + roomId)
     .mousemove(function (e) {
         if (flagDown) {
-            s_bottom = e.pageY - $("#wrapper").position().top;
+            s_bottom = e.pageY - $("#room_wrap_" + roomId).position().top;
             $(".selection").height(s_bottom - s_top);
+            $("#time_counter").html(getTime(s_bottom));
         }
         else if (flagUp) {
-            s_top = e.pageY - $("#wrapper").position().top;
+            s_top = e.pageY - $("#room_wrap_" + roomId).position().top;
             $(".selection").css({ top: s_top + "px" });
             $(".selection").height(s_bottom - s_top);
+            $("#time_counter").html(getTime(s_top));
         }
+        $("#time_counter").css({ top: (e.pageY-5) + "px", left: (e.pageX+10) + "px" });
     })
     .mouseup(function (e) {
         flagDown = false;
         flagUp = false;
+        $("#time_counter").hide();
     });
+}
+
+function removeSelection(roomId) {
+    $("#selection_" + roomId).remove();
+    roomList[roomId] = false;
+    roomFunctionsBeforeSelection(roomId);
+    for (var i = 0; i < roomIds.length; i++) {
+        if (roomList[roomIds[i]]) { return; }
+    }
+    resetSelection();
 }
 
 function removeAllSelections() {
     $(".selection").remove();
-    for (var i = 0; i < roomIds.length; i++) { roomList[roomIds[i]] = false; }
+    for (var i = 0; i < roomIds.length; i++) {
+        roomList[roomIds[i]] = false;
+        roomFunctionsBeforeSelection(roomIds[i]);
+    }
+    resetSelection();
+}
+
+function resetSelection() {
+    s_top = 0;
+    s_bottom = 0;
     selection = false;
+    $("#clear_button").attr("disabled", "disabled");
 }
