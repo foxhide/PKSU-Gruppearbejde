@@ -99,6 +99,7 @@ var roomIds = [];
 var selection = false
 var s_top = 0;
 var s_bottom = 0;
+var offset = 0;
 
 function addRoom(id) {
     roomList[id] = false;
@@ -157,11 +158,13 @@ function addDrawFunctions(roomId) {
     $("#" + roomId + "_b_drawer")
     .mousedown(function (e) {
         flagDown = true;
+        $("#time_counter").html(getTime(s_bottom));
         $("#time_counter").show();
     })
     $("#" + roomId + "_t_drawer")
     .mousedown(function (e) {
         flagUp = true;
+        $("#time_counter").html(getTime(s_top));
         $("#time_counter").show();
     })
     $("#room_" + roomId)
@@ -220,4 +223,50 @@ function resetSelection() {
     s_bottom = 0;
     selection = false;
     $("#clear_button").attr("disabled", "disabled");
+}
+
+var date = new Date();
+
+function setDate(strDate) {
+    var vals = strDate.split("-");
+    date = new Date(vals[0], vals[1] - 1, vals[2]);
+}
+
+function getDate(y) {
+    var tmpDate = date;
+    if (y > 720 - 30 * offset) {
+        tmpDate.setDate(date.getDate() + 1);
+    }
+    var result = tmpDate.getFullYear() + "-";
+    result += tmpDate.getMonth() < 9 ? "0" + (tmpDate.getMonth() + 1) : (tmpDate.getMonth() + 1);
+    result += "-";
+    result += tmpDate.getDate() < 10 ? "0" + tmpDate.getDate() : tmpDate.getDate();
+    result += "T" + getTime(y);
+    return result;
+}
+
+function createNewEvent() {
+    var url = "/Event/EditEvent?eventId=-1";
+    if (selection) {
+        url += "&from=" + getDate(s_top);
+        url += "&to=" + getDate(s_bottom);
+        url += "&rooms=";
+        var first = true;
+        for (var i = 0; i < roomIds.length; i++) {
+            if (roomList[roomIds[i]]) {
+                if (!first) { url += ":"; }
+                url += roomIds[i];
+                first = false;
+            }
+        }
+    }
+    window.location = url;
+}
+
+function addEventGoto(id) {
+        $("#event_" + id).unbind("mousedown")
+        .mousedown(function (e) {
+        e.stopImmediatePropagation()
+        window.location = "/Event?eventId=" + id;
+    });
 }

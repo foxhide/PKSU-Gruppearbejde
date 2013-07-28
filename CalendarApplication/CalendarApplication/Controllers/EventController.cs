@@ -12,6 +12,7 @@ using CalendarApplication.Models.EventType;
 using CalendarApplication.Database;
 using CalendarApplication.PDFBuilder;
 using Newtonsoft.Json;
+using System.Text.RegularExpressions;
 
 namespace CalendarApplication.Controllers
 {
@@ -211,7 +212,33 @@ namespace CalendarApplication.Controllers
             return result;
         }
 
-        public ActionResult EditEvent(int eventId, int year, int month, int day)
+        public DateTime ParseDateString(string date)
+        {
+            if (string.IsNullOrEmpty(date)) { return DateTime.Now; }
+
+            DateTime result = DateTime.Now.AddMinutes(10);
+
+            if (Regex.Match(date, @"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}").Success)
+            {
+                string[] vals = date.Split(new char[] { '-', 'T', ':' });
+                try
+                {
+                    result = new DateTime(Convert.ToInt32(vals[0]),
+                                Convert.ToInt32(vals[1]),
+                                Convert.ToInt32(vals[2]),
+                                Convert.ToInt32(vals[3]),
+                                Convert.ToInt32(vals[4]), 0);
+                }
+                catch (Exception e)
+                {
+                    TempData["errorMsg"] = e.Message;
+                }
+            }
+            else { TempData["errorMsg"] = "Bad date string!"; }
+            return result;
+        }
+
+        public ActionResult EditEvent(int eventId, string from, string to, string rooms)
         {
             // Check if that there is a user, or if it is an old event and user may edit this event
             if(UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
@@ -223,17 +250,20 @@ namespace CalendarApplication.Controllers
             EventEditModel eem = null;
             MySqlConnect msc = new MySqlConnect();
             DataTable dt = null;
+
             if (eventId == -1)
             {
-                DateTime start = new DateTime(year, month, day, 10, 0, 0);
+                DateTime start = this.ParseDateString(from);
+                DateTime end = this.ParseDateString(to);
                 start = start < DateTime.Now.AddMinutes(10) ? DateTime.Now.AddMinutes(10) : start;
+                end = end < start ? start.AddHours(2) : end;
                 eem = new EventEditModel
                 {
                     ID = eventId,
                     EventTypes = new List<SelectListItem>(),
                     SelectedEventType = "0", // Initial value -> Basic event
                     Start = start,
-                    End = start.AddHours(2),
+                    End = end,
                     Visible = true
                 };
             }
@@ -264,6 +294,13 @@ namespace CalendarApplication.Controllers
                 }
             }
             // Get list of rooms //
+            List<int> roomsAdded = new List<int>();
+            if (!string.IsNullOrEmpty(rooms))
+            {
+                string[] roomAry = rooms.Split(':');
+                foreach (string r in roomAry) { roomsAdded.Add(Convert.ToInt32(r)); }
+            }
+
             eem.RoomSelectList = new List<SelectListItem>();
             string roomcmd = eem.ID == -1 ? "SELECT roomId,roomName FROM rooms"
                                : "SELECT roomId,roomName,eventId FROM rooms NATURAL LEFT JOIN "
@@ -282,12 +319,9 @@ namespace CalendarApplication.Controllers
                     SelectListItem room = new SelectListItem
                     {
                         Value = ((int)dr["roomId"]).ToString(),
-                        Text = (string)dr["roomName"]
+                        Text = (string)dr["roomName"],
+                        Selected = (eem.ID != -1 && !(dr["eventId"] is DBNull)) || (eem.ID == -1 && roomsAdded.Contains((int)dr["roomId"]))
                     };
-                    if (eem.ID != -1)
-                    {
-                        room.Selected = !(dr["eventId"] is DBNull);
-                    }
                     eem.RoomSelectList.Add(room);
                 }
             }
