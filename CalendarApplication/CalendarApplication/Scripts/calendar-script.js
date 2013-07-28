@@ -96,69 +96,37 @@ function checkBoxes() {
 
 var roomList = [];
 var roomIds = [];
-var selection = false;
-var dragFlag = false;
-var mouseDown = false;
+var selection = false
 var s_top = 0;
 var s_bottom = 0;
 
 function addRoom(id) {
     roomList[id] = false;
     roomIds.push(id);
-    roomFunctionsBeforeSelection(id);
+    addSelectionFunction(id);
 }
 
-function roomFunctionsBeforeSelection(roomId) {
+function addSelectionFunction(roomId) {
     $("#room_" + roomId)
-    .unbind("mousedown")
     .unbind("mousemove")
     .unbind("mouseup")
+    .unbind("mouseleave")
     .mousedown(function (e) {
         if (!selection) {
-            dragFlag = false;
-            mouseDown = true;
             s_top = e.pageY - $("#room_wrap_" + roomId).position().top;
-            s_bottom = s_top;
-            $(this).html($(this).html() + createSelection(roomId, s_top, s_bottom - s_top));
-            roomList[roomId] = true;
-            addDrawFunctions(roomId);
-        }
-        else if(!roomList[roomId]) {
-            $(this).html($(this).html() + createSelection(roomId, s_top, s_bottom - s_top));
-            roomList[roomId] = true;
-            addDrawFunctions(roomId);
-        }
-    })
-    .mousemove(function (e) {
-        if (!selection) {
-            dragFlag = mouseDown;
-            if (mouseDown) {
-                var y = e.pageY - $("#room_wrap_" + roomId).position().top;
-                if (y > s_top) { s_bottom = y; }
-                else { s_top = y; }
-                
-                $(".selection").css({ top: s_top + "px" });
-                $(".selection").height(s_bottom - s_top);
-            }
-        }
-    })
-    .mouseup(function (e) {
-        if (!selection) {
-            mouseDown = false;
-            if (dragFlag) { // drag
-                dragFlag = false;
-                if (s_bottom - s_top < 15) {
-                    s_bottom = s_top + 15;
-                    $(".selection").height(s_bottom - s_top);
-                }
-            }
-            else { // click
-                s_bottom = s_top + 60;
-                $(".selection").height(60);
-            }
-            selection = true;
+            s_top = s_top > 660 ? 660 : s_top;
+            s_bottom = s_top + 60;
+            $(this).html($(this).html() + createSelection(roomId, s_top, 60));
             $("#clear_button").removeAttr("disabled");
+            selection = true;
+            addDrawFunctions(roomId);
         }
+        else if (!roomList[roomId]) {
+            $(this).html($(this).html() + createSelection(roomId, s_top, s_bottom - s_top));
+            addDrawFunctions(roomId);
+        }
+        roomList[roomId] = true;
+
     });
 }
 
@@ -192,31 +160,38 @@ function addDrawFunctions(roomId) {
         $("#time_counter").show();
     })
     $("#" + roomId + "_t_drawer")
-    .unbind("mousedown")
-    .unbind("mousemove")
-    .unbind("mouseup")
     .mousedown(function (e) {
         flagUp = true;
         $("#time_counter").show();
     })
     $("#room_" + roomId)
+    .unbind("mousedown")
     .mousemove(function (e) {
         if (flagDown) {
             s_bottom = e.pageY - $("#room_wrap_" + roomId).position().top;
+            if (s_bottom < s_top + 15) { s_bottom = s_top + 15; }
+            else if (s_bottom > 720) { s_bottom = 720; }
             $(".selection").height(s_bottom - s_top);
             $("#time_counter").html(getTime(s_bottom));
         }
         else if (flagUp) {
             s_top = e.pageY - $("#room_wrap_" + roomId).position().top;
+            if(s_top > s_bottom - 15) { s_top = s_bottom - 15; }
+            else if (s_top < 0) { s_top = 0; }
             $(".selection").css({ top: s_top + "px" });
             $(".selection").height(s_bottom - s_top);
             $("#time_counter").html(getTime(s_top));
         }
-        $("#time_counter").css({ top: (e.pageY-5) + "px", left: (e.pageX+10) + "px" });
+        $("#time_counter").css({ top: (e.pageY - 5) + "px", left: (e.pageX + 10) + "px" });
     })
     .mouseup(function (e) {
         flagDown = false;
         flagUp = false;
+        $("#time_counter").hide();
+    })
+    .mouseleave(function (e) {
+        flagUp = false;
+        flagDown = false;
         $("#time_counter").hide();
     });
 }
@@ -224,7 +199,7 @@ function addDrawFunctions(roomId) {
 function removeSelection(roomId) {
     $("#selection_" + roomId).remove();
     roomList[roomId] = false;
-    roomFunctionsBeforeSelection(roomId);
+    addSelectionFunction(roomId);
     for (var i = 0; i < roomIds.length; i++) {
         if (roomList[roomIds[i]]) { return; }
     }
@@ -235,7 +210,7 @@ function removeAllSelections() {
     $(".selection").remove();
     for (var i = 0; i < roomIds.length; i++) {
         roomList[roomIds[i]] = false;
-        roomFunctionsBeforeSelection(roomIds[i]);
+        addSelectionFunction(roomIds[i]);
     }
     resetSelection();
 }
