@@ -14,12 +14,15 @@
 
 <h3 style="color:red">@TempData["errorMsg"]</h3>
 
-<script>
-    setDate('@Model.Date.ToString("yyyy/MM/dd") 06:00');
-    offset = @Config.GetStartingHourOfDay();
-</script>
-
-<div id="time_counter" class="time_counter"></div>
+@if(UserModel.GetCurrentUserID() != -1 && DateTime.Today <= Model.Date) {
+    <!-- Only set the js-variables if user is signed in -->
+    <script>
+        setDate('@Model.Date.ToString("yyyy/MM/dd HH:mm")');
+        offset = @Config.GetStartingHourOfDay();
+    </script>
+    
+    <div id="time_counter" class="time_counter"></div>
+}
 
 <form id="cal_form" method="post">
     <input type="hidden" name="Date" id="Date" value="@Model.Date.ToString("yyyy-MM-dd")" />
@@ -40,7 +43,7 @@
                                 onclick="goto('@(Model.Date.AddDays(-1).ToString("yyyy-MM-dd"))')" />
                         </td>
                         <td style="padding:0;text-align:center;">
-                            @(Model.Date.Day + ". " + Calendar.MONTHS[Model.Date.Month-1] + " " + Model.Date.Year)
+                            @(Model.Date.Day + ". " + Calendar.MONTHS[Model.Date.Month - 1] + " " + Model.Date.Year)
                         </td>
                         <td style="text-align:right;padding:0;width:15%">
                             <input type="button" value="@(Model.Date.AddDays(1).ToString("d. MMM ->"))"
@@ -54,7 +57,7 @@
                         <td style="border-left:none;border-top:none"></td>
                         @foreach (SelectListItem room in Model.Filter.Rooms)
                         {
-                            if(room.Selected)
+                            if (room.Selected)
                             {
                                 <th>
                                     @room.Text
@@ -68,7 +71,7 @@
                             <td class="timestamp" rowspan="2">@offset.ToString("HH:mm")</td>
                             foreach (SelectListItem room in Model.Filter.Rooms)
                             {
-                                if(room.Selected)
+                                if (room.Selected)
                                 {
                                     <td class="row">
                                         @* div needed for positioning of the other divs (events and selection) *@
@@ -117,7 +120,11 @@
                                                     }
                                                 }
                                             </div>
-                                            <script>addRoom(@(room.Value))</script>
+                                            @if (UserModel.GetCurrentUserID() != -1 && DateTime.Today <= Model.Date)
+                                            {
+                                                <!-- Only add rooms (add selection mechanism) if user is signed in -->
+                                                <script>addRoom(@(room.Value))</script>
+                                            }
                                         </div>
                                     </td>
                                 }
@@ -133,8 +140,9 @@
                                 <td class="timestamp" rowspan="2">@offset.ToString("HH:mm")</td>
                             }
                             @foreach (SelectListItem room in Model.Filter.Rooms)
-                            { 
-                                if (room.Selected) { <td class="row"></td> }
+                            {
+                                if (room.Selected)
+                                { <td class="row"></td> }
                             }
                         </tr>
                     }
@@ -142,8 +150,8 @@
             </td>
             <td>
                 @Html.Partial("_FilterPartial", Model)
-                @*UserModel.GetCurrentUserID() != -1 && DateTime.Today <= Model.Date)*@
-                @if (true) 
+
+                @if (UserModel.GetCurrentUserID() != -1 && DateTime.Today <= Model.Date)
                 {
                     <fieldset style="text-align:center">
                         <legend>Create event</legend>
@@ -162,11 +170,16 @@
     </table>
 </form>
 <br />
-<script>
-    @foreach (BasicEvent e in Model.Events)
-    {
-        foreach (Room room in e.Rooms) {
-            @:addEvent(@room.ID,'@e.Start.ToString("yyyy/MM/dd HH:mm")','@e.End.ToString("yyyy/MM/dd HH:mm")');
+@if (UserModel.GetCurrentUserID() != -1 && DateTime.Today <= Model.Date)
+{
+    <!-- Let the js-functions know where the events are -->
+    <script>
+        @foreach (BasicEvent e in Model.Events)
+        {
+            foreach (Room room in e.Rooms)
+            {
+                @:addEvent(@room.ID,'@e.Start.ToString("yyyy/MM/dd HH:mm")','@e.End.ToString("yyyy/MM/dd HH:mm")');
+            }
         }
-    }
-</script>
+    </script>
+}

@@ -98,16 +98,19 @@ div.day-event {
     position:absolute;
     z-index:2;
 }
+/* The selection box */
 div.selection {
     border:1px black dashed;
     z-index:3;
-    background-color:lightgoldenrodyellow;
+    background-color:#4747FF;
     opacity:0.4;
 }
+/* Selection box error */
 div.selection-bad {
-    background-color:red;
+    background-color:#FF3300;
 }
-div.drawer {
+/* Drag handles in selection box */
+div.selection div.dragger {
     width:90%;
     height:3px;
     border:1px black solid;
@@ -116,6 +119,7 @@ div.drawer {
     left:5%;
     cursor:row-resize;
 }
+/* Remove button in selection box */
 div.selection div.remove {
     border:1px solid black;
     border-radius:8px;
@@ -130,6 +134,7 @@ div.selection div.remove {
     opacity:1;
     z-index:9;
 }
+/* Time-counter box */
 div.time_counter {
     border:1px black solid;
     border-radius:3px;

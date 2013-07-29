@@ -94,29 +94,60 @@ function checkBoxes() {
     $("#Rooms_checkAll").attr("checked", checked > unchecked);
 }
 
-var roomList = [];
-var roomIds = [];
-var selection = false
-var s_top = 0;
-var s_bottom = 0;
-var offset = 0;
+/* Function for adding the goto function for events */
+function addEventGoto(id) {
+    $("#event_" + id).unbind("mousedown")
+    .mousedown(function (e) {
+        // Stop the click so that it is not registered by selection
+        e.stopImmediatePropagation()
+        window.location = "/Event?eventId=" + id;
+    });
+}
 
+/**************************************************
+ *                                                *
+ * Functions for the 'click-and-select' mechanism *
+ *                                                *
+ **************************************************/
+
+//-- Variables needed for keeping track of the state --//
+var roomList = []; // List of room states, indexed by id
+var roomIds = []; // List of room ids
+var selection = false; // Flag set true, if a selection is made
+var s_top = 0; // The top of the selection
+var s_bottom = 0; // The bottom of the selection
+var offset = 0; // The hourly offset, as defined in Config
+var flagDown = false; // Flag set, when user is dragging selection down
+var flagUp = false; // Flag set, when user is dragging selection up
+var date = new Date(); // The current date.
+
+//-- Function for setting the variables --//
+
+/* Function for adding a room to the js-variables */
 function addRoom(id) {
     roomList[id] = new Object();
     roomList[id].select = false;
-    roomList[id].start = new Array();
-    roomList[id].end = new Array();
+    roomList[id].events = [];
     roomIds.push(id);
     addSelectionFunction(id);
 }
 
+/* Function for adding an event to a given room */
 function addEvent(roomId, start, end) {
     var spix = dateStringToPixel(start);
     var epix = dateStringToPixel(end);
-    roomList[roomId].start.push(spix);
-    roomList[roomId].end.push(epix);
+    roomList[roomId].events.push({ start:spix, end:epix });
 }
 
+/* Set the date by string (yyyy/MM/dd HH:mm) */
+function setDate(strDate) {
+    date = new Date(strDate);
+}
+
+//-- Functions for converting between dates and pixelcounts --//
+
+/* Function for converting a date string (yyyy/MM/dd HH:mm)
+   to a pixel count for the day view (0-720) */
 function dateStringToPixel(dateStr) {
     var d = new Date(dateStr);
     var t = new Date(date);
@@ -126,134 +157,17 @@ function dateStringToPixel(dateStr) {
     return (d - date) / (120000);
 }
 
-function addSelectionFunction(roomId) {
-    $("#room_" + roomId)
-    .unbind("mousemove")
-    .unbind("mouseup")
-    .unbind("mouseleave")
-    .mousedown(function (e) {
-        if (!selection) {
-            s_top = e.pageY - $("#room_wrap_" + roomId).position().top;
-            s_top = s_top > 660 ? 660 : s_top;
-            s_bottom = s_top + 60;
-            $(this).html($(this).html() + createSelection(roomId, s_top, 60));
-            $("#clear_button").removeAttr("disabled");
-            selection = true;
-            addDrawFunctions(roomId);
-        }
-        else if (!roomList[roomId].select) {
-            $(this).html($(this).html() + createSelection(roomId, s_top, s_bottom - s_top));
-            addDrawFunctions(roomId);
-        }
-        roomList[roomId].select = true;
-        checkRoom(roomId);
-    });
-}
-
-function createSelection(roomId, top, height) {
-    var div = "<div id='selection_" + roomId + "' class='day-event selection'";
-    div += "style='top:" + top + "px;height:" + height + "px;'>"
-
-    div += "<div class='drawer' id='" + roomId + "_t_drawer' style='top:2px'></div>";
-    div += "<div class='remove' onclick='removeSelection(" + roomId + ")'>X</div>"
-    div += "<div class='drawer' id='" + roomId + "_b_drawer' style='bottom:2px'></div>";
-
-    div += "</div>";
-    return div;
-}
-
+/* Function for converting a pixelcount y (0-720) to a time (HH:mm) */
 function getTime(y) {
     var hour = y / 30;
-    hour = (hour - (hour % 1) + 6) % 24;
+    hour = (hour - (hour % 1) + offset) % 24;
     var min = (y % 30) * 2;
     min = min - (min % 1);
     return (hour < 10 ? "0" + hour : hour) + ":" + (min < 10 ? "0" + min : min);
 }
 
-var flagDown = false;
-var flagUp = false;
-
-function addDrawFunctions(roomId) {
-    $("#" + roomId + "_b_drawer")
-    .mousedown(function (e) {
-        flagDown = true;
-        $("#time_counter").html(getTime(s_bottom));
-        $("#time_counter").show();
-    })
-    $("#" + roomId + "_t_drawer")
-    .mousedown(function (e) {
-        flagUp = true;
-        $("#time_counter").html(getTime(s_top));
-        $("#time_counter").show();
-    })
-    $("#room_" + roomId)
-    .unbind("mousedown")
-    .mousemove(function (e) {
-        if (flagDown) {
-            s_bottom = e.pageY - $("#room_wrap_" + roomId).position().top;
-            if (s_bottom < s_top + 15) { s_bottom = s_top + 15; }
-            else if (s_bottom > 720) { s_bottom = 720; }
-            $(".selection").height(s_bottom - s_top);
-            $("#time_counter").html(getTime(s_bottom));
-        }
-        else if (flagUp) {
-            s_top = e.pageY - $("#room_wrap_" + roomId).position().top;
-            if(s_top > s_bottom - 15) { s_top = s_bottom - 15; }
-            else if (s_top < 0) { s_top = 0; }
-            $(".selection").css({ top: s_top + "px" });
-            $(".selection").height(s_bottom - s_top);
-            $("#time_counter").html(getTime(s_top));
-        }
-        $("#time_counter").css({ top: (e.pageY - 5) + "px", left: (e.pageX + 10) + "px" });
-    })
-    .mouseup(function (e) {
-        flagDown = false;
-        flagUp = false;
-        $("#time_counter").hide();
-        checkAllRooms();
-    })
-    .mouseleave(function (e) {
-        if (flagUp || flagDown) {
-            checkAllRooms();
-        }
-        flagUp = false;
-        flagDown = false;
-        $("#time_counter").hide();
-    });
-}
-
-function removeSelection(roomId) {
-    $("#selection_" + roomId).remove();
-    roomList[roomId].select = false;
-    addSelectionFunction(roomId);
-    for (var i = 0; i < roomIds.length; i++) {
-        if (roomList[roomIds[i]].select) { return; }
-    }
-    resetSelection();
-}
-
-function removeAllSelections() {
-    $(".selection").remove();
-    for (var i = 0; i < roomIds.length; i++) {
-        roomList[roomIds[i]].select = false;
-        addSelectionFunction(roomIds[i]);
-    }
-    resetSelection();
-}
-
-function resetSelection() {
-    s_top = 0;
-    s_bottom = 0;
-    selection = false;
-    $("#clear_button").attr("disabled", "disabled");
-}
-
-var date = new Date();
-
-function setDate(strDate) {
-    date = new Date(strDate);
-}
-
+/* Get the full date from a pixel count y (in format yyyy-MM-ddTHH:mm).
+   For use when sending arguments to create event */
 function getDate(y) {
     var tmpDate = date;
     if (y > 720 - 30 * offset) {
@@ -267,6 +181,164 @@ function getDate(y) {
     return result;
 }
 
+//-- Functions for adding functions to divs --//
+
+/* Function for adding the selection functions to a room
+   Cleans up mousemove,mouseup,mouseleave from the drag functions */
+function addSelectionFunction(roomId) {
+    $("#room_" + roomId)
+    .unbind("mousemove")
+    .unbind("mouseup")
+    .unbind("mouseleave")
+    .mousedown(function (e) {
+        if (!selection) {
+            s_top = e.pageY - $("#room_wrap_" + roomId).position().top;
+            s_top = s_top > 660 ? 660 : s_top;
+            s_bottom = s_top + 60;
+            $(this).html($(this).html() + createSelection(roomId, s_top, 60));
+            $("#clear_button").removeAttr("disabled");
+            selection = true;
+            addDragFunctions(roomId);
+        }
+        else if (!roomList[roomId].select) {
+            $(this).html($(this).html() + createSelection(roomId, s_top, s_bottom - s_top));
+            addDragFunctions(roomId);
+        }
+        roomList[roomId].select = true;
+        checkRoom(roomId);
+    });
+}
+
+/* Function for adding the dragging functions  */
+function addDragFunctions(roomId) {
+    // Add bottom drag handle
+    $("#" + roomId + "_b_drag")
+    .mousedown(function (e) {
+        flagDown = true;
+        $("#time_counter").html(getTime(s_bottom));
+        $("#time_counter").show();
+    })
+    // Add top drag handle
+    $("#" + roomId + "_t_drag")
+    .mousedown(function (e) {
+        flagUp = true;
+        $("#time_counter").html(getTime(s_top));
+        $("#time_counter").show();
+    })
+    // Add mouse movement and release for the room divs
+    $("#room_" + roomId)
+    .unbind("mousedown")
+    .mousemove(function (e) {
+        if (flagDown) {
+            // Dragging down
+            s_bottom = e.pageY - $("#room_wrap_" + roomId).position().top;
+            if (s_bottom < s_top + 15) { s_bottom = s_top + 15; }
+            else if (s_bottom > 720) { s_bottom = 720; }
+            $(".selection").height(s_bottom - s_top);
+            $("#time_counter").html(getTime(s_bottom));
+        }
+        else if (flagUp) {
+            // Dragging up
+            s_top = e.pageY - $("#room_wrap_" + roomId).position().top;
+            if (s_top > s_bottom - 15) { s_top = s_bottom - 15; }
+            else if (s_top < 0) { s_top = 0; }
+            $(".selection").css({ top: s_top + "px" });
+            $(".selection").height(s_bottom - s_top);
+            $("#time_counter").html(getTime(s_top));
+        }
+        // Update time counter
+        $("#time_counter").css({ top: (e.pageY - 5) + "px", left: (e.pageX + 10) + "px" });
+    })
+    .mouseup(function (e) {
+        flagDown = false;
+        flagUp = false;
+        $("#time_counter").hide();
+        checkAllRooms();
+    })
+    .mouseleave(function (e) {
+        if (flagUp || flagDown) {
+            // We were dragging
+            checkAllRooms();
+            flagUp = false;
+            flagDown = false;
+            $("#time_counter").hide();
+        }
+    });
+}
+
+//-- Functions for creating/removing selection divs --//
+
+/* Function for creating the selection div */
+function createSelection(roomId, top, height) {
+    var div = "<div id='selection_" + roomId + "' class='day-event selection'";
+    div += "style='top:" + top + "px;height:" + height + "px;'>"
+
+    div += "<div class='dragger' id='" + roomId + "_t_drag' style='top:2px'></div>";
+    div += "<div class='remove' onclick='removeSelection(" + roomId + ")'>X</div>"
+    div += "<div class='dragger' id='" + roomId + "_b_drag' style='bottom:2px'></div>";
+
+    div += "</div>";
+    return div;
+}
+
+/* Function used for removing selection for a given room */
+function removeSelection(roomId) {
+    $("#selection_" + roomId).remove();
+    roomList[roomId].select = false;
+    addSelectionFunction(roomId);
+    for (var i = 0; i < roomIds.length; i++) {
+        if (roomList[roomIds[i]].select) { return; }
+    }
+    resetSelection();
+}
+
+/* Function used to remove selecting from all rooms */
+function removeAllSelections() {
+    $(".selection").remove();
+    for (var i = 0; i < roomIds.length; i++) {
+        roomList[roomIds[i]].select = false;
+        addSelectionFunction(roomIds[i]);
+    }
+    resetSelection();
+}
+
+/* Reset selection: (variables and disable clear button) */
+function resetSelection() {
+    s_top = 0;
+    s_bottom = 0;
+    selection = false;
+    $("#clear_button").attr("disabled", "disabled");
+}
+
+//-- Functions for checking selection overlap with old events --//
+
+/* Function for checking all rooms for selection overlap */
+function checkAllRooms() {
+    for (var i = 0; i < roomIds.length; i++) {
+        if (roomList[roomIds[i]].select) {
+            checkRoom(roomIds[i]);
+        }
+    }
+}
+
+/* Function for checking a single room for selection overlap */
+function checkRoom(roomId) {
+    var events = roomList[roomId].events;
+    for (var i = 0; i < events.length; i++) {
+        var event = events[i];
+        if ((event.start > s_top && event.end < s_bottom)
+            || (event.start < s_top && event.end > s_top)
+            || (event.start < s_bottom && event.end > s_bottom)) {
+            $("#selection_" + roomId).addClass("selection-bad");
+            return;
+        }
+    }
+    $("#selection_" + roomId).removeClass("selection-bad");
+}
+
+//-- Button function for create event button --//
+
+/* Called to create event. If selection is set, the selected times/rooms is added as arguments */
 function createNewEvent() {
     var url = "/Event/EditEvent?eventId=-1";
     if (selection) {
@@ -283,34 +355,4 @@ function createNewEvent() {
         }
     }
     window.location = url;
-}
-
-function addEventGoto(id) {
-    $("#event_" + id).unbind("mousedown")
-    .mousedown(function (e) {
-        e.stopImmediatePropagation()
-        window.location = "/Event?eventId=" + id;
-    });
-}
-
-function checkAllRooms() {
-    for (var i = 0; i < roomIds.length; i++) {
-        if (roomList[roomIds[i]].select) {
-            checkRoom(roomIds[i]);
-        }
-    }
-}
-
-function checkRoom(roomId) {
-    for (var i = 0; i < roomList[roomId].start.length; i++) {
-        var start = roomList[roomId].start[i];
-        var end = roomList[roomId].end[i];
-        if ((start > s_top && end < s_bottom)
-            || (start < s_top && end > s_top)
-            || (start < s_bottom && end > s_bottom)) {
-            $("#selection_" + roomId).addClass("selection-bad");
-            return;
-        }
-    }
-    $("#selection_" + roomId).removeClass("selection-bad");
 }
