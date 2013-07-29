@@ -17,7 +17,7 @@
 @if(UserModel.GetCurrentUserID() != -1 && DateTime.Today <= Model.Date) {
     <!-- Only set the js-variables if user is signed in -->
     <script>
-        setDate('@Model.Date.ToString("yyyy/MM/dd HH:mm")');
+        setDate('@Calendar.GetJSDate(Model.Date)');
         offset = @Config.GetStartingHourOfDay();
     </script>
     
@@ -178,7 +178,7 @@
         {
             foreach (Room room in e.Rooms)
             {
-                @:addEvent(@room.ID,'@e.Start.ToString("yyyy/MM/dd HH:mm")','@e.End.ToString("yyyy/MM/dd HH:mm")');
+                @:addEvent(@room.ID,'@Calendar.GetJSDate(e.Start)','@Calendar.GetJSDate(e.End)');
             }
         }
     </script>
