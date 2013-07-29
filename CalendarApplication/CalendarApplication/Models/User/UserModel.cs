@@ -158,22 +158,22 @@ namespace CalendarApplication.Models.User
             if (currentUser == -1)
             {
                 // No user -> only visible events
-                command = "SELECT eventId,eventName,eventTypeName,state"
-                            + "FROM (events NATURAL JOIN users NATURAL JOIN eventtypes)"
-                            + "WHERE userId = @userId AND visible = 1 ORDER BY eventStart";
+                command = "SELECT e.eventId,e.eventName,et.eventTypeName,e.state "
+                            + "FROM (events AS e JOIN users AS u ON e.userId = u.userId JOIN eventtypes AS et ON et.eventTypeId = e.eventTypeId) "
+                            + "WHERE e.userId = @userId AND e.visible = 1 ORDER BY e.eventStart";
             }
             else if (currentUser == userId || UserModel.GetCurrent().Admin)
             {
                 // User is looking at his/her own events or user is admin
-                command = "SELECT eventId,eventName,eventTypeName,state"
-                            + " FROM (events NATURAL JOIN users NATURAL JOIN eventtypes)"
-                            + " WHERE userId = @userId ORDER BY eventStart";
+                command = "SELECT e.eventId,e.eventName,et.eventTypeName,e.state "
+                            + "FROM (events AS e JOIN users AS u ON e.userId = u.userId JOIN eventtypes AS et ON et.eventTypeId = e.eventTypeId) "
+                            + " WHERE e.userId = @userId ORDER BY e.eventStart";
             }
             else
             {
                 // Check if user in edit-group/user or visible-group or if event is visible.
-                command = "SELECT e.eventId, e.eventName,eventTypeName, e.state"
-                                + " FROM events AS e"
+                command = "SELECT e.eventId, e.eventName,et.eventTypeName, e.state"
+                                + " FROM events AS e JOIN users AS u ON e.userId = u.userId JOIN eventtypes AS et ON et.eventTypeId = e.eventTypeId"
                                 + " LEFT JOIN (SELECT eventId,userId"
                                 + " FROM eventeditorsusers"
                                 + " WHERE userId = @uid) AS edt_user ON e.eventId = edt_user.eventId"
@@ -185,7 +185,7 @@ namespace CalendarApplication.Models.User
                                 + "	WHERE userId = @uid) AS edt_group ON e.eventId = edt_group.eventId"
                                 + " WHERE e.userId = @userId AND (visible = 1 OR edt_group.userId IS NOT NULL"
                                 + " OR edt_user.userId IS NOT NULL OR vis_group.userId IS NOT NULL)"
-                                + " ORDER BY eventStart";
+                                + " ORDER BY e.eventStart";
                 argnames = new[] { "@userId", "@uid" };
                 args = new[] { (object)userId, (object)currentUser };
             }

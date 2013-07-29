@@ -44,8 +44,10 @@ namespace CalendarApplication.Controllers
             {
                 ID = eventId
             };
-            string eventinfo = "SELECT * FROM events NATURAL LEFT JOIN eventroomsused " +
-                               "NATURAL LEFT JOIN rooms NATURAL JOIN eventtypes NATURAL JOIN users " +
+            string eventinfo = "SELECT e.eventName,e.eventStart,e.eventEnd,e.state,e.visible,e.creation," +
+                               "et.eventTypeId,et.eventTypeName,u.firstName,u.lastName,u.userId,r.roomId,r.roomName " +
+                               "FROM events AS e NATURAL LEFT JOIN eventroomsused NATURAL LEFT JOIN rooms AS r " +
+                               "JOIN eventtypes AS et ON e.eventTypeId = et.eventTypeId JOIN users AS u ON u.userId = e.userId " +
                                "WHERE eventId = @eid";
             MySqlConnect con = new MySqlConnect();
             object[] argval = { eventId };
