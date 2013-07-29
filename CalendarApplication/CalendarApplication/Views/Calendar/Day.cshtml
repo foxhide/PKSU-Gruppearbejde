@@ -15,7 +15,7 @@
 <h3 style="color:red">@TempData["errorMsg"]</h3>
 
 <script>
-    setDate('@Model.Date.ToString("yyyy-MM-dd")');
+    setDate('@Model.Date.ToString("yyyy/MM/dd") 06:00');
     offset = @Config.GetStartingHourOfDay();
 </script>
 
@@ -162,3 +162,11 @@
     </table>
 </form>
 <br />
+<script>
+    @foreach (BasicEvent e in Model.Events)
+    {
+        foreach (Room room in e.Rooms) {
+            @:addEvent(@room.ID,'@e.Start.ToString("yyyy/MM/dd HH:mm")','@e.End.ToString("yyyy/MM/dd HH:mm")');
+        }
+    }
+</script>

@@ -102,9 +102,28 @@ var s_bottom = 0;
 var offset = 0;
 
 function addRoom(id) {
-    roomList[id] = false;
+    roomList[id] = new Object();
+    roomList[id].select = false;
+    roomList[id].start = new Array();
+    roomList[id].end = new Array();
     roomIds.push(id);
     addSelectionFunction(id);
+}
+
+function addEvent(roomId, start, end) {
+    var spix = dateStringToPixel(start);
+    var epix = dateStringToPixel(end);
+    roomList[roomId].start.push(spix);
+    roomList[roomId].end.push(epix);
+}
+
+function dateStringToPixel(dateStr) {
+    var d = new Date(dateStr);
+    var t = new Date(date);
+    t.setDate(date.getDate() + 1);
+    if (d < date) { return 0; }
+    else if (d > t) { return 720; }
+    return (d - date) / (120000);
 }
 
 function addSelectionFunction(roomId) {
@@ -122,12 +141,12 @@ function addSelectionFunction(roomId) {
             selection = true;
             addDrawFunctions(roomId);
         }
-        else if (!roomList[roomId]) {
+        else if (!roomList[roomId].select) {
             $(this).html($(this).html() + createSelection(roomId, s_top, s_bottom - s_top));
             addDrawFunctions(roomId);
         }
-        roomList[roomId] = true;
-
+        roomList[roomId].select = true;
+        checkRoom(roomId);
     });
 }
 
@@ -191,8 +210,12 @@ function addDrawFunctions(roomId) {
         flagDown = false;
         flagUp = false;
         $("#time_counter").hide();
+        checkAllRooms();
     })
     .mouseleave(function (e) {
+        if (flagUp || flagDown) {
+            checkAllRooms();
+        }
         flagUp = false;
         flagDown = false;
         $("#time_counter").hide();
@@ -201,10 +224,10 @@ function addDrawFunctions(roomId) {
 
 function removeSelection(roomId) {
     $("#selection_" + roomId).remove();
-    roomList[roomId] = false;
+    roomList[roomId].select = false;
     addSelectionFunction(roomId);
     for (var i = 0; i < roomIds.length; i++) {
-        if (roomList[roomIds[i]]) { return; }
+        if (roomList[roomIds[i]].select) { return; }
     }
     resetSelection();
 }
@@ -212,7 +235,7 @@ function removeSelection(roomId) {
 function removeAllSelections() {
     $(".selection").remove();
     for (var i = 0; i < roomIds.length; i++) {
-        roomList[roomIds[i]] = false;
+        roomList[roomIds[i]].select = false;
         addSelectionFunction(roomIds[i]);
     }
     resetSelection();
@@ -228,8 +251,7 @@ function resetSelection() {
 var date = new Date();
 
 function setDate(strDate) {
-    var vals = strDate.split("-");
-    date = new Date(vals[0], vals[1] - 1, vals[2]);
+    date = new Date(strDate);
 }
 
 function getDate(y) {
@@ -253,7 +275,7 @@ function createNewEvent() {
         url += "&rooms=";
         var first = true;
         for (var i = 0; i < roomIds.length; i++) {
-            if (roomList[roomIds[i]]) {
+            if (roomList[roomIds[i]].select) {
                 if (!first) { url += ":"; }
                 url += roomIds[i];
                 first = false;
@@ -264,9 +286,31 @@ function createNewEvent() {
 }
 
 function addEventGoto(id) {
-        $("#event_" + id).unbind("mousedown")
-        .mousedown(function (e) {
+    $("#event_" + id).unbind("mousedown")
+    .mousedown(function (e) {
         e.stopImmediatePropagation()
         window.location = "/Event?eventId=" + id;
     });
+}
+
+function checkAllRooms() {
+    for (var i = 0; i < roomIds.length; i++) {
+        if (roomList[roomIds[i]].select) {
+            checkRoom(roomIds[i]);
+        }
+    }
+}
+
+function checkRoom(roomId) {
+    for (var i = 0; i < roomList[roomId].start.length; i++) {
+        var start = roomList[roomId].start[i];
+        var end = roomList[roomId].end[i];
+        if ((start > s_top && end < s_bottom)
+            || (start < s_top && end > s_top)
+            || (start < s_bottom && end > s_bottom)) {
+            $("#selection_" + roomId).addClass("selection-bad");
+            return;
+        }
+    }
+    $("#selection_" + roomId).removeClass("selection-bad");
 }

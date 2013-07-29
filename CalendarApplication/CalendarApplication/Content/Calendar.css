@@ -50,6 +50,14 @@ table.event-popup td {
 table.day-view {
     border-collapse:collapse;
     border-bottom:solid 1px black;
+
+    /* Remove selectable text/cells/etc in day-view table
+       to make selection work well */
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 table.day-view th {
     padding:0;
@@ -95,6 +103,9 @@ div.selection {
     z-index:3;
     background-color:lightgoldenrodyellow;
     opacity:0.4;
+}
+div.selection-bad {
+    background-color:red;
 }
 div.drawer {
     width:90%;
