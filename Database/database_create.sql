@@ -15,25 +15,26 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`users` (
   `userId` INT NOT NULL AUTO_INCREMENT ,
   `userName` VARCHAR(45) NOT NULL ,
   `password` VARCHAR(70) NOT NULL ,
-  `firstName` VARCHAR(45) NULL ,
-  `lastName` VARCHAR(45) NULL ,
+  `firstName` VARCHAR(45) NOT NULL ,
+  `lastName` VARCHAR(45) NOT NULL ,
   `admin` TINYINT(1) NULL DEFAULT 0 ,
-  `phoneNum` VARCHAR(45) NULL DEFAULT NULL ,
-  `email` VARCHAR(45) NULL DEFAULT NULL ,
+  `phoneNum` VARCHAR(45) NOT NULL ,
+  `email` VARCHAR(70) NOT NULL ,
   `active` TINYINT(1) NULL DEFAULT 0 ,
   `needsApproval` TINYINT(1) NULL DEFAULT 1 ,
   PRIMARY KEY (`userId`) ,
   UNIQUE INDEX `userName_UNIQUE` (`userName` ASC) )
 AUTO_INCREMENT = 1
 COMMENT = 'Table for user logins, passwords and information.\n\nuserId: U /* comment truncated */ /*nique userid for each user (primary key). 
-userName: Unique login/screen name tied to userId. Required, 45 chars.
-password: Password tied to a userId. Required, 45 chars.
-realname: real name of the user. Required, 45 chars.
-admin: whether or not this user has admin status.
+userName: Unique login tied to userId. Required, 45 chars.
+password: Password tied to a userId. Required, 70 chars.
+firstName: first name of user. Required, 45 chars.
+lastName: last name of user. Required, 45 chars.
+admin: whether or not user has admin status.
 phoneNum: user phone number, as a varchar. Not required, 45 chars.
-email: user email address. Not required, 45 chars.
-active: whether the user is active, inactive users cannot login.
-needsApproval: whether the user needs initial approval from an administrator.*/';
+email: user email address. Not required, 70 chars.
+active: whether the user is active, inactive users cannot log in.
+needsApproval: whether the user needs initial approval from an administrator to be able to log in.*/';
 
 
 -- -----------------------------------------------------
@@ -48,7 +49,8 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`eventtypes` (
   PRIMARY KEY (`eventTypeId`) )
 AUTO_INCREMENT = 1
 COMMENT = 'Table for event types with names.\n\neventTypeId: Primary key. /* comment truncated */ /*
-eventTypeName: name of a event type*/';
+eventTypeName: name of a event type
+active: whether the event type is active*/';
 
 
 -- -----------------------------------------------------
@@ -88,7 +90,7 @@ eventStart: Time at which the event starts.(format year-month-day hour:min:sec, 
 eventEnd: Time at which the event ends. (format year-month-day hour:min:sec, 0000-00-00 00:00:00)
 creation: time at which event was created.
 visible: whether the event is visible to all.
-state: current state of the event (not defined in database).*/';
+state: current state of the event (not defined in database, 0 for incomplete, 1 for approved, 2 for finished).*/';
 
 
 -- -----------------------------------------------------
@@ -98,8 +100,8 @@ DROP TABLE IF EXISTS `pksudb`.`files` ;
 
 CREATE  TABLE IF NOT EXISTS `pksudb`.`files` (
   `fileId` INT NOT NULL AUTO_INCREMENT ,
-  `fileName` VARCHAR(45) NOT NULL ,
-  `pathToFile` VARCHAR(150) NOT NULL ,
+  `fileName` VARCHAR(100) NOT NULL ,
+  `pathToFile` VARCHAR(255) NOT NULL ,
   `eventId` INT NULL ,
   `userId` INT NULL ,
   `uploaded` DATETIME NULL ,
@@ -109,17 +111,17 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`files` (
   CONSTRAINT `fileeventid`
     FOREIGN KEY (`eventId` )
     REFERENCES `pksudb`.`events` (`eventId` )
-    ON DELETE NO ACTION
+    ON DELETE SET NULL
     ON UPDATE NO ACTION,
-  CONSTRAINT `fileuseris`
+  CONSTRAINT `fileuserid`
     FOREIGN KEY (`userId` )
     REFERENCES `pksudb`.`users` (`userId` )
-    ON DELETE NO ACTION
+    ON DELETE SET NULL
     ON UPDATE NO ACTION)
 AUTO_INCREMENT = 1
 COMMENT = 'Table for files.\n\nfileId: unique primary key for files.\nfile /* comment truncated */ /*Name: name of the file, e.g. mytextfile.txt.
 pathToFile: path to file (duh), e.g. /root/myfolder/mytextfile.txt.
-eventId: foreign key, event that the file is associated with. stays when events are deleted.
+eventId: foreign key, event that the file is associated with. null if event is deleted.
 userId: foreign key, user that uploaded the file.
 uploaded: time and date when file was uploaded.*/';
 
@@ -136,7 +138,8 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`groups` (
   PRIMARY KEY (`groupId`) )
 AUTO_INCREMENT = 1
 COMMENT = 'Table for groups.\n\ngroupId: Primary key identifying the grou /* comment truncated */ /*p.
-groupName: the name of the group.*/';
+groupName: the name of the group.
+open: whether group is open to all members*/';
 
 
 -- -----------------------------------------------------
@@ -223,8 +226,7 @@ ENGINE = InnoDB
 COMMENT = 'A table describing which users belong to which groups.\n\ngrou /* comment truncated */ /*pId: foreign key referencing groups table.
 userId: foreign key referencing users table.
 groupLeader: whether this user is one of the group leaders.
-canCreate: whether this user can create events of the types allowed in this group. irrelevant if group leader.
-primary key is both together.*/';
+canCreate: whether this user can create events of the types allowed in this group. irrelevant if group leader.*/';
 
 
 -- -----------------------------------------------------
@@ -287,7 +289,7 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`eventtypefields` (
   `requiredApproval` TINYINT(1) NULL DEFAULT 0 ,
   `fieldType` INT NULL ,
   `varCharLength` INT NULL DEFAULT 0 ,
-  `fieldOrder` INT NOT NULL ,
+  `fieldOrder` INT NOT NULL DEFAULT 1 ,
   PRIMARY KEY (`fieldId`) ,
   INDEX `eventtypenameid_idx` (`eventTypeId` ASC) ,
   CONSTRAINT `eventtypenameid`
@@ -301,11 +303,12 @@ COMMENT = 'Table for which fields events use and whether they are requi /* comme
 fieldId: Primary key. Auto incremented.
 eventTypeId: foreign key referencing eventtypenames. cannot be null.
 fieldName: name of the field in the database. cannot be null.
-fieldDescription: description of a field. cannot be null.
+fieldDescription: description of a field.
 requiredCreation: whether or not filling this field is required to create an event of this type.
 requiredApproval: whether or not filling this field is required for full approval of an event of this type.
-fieldType: 0 for float, 1 for text, 2 for date, 3 for user, 4 for group, 5 for file, 6 for boolean, 7 for userlist, 8 for grouplist, 9 for filelist
-varCharLength: length of string if type is string, 0 if not string.*/';
+fieldType: 0 for float, 1 for text, 2 for date, 3 for user, 4 for group, 5 for file, 6 for boolean, 7 for userlist, 8 for grouplist, 9 for filelist, 10 for text list
+varCharLength: length of string if type is string, 0 if not string.
+fieldOrder: the orderthat the fields show up in when displayed.*/';
 
 
 -- -----------------------------------------------------
@@ -486,7 +489,8 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`groupapplicants` (
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
-COMMENT = 'Table for applicants for groups.';
+COMMENT = 'Table for applicants for groups.\n\ngroupId: foreign key refer /* comment truncated */ /*encing groups table.
+userId: foreign key referencing users table.*/';
 
 
 -- -----------------------------------------------------
@@ -513,7 +517,9 @@ CREATE  TABLE IF NOT EXISTS `pksudb`.`stringlist` (
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 AUTO_INCREMENT = 1
-COMMENT = 'Table for lists of text fields';
+COMMENT = 'Table for lists of text fields\n\nstringListId: primary key\nfi /* comment truncated */ /*eldId: foreign key referencing eventtypefields
+eventId: foreign key referencing events
+text: self explanatory. cannot be null, empty strings are a waste of space*/';
 
 USE `pksudb` ;
 
