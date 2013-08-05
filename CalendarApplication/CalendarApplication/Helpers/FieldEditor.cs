@@ -126,6 +126,32 @@ namespace CalendarApplication.Helpers
                 //////////////////////////// needs work ////////////////////////
                 builder.AppendLine("<text>File list</text>");
             }
+            else if (model.Datatype == Fieldtype.TextList)
+            {
+                builder.AppendLine("<div id='" + id + "'>");
+                if (model.StringList == null) { model.StringList = new List<StringListModel>(); }
+                string viewName = name + ".StringList";
+                for (int i = 0; i < model.StringList.Count; i++)
+                {
+                    // the following could possibly be replaced with repeated usage of StringListPartial view
+                    // divs, inputs and so on are the same
+                    builder.AppendLine("<div id='" + id + "_" + i + "'>");
+                    builder.AppendLine("<div id='" + id + "_" + i + "_Text_char_counter'>Characters left: 250</div>");
+                    builder.AppendLine("<input type='text' id='" + id + "_" + i +"_Text' ");
+                    builder.AppendLine("name='" + viewName + "[" + i + "].Text' value='" + model.StringList[i].Text + "' "); 
+                    builder.AppendLine("onkeyup=\"updateCounter('" + id + "_" + i + "', 250); setState(); validateInput('" + id + "','StringList',true,true);\" />");
+                    builder.AppendLine("<input type='hidden' id='" + id + "_" + i + "_Active' ");
+                    builder.AppendLine("name='" + viewName + "[" + i + "].Active' value='true'>");
+                    builder.AppendLine("<input type='hidden' id='" + id + "_" + i + "_ID' ");
+                    builder.AppendLine("name='" + viewName + "[" + i + "].ID' value='" + model.StringList[i].ID + "'>");
+                    builder.AppendLine("<input type=\"button\" value=\"Remove\" onclick=\"removeStringListField('" + id + "_" + i + "')\" />");
+                    builder.AppendLine("</div>");
+                    
+                }
+                builder.AppendLine("</div>");
+                builder.AppendLine("<input type='button' value='Add' onclick='addStringListField(\"" + id + "\",\"" + viewName + "\")' />");
+                builder.AppendLine("<script>stringCounter['" + id + "'] = " + model.StringList.Count + ";</script>");                
+            }
             else
             {
                 builder.AppendLine("<span style='color:red'>Error. Could not create input field. Not implemented...</span>");

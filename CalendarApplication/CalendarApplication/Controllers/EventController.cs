@@ -138,9 +138,11 @@ namespace CalendarApplication.Controllers
                                     fm.StringValue = MySqlGroup.getGroup(fm.IntValue).Name;
                                 }
                                 break;
-                            case Fieldtype.UserList:
-                            case Fieldtype.GroupList:
+                            case Fieldtype.UserList: fm.List = GetList(fm.Datatype, eventId, fm.ID, con); break; // userlist, grouplist and filelist handled in GetList
+                            case Fieldtype.GroupList: fm.List = GetList(fm.Datatype, eventId, fm.ID, con); break;
                             case Fieldtype.FileList: fm.List = GetList(fm.Datatype, eventId, fm.ID, con); break;
+                            case Fieldtype.TextList: fm.StringList = GetStringList(fm.Datatype, eventId, fm.ID, con); break; // textlist handled in GetStringList
+
                         }
                         result.TypeSpecifics.Add(fm);
                     }
@@ -214,6 +216,43 @@ namespace CalendarApplication.Controllers
             return result;
         }
 
+        private List<StringListModel> GetStringList(Fieldtype type, int eventId, int fieldId, MySqlConnect msc)
+        {
+            List<StringListModel> result = new List<StringListModel>();
+            CustomQuery query = new CustomQuery();
+            query.ArgNames = new[] { "@eid", "@fid" };
+            query.Args = new[] { (object)eventId, (object)fieldId };
+
+            if (type == Fieldtype.TextList)
+            {
+                query.Cmd = "SELECT text,stringListId FROM stringlist"
+                            + " WHERE eventId = @eid AND fieldId = @fid";
+                DataTable dt = msc.ExecuteQuery(query);
+                if (dt != null)
+                {
+                    for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        result.Add(new StringListModel
+                        {
+                            Text = (string)dt.Rows[i]["text"],
+                            ID = (int)dt.Rows[i]["stringListId"],
+                            Active = true,
+                            Place = i
+                        });
+                    }
+                }
+                else
+                {
+                    TempData["errorMsg"] = msc.ErrorMessage;
+                }
+            }
+            else
+            {
+                TempData["errorMsg"] = "Wrong argument for GetStringList...";
+            }
+            return result;
+        }
+
         public DateTime ParseDateString(string date)
         {
             if (string.IsNullOrEmpty(date)) { return DateTime.Now; }
@@ -263,7 +302,7 @@ namespace CalendarApplication.Controllers
                 {
                     ID = eventId,
                     EventTypes = new List<SelectListItem>(),
-                    SelectedEventType = "0", // Initial value -> Basic event
+                    SelectedEventType = "0", // Initial value -> No selection
                     Start = start,
                     End = end,
                     Visible = true
@@ -524,7 +563,7 @@ namespace CalendarApplication.Controllers
                 }
             }
 
-            // Error //
+            // An error has occurred if we made it this far //
 
             // Get the types again for the view
             this.GetEventTypes(eem, mse);
@@ -583,6 +622,7 @@ namespace CalendarApplication.Controllers
             List<SelectListItem> groups = null;      // List for group list
             List<SelectListItem> usersDrop = null;   // List for user dropdown
             List<SelectListItem> groupsDrop = null;  // List for group dropdown
+            List<StringListModel> stringList = null;  // List for text list
             string specQuery = "SELECT * FROM eventtypefields WHERE eventTypeId = @etid ORDER BY fieldOrder";
             object[] argval = { type };
             string[] argnam = { "@etid" };
@@ -625,7 +665,9 @@ namespace CalendarApplication.Controllers
                                 fm.List = groups; break;
                             case Fieldtype.Group: if (groupsDrop == null) { groupsDrop = this.GetGroups(msc, true); }
                                 fm.List = groupsDrop; fm.IntValue = 0; break;
-                            case Fieldtype.Text:
+                            case Fieldtype.TextList: if (stringList == null) { stringList = new List<StringListModel>(); }
+                                fm.StringList = stringList; break;
+                            case Fieldtype.Text: fm.StringValue = ""; break;
                             //case Fieldtype.FileList:
                             case Fieldtype.File: fm.StringValue = ""; fm.IntValue = 0; break;
                             case Fieldtype.Datetime: fm.DateValue = DateTime.Now; break;
@@ -650,6 +692,7 @@ namespace CalendarApplication.Controllers
                                                 fm.List = groupsDrop;
                                                 fm.IntValue = row["field_" + fm.ID] is DBNull ? 0 : (int)row["field_" + fm.ID];
                                                 break;
+                            case Fieldtype.TextList: fm.StringList = this.GetStringValues(msc, eventId, fm.ID); break;
                             case Fieldtype.Text: fm.StringValue = row["field_" + fm.ID] is DBNull ? "" : (string)row["field_" + fm.ID];
                                                 break;
                             //case Fieldtype.FileList:
@@ -714,6 +757,39 @@ namespace CalendarApplication.Controllers
                         Value = ((int)dr["userId"]).ToString(),
                         Text = (string)dr["userName"]
                     });
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Getter for a StringListModel list of string values pertaining to a particular event and field.
+        /// </summary>
+        /// <param name="msc">MySqlConnect object</param>
+        /// <param name="eventId">Id of event</param>
+        /// <param name="fieldId">Id of field</param>
+        /// <returns>A StringListModel list of strings and stringListIds</returns>
+        private List<StringListModel> GetStringValues(MySqlConnect msc, int eventId, int fieldId)
+        {
+            List<StringListModel> result = new List<StringListModel>();
+            string cmd = "SELECT text,stringListId FROM stringlist WHERE eventId = @eid AND fieldId = @fid ORDER BY stringListId";
+            string[] argnam = new string[] { "@eid", "@fid" };
+            object[] args = new object[] { eventId, fieldId };
+            CustomQuery query = new CustomQuery { Cmd = cmd, ArgNames = argnam, Args = args };
+            DataTable dt = msc.ExecuteQuery(query);
+            if (dt != null)
+            {
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    if (dt.Rows[i] != null) {
+                        result.Add(new StringListModel
+                        {
+                            ID = (int)dt.Rows[i]["stringListId"],
+                            Text = dt.Rows[i]["text"] as string,
+                            Active = true,
+                            Place = i
+                        });
+                    }
                 }
             }
             return result;
@@ -1042,6 +1118,12 @@ namespace CalendarApplication.Controllers
             }
 
             return RedirectToAction("", "Calendar", null);
+        }
+
+        // Returns the partial for adding a textbox to a string list
+        public ActionResult GetStringListPartial(string viewName, string viewId, int place)
+        {
+            return PartialView("StringListPartial", new StringListModel { ID = -1, Active = true, Place = place, Text = "", ViewID = viewId, ViewName = viewName});
         }
     }
 }

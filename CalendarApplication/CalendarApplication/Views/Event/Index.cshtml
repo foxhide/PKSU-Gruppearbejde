@@ -242,6 +242,16 @@ else
                                                             }
                                                         }
                                                         break;
+                            case Fieldtype.TextList:    using (Html.BeginListView("list_" + fm.ID, null, 100, "auto;max-width:500"))
+                                                        {
+                                                            foreach (StringListModel strings in fm.StringList)
+                                                            {
+                                                                <tr><td>
+                                                                    @strings.Text
+                                                                </td></tr>
+                                                            }
+                                                        }
+                                                        break;
                         }
                     </td>
                 </tr>

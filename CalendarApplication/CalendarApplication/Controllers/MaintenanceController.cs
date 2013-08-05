@@ -191,7 +191,7 @@ namespace CalendarApplication.Controllers
                 etm.TypeSpecific = new List<FieldDataModel>();
                 return View(etm);
             }
-            return RedirectToAction("Index","Maintenance",null);
+            return RedirectToAction("ManageEventTypes","Maintenance",null);
         }
 
         // Returns the partial needed for making new fields in edit event type

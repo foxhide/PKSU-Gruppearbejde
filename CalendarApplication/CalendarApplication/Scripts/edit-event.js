@@ -30,6 +30,10 @@ function typeCheckResponse(response,old) {
 // Number of fields variable
 var numberOfFields = 0;
 
+/* Variable object for editing strings in the string list.
+   Use as a map, i.e. stringCounter['stringListField'] = countOfStrings. */
+var stringCounter = {};
+
 /* Get the partial view for the given event type. If type == 0 (non selected),
    the event_specifics div will be set empty */
 function getSpecifics(type) {
@@ -148,6 +152,10 @@ function validateInput(id,type,showError,removeOnly) {
         if (showError) { setValidationMessage(jid + "_select", jid + "_Error", result && !removeOnly); }
         return !result;
     }
+    else if (type == "StringList") {
+        // DO STUFF
+        return true;
+    }
     return true;
 }
 
@@ -213,4 +221,39 @@ function checkRooms() {
 function dateRoomUpdate() {
     $("#rd_but").css("background-color", "yellow");
     $("#rd_but").val("Check rooms and dates");
+}
+
+/* Function for adding strings to a string list
+   field = identifier for the string list field,
+   name = name of the string list field (i.e. TypeSpecifics[i].StringList) */
+function addStringListField(field, name) {
+    if (field in stringCounter) {
+        var fieldCount = stringCounter[field];
+        // Get partial view from server, using ajax
+        $.ajax({
+            url: "/Event/GetStringListPartial/",
+            type: 'GET',
+            data: { viewId: field , viewName: name, place: fieldCount },
+            dataType: 'html',
+            success: function (result) {
+                var list = document.getElementById(field);
+                var newField = document.createElement('div');
+                var fieldId = field + '_' + fieldCount;
+                newField.id = fieldId;
+                list.appendChild(newField);
+                $('#' + fieldId).html(result);
+                stringCounter[field] = fieldCount + 1;
+            }
+        });
+    }
+    else { alert("THIS IS NOT SUPPOSED TO HAPPEN! BAD TIMES! :("); }
+}
+
+/* Function for removing strings from a string list
+   field = identifier for the string field */
+function removeStringListField(field) {
+        var act = document.getElementById(field + "_Active");
+        act.value = false;
+        var el = document.getElementById(field);
+        el.style.display = 'none';
 }

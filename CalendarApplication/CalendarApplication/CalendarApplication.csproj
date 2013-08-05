@@ -148,6 +148,7 @@
     <Compile Include="Models\Event\Room.cs" />
     <Compile Include="Models\Account\LoginModel.cs" />
     <Compile Include="Models\Event\RoomListModel.cs" />
+    <Compile Include="Models\Event\StringListModel.cs" />
     <Compile Include="Models\Group\GroupPrivilegesModel.cs" />
     <Compile Include="Models\Group\GroupViewModel.cs" />
     <Compile Include="Models\Group\GroupListModel.cs" />
@@ -265,6 +266,7 @@
     <Content Include="Views\List\GroupList.cshtml" />
     <Content Include="Views\List\UserList.cshtml" />
     <Content Include="Views\List\RoomList.cshtml" />
+    <Content Include="Views\Event\StringListPartial.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
