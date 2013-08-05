@@ -123,7 +123,7 @@ function checkCreate() {
         var req = $(jid + "_RequiredCreate").val();
         if (req.toLowerCase() == "true") {
             var dataType = $(jid + "_Datatype").val();
-            dataType = dataType.substring(dataType.length - 4) == "List" ? "List" : dataType;
+            dataType = dataType.substring(dataType.length - 4) == "List" && dataType != "TextList" ? "List" : dataType;
             ok = validateInput(id, dataType, true, false) && ok;
         }
     }
@@ -152,9 +152,16 @@ function validateInput(id,type,showError,removeOnly) {
         if (showError) { setValidationMessage(jid + "_select", jid + "_Error", result && !removeOnly); }
         return !result;
     }
-    else if (type == "StringList") {
-        // DO STUFF
-        return true;
+    else if (type == "TextList") {
+        var fieldCount = stringCounter[id];
+        var result = true;
+        for (var i = 0; i < fieldCount; i++) {
+            result = $(jid + "_" + i + "_Text").val() == "" || $(jid + "_" + i + "_Active").val().toLowerCase() == "false";
+            if (!result) { break; }
+        }
+        if (showError) { setValidationMessage(jid, jid + "_Error", result && !removeOnly); }
+        return !result;
+        
     }
     return true;
 }
@@ -227,26 +234,23 @@ function dateRoomUpdate() {
    field = identifier for the string list field,
    name = name of the string list field (i.e. TypeSpecifics[i].StringList) */
 function addStringListField(field, name) {
-    if (field in stringCounter) {
-        var fieldCount = stringCounter[field];
-        // Get partial view from server, using ajax
-        $.ajax({
-            url: "/Event/GetStringListPartial/",
-            type: 'GET',
-            data: { viewId: field , viewName: name, place: fieldCount },
-            dataType: 'html',
-            success: function (result) {
-                var list = document.getElementById(field);
-                var newField = document.createElement('div');
-                var fieldId = field + '_' + fieldCount;
-                newField.id = fieldId;
-                list.appendChild(newField);
-                $('#' + fieldId).html(result);
-                stringCounter[field] = fieldCount + 1;
-            }
-        });
-    }
-    else { alert("THIS IS NOT SUPPOSED TO HAPPEN! BAD TIMES! :("); }
+    var fieldCount = stringCounter[field];
+    // Get partial view from server, using ajax
+    $.ajax({
+        url: "/Event/GetStringListPartial/",
+        type: 'GET',
+        data: { viewId: field , viewName: name, place: fieldCount },
+        dataType: 'html',
+        success: function (result) {
+            var list = document.getElementById(field);
+            var newField = document.createElement('div');
+            var fieldId = field + '_' + fieldCount;
+            newField.id = fieldId;
+            list.appendChild(newField);
+            $('#' + fieldId).html(result);
+            stringCounter[field] = fieldCount + 1;
+        }
+    });
 }
 
 /* Function for removing strings from a string list
