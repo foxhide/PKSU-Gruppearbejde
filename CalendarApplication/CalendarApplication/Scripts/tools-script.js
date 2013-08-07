@@ -144,3 +144,9 @@ function updateList(id, cols, maxHeight) {
         lasthd.width(lasthd.width() + scrollbar);
     }
 }
+
+/* open url in new window */
+function newWindowUrl(url, popName) {
+    window.open(url, popName, 'scrollbars=1,height=650,width=1050');
+    window.focus();
+}

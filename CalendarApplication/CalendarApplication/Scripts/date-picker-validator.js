@@ -69,28 +69,36 @@ function validateDate(name, compare) {
         minute = 0;
     }
 
-    // Writeback to editor fields
-    yearInput.val(year);
-    monthInput.val(month);
-    dayInput.val(day);
-    hourInput.val(hour);
-    minuteInput.val(minute);
+    var newDate = new Date(year, month - 1, day, hour, minute);
 
     // Apply compare validation.
     var compareArr = compare.split(",");
     for (var i = 0; i < compareArr.length; i++) {
+        var otherId = compareArr[i].substring(2);
         if (compareArr[i].charAt(0) == 'g') {
-            validateCompare(name, compareArr[i].substring(2), false);
+            if (otherId == "today") {
+                newDate = newDate > new Date() ? newDate : new Date();
+            }
+            else {
+                var otherDate = getDate(otherId);
+                otherDate = newDate > otherDate ? otherDate : newDate;
+                setDate(otherId,otherDate);
+            }
         }
         else if (compareArr[i].charAt(0) == 'l') {
-            validateCompare(name, compareArr[i].substring(2), true);
+            if (otherId == "today") {
+                newDate = newDate < new Date() ? newDate : new Date();
+            }
+            else {
+                var otherDate = getDate(otherId);
+                otherDate = newDate < otherDate ? otherDate : newDate;
+                setDate(otherId, otherDate);
+            }
         }
     }
 
-    //Writeback to the hidden field:
-    var date_hidden = $("#" + name);
-    date_hidden.val(pad(dayInput.val()) + "-" + pad(monthInput.val()) + "-" + yearInput.val() + " "
-                        + pad(hourInput.val()) + ":" + pad(minuteInput.val()) + ":00");
+    // Writeback to editor and hidden fields
+    setDate(name, newDate);
 }
 
 /* Padding function: pads a single digit with a leading zero */
@@ -111,57 +119,27 @@ function daysInMonth(month,year) {
     }
 }
 
-/* Compares to another DateTimeEditor or to todays date */
-function validateCompare(name,other,compGreater) {
-    var year = $("#" + name + "_Year");
-    var month = $("#" + name + "_Month");
-    var day = $("#" + name + "_Day");
-    var hour = $("#" + name + "_Hour");
-    var minute = $("#" + name + "_Minute");
-    var date = new Date();
+/* Sets the date of a datetime editor */
+function setDate(id, date) {
+    $("#" + id + "_Year").val(date.getFullYear());
+    $("#" + id + "_Month").val(date.getMonth() + 1);
+    $("#" + id + "_Day").val(date.getDate());
+    $("#" + id + "_Hour").val(date.getHours());
+    $("#" + id + "_Minute").val(date.getMinutes());
 
-    // Check if we should compare by today or other date
-    if (other != "today") {
-        // Parse date from hidden field, this is safe since the value is written by C#
-        var arr = $("#" + other).val().split(/\s|:|-/);
-        date = new Date(arr[2], arr[1]-1, arr[0], arr[3], arr[4]);
-    }
+    var date_hidden = $("#" + id);
+    date_hidden.val(pad(date.getDate()) + "-" + pad(date.getMonth()) + "-" + date.getFullYear() + " "
+                        + pad(date.getHours()) + ":" + pad(date.getMinutes()) + ":00");
+}
 
-    // Compare greater or less
-    if (compGreater) {
-        if (year.val() >= date.getFullYear()) {
-            year.val(date.getFullYear());
-            if (month.val() >= date.getMonth()+1) {
-                month.val(date.getMonth()+1);
-                if (day.val() >= date.getDate()) {
-                    day.val(date.getDate());
-                    if (hour.val() >= date.getHours()) {
-                        hour.val(date.getHours());
-                        if (minute.val() > date.getMinutes()) {
-                            minute.val(date.getMinutes());
-                        }
-                    }
-                }
-            }
-        }
-    }
-    else {
-        if (year.val() <= date.getFullYear()) {
-            year.val(date.getFullYear());
-            if (month.val() <= date.getMonth()+1) {
-                month.val(date.getMonth()+1);
-                if (day.val() <= date.getDate()) {
-                    day.val(date.getDate());
-                    if (hour.val() <= date.getHours()) {
-                        hour.val(date.getHours());
-                        if (minute.val() < date.getMinutes()) {
-                            minute.val(date.getMinutes());
-                        }
-                    }
-                }
-            }
-        }
-    }
+/* Use only if date is valid!!! */
+function getDate(id) {
+    var year = $("#" + id + "_Year").val();
+    var month = $("#" + id + "_Month").val();
+    var day = $("#" + id + "_Day").val();
+    var hour = $("#" + id + "_Hour").val();
+    var minute = $("#" + id + "_Minute").val();
+    return new Date(year, month - 1, day, hour, minute);
 }
 
 /* Function for creating datepicker */
@@ -188,29 +166,18 @@ function createDatePicker(name, compare, onchange, dateString) {
     });
 }
 
-/* Function for updating times in datepickers */
+/* Function for updating times in datepickers (only .today will work now, as other dates are updated!) */
 function getRange(cmpStr) {
     if (cmpStr == "") { return {}; }
     var compareArr = cmpStr.split(",");
     var maxDate = null;
     var minDate = null;
     for (var i = 0; i < compareArr.length; i++) {
-        var name = compareArr[i].substring(2);
-        if (compareArr[i].charAt(0) == 'g') {
-            if (name == "today") {
-                minDate = new Date();
-            }
-            else {
-                minDate = $.datepicker.parseDate("dd-mm-yy", $("#" + name).val().substring(0, 10))
-            }
+        if (compareArr[i] == 'g.today') {
+            minDate = new Date();
         }
-        else {
-            if (name == "today") {
-                maxDate = new Date();
-            }
-            else {
-                maxDate = $.datepicker.parseDate("dd-mm-yy", $("#" + name).val().substring(0, 10))
-            }
+        else if (compareArr[i] == 'l.today') {
+            maxDate = new Date();
         }
     }
     return { minDate: minDate, maxDate: maxDate };
