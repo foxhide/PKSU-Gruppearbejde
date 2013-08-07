@@ -12,6 +12,7 @@ using CalendarApplication.Models.EventType;
 using CalendarApplication.Database;
 using CalendarApplication.PDFBuilder;
 using Newtonsoft.Json;
+using System.Text.RegularExpressions;
 
 namespace CalendarApplication.Controllers
 {
@@ -48,8 +49,10 @@ namespace CalendarApplication.Controllers
             {
                 ID = eventId
             };
-            string eventinfo = "SELECT * FROM events NATURAL LEFT JOIN eventroomsused " +
-                               "NATURAL LEFT JOIN rooms NATURAL JOIN eventtypes NATURAL JOIN users " +
+            string eventinfo = "SELECT e.eventName,e.eventStart,e.eventEnd,e.state,e.visible,e.creation," +
+                               "et.eventTypeId,et.eventTypeName,u.firstName,u.lastName,u.userId,r.roomId,r.roomName " +
+                               "FROM events AS e NATURAL LEFT JOIN eventroomsused NATURAL LEFT JOIN rooms AS r " +
+                               "JOIN eventtypes AS et ON e.eventTypeId = et.eventTypeId JOIN users AS u ON u.userId = e.userId " +
                                "WHERE eventId = @eid";
             MySqlConnect con = new MySqlConnect();
             object[] argval = { eventId };
@@ -140,9 +143,11 @@ namespace CalendarApplication.Controllers
                                     fm.StringValue = MySqlGroup.getGroup(fm.IntValue).Name;
                                 }
                                 break;
-                            case Fieldtype.UserList:
-                            case Fieldtype.GroupList:
+                            case Fieldtype.UserList: fm.List = GetList(fm.Datatype, eventId, fm.ID, con); break; // userlist, grouplist and filelist handled in GetList
+                            case Fieldtype.GroupList: fm.List = GetList(fm.Datatype, eventId, fm.ID, con); break;
                             case Fieldtype.FileList: fm.List = GetList(fm.Datatype, eventId, fm.ID, con); break;
+                            case Fieldtype.TextList: fm.StringList = GetStringList(fm.Datatype, eventId, fm.ID, con); break; // textlist handled in GetStringList
+
                         }
                         result.TypeSpecifics.Add(fm);
                     }
@@ -216,7 +221,70 @@ namespace CalendarApplication.Controllers
             return result;
         }
 
-        public ActionResult EditEvent(int eventId, int year, int month, int day)
+        private List<StringListModel> GetStringList(Fieldtype type, int eventId, int fieldId, MySqlConnect msc)
+        {
+            List<StringListModel> result = new List<StringListModel>();
+            CustomQuery query = new CustomQuery();
+            query.ArgNames = new[] { "@eid", "@fid" };
+            query.Args = new[] { (object)eventId, (object)fieldId };
+
+            if (type == Fieldtype.TextList)
+            {
+                query.Cmd = "SELECT text,stringListId FROM stringlist"
+                            + " WHERE eventId = @eid AND fieldId = @fid";
+                DataTable dt = msc.ExecuteQuery(query);
+                if (dt != null)
+                {
+                    for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        result.Add(new StringListModel
+                        {
+                            Text = (string)dt.Rows[i]["text"],
+                            ID = (int)dt.Rows[i]["stringListId"],
+                            Active = true,
+                            Place = i
+                        });
+                    }
+                }
+                else
+                {
+                    TempData["errorMsg"] = msc.ErrorMessage;
+                }
+            }
+            else
+            {
+                TempData["errorMsg"] = "Wrong argument for GetStringList...";
+            }
+            return result;
+        }
+
+        public DateTime ParseDateString(string date)
+        {
+            if (string.IsNullOrEmpty(date)) { return DateTime.Now; }
+
+            DateTime result = DateTime.Now.AddMinutes(10);
+
+            if (Regex.Match(date, @"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}").Success)
+            {
+                string[] vals = date.Split(new char[] { '-', 'T', ':' });
+                try
+                {
+                    result = new DateTime(Convert.ToInt32(vals[0]),
+                                Convert.ToInt32(vals[1]),
+                                Convert.ToInt32(vals[2]),
+                                Convert.ToInt32(vals[3]),
+                                Convert.ToInt32(vals[4]), 0);
+                }
+                catch (Exception e)
+                {
+                    TempData["errorMsg"] = e.Message;
+                }
+            }
+            else { TempData["errorMsg"] = "Bad date string!"; }
+            return result;
+        }
+
+        public ActionResult EditEvent(int eventId, string from, string to, string rooms)
         {
             // Check if that there is a user, or if it is an old event and user may edit this event
             if(UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
@@ -228,17 +296,20 @@ namespace CalendarApplication.Controllers
             EventEditModel eem = null;
             MySqlConnect msc = new MySqlConnect();
             DataTable dt = null;
+
             if (eventId == -1)
             {
-                DateTime start = new DateTime(year, month, day, 10, 0, 0);
+                DateTime start = this.ParseDateString(from);
+                DateTime end = this.ParseDateString(to);
                 start = start < DateTime.Now.AddMinutes(10) ? DateTime.Now.AddMinutes(10) : start;
+                end = end < start ? start.AddHours(2) : end;
                 eem = new EventEditModel
                 {
                     ID = eventId,
                     EventTypes = new List<SelectListItem>(),
-                    SelectedEventType = "0", // Initial value -> Basic event
+                    SelectedEventType = "0", // Initial value -> No selection
                     Start = start,
-                    End = start.AddHours(2),
+                    End = end,
                     Visible = true
                 };
             }
@@ -269,6 +340,13 @@ namespace CalendarApplication.Controllers
                 }
             }
             // Get list of rooms //
+            List<int> roomsAdded = new List<int>();
+            if (!string.IsNullOrEmpty(rooms))
+            {
+                string[] roomAry = rooms.Split(':');
+                foreach (string r in roomAry) { roomsAdded.Add(Convert.ToInt32(r)); }
+            }
+
             eem.RoomSelectList = new List<SelectListItem>();
             string roomcmd = eem.ID == -1 ? "SELECT roomId,roomName FROM rooms"
                                : "SELECT roomId,roomName,eventId FROM rooms NATURAL LEFT JOIN "
@@ -287,12 +365,9 @@ namespace CalendarApplication.Controllers
                     SelectListItem room = new SelectListItem
                     {
                         Value = ((int)dr["roomId"]).ToString(),
-                        Text = (string)dr["roomName"]
+                        Text = (string)dr["roomName"],
+                        Selected = (eem.ID != -1 && !(dr["eventId"] is DBNull)) || (eem.ID == -1 && roomsAdded.Contains((int)dr["roomId"]))
                     };
-                    if (eem.ID != -1)
-                    {
-                        room.Selected = !(dr["eventId"] is DBNull);
-                    }
                     eem.RoomSelectList.Add(room);
                 }
             }
@@ -493,7 +568,7 @@ namespace CalendarApplication.Controllers
                 }
             }
 
-            // Error //
+            // An error has occurred if we made it this far //
 
             // Get the types again for the view
             this.GetEventTypes(eem, mse);
@@ -552,6 +627,7 @@ namespace CalendarApplication.Controllers
             List<SelectListItem> groups = null;      // List for group list
             List<SelectListItem> usersDrop = null;   // List for user dropdown
             List<SelectListItem> groupsDrop = null;  // List for group dropdown
+            List<StringListModel> stringList = null;  // List for text list
             string specQuery = "SELECT * FROM eventtypefields WHERE eventTypeId = @etid ORDER BY fieldOrder";
             object[] argval = { type };
             string[] argnam = { "@etid" };
@@ -594,7 +670,9 @@ namespace CalendarApplication.Controllers
                                 fm.List = groups; break;
                             case Fieldtype.Group: if (groupsDrop == null) { groupsDrop = this.GetGroups(msc, true); }
                                 fm.List = groupsDrop; fm.IntValue = 0; break;
-                            case Fieldtype.Text:
+                            case Fieldtype.TextList: if (stringList == null) { stringList = new List<StringListModel>(); }
+                                fm.StringList = stringList; break;
+                            case Fieldtype.Text: fm.StringValue = ""; break;
                             //case Fieldtype.FileList:
                             case Fieldtype.File: fm.StringValue = ""; fm.IntValue = 0; break;
                             case Fieldtype.Datetime: fm.DateValue = DateTime.Now; break;
@@ -619,6 +697,7 @@ namespace CalendarApplication.Controllers
                                                 fm.List = groupsDrop;
                                                 fm.IntValue = row["field_" + fm.ID] is DBNull ? 0 : (int)row["field_" + fm.ID];
                                                 break;
+                            case Fieldtype.TextList: fm.StringList = this.GetStringValues(msc, eventId, fm.ID); break;
                             case Fieldtype.Text: fm.StringValue = row["field_" + fm.ID] is DBNull ? "" : (string)row["field_" + fm.ID];
                                                 break;
                             //case Fieldtype.FileList:
@@ -683,6 +762,39 @@ namespace CalendarApplication.Controllers
                         Value = ((int)dr["userId"]).ToString(),
                         Text = (string)dr["userName"]
                     });
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Getter for a StringListModel list of string values pertaining to a particular event and field.
+        /// </summary>
+        /// <param name="msc">MySqlConnect object</param>
+        /// <param name="eventId">Id of event</param>
+        /// <param name="fieldId">Id of field</param>
+        /// <returns>A StringListModel list of strings and stringListIds</returns>
+        private List<StringListModel> GetStringValues(MySqlConnect msc, int eventId, int fieldId)
+        {
+            List<StringListModel> result = new List<StringListModel>();
+            string cmd = "SELECT text,stringListId FROM stringlist WHERE eventId = @eid AND fieldId = @fid ORDER BY stringListId";
+            string[] argnam = new string[] { "@eid", "@fid" };
+            object[] args = new object[] { eventId, fieldId };
+            CustomQuery query = new CustomQuery { Cmd = cmd, ArgNames = argnam, Args = args };
+            DataTable dt = msc.ExecuteQuery(query);
+            if (dt != null)
+            {
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    if (dt.Rows[i] != null) {
+                        result.Add(new StringListModel
+                        {
+                            ID = (int)dt.Rows[i]["stringListId"],
+                            Text = dt.Rows[i]["text"] as string,
+                            Active = true,
+                            Place = i
+                        });
+                    }
                 }
             }
             return result;
@@ -777,14 +889,14 @@ namespace CalendarApplication.Controllers
             if (UserModel.GetCurrentUserID() != -1 && UserModel.GetCurrent().Admin)
             {
                 // Admin -> get all events
-                userquery.Cmd = "SELECT eventTypeId,eventTypeName FROM eventtypes";
+                userquery.Cmd = "SELECT eventTypeId,eventTypeName FROM eventtypes WHERE active = 1";
             }
             else
             {
                 // Not admin -> get events allowed for creation by this user + the current selected type.
                 userquery.Cmd = "SELECT DISTINCT(eventTypeId),eventTypeName "
                         + "FROM eventtypes NATURAL LEFT JOIN eventcreationgroups NATURAL LEFT JOIN groupmembers "
-                        + "WHERE (userId = @uid AND canCreate = 1) OR eventTypeId = @ti";
+                        + "WHERE (userId = @uid AND canCreate = 1 AND active = 1) OR eventTypeId = @ti";
                 userquery.ArgNames = new[] { "@uid", "@ti" };
                 userquery.Args = new[] { (object)UserModel.GetCurrentUserID(), Convert.ToInt32(eem.SelectedEventType) };
             }
@@ -836,6 +948,9 @@ namespace CalendarApplication.Controllers
         /// <returns>List of rooms used</returns>
         public List<RoomWithTimes> CheckDates(int eventId, DateTime start, DateTime end, List<SelectListItem> rooms)
         {
+            // Sanity check
+            if (rooms == null) { return null; }
+
             List<RoomWithTimes> result = new List<RoomWithTimes>();
             string cmd = "SELECT roomName, eventStart, eventEnd FROM events NATURAL JOIN eventroomsused NATURAL JOIN rooms"
                             + " WHERE ((@start >= eventStart AND @start < eventEnd) OR "
@@ -1008,6 +1123,12 @@ namespace CalendarApplication.Controllers
             }
 
             return RedirectToAction("", "Calendar", null);
+        }
+
+        // Returns the partial for adding a textbox to a string list
+        public ActionResult GetStringListPartial(string viewName, string viewId, int place)
+        {
+            return PartialView("StringListPartial", new StringListModel { ID = -1, Active = true, Place = place, Text = "", ViewID = viewId, ViewName = viewName});
         }
     }
 }

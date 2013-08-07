@@ -31,17 +31,13 @@ function moveSelected(name, add) {
     var name2 = add ? name + '_select' : name + '_available';
     var list1 = document.getElementById(name1);
     var list2 = document.getElementById(name2);
-    // Run through the list until selected option is found. Remove it
-    // and add it to the other list.
-    for (var i = 0; i < list1.length; i++) {
-        if(list1.options[i].selected) {
-            var id = list1.options[i].value;
-            var roomName = list1.options[i].innerHTML;
-            list1.remove(i);
-            list2.options[list2.length] = new Option(roomName,id);
-            document.getElementById(name + '_' + id).value = add;
-            break;
-         }
+    while (list1.selectedIndex != -1) {
+        var i = list1.selectedIndex;
+        var id = list1.options[i].value;
+        var roomName = list1.options[i].innerHTML;
+        list1.remove(i);
+        list2.options[list2.length] = new Option(roomName,id);
+        document.getElementById(name + '_' + id).value = add;
     }
 }
 

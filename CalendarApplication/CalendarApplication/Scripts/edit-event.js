@@ -30,6 +30,10 @@ function typeCheckResponse(response,old) {
 // Number of fields variable
 var numberOfFields = 0;
 
+/* Variable object for editing strings in the string list.
+   Use as a map, i.e. stringCounter['stringListField'] = countOfStrings. */
+var stringCounter = {};
+
 /* Get the partial view for the given event type. If type == 0 (non selected),
    the event_specifics div will be set empty */
 function getSpecifics(type) {
@@ -119,7 +123,7 @@ function checkCreate() {
         var req = $(jid + "_RequiredCreate").val();
         if (req.toLowerCase() == "true") {
             var dataType = $(jid + "_Datatype").val();
-            dataType = dataType.substring(dataType.length - 4) == "List" ? "List" : dataType;
+            dataType = dataType.substring(dataType.length - 4) == "List" && dataType != "TextList" ? "List" : dataType;
             ok = validateInput(id, dataType, true, false) && ok;
         }
     }
@@ -148,6 +152,17 @@ function validateInput(id,type,showError,removeOnly) {
         if (showError) { setValidationMessage(jid + "_select", jid + "_Error", result && !removeOnly); }
         return !result;
     }
+    else if (type == "TextList") {
+        var fieldCount = stringCounter[id];
+        var result = true;
+        for (var i = 0; i < fieldCount; i++) {
+            result = $(jid + "_" + i + "_Text").val() == "" || $(jid + "_" + i + "_Active").val().toLowerCase() == "false";
+            if (!result) { break; }
+        }
+        if (showError) { setValidationMessage(jid, jid + "_Error", result && !removeOnly); }
+        return !result;
+        
+    }
     return true;
 }
 
@@ -168,6 +183,13 @@ function setValidationMessage(id, errId, isError) {
 /* Check if the rooms are free at the time specified (using AJAX) */
 function checkRooms() {
     var rooms = getListSelected("RoomSelectList");
+
+    if (rooms.length == 0) {
+        $("#rd_but").css("background-color", "red");
+        $("#rd_but").val("Error!");
+        $("#room_date_feedback").html("No rooms selected!");
+        return;
+    }
 
     var eventId = $("#ID").val();
     var start = $("#Start").val();
@@ -206,4 +228,36 @@ function checkRooms() {
 function dateRoomUpdate() {
     $("#rd_but").css("background-color", "yellow");
     $("#rd_but").val("Check rooms and dates");
+}
+
+/* Function for adding strings to a string list
+   field = identifier for the string list field,
+   name = name of the string list field (i.e. TypeSpecifics[i].StringList) */
+function addStringListField(field, name) {
+    var fieldCount = stringCounter[field];
+    // Get partial view from server, using ajax
+    $.ajax({
+        url: "/Event/GetStringListPartial/",
+        type: 'GET',
+        data: { viewId: field , viewName: name, place: fieldCount },
+        dataType: 'html',
+        success: function (result) {
+            var list = document.getElementById(field);
+            var newField = document.createElement('div');
+            var fieldId = field + '_' + fieldCount;
+            newField.id = fieldId;
+            list.appendChild(newField);
+            $('#' + fieldId).html(result);
+            stringCounter[field] = fieldCount + 1;
+        }
+    });
+}
+
+/* Function for removing strings from a string list
+   field = identifier for the string field */
+function removeStringListField(field) {
+        var act = document.getElementById(field + "_Active");
+        act.value = false;
+        var el = document.getElementById(field);
+        el.style.display = 'none';
 }

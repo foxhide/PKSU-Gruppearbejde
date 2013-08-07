@@ -4,7 +4,7 @@
     ViewBag.Title = "EditRoom";
 }
 
-<h2>@(Model.ID != -1 ? "Edit Room Name" : "Create Room")</h2>
+<h2>@(Model.ID != -1 ? "Edit Room" : "Create Room")</h2>
 
 <h3 style="color:red">@TempData["errorMsg"]</h3>
 @using (Html.BeginForm(new { ReturnUrl = ViewBag.ReturnUrl }))
@@ -13,6 +13,16 @@
     <b>@Html.LabelFor(model => Model.Name)</b><br />
     @Html.EditorFor(model => Model.Name)
     @Html.ValidationMessageFor(model => Model.Name)
+    <br />
+    
+    <b>@Html.LabelFor(model => Model.Capacity)</b><br />
+    @Html.EditorFor(model => Model.Capacity)
+    @Html.ValidationMessageFor(model => Model.Capacity)
+    <br />
+    
+    <b>@Html.LabelFor(model => Model.Description)</b><br />
+    @Html.EditorFor(model => Model.Description)
+    @Html.ValidationMessageFor(model => Model.Description)
     <br />
     <input type="submit"  name="id"  value="@(Model.ID != -1 ? "Save changes" : "Create Room")"/>
 }

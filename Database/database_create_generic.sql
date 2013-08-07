@@ -2,7 +2,6 @@ SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
 
--- PUT "USE [DBNAME];" HERE:
 
 -- -----------------------------------------------------
 -- Table `users`
@@ -13,24 +12,26 @@ CREATE  TABLE IF NOT EXISTS `users` (
   `userId` INT NOT NULL AUTO_INCREMENT ,
   `userName` VARCHAR(45) NOT NULL ,
   `password` VARCHAR(70) NOT NULL ,
-  `realName` VARCHAR(45) NULL DEFAULT NULL ,
+  `firstName` VARCHAR(45) NOT NULL ,
+  `lastName` VARCHAR(45) NOT NULL ,
   `admin` TINYINT(1) NULL DEFAULT 0 ,
-  `phoneNum` VARCHAR(45) NULL DEFAULT NULL ,
-  `email` VARCHAR(45) NULL DEFAULT NULL ,
+  `phoneNum` VARCHAR(45) NOT NULL ,
+  `email` VARCHAR(70) NOT NULL ,
   `active` TINYINT(1) NULL DEFAULT 0 ,
   `needsApproval` TINYINT(1) NULL DEFAULT 1 ,
   PRIMARY KEY (`userId`) ,
   UNIQUE INDEX `userName_UNIQUE` (`userName` ASC) )
 AUTO_INCREMENT = 1
 COMMENT = 'Table for user logins, passwords and information.\n\nuserId: U /* comment truncated */ /*nique userid for each user (primary key). 
-userName: Unique login/screen name tied to userId. Required, 45 chars.
-password: Password tied to a userId. Required, 45 chars.
-realname: real name of the user. Required, 45 chars.
-admin: whether or not this user has admin status.
+userName: Unique login tied to userId. Required, 45 chars.
+password: Password tied to a userId. Required, 70 chars.
+firstName: first name of user. Required, 45 chars.
+lastName: last name of user. Required, 45 chars.
+admin: whether or not user has admin status.
 phoneNum: user phone number, as a varchar. Not required, 45 chars.
-email: user email address. Not required, 45 chars.
-active: whether the user is active, inactive users cannot login.
-needsApproval: whether the user needs initial approval from an administrator.*/';
+email: user email address. Not required, 70 chars.
+active: whether the user is active, inactive users cannot log in.
+needsApproval: whether the user needs initial approval from an administrator to be able to log in.*/';
 
 
 -- -----------------------------------------------------
@@ -41,10 +42,12 @@ DROP TABLE IF EXISTS `eventtypes` ;
 CREATE  TABLE IF NOT EXISTS `eventtypes` (
   `eventTypeId` INT NOT NULL AUTO_INCREMENT ,
   `eventTypeName` VARCHAR(45) NOT NULL ,
+  `active` TINYINT(1) NULL DEFAULT 1 ,
   PRIMARY KEY (`eventTypeId`) )
 AUTO_INCREMENT = 1
 COMMENT = 'Table for event types with names.\n\neventTypeId: Primary key. /* comment truncated */ /*
-eventTypeName: name of a event type*/';
+eventTypeName: name of a event type
+active: whether the event type is active*/';
 
 
 -- -----------------------------------------------------
@@ -56,9 +59,10 @@ CREATE  TABLE IF NOT EXISTS `events` (
   `eventId` INT NOT NULL AUTO_INCREMENT ,
   `userId` INT NOT NULL ,
   `eventTypeId` INT NULL ,
-  `eventName` VARCHAR(45) NOT NULL ,
+  `eventName` VARCHAR(250) NOT NULL ,
   `eventStart` DATETIME NOT NULL ,
   `eventEnd` DATETIME NOT NULL ,
+  `creation` DATETIME NULL ,
   `visible` TINYINT(1) NULL DEFAULT 1 ,
   `state` INT NULL DEFAULT 0 ,
   PRIMARY KEY (`eventId`) ,
@@ -81,8 +85,9 @@ eventTypeId: id of the eventtype, references table eventtypes (foreign key).
 eventName: Name of the event (max 45 chars)
 eventStart: Time at which the event starts.(format year-month-day hour:min:sec, 0000-00-00 00:00:00)
 eventEnd: Time at which the event ends. (format year-month-day hour:min:sec, 0000-00-00 00:00:00)
+creation: time at which event was created.
 visible: whether the event is visible to all.
-state: current state of the event (not defined in database).*/';
+state: current state of the event (not defined in database, 0 for incomplete, 1 for approved, 2 for finished).*/';
 
 
 -- -----------------------------------------------------
@@ -92,8 +97,8 @@ DROP TABLE IF EXISTS `files` ;
 
 CREATE  TABLE IF NOT EXISTS `files` (
   `fileId` INT NOT NULL AUTO_INCREMENT ,
-  `fileName` VARCHAR(45) NOT NULL ,
-  `pathToFile` VARCHAR(150) NOT NULL ,
+  `fileName` VARCHAR(100) NOT NULL ,
+  `pathToFile` VARCHAR(255) NOT NULL ,
   `eventId` INT NULL ,
   `userId` INT NULL ,
   `uploaded` DATETIME NULL ,
@@ -103,17 +108,17 @@ CREATE  TABLE IF NOT EXISTS `files` (
   CONSTRAINT `fileeventid`
     FOREIGN KEY (`eventId` )
     REFERENCES `events` (`eventId` )
-    ON DELETE NO ACTION
+    ON DELETE SET NULL
     ON UPDATE NO ACTION,
-  CONSTRAINT `fileuseris`
+  CONSTRAINT `fileuserid`
     FOREIGN KEY (`userId` )
     REFERENCES `users` (`userId` )
-    ON DELETE NO ACTION
+    ON DELETE SET NULL
     ON UPDATE NO ACTION)
 AUTO_INCREMENT = 1
 COMMENT = 'Table for files.\n\nfileId: unique primary key for files.\nfile /* comment truncated */ /*Name: name of the file, e.g. mytextfile.txt.
 pathToFile: path to file (duh), e.g. /root/myfolder/mytextfile.txt.
-eventId: foreign key, event that the file is associated with. stays when events are deleted.
+eventId: foreign key, event that the file is associated with. null if event is deleted.
 userId: foreign key, user that uploaded the file.
 uploaded: time and date when file was uploaded.*/';
 
@@ -126,10 +131,12 @@ DROP TABLE IF EXISTS `groups` ;
 CREATE  TABLE IF NOT EXISTS `groups` (
   `groupId` INT NOT NULL AUTO_INCREMENT ,
   `groupName` VARCHAR(45) NOT NULL ,
+  `open` TINYINT(1) NULL DEFAULT 0 ,
   PRIMARY KEY (`groupId`) )
 AUTO_INCREMENT = 1
 COMMENT = 'Table for groups.\n\ngroupId: Primary key identifying the grou /* comment truncated */ /*p.
-groupName: the name of the group.*/';
+groupName: the name of the group.
+open: whether group is open to all members*/';
 
 
 -- -----------------------------------------------------
@@ -216,8 +223,7 @@ ENGINE = InnoDB
 COMMENT = 'A table describing which users belong to which groups.\n\ngrou /* comment truncated */ /*pId: foreign key referencing groups table.
 userId: foreign key referencing users table.
 groupLeader: whether this user is one of the group leaders.
-canCreate: whether this user can create events of the types allowed in this group. irrelevant if group leader.
-primary key is both together.*/';
+canCreate: whether this user can create events of the types allowed in this group. irrelevant if group leader.*/';
 
 
 -- -----------------------------------------------------
@@ -228,9 +234,13 @@ DROP TABLE IF EXISTS `rooms` ;
 CREATE  TABLE IF NOT EXISTS `rooms` (
   `roomId` INT NOT NULL AUTO_INCREMENT ,
   `roomName` VARCHAR(45) NOT NULL ,
+  `capacity` INT NULL ,
+  `description` VARCHAR(100) NULL ,
   PRIMARY KEY (`roomId`) )
 AUTO_INCREMENT = 1
-COMMENT = 'Table for rooms.\n\nroomId: Primary key identifying the room.\n /* comment truncated */ /* /* comment truncated */ /*roomName: the name of the room.*/*/';
+COMMENT = 'Table for rooms.\n\nroomId: Primary key identifying the room.\n /* comment truncated */ /*roomName: the name of the room.
+capacity: integer indicating capacity of room
+description: 100 chars worth of description of room*/';
 
 
 -- -----------------------------------------------------
@@ -276,6 +286,7 @@ CREATE  TABLE IF NOT EXISTS `eventtypefields` (
   `requiredApproval` TINYINT(1) NULL DEFAULT 0 ,
   `fieldType` INT NULL ,
   `varCharLength` INT NULL DEFAULT 0 ,
+  `fieldOrder` INT NOT NULL DEFAULT 1 ,
   PRIMARY KEY (`fieldId`) ,
   INDEX `eventtypenameid_idx` (`eventTypeId` ASC) ,
   CONSTRAINT `eventtypenameid`
@@ -289,11 +300,12 @@ COMMENT = 'Table for which fields events use and whether they are requi /* comme
 fieldId: Primary key. Auto incremented.
 eventTypeId: foreign key referencing eventtypenames. cannot be null.
 fieldName: name of the field in the database. cannot be null.
-fieldDescription: description of a field. cannot be null.
+fieldDescription: description of a field.
 requiredCreation: whether or not filling this field is required to create an event of this type.
 requiredApproval: whether or not filling this field is required for full approval of an event of this type.
-fieldType: 0 for float, 1 for text, 2 for date, 3 for user, 4 for group, 5 for file, 6 for boolean, 7 for userlist, 8 for grouplist, 9 for filelist
-varCharLength: length of string if type is string, 0 if not string.*/';
+fieldType: 0 for float, 1 for text, 2 for date, 3 for user, 4 for group, 5 for file, 6 for boolean, 7 for userlist, 8 for grouplist, 9 for filelist, 10 for text list
+varCharLength: length of string if type is string, 0 if not string.
+fieldOrder: the orderthat the fields show up in when displayed.*/';
 
 
 -- -----------------------------------------------------
@@ -450,6 +462,61 @@ ENGINE = InnoDB
 COMMENT = 'Table for lists of groups.\n\nfieldId: Foreign key referencing /* comment truncated */ /* eventtypefields
 groupId: Foreign key referencing group
 eventId: Foreign key referencing events*/';
+
+
+-- -----------------------------------------------------
+-- Table `groupapplicants`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `groupapplicants` ;
+
+CREATE  TABLE IF NOT EXISTS `groupapplicants` (
+  `userId` INT NOT NULL ,
+  `groupId` INT NOT NULL ,
+  PRIMARY KEY (`userId`, `groupId`) ,
+  INDEX `applicantuserId_idx` (`userId` ASC) ,
+  INDEX `applicantgroupId_idx` (`groupId` ASC) ,
+  CONSTRAINT `applicantuserId`
+    FOREIGN KEY (`userId` )
+    REFERENCES `users` (`userId` )
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION,
+  CONSTRAINT `applicantgroupId`
+    FOREIGN KEY (`groupId` )
+    REFERENCES `groups` (`groupId` )
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+COMMENT = 'Table for applicants for groups.\n\ngroupId: foreign key refer /* comment truncated */ /*encing groups table.
+userId: foreign key referencing users table.*/';
+
+
+-- -----------------------------------------------------
+-- Table `stringlist`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `stringlist` ;
+
+CREATE  TABLE IF NOT EXISTS `stringlist` (
+  `stringListId` INT NOT NULL AUTO_INCREMENT ,
+  `fieldId` INT NOT NULL ,
+  `eventId` INT NOT NULL ,
+  `text` VARCHAR(250) NOT NULL ,
+  INDEX `stringlistfield_idx` (`fieldId` ASC) ,
+  INDEX `stringlistevent_idx` (`eventId` ASC) ,
+  PRIMARY KEY (`stringListId`) ,
+  CONSTRAINT `stringlistfield`
+    FOREIGN KEY (`fieldId` )
+    REFERENCES `eventtypefields` (`fieldId` )
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION,
+  CONSTRAINT `stringlistevent`
+    FOREIGN KEY (`eventId` )
+    REFERENCES `events` (`eventId` )
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION)
+AUTO_INCREMENT = 1
+COMMENT = 'Table for lists of text fields\n\nstringListId: primary key\nfi /* comment truncated */ /*eldId: foreign key referencing eventtypefields
+eventId: foreign key referencing events
+text: self explanatory. cannot be null, empty strings are a waste of space*/';
 
 
 

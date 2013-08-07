@@ -356,6 +356,61 @@ namespace CalendarApplication.Database
 
         }
 
+        /// <summary>
+        /// Function for updating the active state of an event type
+        /// </summary>
+        /// <param name="eventTypeId">The ID of the event type to update</param>
+        /// <param name="active">The new state (true or false)</param>
+        /// <returns>True on success, otherwise false</returns>
+        public bool SetEventTypeActive(int eventTypeId, bool active)
+        {
+            if (this.OpenConnection())
+            {
+                MySqlTransaction mst = null;
+                MySqlCommand cmd = null;
+
+                try
+                {
+                    mst = this.connection.BeginTransaction();
+                    cmd = new MySqlCommand();
+                    cmd.Connection = this.connection;
+                    cmd.Transaction = mst;
+
+                    cmd.CommandText = "UPDATE eventtypes SET active = @act WHERE eventTypeId = @id";
+                    cmd.Parameters.AddWithValue("@act", active);
+                    cmd.Parameters.AddWithValue("@id", eventTypeId);
+                    cmd.Prepare();
+
+                    cmd.ExecuteNonQuery();
+
+                    mst.Commit();
+
+                    this.CloseConnection();
+                    return true;
+                }
+                catch (MySqlException ex1)
+                {
+                    try
+                    {
+                        mst.Rollback();
+                        this.CloseConnection();
+                        this.ErrorMessage = ex1.ErrorCode.ToString();
+                        return false;
+                    }
+                    catch (MySqlException ex2)
+                    {
+                        this.CloseConnection();
+                        this.ErrorMessage = ex2.ErrorCode.ToString();
+                        return false;
+                    }
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         public int EditEvent(EventEditModel eem)
         {
             if (this.OpenConnection() == true)
@@ -417,6 +472,40 @@ namespace CalendarApplication.Database
                         cmd.CommandText = delete;
                         cmd.Prepare();
                         cmd.ExecuteNonQuery();
+
+                        // also delete any and all list values
+                        cmd.CommandText = "DELETE FROM userlist WHERE eventId = @nid";
+                        cmd.Prepare();
+                        cmd.ExecuteNonQuery();
+                        cmd.CommandText = "DELETE FROM grouplist WHERE eventId = @nid";
+                        cmd.Prepare();
+                        cmd.ExecuteNonQuery();
+                        cmd.CommandText = "DELETE FROM stringlist WHERE eventId = @nid";
+                        cmd.Prepare();
+                        cmd.ExecuteNonQuery();
+                        /*
+                        // delete files permanently if the checkbox said to
+                        if (eem.DeleteFiles)
+                        {
+                            foreach(FieldModel fm in eem.TypeSpecifics)
+                            {
+                                if (fm.Datatype == Fieldtype.File)
+                                {
+                                    //delete file
+                                }
+                                if (fm.Datatype == Fieldtype.FileList)
+                                {
+                                    //delete files
+                                    foreach (SelectListItem item in fm.List)
+                                    {
+                                        //delete file
+                                    }
+                                }
+                            }
+                        } */
+                        cmd.CommandText = "DELETE FROM filelist WHERE eventId = @nid";
+                        cmd.Prepare();
+                        cmd.ExecuteNonQuery();
                     }
 
                     // Check if (new) type has a specifics table
@@ -438,6 +527,7 @@ namespace CalendarApplication.Database
                                 {
                                     this.InsertListValues(newId, fm, mst);
                                 }
+                                if (fm.Datatype == Fieldtype.TextList) { this.InsertStringValues(newId, fm, mst); }
                                 prologue += "field_" + fm.ID;
                                 string value = "@fieldval" + i;
                                 epilogue += value;
@@ -463,6 +553,8 @@ namespace CalendarApplication.Database
                                 {
                                     this.InsertListValues(newId, fm, mst);
                                 }
+                                // text lists should be updated, not inserted
+                                if (fm.Datatype == Fieldtype.TextList) { this.UpdateStringValues(newId, fm, mst); }
                                 string value = "@fieldvalue" + i;
                                 updateTable += "field_" + fm.ID + " = " + value;
                                 cmd.Parameters.AddWithValue(value, fm.GetDBValue());
@@ -634,6 +726,102 @@ namespace CalendarApplication.Database
                     cmd.Parameters["@item"].Value = item.Value;
                     cmd.ExecuteNonQuery();
                 }
+            }
+            return true;
+        }
+
+
+        /// <summary>
+        /// Function for inserting values into stringlist table. Assumes the connection to be open
+        /// and the transaction to be started
+        /// </summary>
+        /// <param name="eventId">Id of the current event</param>
+        /// <param name="fm">FieldModel, datatype should be a stringlist</param>
+        /// <param name="currentTrans">The current transaction</param>
+        /// <returns>True on success, false if datatype is not a stringlist</returns>
+        private bool InsertStringValues(int eventId, FieldModel fm, MySqlTransaction currentTrans)
+        {
+            if (fm.Datatype != Fieldtype.TextList) { return false; }
+            //if list is null there were no values, so return
+            if (fm.StringList == null) { return true; }
+
+            MySqlCommand cmd = new MySqlCommand();
+            cmd.Transaction = currentTrans;
+            cmd.Connection = this.connection;
+            cmd.Parameters.AddWithValue("@eid", eventId);
+            cmd.Parameters.AddWithValue("@fid", fm.ID);
+            cmd.Parameters.AddWithValue("@item", null);
+            cmd.CommandText = "INSERT INTO stringlist (eventId,fieldId,text)"
+                                      + " VALUES (@eid,@fid,@item)";
+            cmd.Prepare();
+
+
+            foreach (StringListModel item in fm.StringList)
+            {
+                if (!string.IsNullOrWhiteSpace(item.Text) || !item.Active)
+                {
+                    cmd.Parameters["@item"].Value = item.Text;
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Function for updating values in stringlist table. Assumes the connection to be open
+        /// and the transaction to be started
+        /// </summary>
+        /// <param name="eventId">Id of the current event</param>
+        /// <param name="fm">FieldModel, datatype should be a stringlist</param>
+        /// <param name="currentTrans">The current transaction</param>
+        /// <returns>True on success, false if datatype is not stringlist</returns>
+        private bool UpdateStringValues(int eventId, FieldModel fm, MySqlTransaction currentTrans)
+        {
+            if (fm.Datatype != Fieldtype.TextList) { return false; }
+            //if list is null there were no values, so return
+            if (fm.StringList == null) { return true; }
+
+            MySqlCommand cmd = new MySqlCommand();
+            cmd.Transaction = currentTrans;
+            cmd.Connection = this.connection;
+            cmd.Parameters.AddWithValue("@eid", eventId);
+            cmd.Parameters.AddWithValue("@fid", fm.ID);
+            cmd.Parameters.AddWithValue("@strid", null);
+            cmd.Parameters.AddWithValue("@item", null);
+
+
+            foreach (StringListModel item in fm.StringList)
+            {
+                if (item.Active == true && !string.IsNullOrWhiteSpace(item.Text) )
+                {
+                    if (item.ID < 0)
+                    {
+                        // if string is new, insert
+                        cmd.CommandText = "INSERT INTO stringlist (eventId,fieldId,text)"
+                                      + " VALUES (@eid,@fid,@item)";
+                        cmd.Prepare();
+                        cmd.Parameters["@item"].Value = item.Text;
+                        cmd.ExecuteNonQuery();
+                    }
+                    else
+                    {
+                        // if string is already there, update it
+                        cmd.CommandText = "UPDATE stringlist SET text = @item WHERE stringListId = @strid";
+                        cmd.Prepare();
+                        cmd.Parameters["@strid"].Value = item.ID;
+                        cmd.Parameters["@item"].Value = item.Text;
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                else
+                {
+                    // delete string if removed, empty or whitespace
+                    cmd.CommandText = "DELETE FROM stringlist WHERE stringListId = @strid";
+                    cmd.Prepare();
+                    cmd.Parameters["@strid"].Value = item.ID;
+                    cmd.ExecuteNonQuery();
+                }
+
             }
             return true;
         }

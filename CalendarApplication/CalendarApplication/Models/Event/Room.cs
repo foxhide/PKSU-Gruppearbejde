@@ -14,6 +14,12 @@ namespace CalendarApplication.Models.Event
         [Display(Name = "Name")]
         public string Name { set; get; }
 
+        [Display(Name = "Description")]
+        public string Description { set; get; }
+
+        [Display(Name = "Capacity")]
+        public int? Capacity { set; get; }
+
         public override bool Equals(object obj)
         {
             if (object.ReferenceEquals(this, obj)) return true;

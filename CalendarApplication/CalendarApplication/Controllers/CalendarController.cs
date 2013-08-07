@@ -473,7 +473,7 @@ namespace CalendarApplication.Controllers
 
             select.Append("SELECT e.eventId,e.userId,e.creation,u.firstName,u.lastName,e.eventTypeId,e.eventName,e.eventStart,");
             select.Append("e.eventEnd,e.state,e.visible,et.eventTypeName,r.roomId,r.roomName");
-            from.Append("FROM events AS e NATURAL JOIN users AS u NATURAL JOIN eventtypes AS et");
+            from.Append("FROM events AS e JOIN users AS u ON e.userId = u.userId JOIN eventtypes AS et ON e.eventTypeId = et.eventTypeId");
             from.Append(" NATURAL JOIN eventroomsused AS eru NATURAL JOIN rooms AS r");
 
             List<string> argNames = new List<String>();

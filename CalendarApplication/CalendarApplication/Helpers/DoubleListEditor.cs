@@ -79,7 +79,7 @@ namespace CalendarApplication.Helpers
             builder.AppendLine("</tr><tr>");
 
             builder.AppendLine("<td>");
-            builder.AppendLine("<select id='" + id + "_available' name='" + name + "' size='5' style='min-width:100px'>");
+            builder.AppendLine("<select id='" + id + "_available' multiple='multiple' name='" + name + "' size='5' style='min-width:100px'>");
             foreach (SelectListItem sli in list)
             {
                 if (!sli.Selected) builder.AppendLine("<option value='" + sli.Value + "'>" + sli.Text + "</option>");
@@ -88,14 +88,14 @@ namespace CalendarApplication.Helpers
             builder.AppendLine("</td>");
 
             builder.AppendLine("<td style='vertical-align:middle'>");
-            builder.Append("<input type='button' id='" + name + "_add_button' value='<--' onclick=\"moveSelected('" + id + "',false);");
+            builder.Append("<input type='button' id='" + name + "_add_button' value='-->' onclick=\"moveSelected('" + id + "',true);");
             builder.Append(onAdd + "\" ><br>");
-            builder.Append("<input type='button' id='" + name + "_rem_button' value='-->' onclick=\"moveSelected('" + id + "',true);");
+            builder.Append("<input type='button' id='" + name + "_rem_button' value='<--' onclick=\"moveSelected('" + id + "',false);");
             builder.Append(onRem + "\" >");
             builder.AppendLine("</td>");
 
             builder.AppendLine("<td>");
-            builder.AppendLine("<select id='" + id + "_select' name='" + name + "' size='5' style='min-width:100px'>");
+            builder.AppendLine("<select id='" + id + "_select' multiple='multiple' name='" + name + "' size='5' style='min-width:100px'>");
             foreach (SelectListItem sli in list)
             {
                 if (sli.Selected) builder.AppendLine("<option value='" + sli.Value + "'>" + sli.Text + "</option>");

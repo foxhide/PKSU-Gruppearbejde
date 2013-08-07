@@ -110,7 +110,7 @@ else
             {
                 <tr><td>
                     <input type="button"
-                        onclick="gotoUrl('@Url.Action("EditEvent", "Event", new { eventId = Model.ID, year = 0, month = 0, day = 0 }, null)')"
+                        onclick="gotoUrl('@Url.Action("EditEvent", "Event", new { eventId = Model.ID }, null)')"
                         value="Edit event"
                         style="width:100%" />
                 </td></tr>
@@ -148,7 +148,7 @@ else
             <td style="width:100px;"><b>Type</b></td><td>@Model.TypeName</td>
         </tr>
         <tr id="creator">
-            <td><b>Created by</b></td><td>@Html.ActionLink(u.GetFullName(), "Index", "User", new { UserId = Model.CreatorId }, null)</td>
+            <td><b>Created by</b></td><td>@Html.ActionLink(Model.Creator, "Index", "User", new { UserId = Model.CreatorId }, null)</td>
         </tr>
         <tr id="creation_date">
             <td><b>Creation date</b></td><td>@Calendar.GetDateTimeString(Model.CreationDate)</td>
@@ -238,6 +238,16 @@ else
                                                             {
                                                                 <tr><td>
                                                                     @Html.ActionLink(group.Text, "ViewGroup", "Group", new { groupId = Convert.ToInt32(group.Value) }, null)
+                                                                </td></tr>
+                                                            }
+                                                        }
+                                                        break;
+                            case Fieldtype.TextList:    using (Html.BeginListView("list_" + fm.ID, null, 100, "auto;max-width:500"))
+                                                        {
+                                                            foreach (StringListModel strings in fm.StringList)
+                                                            {
+                                                                <tr><td>
+                                                                    @strings.Text
                                                                 </td></tr>
                                                             }
                                                         }

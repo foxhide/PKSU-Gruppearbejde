@@ -191,13 +191,13 @@ namespace CalendarApplication.Tests
             MySqlRoom msr = new MySqlRoom();
 
             // Try to create a null room -> fail
-            int id = msr.CreateRoom(null);
+            int id = msr.CreateRoom(null, null, null);
             Assert.AreEqual(-1, id);
             Assert.IsNotNull(msr.ErrorMessage);
             msr.ErrorMessage = null;
 
             // Try to create a room
-            id = msr.CreateRoom("MyTestRoom");
+            id = msr.CreateRoom("MyTestRoom", "A super duper room", 50);
             Assert.IsTrue(id > 7); // 7 rooms from script
             Assert.IsNull(msr.ErrorMessage);
 
@@ -212,9 +212,11 @@ namespace CalendarApplication.Tests
             Assert.AreEqual(1, dt.Rows.Count);
 
             Assert.AreEqual("MyTestRoom", dt.Rows[0]["roomName"]);
+            Assert.AreEqual("A super duper room", dt.Rows[0]["description"]);
+            Assert.AreEqual(50, dt.Rows[0]["capacity"]);
 
             // Try to edit the room-name
-            bool ok = msr.RenameRoom(id, "MyRenamedRoom");
+            bool ok = msr.EditRoom(id, "MyRenamedRoom", "An even better room", 80);
             Assert.IsTrue(ok);
             Assert.IsNull(msr.ErrorMessage);
 
@@ -224,6 +226,8 @@ namespace CalendarApplication.Tests
             Assert.AreEqual(1, dt.Rows.Count);
 
             Assert.AreEqual("MyRenamedRoom", dt.Rows[0]["roomName"]);
+            Assert.AreEqual("An even better room", dt.Rows[0]["description"]);
+            Assert.AreEqual(80, dt.Rows[0]["capacity"]);
 
             // Now, delete the room
             ok = msr.DeleteRoom(id);

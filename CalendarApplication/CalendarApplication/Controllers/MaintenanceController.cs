@@ -122,14 +122,14 @@ namespace CalendarApplication.Controllers
             return View(mm);
         }
 
-        public ActionResult EditEventType(int eventId)
+        public ActionResult EditEventType(int eventTypeId)
         {
             // Check if user is logged in and is admin
             if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
             else if (!UserModel.GetCurrent().Admin) { return RedirectToAction("Index", "Home", null); }
 
             EventTypeModel etm = new EventTypeModel { TypeSpecific = new List<FieldDataModel>() };
-            if (eventId == -1)
+            if (eventTypeId == -1)
             {
                 etm.ID = -1;
             }
@@ -137,11 +137,11 @@ namespace CalendarApplication.Controllers
             {
                 string getType = "SELECT * FROM (eventtypes NATURAL LEFT JOIN eventtypefields) WHERE eventTypeId = @eid ORDER BY fieldOrder";
                 MySqlConnect msc = new MySqlConnect();
-                object[] argval = { eventId };
+                object[] argval = { eventTypeId };
                 string[] argnam = { "@eid" };
                 CustomQuery query = new CustomQuery { Cmd = getType, ArgNames = argnam, Args = argval };
                 DataTable dt = msc.ExecuteQuery(query);
-                etm.ID = eventId;
+                etm.ID = eventTypeId;
                 etm.Name = (string)dt.Rows[0]["eventTypeName"];
                 etm.ActiveFields = 0;
 
@@ -191,7 +191,7 @@ namespace CalendarApplication.Controllers
                 etm.TypeSpecific = new List<FieldDataModel>();
                 return View(etm);
             }
-            return RedirectToAction("Index","Maintenance",null);
+            return RedirectToAction("ManageEventTypes","Maintenance",null);
         }
 
         // Returns the partial needed for making new fields in edit event type
@@ -360,6 +360,55 @@ namespace CalendarApplication.Controllers
         }
 
         /// <summary>
+        /// Gets the page for managing event types
+        /// </summary>
+        /// <returns>The ManageEventTypes view</returns>
+        public ActionResult ManageEventTypes()
+        {
+            ManageEventTypeModel met = new ManageEventTypeModel
+            {
+                ActiveEventTypes = new List<SelectListItem>(),
+                InactiveEventTypes = new List<SelectListItem>()
+            };
+
+            MySqlConnect msc = new MySqlConnect();
+            CustomQuery query = new CustomQuery();
+            query.Cmd = "SELECT eventTypeId, eventTypeName, active FROM eventtypes";
+
+            DataTable dt = msc.ExecuteQuery(query);
+            if (dt != null)
+            {
+                foreach (DataRow dr in dt.Rows)
+                {
+                    SelectListItem et = new SelectListItem { Value = ((int)dr["eventTypeId"]).ToString(), Text = (string)dr["eventTypeName"] };
+                    
+                    if ((bool)dr["active"]) { met.ActiveEventTypes.Add(et); }
+                    else { met.InactiveEventTypes.Add(et); }
+                }
+            }
+            else
+            {
+                TempData["errorMsg"] = msc.ErrorMessage;
+            }
+
+            return View(met);
+        }
+
+        /// <summary>
+        /// Function for setting the active state of the given event type
+        /// </summary>
+        /// <param name="eventTypeId">The ID of the event type</param>
+        /// <param name="active">The new active state, true or false</param>
+        /// <returns>True on success, otherwise false</returns>
+        public bool SetEventTypeActive(int eventTypeId, bool active)
+        {
+            if (UserModel.GetCurrentUserID() == -1 || !UserModel.GetCurrent().Admin) { return false; }
+
+            MySqlEvent mse = new MySqlEvent();
+            return mse.SetEventTypeActive(eventTypeId,active);
+        }
+
+        /// <summary>
         /// Gets the page for editing a room - admins only
         /// </summary>
         /// <param name="roomId">Id of the room to edit, -1 for new room</param>
@@ -370,17 +419,18 @@ namespace CalendarApplication.Controllers
             if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
             else if (!UserModel.GetCurrent().Admin) { return RedirectToAction("Index", "Home", null); }
 
-            CalendarApplication.Models.Event.Room room = new CalendarApplication.Models.Event.Room{ ID = roomId, Name = "" };
+            CalendarApplication.Models.Event.Room room = new CalendarApplication.Models.Event.Room{ ID = roomId };
             if (roomId != -1)
             {
                 MySqlConnect sql = new MySqlConnect();
-                string que = "SELECT roomName FROM rooms WHERE roomId = @id";
+                string que = "SELECT roomName,capacity,description FROM rooms WHERE roomId = @id";
                 string[] argsn = { "@id" };
                 object[] args = { roomId };
                 CustomQuery query = new CustomQuery { Cmd = que, Args = args, ArgNames = argsn };
                 DataTable dt = sql.ExecuteQuery(query);
-                string name = (string)dt.Rows[0]["roomName"];
-                room.Name = name;
+                room.Name = dt.Rows[0]["roomName"] as string;
+                room.Description = dt.Rows[0]["description"] as string;
+                room.Capacity = dt.Rows[0]["capacity"] as int?;
             }
             return View(room);
         }
@@ -402,11 +452,11 @@ namespace CalendarApplication.Controllers
             MySqlRoom sqlrm = new MySqlRoom();
             if (roomId == -1)
             {
-                roomId = sqlrm.CreateRoom(room.Name);
+                roomId = sqlrm.CreateRoom(room.Name, room.Description, room.Capacity);
             }
             else
             {
-                worked = sqlrm.RenameRoom(roomId, room.Name);
+                worked = sqlrm.EditRoom(roomId, room.Name, room.Description, room.Capacity);
             }
 
             if ((roomId != room.ID) || worked)

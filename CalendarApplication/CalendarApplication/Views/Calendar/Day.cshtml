@@ -14,6 +14,16 @@
 
 <h3 style="color:red">@TempData["errorMsg"]</h3>
 
+@if(UserModel.GetCurrentUserID() != -1 && DateTime.Today <= Model.Date) {
+    <!-- Only set the js-variables if user is signed in -->
+    <script>
+        setDate('@Calendar.GetJSDate(Model.Date)');
+        offset = @Config.GetStartingHourOfDay();
+    </script>
+    
+    <div id="time_counter" class="time_counter"></div>
+}
+
 <form id="cal_form" method="post">
     <input type="hidden" name="Date" id="Date" value="@Model.Date.ToString("yyyy-MM-dd")" />
     @Html.HiddenFor(model => model.Mode)
@@ -33,7 +43,7 @@
                                 onclick="goto('@(Model.Date.AddDays(-1).ToString("yyyy-MM-dd"))')" />
                         </td>
                         <td style="padding:0;text-align:center;">
-                            @(Model.Date.Day + ". " + Calendar.MONTHS[Model.Date.Month-1] + " " + Model.Date.Year)
+                            @(Model.Date.Day + ". " + Calendar.MONTHS[Model.Date.Month - 1] + " " + Model.Date.Year)
                         </td>
                         <td style="text-align:right;padding:0;width:15%">
                             <input type="button" value="@(Model.Date.AddDays(1).ToString("d. MMM ->"))"
@@ -47,7 +57,7 @@
                         <td style="border-left:none;border-top:none"></td>
                         @foreach (SelectListItem room in Model.Filter.Rooms)
                         {
-                            if(room.Selected)
+                            if (room.Selected)
                             {
                                 <th>
                                     @room.Text
@@ -61,52 +71,60 @@
                             <td class="timestamp" rowspan="2">@offset.ToString("HH:mm")</td>
                             foreach (SelectListItem room in Model.Filter.Rooms)
                             {
-                                if(room.Selected)
+                                if (room.Selected)
                                 {
                                     <td class="row">
-                                        <div style="position:relative">
-                                            @foreach (BasicEvent e in Model.Events)
-                                            {
-                                                if (e.Rooms.Contains(new Room { ID = Convert.ToInt32(room.Value) }))
+                                        @* div needed for positioning of the other divs (events and selection) *@
+                                        <div id="room_wrap_@room.Value" style="position:relative">
+                                            <div id="room_@room.Value" class="room" style="position:absolute;z-index:1;width:100%;height:720px;">
+                                                @foreach (BasicEvent e in Model.Events)
                                                 {
-                                                    @* Calculate painting start and height *@
-                                                    int start = 0;
-                                                    if (e.Start > offset)
+                                                    if (e.Rooms.Contains(new Room { ID = Convert.ToInt32(room.Value) }))
                                                     {
-                                                        TimeSpan s = e.Start - offset;
-                                                        start = (s.Hours * 60 + s.Minutes) / 2;
-                                                    }
-                                                    int height = 720 - start;
-                                                    if (e.End < offset.AddDays(1))
-                                                    {
-                                                        if (start == 0)
+                                                        @* Calculate painting start and height *@
+                                                        int start = 0;
+                                                        if (e.Start > offset)
                                                         {
-                                                            TimeSpan s = e.End - offset;
-                                                            height = (s.Hours * 60 + s.Minutes) / 2;
+                                                            TimeSpan s = e.Start - offset;
+                                                            start = (s.Hours * 60 + s.Minutes) / 2;
                                                         }
-                                                        else
+                                                        int height = 720 - start;
+                                                        if (e.End < offset.AddDays(1))
                                                         {
-                                                            TimeSpan s = e.End - e.Start;
-                                                            height = (s.Hours * 60 + s.Minutes) / 2;
+                                                            if (start == 0)
+                                                            {
+                                                                TimeSpan s = e.End - offset;
+                                                                height = (s.Hours * 60 + s.Minutes) / 2;
+                                                            }
+                                                            else
+                                                            {
+                                                                TimeSpan s = e.End - e.Start;
+                                                                height = (s.Hours * 60 + s.Minutes) / 2;
+                                                            }
                                                         }
-                                                    }
                                             
-                                                    <div class="day-event"
-                                                        style="position:absolute;z-index:1;top:@(start)px;left:4px;width:92px;height:@(height)px;
-                                                                background-color:@(e.getColor());@(e.ViewVisible ? "cursor:pointer" : "")"
-                                                        @(e.ViewVisible ? "onclick=window.location='" + Url.Action("Index", "Event", new { eventId = e.ID }) + "'" : "")>
-                                                        @if (e.ViewVisible)
-                                                        {
-                                                            @e.Name <br />
-                                                            @* Creator: e.Creator and more fields *@
-                                                        }
-                                                        else
-                                                        {
-                                                            @:Room occupied!
-                                                        }
-                                                    </div>
+                                                        <div class="day-event" id="event_@e.ID"
+                                                            style="top:@(start)px;height:@(height)px;
+                                                                    background-color:@(e.getColor());@(e.ViewVisible ? "cursor:pointer" : "")">
+                                                            @if (e.ViewVisible)
+                                                            {
+                                                                @e.Name <br />
+                                                                @* Creator: e.Creator and more fields *@
+                                                                <script>addEventGoto(@e.ID);</script>
+                                                            }
+                                                            else
+                                                            {
+                                                                @:Room occupied!
+                                                            }
+                                                        </div>
+                                                    }
                                                 }
-                                            }  
+                                            </div>
+                                            @if (UserModel.GetCurrentUserID() != -1 && DateTime.Today <= Model.Date)
+                                            {
+                                                <!-- Only add rooms (add selection mechanism) if user is signed in -->
+                                                <script>addRoom(@(room.Value))</script>
+                                            }
                                         </div>
                                     </td>
                                 }
@@ -122,8 +140,9 @@
                                 <td class="timestamp" rowspan="2">@offset.ToString("HH:mm")</td>
                             }
                             @foreach (SelectListItem room in Model.Filter.Rooms)
-                            { 
-                                if (room.Selected) { <td class="row"></td> }
+                            {
+                                if (room.Selected)
+                                { <td class="row"></td> }
                             }
                         </tr>
                     }
@@ -134,17 +153,33 @@
 
                 @if (UserModel.GetCurrentUserID() != -1 && DateTime.Today <= Model.Date)
                 {
-                    @* A user is signed in... *@
-                    <input type="button" value="New event!" onclick="window.location='@Url.Action("EditEvent", "Event",
-                                                                    new
-                                                                    {
-                                                                        eventId = -1,
-                                                                        year = Model.Date.Year,
-                                                                        month = Model.Date.Month,
-                                                                        day = Model.Date.Day
-                                                                    })'"/>
+                    <fieldset style="text-align:center">
+                        <legend>Create event</legend>
+                        <br />
+                        @* A user is signed in... *@
+                        <input type="button" value="Create event!" onclick="createNewEvent()"/>
+                        <br />
+                        <br />
+                        <span style="color:gray;font-size:12px">Tip: click and drag to select<br />rooms and time.</span>
+                        <br />
+                        <input type="button" id="clear_button" value="Clear selection" onclick="removeAllSelections()" disabled="disabled" />
+                    </fieldset>
                 }
             </td>
         </tr>
     </table>
 </form>
+<br />
+@if (UserModel.GetCurrentUserID() != -1 && DateTime.Today <= Model.Date)
+{
+    <!-- Let the js-functions know where the events are -->
+    <script>
+        @foreach (BasicEvent e in Model.Events)
+        {
+            foreach (Room room in e.Rooms)
+            {
+                @:addEvent(@room.ID,'@Calendar.GetJSDate(e.Start)','@Calendar.GetJSDate(e.End)');
+            }
+        }
+    </script>
+}

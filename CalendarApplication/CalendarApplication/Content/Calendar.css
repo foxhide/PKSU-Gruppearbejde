@@ -14,8 +14,8 @@ td.calendar-month {
     text-align:left;
     vertical-align:top;
     padding:0;
-    width:100px;
-    height:80px;
+    width:130px;
+    height:86px;
     border:1px solid black;
 }
 
@@ -26,6 +26,7 @@ td.calendar-date-number {
     padding:0;
     font-size:14px;
     width:8px;
+    height:10px;
     background-color:black;
     color:white;
     cursor: pointer;
@@ -50,6 +51,14 @@ table.event-popup td {
 table.day-view {
     border-collapse:collapse;
     border-bottom:solid 1px black;
+
+    /* Remove selectable text/cells/etc in day-view table
+       to make selection work well */
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 table.day-view th {
     padding:0;
@@ -84,6 +93,57 @@ table.day-view td.row {
 div.day-event {
     text-align:center;
     vertical-align:middle;
+    border-radius:4px;
+    border:1px black solid;
+    width:98%;
+    position:absolute;
+    z-index:2;
+}
+/* The selection box */
+div.selection {
+    border:1px black dashed;
+    z-index:3;
+    background-color:#4747FF;
+    opacity:0.4;
+}
+/* Selection box error */
+div.selection-bad {
+    background-color:#FF3300;
+}
+/* Drag handles in selection box */
+div.selection div.dragger {
+    width:90%;
+    height:3px;
+    border:1px black solid;
+    position:absolute;
+    border-radius:2px;
+    left:5%;
+    cursor:row-resize;
+}
+/* Remove button in selection box */
+div.selection div.remove {
+    border:1px solid black;
+    border-radius:8px;
+    width:16px;
+    height:16px;
+    color:white;
+    background-color:black;
+    position:absolute;
+    right:5%;
+    top:8px;
+    cursor:pointer;
+    opacity:1;
+    z-index:9;
+}
+/* Time-counter box */
+div.time_counter {
+    border:1px black solid;
+    border-radius:3px;
+    background-color:black;
+    display:none;
+    color:white;
+    position:absolute;
+    z-index:10;
 }
 
 /**************************************************/

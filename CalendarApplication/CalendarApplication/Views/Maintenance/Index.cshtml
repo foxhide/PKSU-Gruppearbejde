@@ -41,7 +41,7 @@
 @Html.HiddenFor(m => Model.SubmitValue);
 <fieldset>
     <legend>Event types</legend>
-    <table>
+    <!--<table>
         <tr>
             <td>
                 @Html.DropDownListFor(m => Model.SelectedEventType, new SelectList(Model.EventTypes, "Value", "Text"))
@@ -53,7 +53,8 @@
                 <input type="submit" value="Create new" onclick="setSubmitValue(1)" />
             </td>
         </tr>
-    </table>
+    </table>-->
+    @Html.ActionLink("Manage event types","ManageEventTypes")
 </fieldset>
 
 <fieldset>
@@ -92,7 +93,7 @@
                 @Html.DropDownListFor(m => Model.SelectedRoom, new SelectList(Model.Rooms, "Value", "Text"))
             </td>
             <td>
-                <input type="submit" value="Rename" onclick="setSubmitValue(4)" />
+                <input type="submit" value="Edit" onclick="setSubmitValue(4)" />
             </td>
             <td>
                 <input type="submit" value="Delete" onclick="deleteRoom()" />

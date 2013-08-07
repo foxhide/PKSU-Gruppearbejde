@@ -17,7 +17,8 @@ namespace CalendarApplication.Models.EventType
         Bool,
         UserList,
         GroupList,
-        FileList
+        FileList,
+        TextList
     }
 
     public class FieldDataModel
@@ -34,7 +35,8 @@ namespace CalendarApplication.Models.EventType
                 "Checkbox",
                 "List of users",
                 "List of groups",
-                "List of files"
+                "List of files",
+                "Text list"
             };
 
         public FieldDataModel()
@@ -84,10 +86,11 @@ namespace CalendarApplication.Models.EventType
                 case Fieldtype.Group: return "int"; //groupId
                 case Fieldtype.File: return "int";  //fileId
                 case Fieldtype.Bool: return "tinyint(1)";    //Yes/No
-                case Fieldtype.UserList:
-                case Fieldtype.GroupList:
+                case Fieldtype.UserList: return "tinyint(1)";  //Dummy type for lists
+                case Fieldtype.GroupList: return "tinyint(1)";  //Dummy type for lists
                 case Fieldtype.FileList: return "tinyint(1)";  //Dummy type for lists
-                default: return "int";
+                case Fieldtype.TextList: return "tinyint(1)";  //Dummy type for lists
+                default: throw new Exception("Unimplemented Datatype: " + this.Datatype);
             }
         }
 
@@ -105,7 +108,8 @@ namespace CalendarApplication.Models.EventType
                 case Fieldtype.UserList: return 7;
                 case Fieldtype.GroupList: return 8;
                 case Fieldtype.FileList: return 9;
-                default: return -1;
+                case Fieldtype.TextList: return 10;
+                default: throw new Exception("Unimplemented Datatype: " + this.Datatype);
             }
         }
 
