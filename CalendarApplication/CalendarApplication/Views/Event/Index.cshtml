@@ -105,7 +105,7 @@ else
     <div id="options_pane">
         <table>
             <tr><th>Options</th></tr>
-            <tr><td><input type="button" onclick="newWindowUrl('@Url.Action("PrintEvent", "Event", new { eventId = Model.ID }, null)', 'Print Event')" value="Print Event" style="width:100%" /></td></tr>
+            <tr><td><input type="button" onclick="newWindowUrl('@Url.Action("PrintEvent", "Event", new { eventId = Model.ID }, null)', 'Print Event')" value="Printable Event" style="width:100%" /></td></tr>
             @if (UserModel.EditAuthentication(Model.ID, UserModel.GetCurrentUserID()))
             {
                 <tr><td>
