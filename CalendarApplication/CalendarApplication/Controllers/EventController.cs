@@ -853,8 +853,9 @@ namespace CalendarApplication.Controllers
             List<SelectListItem> result = new List<SelectListItem>();
             CustomQuery query = new CustomQuery
             {
-                Cmd = "SELECT userId,userName,fieldId FROM users NATURAL LEFT JOIN userlist "
-                        + " WHERE active = 1 OR (fieldId = @fid AND eventId = @eid) ORDER BY userName",
+                Cmd = "SELECT userId,userName,fieldId FROM users NATURAL LEFT JOIN "
+                      + " (SELECT * FROM userlist WHERE fieldId = @fid AND eventId = @eid) AS ul "
+                      + " WHERE active = 1 OR fieldId IS NOT NULL ORDER BY userName",
                 ArgNames = new[] { "@eid", "@fid" },
                 Args = new[] { (object)eventId, (object)fieldId }
             };
