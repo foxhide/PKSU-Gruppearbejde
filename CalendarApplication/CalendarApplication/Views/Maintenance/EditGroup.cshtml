@@ -6,24 +6,12 @@
 
 @using CalendarApplication.Models.User;
 
-<script src="@Url.Content("~/Scripts/create-eventtype.js?" + CalendarApplication.Models.Maintenance.Config.GetVersion())" type="text/javascript"></script>
-
 <h2>@(Model.ID != -1 ? "Edit Group" : "Create Group")</h2>
 
 <h3 style="color:red">@TempData["errorMsg"]</h3>
 
 @using (Html.BeginForm(new { ReturnUrl = ViewBag.ReturnUrl }))
-{
-    
-    <!--Consider putting some description here!-->
-    
-    <!--Styles needed for fields view. Putting it here avoids duplication code-->
-    <style>
-        #fields td {padding:0;padding-left:5px;padding-right:5px}
-        #fields tr {padding:0;}
-        #fields th {padding:0;}
-    </style>
-    
+{    
     <table>
         <tr>
             <td>
@@ -49,7 +37,7 @@
             <td>
                 <fieldset>
                     <legend>@Html.LabelFor(model => model.canCreate)</legend>
-                    @Html.ListEditorFor(m => m.canCreate, "Can create and edit events", "Group Members")
+                    @Html.ListEditorFor(m => m.canCreate, "Can create events", "Group Members")
                 </fieldset>
             </td>
         </tr>
@@ -57,7 +45,7 @@
             <td>
                 <fieldset>
                     <legend>@Html.LabelFor(model => model.groupMembers)</legend>
-                    @Html.ListEditorFor(m => m.groupMembers, "Group Members", "Approved Users")
+                    @Html.ListEditorFor(m => m.groupMembers, "Group Members", "Non-members")
                 </fieldset>
             </td>
         </tr>

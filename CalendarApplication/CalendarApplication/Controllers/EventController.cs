@@ -373,9 +373,10 @@ namespace CalendarApplication.Controllers
             }
 
             // Get list of users
+            // Admins and the creator are not needed, since they can edit anyway
             eem.UserEditorList = new List<SelectListItem>();
-            string usercmd = eem.ID == -1 ? "SELECT userId,userName FROM users WHERE admin = 0 AND userId != @uid ORDER BY userName"
-                               : "SELECT userId,userName,eventId FROM ( SELECT * FROM users WHERE admin = 0 AND userId != @uid ) AS u  NATURAL LEFT JOIN "
+            string usercmd = eem.ID == -1 ? "SELECT userId,userName FROM users WHERE active = 1 AND admin = 0 AND userId != @uid ORDER BY userName"
+                               : "SELECT userId,userName,eventId FROM ( SELECT * FROM users WHERE active = 1 AND admin = 0 AND userId != @uid ) AS u  NATURAL LEFT JOIN "
                                 + " ( SELECT * FROM eventeditorsusers WHERE eventId = @eid ) AS e ORDER BY userName";
             int creatorID = eem.ID == -1 ? UserModel.GetCurrentUserID() : eem.CreatorId;
             CustomQuery userquery = new CustomQuery
