@@ -589,7 +589,7 @@ namespace CalendarApplication.Controllers
                     }
                     else if (fm.Datatype == Fieldtype.User)
                     {
-                        users = users == null ? this.GetUsers(mse, true) : users;
+                        users = users == null ? this.GetUsers(mse, true, 0) : users;
                         fm.List = users;
                     }
                 }
@@ -664,9 +664,9 @@ namespace CalendarApplication.Controllers
                         switch (fm.Datatype)
                         {
                             case Fieldtype.Float: fm.FloatValue = null; break; //float
-                            case Fieldtype.UserList: if (users == null) { users = this.GetUsers(msc, false); }
+                            case Fieldtype.UserList: if (users == null) { users = this.GetUsers(msc, false, 0); }
                                 fm.List = users; break;
-                            case Fieldtype.User: if (usersDrop == null) { usersDrop = this.GetUsers(msc, true); }
+                            case Fieldtype.User: if (usersDrop == null) { usersDrop = this.GetUsers(msc, true, 0); }
                                 fm.List = usersDrop; fm.IntValue = 0; break;
                             case Fieldtype.GroupList: if (groups == null) { groups = this.GetGroups(msc, false); }
                                 fm.List = groups; break;
@@ -690,9 +690,10 @@ namespace CalendarApplication.Controllers
                             case Fieldtype.Float: fm.FloatValue = row["field_" + fm.ID] is DBNull ? null : (float?)row["field_" + fm.ID];
                                                 break; //float
                             case Fieldtype.UserList: fm.List = this.GetUsersValues(msc, eventId, fm.ID); break;
-                            case Fieldtype.User: if (usersDrop == null) { usersDrop = this.GetUsers(msc, true); }
+                            case Fieldtype.User: int selectedUser = row["field_" + fm.ID] is DBNull ? 0 : (int)row["field_" + fm.ID];
+                                                if (usersDrop == null) { usersDrop = this.GetUsers(msc, true, selectedUser); }
                                                 fm.List = usersDrop;
-                                                fm.IntValue = row["field_" + fm.ID] is DBNull ? 0 : (int)row["field_" + fm.ID];
+                                                fm.IntValue = selectedUser;
                                                 break;
                             case Fieldtype.GroupList: fm.List = this.GetGroupsValues(msc, eventId, fm.ID); break;
                             case Fieldtype.Group: if (groupsDrop == null) { groupsDrop = this.GetGroups(msc, true); }
@@ -748,12 +749,12 @@ namespace CalendarApplication.Controllers
         /// <param name="msc">MySqlConnect object</param>
         /// <param name="nullVal">If true, includes a null-value</param>
         /// <returns>A SelecetListItem list of users</returns>
-        private List<SelectListItem> GetUsers(MySqlConnect msc, bool nullVal)
+        private List<SelectListItem> GetUsers(MySqlConnect msc, bool nullVal, int select)
         {
             List<SelectListItem> result = new List<SelectListItem>();
             if (nullVal) { result.Insert(0, new SelectListItem { Value = "0", Text = "Select user" }); }
-            string usercmd = "SELECT userId,userName FROM users ORDER BY userName";
-            CustomQuery userquery = new CustomQuery { Cmd = usercmd, ArgNames = new string[] { }, Args = new object[] { } };
+            string usercmd = "SELECT userId,userName FROM users WHERE active = 1 OR userId = @sel ORDER BY userName";
+            CustomQuery userquery = new CustomQuery { Cmd = usercmd, ArgNames = new string[] { "@sel" }, Args = new object[] { select } };
             DataTable dt = msc.ExecuteQuery(userquery);
             if (dt != null)
             {
@@ -852,9 +853,8 @@ namespace CalendarApplication.Controllers
             List<SelectListItem> result = new List<SelectListItem>();
             CustomQuery query = new CustomQuery
             {
-                Cmd = "SELECT userId,userName,fieldId FROM users NATURAL LEFT JOIN"
-                        + "(SELECT fieldId,userId FROM userlist WHERE eventId = @eid AND fieldId = @fid) AS ul"
-                        + " ORDER BY userName",
+                Cmd = "SELECT userId,userName,fieldId FROM users NATURAL LEFT JOIN userlist "
+                        + " WHERE active = 1 OR (fieldId = @fid AND eventId = @eid) ORDER BY userName",
                 ArgNames = new[] { "@eid", "@fid" },
                 Args = new[] { (object)eventId, (object)fieldId }
             };
