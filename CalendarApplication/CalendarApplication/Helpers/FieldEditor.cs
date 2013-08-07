@@ -133,18 +133,18 @@ namespace CalendarApplication.Helpers
                 string viewName = name + ".StringList";
                 for (int i = 0; i < model.StringList.Count; i++)
                 {
+                    builder.AppendLine("<div id='" + id + "_" + i + "'>");
                     // the following could possibly be replaced with repeated usage of StringListPartial view
                     // divs, inputs and so on are the same
-                    builder.AppendLine("<div id='" + id + "_" + i + "'>");
-                    builder.AppendLine("<div id='" + id + "_" + i + "_Text_char_counter'>Characters left: 250</div>");
+                    builder.AppendLine("<div id='" + id + "_" + i + "_Text_char_counter'>Characters left: " + (250 - model.StringList[i].Text.Length) + "</div>");
                     builder.AppendLine("<input type='text' id='" + id + "_" + i +"_Text' ");
                     builder.AppendLine("name='" + viewName + "[" + i + "].Text' value='" + model.StringList[i].Text + "' "); 
-                    builder.AppendLine("onkeyup=\"updateCounter('" + id + "_" + i + "', 250); setState(); validateInput('" + id + "','StringList',true,true);\" />");
+                    builder.AppendLine("onkeyup=\"updateCounter('" + id + "_" + i + "_Text', 250); setState(); validateInput('" + id + "','StringList',true,true);\" />");
                     builder.AppendLine("<input type='hidden' id='" + id + "_" + i + "_Active' ");
                     builder.AppendLine("name='" + viewName + "[" + i + "].Active' value='true'>");
                     builder.AppendLine("<input type='hidden' id='" + id + "_" + i + "_ID' ");
                     builder.AppendLine("name='" + viewName + "[" + i + "].ID' value='" + model.StringList[i].ID + "'>");
-                    builder.AppendLine("<input type=\"button\" value=\"Remove\" onclick=\"removeStringListField('" + id + "_" + i + "')\" />");
+                    builder.AppendLine("<input type=\"button\" value=\"Remove\" onclick=\"removeStringListField('" + id + "_" + i + "'); setState();\" />");
                     builder.AppendLine("</div>");
                     
                 }
