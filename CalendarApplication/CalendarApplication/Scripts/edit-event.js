@@ -104,7 +104,7 @@ function checkApprove() {
         var req = $(jid + "_RequiredApprove").val();
         if (req.toLowerCase() == "true") {
             var dataType = $(jid + "_Datatype").val();
-            dataType = dataType.substring(dataType.length - 4) == "List" ? "List" : dataType;
+            dataType = dataType.substring(dataType.length - 4) == "List" && dataType != "TextList" ? "List" : dataType;
             if (!validateInput(id, dataType, false, false)) { return false; }
         }
     }

@@ -7,8 +7,8 @@
 @using CalendarApplication.Models.Event;
 @using CalendarApplication.Models.Calendar;
 
-<script src="@Url.Content("~/Scripts/calendar-script.js")" type="text/javascript"></script>
-<link href="@Url.Content("~/Content/Calendar.css")" rel="stylesheet" type="text/css" />
+<script src="@Url.Content("~/Scripts/calendar-script.js?" + CalendarApplication.Models.Maintenance.Config.GetVersion())" type="text/javascript"></script>
+<link href="@Url.Content("~/Content/Calendar.css?" + CalendarApplication.Models.Maintenance.Config.GetVersion())" rel="stylesheet" type="text/css" />
 
 <h3 style="color:red">@TempData["errorMsg"]</h3>
 

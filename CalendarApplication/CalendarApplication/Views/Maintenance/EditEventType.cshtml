@@ -6,7 +6,7 @@
 
 @using CalendarApplication.Models.EventType;
 
-<script src="@Url.Content("~/Scripts/create-eventtype.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/create-eventtype.js?" + CalendarApplication.Models.Maintenance.Config.GetVersion()) type="text/javascript"></script>
 
 <h2>@(Model.ID != -1 ? "Edit Event Type" : "Create Event Type")</h2>
 

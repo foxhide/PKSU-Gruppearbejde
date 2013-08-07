@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Configuration;
 
 namespace CalendarApplication.Models.Maintenance
 {
@@ -11,9 +12,14 @@ namespace CalendarApplication.Models.Maintenance
     /// </summary>
     public static class Config
     {
+        public static string GetVersion()
+        {
+            return ConfigurationManager.AppSettings["CalendarApplication:Version"];
+        }
+
         public static int GetStartingHourOfDay()
         {
-            return 6;
+            return int.Parse(ConfigurationManager.AppSettings["CalendarApplication:StartingHourOfDay"]);
         }
     }
 }

@@ -374,14 +374,15 @@ namespace CalendarApplication.Controllers
 
             // Get list of users
             eem.UserEditorList = new List<SelectListItem>();
-            string usercmd = eem.ID == -1 ? "SELECT userId,userName FROM users ORDER BY userName"
-                               : "SELECT userId,userName,eventId FROM users NATURAL LEFT JOIN "
+            string usercmd = eem.ID == -1 ? "SELECT userId,userName FROM users WHERE admin = 0 AND userId != @uid ORDER BY userName"
+                               : "SELECT userId,userName,eventId FROM ( SELECT * FROM users WHERE admin = 0 AND userId != @uid ) AS u  NATURAL LEFT JOIN "
                                 + " ( SELECT * FROM eventeditorsusers WHERE eventId = @eid ) AS e ORDER BY userName";
+            int creatorID = eem.ID == -1 ? UserModel.GetCurrentUserID() : eem.CreatorId;
             CustomQuery userquery = new CustomQuery
             {
                 Cmd = usercmd,
-                ArgNames = new[] { "@eid" },
-                Args = new[] { (object)eem.ID }
+                ArgNames = new[] { "@eid", "@uid" },
+                Args = new[] { (object)eem.ID, creatorID }
             };
 
             dt = msc.ExecuteQuery(userquery);
