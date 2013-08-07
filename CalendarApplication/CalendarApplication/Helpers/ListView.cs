@@ -87,7 +87,7 @@ namespace CalendarApplication.Helpers
 
             if (labels != null)
             {
-                w.WriteLine("<tr>");
+                w.WriteLine("<tr id='" + id + "_trow'>");
                 for (int i = 0; i < labels.Length; i++)
                 {
                     w.WriteLine("<td id='" + id + "_td_" + i + "' style='padding-top:0;padding-bottom:0'></td>");

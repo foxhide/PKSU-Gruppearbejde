@@ -139,7 +139,7 @@ function updateList(id, cols, maxHeight) {
         firsthd.width(firsthd.width() + 1);
 
         // Calculate the missing width (scrollbar) and offset the last header width
-        var scrollbar = $("#" + id).width() - $("#" + id + "_hrow").width();
+        var scrollbar = $("#" + id).width() - $("#" + id + "_trow").width() + 2;
         var lasthd = $("#" + id + "_hd_" + (i - 1));
         lasthd.width(lasthd.width() + scrollbar);
     }
