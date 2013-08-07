@@ -10,7 +10,7 @@
 @using CalendarApplication.Models.Calendar
 
 <script>
-    /* Function for printing an event to a pdf */
+    /* OBSOLETE Function for printing an event to a pdf
     function printEvent(eventId) {
         $.ajax({
             url: "/Event/PrintEvent",
@@ -18,7 +18,7 @@
             data: { eventId: eventId },
             success: function (result) { window.open(result); }
         });
-    }
+    } */
 
     // Variable used to keep track of event state
     var cur_state = @Model.State;
@@ -105,7 +105,7 @@ else
     <div id="options_pane">
         <table>
             <tr><th>Options</th></tr>
-            <tr><td><input type="button" onclick="printEvent(@(Model.ID))" value="Print Event" style="width:100%" disabled="disabled" /></td></tr>
+            <tr><td><input type="button" onclick="gotoUrl('@Url.Action("PrintEvent", "Event", new { eventId = Model.ID }, null )')" value="Print Event" style="width:100%" /></td></tr>
             @if (UserModel.EditAuthentication(Model.ID, UserModel.GetCurrentUserID()))
             {
                 <tr><td>

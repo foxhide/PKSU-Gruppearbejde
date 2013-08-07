@@ -1,0 +1,22 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Stengade calendar application - @ViewBag.Title</title>
+
+    @* Page-wide scripts and css needed *@
+    <link href="@Url.Content("~/Content/Site.css")" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    <table class="layout-style-basic">
+        <tr>
+            <td class="layout-body">
+                @RenderBody()
+            </td>
+        </tr>
+        </table>
+</body>
+
+</html>
