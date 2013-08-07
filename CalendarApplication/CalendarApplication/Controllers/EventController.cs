@@ -886,6 +886,7 @@ namespace CalendarApplication.Controllers
         private void GetEventTypes(EventEditModel eem, MySqlConnect msc)
         {
             eem.EventTypes = new List<SelectListItem>();
+            eem.CanChangeType = true;
             if (eem.ID == -1) { eem.EventTypes.Add(new SelectListItem { Value = "0", Text = "Select event type" }); }
             CustomQuery userquery = new CustomQuery();
             int selectedId = Convert.ToInt32(eem.SelectedEventType);
@@ -916,7 +917,7 @@ namespace CalendarApplication.Controllers
                         Text = (string)dr["eventTypeName"]
                     });
                     // Set canchange based on active field
-                    if((int)dr["eventTypeId"] == selectedId) {
+                    if(eem.ID != -1 && (int)dr["eventTypeId"] == selectedId) {
                         eem.CanChangeType = (bool)dr["active"];
                     }
                 }
