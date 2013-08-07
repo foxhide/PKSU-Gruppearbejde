@@ -31,10 +31,15 @@ namespace CalendarApplication.Controllers
             return View(this.GetEvent(eventId));
         }
 
-        [HttpPost]
-        public string PrintEvent(int eventId)
+        public ActionResult PrintEvent(int eventId)
         {
-            return EventBuilder.BuildPDF(GetEvent(eventId));
+            // Check if current user may view this event.
+            if (!UserModel.ViewAuthentication(eventId, UserModel.GetCurrentUserID()))
+            {
+                if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
+                else { return RedirectToAction("Index", "Home", null); }
+            }
+            return View(this.GetEvent(eventId));
         }
 
         public EventWithDetails GetEvent(int eventId)

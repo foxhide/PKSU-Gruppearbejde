@@ -1,0 +1,18 @@
+﻿@model CalendarApplication.Models.Event.EventWithDetails
+@{
+    ViewBag.Title = "PrintEvent";
+    Layout = "~/Views/Shared/_PrintEvent.cshtml";
+}
+
+@using CalendarApplication.Models.Event
+@using CalendarApplication.Models.EventType
+@using CalendarApplication.Models.User
+@using CalendarApplication.Models.Calendar
+
+<table>
+    <tr>
+        <td>
+            @(Model.Creator)
+        </td>
+    </tr>
+</table>

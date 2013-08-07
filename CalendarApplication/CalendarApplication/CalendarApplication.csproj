@@ -257,6 +257,8 @@
     <Content Include="Views\Group\Index.cshtml" />
     <Content Include="Views\Group\ViewGroup.cshtml" />
     <Content Include="Views\Group\SetPrivileges.cshtml" />
+    <Content Include="Views\Event\PrintEvent.cshtml" />
+    <Content Include="Views\Shared\_PrintEvent.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
