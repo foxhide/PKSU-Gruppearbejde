@@ -11,7 +11,7 @@ namespace CalendarApplication.Models.Group
     {
         public string Name { get; set; }
         public int ID { get; set; }
-        [Display(Name = "Event types allowed to view, create and edit")]
+        [Display(Name = "Event types allowed to view and create")]
         public List<SelectListItem> EventTypes { set; get; }
     }
 }
