@@ -1,13 +1,12 @@
 ﻿@model CalendarApplication.Models.Event.StringListModel
 
 
-        <div id='@(Model.ViewID + "_" + Model.Place)_Text_char_counter'>Characters left: 250</div>
-        <input type='text' id='@(Model.ViewID + "_" + Model.Place)_Text'
-            name='@(Model.ViewName + "[" + Model.Place + "]").Text' value='@Model.Text' 
-            onkeyup="updateCounter('@(Model.ViewID + "_" + Model.Place + "_Text")','250'); setState(); validateInput('@(Model.ViewID)','StringList',true,true);" />
-        <input type='hidden' id='@(Model.ViewID + "_" + Model.Place)_Active' name='@(Model.ViewName +
-            "[" + Model.Place + "].Active")' value='true'>
-        <input type='hidden' id='@(Model.ViewID + "_" + Model.Place)_ID' name='@(Model.ViewName +
-                "[" + Model.Place + "].ID")' value='-1'>
-        <input type='button' value='Remove' onclick="removeStringListField('@(Model.ViewID + "_" + Model.Place)')" />
-         
+    <div id='@(Model.ViewID + "_" + Model.Place)_Text_char_counter'>Characters left: 250</div>
+    <input type='text' id='@(Model.ViewID + "_" + Model.Place)_Text'
+        name='@(Model.ViewName + "[" + Model.Place + "]").Text' value='@Model.Text' 
+        onkeyup="updateCounter('@(Model.ViewID + "_" + Model.Place + "_Text")','250'); setState(); validateInput('@(Model.ViewID)','StringList',true,true);" />
+    <input type='hidden' id='@(Model.ViewID + "_" + Model.Place)_Active' name='@(Model.ViewName +
+        "[" + Model.Place + "].Active")' value='true'>
+    <input type='hidden' id='@(Model.ViewID + "_" + Model.Place)_ID' name='@(Model.ViewName +
+            "[" + Model.Place + "].ID")' value='-1'>
+    <input type='button' value='Remove' onclick="removeStringListField('@(Model.ViewID + "_" + Model.Place)'; setState();)" />

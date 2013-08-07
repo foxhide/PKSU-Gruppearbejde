@@ -7,7 +7,7 @@
 <h2>Edit profile</h2>
 <h3 style="color:red">@TempData["errorMsg"]</h3>
 
-<script src="@Url.Content("~/Scripts/edit-user.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/edit-user.js?" + CalendarApplication.Models.Maintenance.Config.GetVersion())" type="text/javascript"></script>
 
 <style>
     .password-table {
