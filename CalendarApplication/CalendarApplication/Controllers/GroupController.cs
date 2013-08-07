@@ -70,7 +70,7 @@ namespace CalendarApplication.Controllers
 
             string cmd2 = "SELECT groupId, groupName, groupLeader, canCreate, firstName, lastName, userId "
                          + "FROM groups NATURAL JOIN groupmembers NATURAL JOIN users "
-                         + "WHERE groupId = @gid AND active = 1 ORDER BY userName";
+                         + "WHERE groupId = @gid AND active = 1 ORDER BY firstName";
             //perhaps inactive members should be shown anyway?
             string[] argnam2 = { "@gid" };
             object[] args2 = { groupId };

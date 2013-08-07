@@ -88,7 +88,7 @@ namespace CalendarApplication.Controllers
 
             UserListModel model = new UserListModel { UserList = new List<UserModel>() };
             MySqlConnect msc = new MySqlConnect();
-            string usrcmd = "SELECT * FROM users WHERE active = 1 ORDER BY lastName";
+            string usrcmd = "SELECT * FROM users WHERE active = 1 ORDER BY firstName";
             CustomQuery usrquery = new CustomQuery { Cmd = usrcmd, ArgNames = { }, Args = { } };
             DataTable dt = msc.ExecuteQuery(usrquery);
 

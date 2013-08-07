@@ -128,7 +128,7 @@ namespace CalendarApplication.Controllers
                                 else
                                 {
                                     fm.IntValue = (int)ds.Tables[0].Rows[0]["field_" + fm.ID];
-                                    fm.StringValue = UserModel.GetUser(fm.IntValue).UserName;
+                                    fm.StringValue = UserModel.GetUser(fm.IntValue).GetFullName();
                                 }
                                 break;
 
@@ -174,8 +174,8 @@ namespace CalendarApplication.Controllers
             }
             else if (type == Fieldtype.UserList)
             {
-                query.Cmd = "SELECT userId,userName FROM users NATURAL JOIN userlist"
-                            + " WHERE eventId = @eid AND fieldId = @fid";
+                query.Cmd = "SELECT userId,firstName,lastName FROM users NATURAL JOIN userlist"
+                            + " WHERE eventId = @eid AND fieldId = @fid ORDER BY firstName";
                 DataTable dt = msc.ExecuteQuery(query);
                 if (dt != null)
                 {
@@ -183,7 +183,7 @@ namespace CalendarApplication.Controllers
                     {
                         result.Add(new SelectListItem
                         {
-                            Text = (string)dr["userName"],
+                            Text = (string)dr["firstName"] + " " + (string)dr["lastName"],
                             Value = ((int)dr["userId"]).ToString()
                         });
                     }
@@ -375,9 +375,9 @@ namespace CalendarApplication.Controllers
             // Get list of users
             // Admins and the creator are not needed, since they can edit anyway
             eem.UserEditorList = new List<SelectListItem>();
-            string usercmd = eem.ID == -1 ? "SELECT userId,userName FROM users WHERE active = 1 AND admin = 0 AND userId != @uid ORDER BY userName"
-                               : "SELECT userId,userName,eventId FROM ( SELECT * FROM users WHERE active = 1 AND admin = 0 AND userId != @uid ) AS u  NATURAL LEFT JOIN "
-                                + " ( SELECT * FROM eventeditorsusers WHERE eventId = @eid ) AS e ORDER BY userName";
+            string usercmd = eem.ID == -1 ? "SELECT userId,firstName,lastName FROM users WHERE active = 1 AND admin = 0 AND userId != @uid ORDER BY firstName"
+                               : "SELECT userId,firstName,lastName,eventId FROM ( SELECT * FROM users WHERE active = 1 AND admin = 0 AND userId != @uid ) AS u  NATURAL LEFT JOIN "
+                                + " ( SELECT * FROM eventeditorsusers WHERE eventId = @eid ) AS e ORDER BY firstName";
             int creatorID = eem.ID == -1 ? UserModel.GetCurrentUserID() : eem.CreatorId;
             CustomQuery userquery = new CustomQuery
             {
@@ -394,7 +394,7 @@ namespace CalendarApplication.Controllers
                     SelectListItem user = new SelectListItem
                     {
                         Value = ((int)dr["userId"]).ToString(),
-                        Text = (string)dr["userName"]
+                        Text = (string)dr["firstName"] + " " + (string)dr["lastName"]
                     };
                     if (eem.ID != -1) { user.Selected = !(dr["eventId"] is DBNull); }
                     eem.UserEditorList.Add(user);
@@ -753,7 +753,7 @@ namespace CalendarApplication.Controllers
         {
             List<SelectListItem> result = new List<SelectListItem>();
             if (nullVal) { result.Insert(0, new SelectListItem { Value = "0", Text = "Select user" }); }
-            string usercmd = "SELECT userId,userName FROM users WHERE active = 1 OR userId = @sel ORDER BY userName";
+            string usercmd = "SELECT userId,firstName,lastName FROM users WHERE active = 1 OR userId = @sel ORDER BY firstName";
             CustomQuery userquery = new CustomQuery { Cmd = usercmd, ArgNames = new string[] { "@sel" }, Args = new object[] { select } };
             DataTable dt = msc.ExecuteQuery(userquery);
             if (dt != null)
@@ -763,7 +763,7 @@ namespace CalendarApplication.Controllers
                     result.Add(new SelectListItem
                     {
                         Value = ((int)dr["userId"]).ToString(),
-                        Text = (string)dr["userName"]
+                        Text = (string)dr["firstName"] + " " + (string)dr["lastName"]
                     });
                 }
             }
@@ -853,9 +853,9 @@ namespace CalendarApplication.Controllers
             List<SelectListItem> result = new List<SelectListItem>();
             CustomQuery query = new CustomQuery
             {
-                Cmd = "SELECT userId,userName,fieldId FROM users NATURAL LEFT JOIN "
+                Cmd = "SELECT userId,firstName,lastName,fieldId FROM users NATURAL LEFT JOIN "
                       + " (SELECT * FROM userlist WHERE fieldId = @fid AND eventId = @eid) AS ul "
-                      + " WHERE active = 1 OR fieldId IS NOT NULL ORDER BY userName",
+                      + " WHERE active = 1 OR fieldId IS NOT NULL ORDER BY firstName",
                 ArgNames = new[] { "@eid", "@fid" },
                 Args = new[] { (object)eventId, (object)fieldId }
             };
@@ -867,7 +867,7 @@ namespace CalendarApplication.Controllers
                     result.Add(new SelectListItem
                     {
                         Value = ((int)dr["userId"]).ToString(),
-                        Text = (string)dr["userName"],
+                        Text = (string)dr["firstName"] + " " +  (string)dr["lastName"],
                         Selected = !(dr["fieldId"] is DBNull) // Selected if in userlist
                     });
                 }

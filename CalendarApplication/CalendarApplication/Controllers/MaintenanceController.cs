@@ -218,9 +218,9 @@ namespace CalendarApplication.Controllers
             
             MySqlConnect msc = new MySqlConnect();
 
-            string cmd0 = "SELECT * FROM users WHERE needsApproval = @needsApproval";
-            string[] argnames0 = { "@needsApproval" };
-            object[] args0 = { 0 };
+            string cmd0 = "SELECT * FROM users WHERE needsApproval = 0 ORDER BY firstName ";
+            string[] argnames0 = {  };
+            object[] args0 = {  };
             CustomQuery query0 = new CustomQuery { Cmd = cmd0, ArgNames = argnames0, Args = args0 };
             string cmd1 = "SELECT * FROM groups NATURAL LEFT JOIN groupmembers NATURAL LEFT JOIN users WHERE groupId = @groupId";
             string[] argnames1 = { "@groupId" };
@@ -345,7 +345,7 @@ namespace CalendarApplication.Controllers
             };
 
             MySqlConnect msc = new MySqlConnect();
-            CustomQuery query = new CustomQuery { Cmd = "SELECT userId,firstName,lastName,needsApproval,active FROM users ORDER BY lastName" };
+            CustomQuery query = new CustomQuery { Cmd = "SELECT userId,firstName,lastName,needsApproval,active FROM users ORDER BY firstName" };
             DataTable dt = msc.ExecuteQuery(query);
 
             foreach (DataRow dr in dt.Rows)
