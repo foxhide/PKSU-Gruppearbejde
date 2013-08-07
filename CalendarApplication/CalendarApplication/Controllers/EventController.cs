@@ -886,19 +886,22 @@ namespace CalendarApplication.Controllers
             eem.EventTypes = new List<SelectListItem>();
             if (eem.ID == -1) { eem.EventTypes.Add(new SelectListItem { Value = "0", Text = "Select event type" }); }
             CustomQuery userquery = new CustomQuery();
+            int selectedId = Convert.ToInt32(eem.SelectedEventType);
             if (UserModel.GetCurrentUserID() != -1 && UserModel.GetCurrent().Admin)
             {
                 // Admin -> get all events
-                userquery.Cmd = "SELECT eventTypeId,eventTypeName FROM eventtypes WHERE active = 1";
+                userquery.Cmd = "SELECT eventTypeId,eventTypeName,active FROM eventtypes WHERE active = 1 OR eventTypeId = @ti";
+                userquery.ArgNames = new[] { "@ti" };
+                userquery.Args = new[] { (object)selectedId };
             }
             else
             {
                 // Not admin -> get events allowed for creation by this user + the current selected type.
-                userquery.Cmd = "SELECT DISTINCT(eventTypeId),eventTypeName "
+                userquery.Cmd = "SELECT DISTINCT(eventTypeId),eventTypeName,active "
                         + "FROM eventtypes NATURAL LEFT JOIN eventcreationgroups NATURAL LEFT JOIN groupmembers "
                         + "WHERE (userId = @uid AND canCreate = 1 AND active = 1) OR eventTypeId = @ti";
                 userquery.ArgNames = new[] { "@uid", "@ti" };
-                userquery.Args = new[] { (object)UserModel.GetCurrentUserID(), Convert.ToInt32(eem.SelectedEventType) };
+                userquery.Args = new[] { (object)UserModel.GetCurrentUserID(), selectedId };
             }
             DataTable dt = msc.ExecuteQuery(userquery);
             if (dt != null)
@@ -910,11 +913,16 @@ namespace CalendarApplication.Controllers
                         Value = ((int)dr["eventTypeId"]).ToString(),
                         Text = (string)dr["eventTypeName"]
                     });
+                    // Set canchange based on active field
+                    if((int)dr["eventTypeId"] == selectedId) {
+                        eem.CanChangeType = (bool)dr["active"];
+                    }
                 }
             }
 
-            // If old event and not admin, check if we are allowed to create the current event type
-            if (eem.ID != -1 && !UserModel.GetCurrent().Admin)
+            // If old event and not admin and we can change (== eventtype is active),
+            // -> check if we are allowed to create the current event type
+            if (eem.ID != -1 && !UserModel.GetCurrent().Admin && eem.CanChangeType)
             {
                 CustomQuery cq = new CustomQuery
                 {
@@ -935,7 +943,6 @@ namespace CalendarApplication.Controllers
                     TempData["errorMsg"] = msc.ErrorMessage;
                 }
             }
-            else { eem.CanChangeType = true; } // New event or admin
         }
 
         /// <summary>
