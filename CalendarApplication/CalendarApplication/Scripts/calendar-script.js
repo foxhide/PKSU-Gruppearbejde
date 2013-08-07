@@ -95,8 +95,8 @@ function checkBoxes() {
 }
 
 /* Function for adding the goto function for events */
-function addEventGoto(id) {
-    $("#event_" + id).unbind("mousedown")
+function addEventGoto(htmlId,id) {
+    $("#" + htmlId).unbind("mousedown")
     .mousedown(function (e) {
         // Stop the click so that it is not registered by selection
         e.stopImmediatePropagation()

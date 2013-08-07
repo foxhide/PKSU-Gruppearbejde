@@ -103,14 +103,14 @@
                                                             }
                                                         }
                                             
-                                                        <div class="day-event" id="event_@e.ID"
+                                                        <div class="day-event" id="event_@(e.ID)_@room.Value"
                                                             style="top:@(start)px;height:@(height)px;
                                                                     background-color:@(e.getColor());@(e.ViewVisible ? "cursor:pointer" : "")">
                                                             @if (e.ViewVisible)
                                                             {
                                                                 @e.Name <br />
                                                                 @* Creator: e.Creator and more fields *@
-                                                                <script>addEventGoto(@e.ID);</script>
+                                                                <script>addEventGoto('event_@(e.ID)_@room.Value',@e.ID);</script>
                                                             }
                                                             else
                                                             {
