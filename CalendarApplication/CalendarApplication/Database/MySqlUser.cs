@@ -51,8 +51,14 @@ namespace CalendarApplication.Database
                     {
                         mst.Rollback();
                         this.CloseConnection();
-                        ErrorMessage = "Some database error occured: Discarded changes, Error message: " + ex0.Message
-                                        + ", Caused by: " + cmd.CommandText;
+                        if (ex0.Number == 1062)
+                        {
+                            ErrorMessage = "Username is already taken.";
+                        }
+                        else {
+                            ErrorMessage = "Some database error occured: Discarded changes, Error message: " + ex0.Message
+                                            + ", Caused by: " + cmd.CommandText;
+                        }
                         return -1;
                     }
                     catch (MySqlException ex1)
