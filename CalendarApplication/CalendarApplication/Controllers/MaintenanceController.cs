@@ -218,7 +218,7 @@ namespace CalendarApplication.Controllers
             
             MySqlConnect msc = new MySqlConnect();
 
-            string cmd0 = "SELECT * FROM users WHERE needsApproval = 0 ORDER BY firstName ";
+            string cmd0 = "SELECT * FROM users WHERE active = 1 ORDER BY firstName ";
             string[] argnames0 = {  };
             object[] args0 = {  };
             CustomQuery query0 = new CustomQuery { Cmd = cmd0, ArgNames = argnames0, Args = args0 };
@@ -231,12 +231,12 @@ namespace CalendarApplication.Controllers
             DataTable dt0 = ds.Tables[0];
             DataTable dt1 = ds.Tables[1];
 
-            List<int> groupMembers = new List<int>();
+            List<int> groupMemberIds = new List<int>();
             for (int i = 0; i < dt1.Rows.Count; i++)
             {
                 if (!(dt1.Rows[i]["userId"] is DBNull))
                 {
-                    groupMembers.Add((int)dt1.Rows[i]["userId"]);
+                    groupMemberIds.Add((int)dt1.Rows[i]["userId"]);
                     result.groupLeaders.Add(new SelectListItem
                     {
                         Value = ((int)dt1.Rows[i]["userId"]).ToString(),
@@ -262,7 +262,7 @@ namespace CalendarApplication.Controllers
                         {
                             Value = ((int)dt0.Rows[i]["userId"]).ToString(),
                             Text = (string)dt0.Rows[i]["firstName"] + " " + (string)dt0.Rows[i]["lastName"],
-                            Selected = groupMembers.Contains((int)dt0.Rows[i]["userId"])
+                            Selected = groupMemberIds.Contains((int)dt0.Rows[i]["userId"])
                         });
                 }
 
@@ -298,7 +298,7 @@ namespace CalendarApplication.Controllers
             }
             if (grm.ID != -1)
             {
-                return RedirectToAction("EditGroup", "Maintenance", new { groupId = grm.ID });
+                return EditGroup(grm.ID);
             }
             return RedirectToAction("Index", "Maintenance", null);
         }

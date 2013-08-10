@@ -14,7 +14,7 @@ namespace CalendarApplication.Database
         public int CreateUser(Register data)
         {
             string insert = "INSERT INTO users (userName,password,firstName,lastName,phoneNum,email,active,needsApproval) " +
-                            "VALUES (@username, @password, @firstname, @lastname, @phone, @email, 1, 1);"
+                            "VALUES (@username, @password, @firstname, @lastname, @phone, @email, 0, 1);"
                             + " SELECT last_insert_id();";
 
             if (this.OpenConnection() == true)
@@ -93,6 +93,58 @@ namespace CalendarApplication.Database
 
                     string update = "UPDATE users SET " + change + " = @value WHERE userId = @uid";
                     cmd.Parameters.AddWithValue("@value", newValue);
+                    cmd.Parameters.AddWithValue("@uid", id);
+
+                    cmd.CommandText = update;
+                    cmd.Prepare();
+
+                    cmd.ExecuteNonQuery();
+
+                    mst.Commit();
+
+                    this.CloseConnection();
+                }
+                catch (MySqlException ex0)
+                {
+                    try
+                    {
+                        mst.Rollback();
+                        this.CloseConnection();
+                        ErrorMessage = "Some database error occured: Discarded changes, Error message: " + ex0.Message
+                                        + ", Caused by: " + cmd.CommandText;
+                        return false;
+                    }
+                    catch (MySqlException ex1)
+                    {
+                        this.CloseConnection();
+                        ErrorMessage = "Some database error occured: Could not discard changes, DB corrupt, Error message: " + ex1.Message
+                                        + ", Caused by: " + cmd.CommandText;
+                        return false;
+                    }
+                }
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public bool SetApproved(int id)
+        {
+            if (this.OpenConnection() == true)
+            {
+                MySqlTransaction mst = null;
+                MySqlCommand cmd = null;
+
+                try
+                {
+                    mst = this.connection.BeginTransaction();
+                    cmd = new MySqlCommand();
+                    cmd.Connection = this.connection;
+                    cmd.Transaction = mst;
+
+                    string update = "UPDATE users SET needsApproval = 0, active = 1 WHERE userId = @uid";
                     cmd.Parameters.AddWithValue("@uid", id);
 
                     cmd.CommandText = update;

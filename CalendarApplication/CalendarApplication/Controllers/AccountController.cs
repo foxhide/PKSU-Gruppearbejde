@@ -185,9 +185,10 @@ namespace CalendarApplication.Controllers
         [HttpPost]
         public bool EditUserBool(int field, int userId, bool value)
         {
-            // If no user or non-admin trying to edit other user's boolean -> return
+            // If non-admin trying to edit boolean -> return
             if (UserModel.GetCurrentUserID() == -1 || !UserModel.GetCurrent().Admin) { return false; }
 
+            MySqlUser msu = new MySqlUser();
             string fieldName = null;
             switch (field)
             {
@@ -196,12 +197,11 @@ namespace CalendarApplication.Controllers
                 //set active
                 case 0: fieldName = "active"; break;
                 //set needsApproval
-                case 1: fieldName = "needsApproval"; break;
+                case 1: return msu.SetApproved(userId);
                 //set admin
                 case 2: fieldName = "admin"; break;
             }
 
-            MySqlUser msu = new MySqlUser();
             return msu.EditUser(userId, value, fieldName);
         }
 
