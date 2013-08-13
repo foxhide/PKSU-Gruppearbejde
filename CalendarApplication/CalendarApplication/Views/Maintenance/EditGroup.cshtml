@@ -16,12 +16,16 @@
         <tr>
             <td>
                 <fieldset>
-                    <legend>
-                        @Html.HiddenFor(model => Model.ID)
-                        @Html.LabelFor(model => Model.Name)
-                    </legend>
+                    <legend>Group settings</legend>
+                    @Html.HiddenFor(model => Model.ID)
+                    @Html.LabelFor(model => Model.Name)
+                    <br />
                     @Html.EditorFor(model => Model.Name)
                     @Html.ValidationMessageFor(model => Model.Name)
+                    <br /><br />
+                    @Html.LabelFor(model => Model.Open)
+                    <br />
+                    @Html.CheckBoxFor(model => Model.Open)
                 </fieldset>
             </td>
         </tr>
@@ -55,6 +59,4 @@
             </td>
         </tr>
     </table>
-    
-    
 }

@@ -12,6 +12,7 @@ namespace CalendarApplication.Models.Group
     {
         public string Name { get; set; }
         public int ID { get; set; }
+        public bool Open { get; set; }
         public List<GroupUserModel> Members { get; set; }
         public List<EventTypeModel> EventTypes { get; set; }
 
@@ -42,6 +43,31 @@ namespace CalendarApplication.Models.Group
                 if (usr.ID == id)
                 {
                     return true;
+                }
+            }
+            return false;
+        }
+
+        public bool IsApplicant(int id)
+        {
+            if (id != -1)
+            {
+                string cmd = "SELECT * FROM groupApplicants WHERE userId = @uid AND groupId = @gid";
+                string[] argnam = { "@uid", "@gid" };
+                object[] args = { id, this.ID };
+                Database.CustomQuery query = new Database.CustomQuery{ Args = args, ArgNames = argnam, Cmd = cmd };
+                Database.MySqlConnect msc = new Database.MySqlConnect();
+                System.Data.DataTable dt = msc.ExecuteQuery(query);
+                if (dt != null)
+                {
+                    if (dt.Rows.Count > 0)
+                    {
+                        return !(dt.Rows[0]["userId"] is DBNull);
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
             }
             return false;

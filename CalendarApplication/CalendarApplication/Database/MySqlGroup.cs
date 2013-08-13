@@ -14,7 +14,7 @@ namespace CalendarApplication.Database
     public class MySqlGroup : MySqlConnect
     {
         /// <summary>
-        /// Create a new group -WIP
+        /// Create a new group
         /// </summary>
         /// <param name="groupmodel">Model with data to be stored</param>
         /// <returns>bool indicating success or failure</returns>
@@ -33,8 +33,9 @@ namespace CalendarApplication.Database
                     cmd.Transaction = mst;
 
                     //body
-                    cmd.CommandText = "INSERT INTO groups (groupName) VALUES (@groupName); SELECT last_insert_id()";
+                    cmd.CommandText = "INSERT INTO groups (groupName,open) VALUES (@groupName,@open); SELECT last_insert_id()";
                     cmd.Parameters.AddWithValue("@groupName", groupmodel.Name);
+                    cmd.Parameters.AddWithValue("@open", groupmodel.Open);
                     cmd.Prepare();
                     int id = Convert.ToInt32(cmd.ExecuteScalar());
 
@@ -86,6 +87,7 @@ namespace CalendarApplication.Database
             DataRow dr = msc.ExecuteQuery(new CustomQuery { Cmd = cmd, ArgNames = argnames, Args = args }).Rows[0];
             
             result.Name = (string)dr["groupName"];
+            result.Open = (bool)dr["open"];
 
             return result;
         }
@@ -109,14 +111,22 @@ namespace CalendarApplication.Database
                     cmd.Connection = connection;
                     cmd.Transaction = mst;
 
-                    cmd.CommandText = "UPDATE groups SET groupName = @groupName WHERE groupId = @groupId";
+                    cmd.CommandText = "UPDATE groups SET groupName = @groupName, open = @open WHERE groupId = @groupId";
                     cmd.Parameters.AddWithValue("@groupName", groupmodel.Name);
                     cmd.Parameters.AddWithValue("@groupId", groupmodel.ID);
+                    cmd.Parameters.AddWithValue("@open", groupmodel.Open);
                     cmd.Prepare();
                     cmd.ExecuteNonQuery();
                     cmd.CommandText = "DELETE FROM groupmembers WHERE groupId = @groupId";
                     cmd.Prepare();
                     cmd.ExecuteNonQuery();
+                    if (groupmodel.Open)
+                    {
+                        // delete any applicants if open (might have been closed before, negligible cost if not)
+                        cmd.CommandText = "DELETE FROM groupApplicants WHERE groupId = @groupId";
+                        cmd.Prepare();
+                        cmd.ExecuteNonQuery();
+                    }
 
                     if (groupmodel.groupMembers == null)
                     {
@@ -126,33 +136,37 @@ namespace CalendarApplication.Database
                     {
                         groupmodel.groupLeaders = new List<SelectListItem>();
                     }
+                    if (groupmodel.canCreate == null)
+                    {
+                        groupmodel.canCreate = new List<SelectListItem>();
+                    }
 
                     int memberSize = groupmodel.groupMembers.Count;
                     int leaderSize = groupmodel.groupLeaders.Count;
                     
                     cmd.CommandText = "INSERT INTO groupmembers (groupId, userId, groupLeader, canCreate) VALUES (@groupId, @userId, @groupLeader, @canCreate)";
                     cmd.Parameters.AddWithValue("@userId", null);
-                    cmd.Parameters.AddWithValue("@groupLeader", 0);
-                    cmd.Parameters.AddWithValue("@canCreate", 0);
+                    cmd.Parameters.AddWithValue("@groupLeader", false);
+                    cmd.Parameters.AddWithValue("@canCreate", false);
                     cmd.Prepare();
 
                     for (int i = 0; i < memberSize; i++)
                     {
                         if (groupmodel.groupMembers[i].Selected)
                         {
-                            cmd.Parameters["@userId"].Value = groupmodel.groupMembers[i].Value;
+                            cmd.Parameters["@userId"].Value = int.Parse(groupmodel.groupMembers[i].Value);
                             cmd.ExecuteNonQuery();
                         }
                     }
 
-                    cmd.CommandText = "UPDATE groupmembers SET groupLeader = @groupLeader, canCreate = @canCreate WHERE userId = @userId";
+                    cmd.CommandText = "UPDATE groupmembers SET groupLeader = @groupLeader, canCreate = @canCreate WHERE userId = @userId AND groupId = @groupId";
                     cmd.Prepare();
 
                     for (int i = 0; i < leaderSize; i++)
                     {
                         cmd.Parameters["@groupLeader"].Value = groupmodel.groupLeaders[i].Selected;
                         cmd.Parameters["@canCreate"].Value = groupmodel.groupLeaders[i].Selected || groupmodel.canCreate[i].Selected;
-                        cmd.Parameters["@userId"].Value = groupmodel.groupLeaders[i].Value;
+                        cmd.Parameters["@userId"].Value = int.Parse(groupmodel.groupLeaders[i].Value);
                         cmd.ExecuteNonQuery();
                     }
 
@@ -275,6 +289,238 @@ namespace CalendarApplication.Database
             {
                 //could not open connection
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Handles applications to groups from list of groups and applicants
+        /// </summary>
+        /// <param name="model">ApplicantListModel for all applicants</param>
+        /// <returns>bool indicating success or failure</returns>
+        public bool HandleApplications(ApplicantListModel model)
+        {
+            if (this.OpenConnection() == true)
+            {
+                MySqlTransaction mst = null;
+                MySqlCommand cmd = null;
+                cmd = new MySqlCommand();
+
+                try
+                {
+                    mst = connection.BeginTransaction();
+                    cmd.Connection = connection;
+                    cmd.Transaction = mst;
+                    cmd.Parameters.AddWithValue("@groupId", null);
+                    cmd.Parameters.AddWithValue("@userId", null);
+                    cmd.Parameters.AddWithValue("@create", null);
+                    cmd.Parameters.AddWithValue("@leader", null);
+                    foreach (ApplicantListModel.ApplicantGroupModel group in model.ApplicationGroupList)
+                    {
+                        cmd.Parameters["@groupId"].Value = group.GroupID;
+                        foreach (ApplicantListModel.ApplicantGroupModel.ApplicantModel appl in group.ApplicantList)
+                        {
+                            string command = "";
+
+                            if (appl.Delete)
+                            {
+                                command = "DELETE FROM groupApplicants WHERE userId = @userId AND groupId = @groupId";
+                                cmd.Parameters["@userId"].Value = appl.UserID;
+
+                                cmd.CommandText = command;
+
+                                cmd.Prepare();
+                                cmd.ExecuteNonQuery();
+
+                            }
+                            else
+                            if (appl.Accept)
+                            {
+                                command = "INSERT INTO groupMembers (groupId, userId, groupLeader, canCreate) VALUES (@groupId, @userId, @leader, @create)";
+                                cmd.Parameters["@userId"].Value = appl.UserID;
+                                cmd.Parameters["@create"].Value = appl.MakeLeader || appl.MakeCreator;
+                                cmd.Parameters["@leader"].Value = appl.MakeLeader;
+                                cmd.CommandText = command;
+
+                                cmd.Prepare();
+                                cmd.ExecuteNonQuery();
+
+                                // remove application when accepted
+                                command = "DELETE FROM groupApplicants WHERE userId = @userId AND groupId = @groupId";
+                                cmd.Parameters["@userId"].Value = appl.UserID;
+
+                                cmd.CommandText = command;
+
+                                cmd.Prepare();
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
+                    }
+                    mst.Commit();
+
+                    this.CloseConnection();
+                    return true;
+                }
+                catch (MySqlException ex)
+                {
+                    this.ErrorMessage = ex.Message + " caused by: " + cmd.CommandText;
+                    mst.Rollback();
+                    this.CloseConnection();
+                    return false;
+                }
+            }
+            else
+            {
+                //could not open connection
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Allows a single user to apply to a group, by id.
+        /// If group is open, simply adds the user to the group
+        /// </summary>
+        /// <param name="userId">ID of applicant</param>
+        /// <param name="groupId">ID of group</param>
+        /// <param name="open">Whether group is open</param>
+        /// <returns>bool indicating success or failure</returns>
+        public bool ApplyToGroup(int userId, int groupId, bool open)
+        {
+            if (this.OpenConnection() == true)
+            {
+                MySqlTransaction mst = null;
+                MySqlCommand cmd = null;
+                cmd = new MySqlCommand();
+
+                try
+                {
+                    mst = connection.BeginTransaction();
+                    cmd.Connection = connection;
+                    cmd.Transaction = mst;
+                    cmd.Parameters.AddWithValue("@groupId", groupId);
+                    cmd.Parameters.AddWithValue("@userId", userId);
+                    cmd.Parameters.AddWithValue("@create", false);
+                    cmd.Parameters.AddWithValue("@leader", false);
+                    if (open)
+                    {
+                        cmd.CommandText = "INSERT INTO groupMembers (groupId, userId, groupLeader, canCreate) VALUES (@groupId, @userId, @leader, @create)";
+                        cmd.Prepare();
+                        cmd.ExecuteNonQuery();
+                    }
+                    else
+                    {
+                        cmd.CommandText = "INSERT INTO groupApplicants(groupId, userId) VALUES (@groupId, @userId)";
+                        cmd.Prepare();
+                        cmd.ExecuteNonQuery();
+                    }
+                    
+                    mst.Commit();
+
+                    this.CloseConnection();
+                    return true;
+                }
+                catch (MySqlException ex)
+                {
+                    this.ErrorMessage = ex.Message + " caused by: " + cmd.CommandText;
+                    mst.Rollback();
+                    this.CloseConnection();
+                    return false;
+                }
+            }
+            else
+            {
+                //could not open connection
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Gets count of all applications to groups
+        /// If a user occurs more than once in groupApplications table, all entries are counted
+        /// </summary>
+        /// <returns>count of all applcations to groups</returns>
+        public int GetApplicantCountAdmin()
+        {
+            int result = -1;
+
+            if (this.OpenConnection() == true)
+            {
+                MySqlTransaction mst = null;
+                MySqlCommand cmd = null;
+
+                try
+                {
+                    mst = this.connection.BeginTransaction();
+                    cmd = new MySqlCommand();
+                    cmd.Connection = this.connection;
+                    cmd.Transaction = mst;
+
+                    string count = "SELECT COUNT(*) FROM groupApplicants";
+
+                    cmd.CommandText = count;
+                    cmd.Prepare();
+
+                    result = Convert.ToInt32(cmd.ExecuteScalar());
+                    this.CloseConnection();
+                }
+                catch (MySqlException ex0)
+                {
+                    this.CloseConnection();
+                    ErrorMessage = "Some database error occured: Error message: " + ex0.Message
+                                    + ", Caused by: " + cmd.CommandText;
+                    return result;
+                }
+                return result;
+            }
+            else
+            {
+                return result;
+            }
+        }
+        /// <summary>
+        /// Method for getting a count of applicants for groups where user is leader
+        /// If a user occurs more than once in groupApplications table, all entries are counted
+        /// </summary>
+        /// <param name="userId">ID of user</param>
+        /// <returns>count of applicants for groups where user is leader</returns>
+        public int GetApplicantCountLeader(int userId)
+        {
+            int result = 0;
+
+            if (userId == -1) { return result; }
+
+            if (this.OpenConnection() == true)
+            {
+                MySqlTransaction mst = null;
+                MySqlCommand cmd = null;
+
+                try
+                {
+                    mst = this.connection.BeginTransaction();
+                    cmd = new MySqlCommand();
+                    cmd.Connection = this.connection;
+                    cmd.Transaction = mst;
+
+                    string count = "SELECT COUNT(*) FROM groupApplicants NATURAL JOIN "
+                                   + "(SELECT groupId FROM users NATURAL JOIN groupMembers WHERE userId = @uid AND groupLeader = 1) AS g";
+                    cmd.Parameters.AddWithValue("@uid", userId);
+                    cmd.CommandText = count;
+                    cmd.Prepare();
+
+                    result = Convert.ToInt32(cmd.ExecuteScalar());
+                    this.CloseConnection();
+                }
+                catch (MySqlException ex0)
+                {
+                    this.CloseConnection();
+                    ErrorMessage = "Some database error occured: Error message: " + ex0.Message
+                                    + ", Caused by: " + cmd.CommandText;
+                    return result;
+                }
+                return result;
+            }
+            else
+            {
+                return result;
             }
         }
     }

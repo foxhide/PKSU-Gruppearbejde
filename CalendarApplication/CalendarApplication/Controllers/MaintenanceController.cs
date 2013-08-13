@@ -118,6 +118,8 @@ namespace CalendarApplication.Controllers
                 case 9: return RedirectToAction("Index", "Maintenance", "");
                 //Set group privileges
                 case 10: return RedirectToAction("SetPrivileges", "Group", new { groupId = int.Parse(mm.SelectedGroup) });
+                //View group applicants
+                case 11: return RedirectToAction("ViewApplicants", "Group", null );
             }
             return View(mm);
         }

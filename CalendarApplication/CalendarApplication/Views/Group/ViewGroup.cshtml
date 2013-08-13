@@ -9,6 +9,32 @@
 <h2>Group: @(string.IsNullOrEmpty(Model.Name) ? "Unknown" : Model.Name)</h2>
 @using (Html.BeginForm()) {
     UserModel user = UserModel.GetCurrent();
+    <script>
+        function applyToGroup(){
+            $.ajax({
+                url: "/Group/ApplyToGroup",
+                type: 'POST',
+                data: { userId: @user.ID, groupId: @Model.ID },
+                success: function (result) {
+                    if (result) {
+                        $("#apply-success").addClass("tick");
+                        var el1 = document.getElementById("apply-button");
+                        el1.style.display = 'none';
+                        var open = @Model.Open.ToString().ToLower();
+                        if(open)
+                        {
+                            var el2 = document.getElementById("applied-open");
+                            el2.style.display = 'initial';
+                        }
+                    }
+                    else { $("#apply-success").addClass("red_cross"); }
+                },
+                error: function (result) {
+                    $("#apply-success").addClass("red_cross");
+                }
+            });
+        }
+    </script>
     <table style="margin-left:40px;margin-right:auto">
         <tr>
             <td id="members" style="padding-right:120px">
@@ -49,4 +75,21 @@
             <!--}-->
         </tr>
     </table>
+    <h3>@(Model.Open ? "Open Group" : "Closed Group")</h3>
+    <br />
+    bool applied = Model.IsApplicant(user.ID);
+    if (!Model.Open && applied)
+    {
+        <span style="color:green">You have applied to this group</span>
+    }
+    else
+    if (user.ID != -1 && !user.Admin && !Model.IsMember(user.ID) && (Model.Open || !applied))
+    {
+        <div id="apply-button">
+            <input type="button" id="groupapplicationbutton" onclick="applyToGroup()" value="@(Model.Open ? "Join group" : "Apply to group")" />
+        </div>
+        <div id="apply-success" class="" style="height:26px;width:26px;display:inline-block"></div>
+        <br />
+        <div id="applied-open" style="display:none">Joined successfully. You will show up in the member list when you refresh this page.</div>
+    }
 }

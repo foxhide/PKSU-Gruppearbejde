@@ -68,7 +68,7 @@ namespace CalendarApplication.Controllers
             object[] args1 = new object[] { groupId };
             CustomQuery query1 = new CustomQuery { Cmd = cmd1, ArgNames = argnam1, Args = args1 };
 
-            string cmd2 = "SELECT groupId, groupName, groupLeader, canCreate, firstName, lastName, userId "
+            string cmd2 = "SELECT groupId, groupName, open, groupLeader, canCreate, firstName, lastName, userId "
                          + "FROM groups NATURAL JOIN groupmembers NATURAL JOIN users "
                          + "WHERE groupId = @gid ORDER BY firstName";
             string[] argnam2 = { "@gid" };
@@ -82,6 +82,7 @@ namespace CalendarApplication.Controllers
             if (dt1.Rows.Count > 0)
             {
                 model.Name = (string)dt1.Rows[0]["groupName"].ToString();
+                model.Open = (bool)dt1.Rows[0]["open"];
             }
 
             foreach (DataRow dr in dt0.Rows)
@@ -187,10 +188,160 @@ namespace CalendarApplication.Controllers
             if (!ok)
             {
                 TempData["errorMsg"] = msg.ErrorMessage;
-                return View(model);
+                return SetPrivileges(model.ID);
             }
 
             return RedirectToAction("ViewGroup", "Group", new {groupId = model.ID});
+        }
+
+        /// <summary>
+        /// HttpPost for ApplyToGroup
+        /// </summary>
+        /// <param name="userId">ID for user wanting to apply</param>
+        /// <param name="groupId">ID for group user wants to apply to</param>
+        /// <returns>Goes back to view of group</returns>
+        [HttpPost]
+        public bool ApplyToGroup(int userId, int groupId)
+        {
+            // Check if user is logged in
+            if (UserModel.GetCurrentUserID() == -1) { return false; }
+
+            //Check if the group is open
+            bool open = MySqlGroup.getGroup(groupId).Open;
+            MySqlGroup grp = new MySqlGroup();
+            return grp.ApplyToGroup(userId, groupId, open);
+        }
+
+
+        /// <summary>
+        /// Viewing all group applicants
+        /// </summary>
+        /// <returns>view of ApplicantListModel</returns>
+        public ActionResult ViewApplicants()
+        {
+            //Only for admins and group leaders
+            if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
+            UserModel user = UserModel.GetCurrent();
+
+            ApplicantListModel model = new ApplicantListModel();
+            string cmd = "";
+            string[] argnam = { "@uid" };
+            object[] args = { user.ID };
+            MySqlConnect msc = new MySqlConnect();
+            
+            if (!user.Admin)
+            {
+                if (!isLeader(user.ID))
+                {
+                    return RedirectToAction("Index", "Home", null);
+                }
+                cmd = "SELECT groupId,groupName,userId,firstName,lastName FROM groupApplicants NATURAL JOIN "
+                             + "(SELECT groupId FROM users NATURAL JOIN groupMembers WHERE userId = @uid AND groupLeader = 1) AS g "
+                             + "NATURAL JOIN groups NATURAL JOIN users ORDER BY groupName,groupId,firstName";
+            }
+            else
+            {
+                cmd = "SELECT groupId,groupName,userId,firstName,lastName FROM groupApplicants "
+                             + "NATURAL JOIN groups NATURAL JOIN users ORDER BY groupName,groupId,firstName";
+
+            }
+            CustomQuery query = new CustomQuery { Cmd = cmd, Args = args, ArgNames = argnam };
+            DataTable dt = msc.ExecuteQuery(query);
+            if (dt != null)
+            {
+                if (dt.Rows.Count > 0)
+                {
+                    model.ApplicationGroupList = new List<ApplicantListModel.ApplicantGroupModel>();
+                    ApplicantListModel.ApplicantGroupModel curgrp = new ApplicantListModel.ApplicantGroupModel();
+                    curgrp.ApplicantList = new List<ApplicantListModel.ApplicantGroupModel.ApplicantModel>();
+                    curgrp.GroupID = (int)dt.Rows[0]["groupId"];
+                    curgrp.GroupName = (string)dt.Rows[0]["groupName"];
+                    ApplicantListModel.ApplicantGroupModel.ApplicantModel applicant = new ApplicantListModel.ApplicantGroupModel.ApplicantModel();
+                    for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        if(curgrp.GroupID != (int)dt.Rows[i]["groupId"])
+                        {
+                            model.ApplicationGroupList.Add(curgrp);
+                            curgrp = new ApplicantListModel.ApplicantGroupModel();
+                            curgrp.GroupID = (int)dt.Rows[i]["groupId"];
+                            curgrp.GroupName = (string)dt.Rows[i]["groupName"];
+                            curgrp.ApplicantList = new List<ApplicantListModel.ApplicantGroupModel.ApplicantModel>();
+                        }
+                        applicant.UserID = (int)dt.Rows[i]["userId"];
+                        applicant.UserName = (string)dt.Rows[i]["firstName"] + " " + (string)dt.Rows[i]["lastName"];
+                        applicant.Accept = false;
+                        applicant.Delete = false;
+                        applicant.MakeCreator = false;
+                        applicant.MakeLeader = false;
+                        curgrp.ApplicantList.Add(applicant);
+                        applicant = new ApplicantListModel.ApplicantGroupModel.ApplicantModel();
+                    }
+                    model.ApplicationGroupList.Add(curgrp);
+                }
+                else
+                {
+                    TempData["errorMsg"] = "No applicants found";
+                }
+            }
+            else
+            {
+                TempData["errorMsg"] = "An error occurred fetching group applicants: " + msc.ErrorMessage;
+            }
+
+            return View(model);
+        }
+
+        /// <summary>
+        /// HttpPost for ViewApplicants
+        /// </summary>
+        /// <param name="model">List of Applicants</param>
+        /// <returns>Goes list of groups on success</returns>
+        [HttpPost]
+        public ActionResult ViewApplicants(ApplicantListModel model)
+        {
+            // Check if user is logged in and is admin or group leader
+            UserModel user = UserModel.GetCurrent();
+            if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
+            else if (!(user.Admin) || !(isLeader(user.ID)))
+            {
+                return RedirectToAction("Index", "Home", null);
+            }
+
+            MySqlGroup msg = new MySqlGroup();
+            bool ok = msg.HandleApplications(model);
+            if (!ok)
+            {
+                TempData["errorMsg"] = msg.ErrorMessage;
+                return ViewApplicants();
+            }
+
+            return RedirectToAction("GroupList", "List", null );
+        }
+
+        /// <summary>
+        /// checks if a user is leader of at least one group
+        /// </summary>
+        /// <param name="userId">ID of user</param>
+        /// <returns>boolean indicating if user is leader of any group</returns>
+        public bool isLeader(int userId)
+        {
+            bool result = false;
+            string cmd = "SELECT groupId FROM groupMembers WHERE userId = @uid AND groupLeader = 1";
+            string[] argnam = { "@uid" };
+            object[] args = { userId };
+            CustomQuery query = new CustomQuery { Cmd = cmd, ArgNames = argnam, Args = args };
+            MySqlConnect msc = new MySqlConnect();
+            DataTable dt = msc.ExecuteQuery(query);
+            if (dt != null)
+            {
+                foreach (DataRow row in dt.Rows)
+                {
+                    result = !(row["groupId"] is DBNull);
+                    if (result) { return result; }
+                }
+            }
+
+            return result;
         }
     }
 }

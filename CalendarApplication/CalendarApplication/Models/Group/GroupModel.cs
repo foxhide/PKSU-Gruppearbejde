@@ -19,6 +19,7 @@ namespace CalendarApplication.Models.Group
 
         [Display(Name = "Group Name")]
         public string Name { set; get; }
+        [Display(Name = "Open group")]
         public bool Open { set; get; }
         public bool Selected { set; get; }
         [Display(Name = "Group Members")]

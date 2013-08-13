@@ -1,0 +1,68 @@
+﻿@model CalendarApplication.Models.Group.ApplicantListModel
+
+@{
+    ViewBag.Title = "ViewApplicants";
+}
+
+@using CalendarApplication.Models.Group
+
+<h2>Group Applicants</h2>
+
+<h3 style="color:red">@TempData["errorMsg"]</h3>
+
+@using (Html.BeginForm())
+{
+    if (Model.ApplicationGroupList == null)
+    {
+        @: Nothing to show
+    }
+    else
+    {
+        <script>
+            function setAll(groupnum,checkboxtype,count,allbox) {
+                var preId = "ApplicationGroupList_" + groupnum + "__ApplicantList_";
+                var postId = "__" + checkboxtype;
+                for (var i = 0; i < count; i++)
+                {
+                    $("#" + preId + i + postId).attr("checked", allbox.checked);
+                }
+
+            }
+        </script>
+        for (int i = 0; i < Model.ApplicationGroupList.Count; i++)
+        {
+            <fieldset>
+            <legend>@Model.ApplicationGroupList[i].GroupName</legend>
+            @Html.HiddenFor(m => Model.ApplicationGroupList[i].GroupID)
+            <table border="0" style="margin-left:40px;margin-right:auto">
+                <tr>
+                    <td>@Html.LabelFor(m => Model.ApplicationGroupList[i].ApplicantList[0].UserName)</td>
+                    <td>@Html.LabelFor(m => Model.ApplicationGroupList[i].ApplicantList[0].Accept)</td>
+                    <td>@Html.LabelFor(m => Model.ApplicationGroupList[i].ApplicantList[0].MakeLeader)</td>
+                    <td>@Html.LabelFor(m => Model.ApplicationGroupList[i].ApplicantList[0].MakeCreator)</td>
+                    <td>@Html.LabelFor(m => Model.ApplicationGroupList[i].ApplicantList[0].Delete)</td>
+                </tr>
+                <tr>
+                    <td>Select/Deselect all:</td>
+                    <td><input id="@("sel_all_Accept_" + i)" type="checkbox" onclick="setAll('@i','Accept','@Model.ApplicationGroupList[i].ApplicantList.Count',this)"/></td>
+                    <td><input id="@("sel_all_MakeLeader_" + i)" type="checkbox" onclick="setAll('@i','MakeLeader','@Model.ApplicationGroupList[i].ApplicantList.Count',this)"/></td>
+                    <td><input id="@("sel_all_MakeCreator_" + i)" type="checkbox" onclick="setAll('@i','MakeCreator','@Model.ApplicationGroupList[i].ApplicantList.Count',this)"/></td>
+                    <td><input id="@("sel_all_Delete_" + i)" type="checkbox" onclick="setAll('@i','Delete','@Model.ApplicationGroupList[i].ApplicantList.Count',this)"/></td>
+                </tr>
+            @for (int j = 0; j < Model.ApplicationGroupList[i].ApplicantList.Count; j++)
+            {
+                <tr>
+                    @Html.HiddenFor(m => Model.ApplicationGroupList[i].ApplicantList[j].UserID)
+                    <td><b>@Model.ApplicationGroupList[i].ApplicantList[j].UserName</b></td>
+                    <td>@Html.CheckBoxFor(m => Model.ApplicationGroupList[i].ApplicantList[j].Accept)</td>
+                    <td>@Html.CheckBoxFor(m => Model.ApplicationGroupList[i].ApplicantList[j].MakeLeader)</td>
+                    <td>@Html.CheckBoxFor(m => Model.ApplicationGroupList[i].ApplicantList[j].MakeCreator)</td>
+                    <td>@Html.CheckBoxFor(m => Model.ApplicationGroupList[i].ApplicantList[j].Delete)</td>
+                </tr>
+            }
+            </table>
+            </fieldset>
+        }
+        <input type="submit" value="Apply selections"/>
+    }
+}

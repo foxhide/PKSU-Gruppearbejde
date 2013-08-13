@@ -31,16 +31,41 @@ else {
     
     if (user.Admin)
     {
+        <br />
+        <br />
         MySqlUser msu = new MySqlUser();
         int count = msu.GetUnapprovedCount();
         bool eqone = count == 1;
         <text>
-            <br />
-            <br />
               There @(eqone ? "is" : "are") currently
-              @Html.ActionLink("" + count + (eqone ? " user" : " users" ),"ManageUsers","Maintenance",null,null)
+              @Html.ActionLink("" + count + (eqone ? " new user" : " new users" ),"ManageUsers","Maintenance",null,null)
               awaiting activation.
         </text>
+        <br />
+        <br />
+        MySqlGroup msg = new MySqlGroup();
+        count = msg.GetApplicantCountAdmin();
+        eqone = count == 1;
+        <text>
+              There @(eqone ? "is" : "are") currently
+              @Html.ActionLink("" + count + (eqone ? " applicant" : " applicants" ),"ViewApplicants","Group",null,null)
+              for groups.
+        </text>
     }
-    
+    else
+    {
+        MySqlGroup msg = new MySqlGroup();
+        int count = msg.GetApplicantCountLeader(user.ID);
+        if(count > 0)
+        {
+            bool eqone = count == 1;
+            <br />
+            <br />
+            <text>
+                  There @(eqone ? "is" : "are") currently
+                  @Html.ActionLink("" + count + (eqone ? " applicant" : " applicants" ),"ViewApplicants","Group",null,null)
+                  for groups that you are a leader of.
+            </text>
+        }
+    }
 }
