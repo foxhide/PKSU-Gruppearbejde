@@ -492,9 +492,9 @@ namespace CalendarApplication.Controllers
             end = end.AddHours(offset);
 
             //     Add the date limits (with offset)
-            where.Append("WHERE ((eventStart <= @end AND eventStart >= @start)");
-            where.Append(" OR (eventEnd <= @end AND eventEnd >= @start)");
-            where.Append(" OR (eventEnd >= @end AND eventStart <= @start))");
+            where.Append("WHERE ((e.eventStart <= @end AND e.eventStart >= @start)");
+            where.Append(" OR (e.eventEnd <= @end AND e.eventEnd >= @start)");
+            where.Append(" OR (e.eventEnd >= @end AND e.eventStart <= @start))");
 
             argNames.Add("@end");
             args.Add(end);
@@ -507,7 +507,7 @@ namespace CalendarApplication.Controllers
                 if (!etm.Selected)
                 {
                     string arg = "@etm_" + etm.ID;
-                    where.Append(" AND (eventTypeId != " + arg + ")");
+                    where.Append(" AND (e.eventTypeId != " + arg + ")");
                     argNames.Add(arg);
                     args.Add(etm.ID);
                 }
@@ -519,23 +519,23 @@ namespace CalendarApplication.Controllers
                 if (!room.Selected)
                 {
                     string arg = "@room_" + room.Value;
-                    where.Append(" AND (roomId != " + arg + ")");
+                    where.Append(" AND (r.roomId != " + arg + ")");
                     argNames.Add(arg);
                     args.Add(Convert.ToInt32(room.Value));
                 }
             }
 
             //   States
-            where.Append((f.ViewState0 ? "" : " AND (state != 0)"));
-            where.Append((f.ViewState1 ? "" : " AND (state != 1)"));
-            where.Append((f.ViewState2 ? "" : " AND (state != 2)"));
+            where.Append((f.ViewState0 ? "" : " AND (e.state != 0)"));
+            where.Append((f.ViewState1 ? "" : " AND (e.state != 1)"));
+            where.Append((f.ViewState2 ? "" : " AND (e.state != 2)"));
 
             //   User authentication
             UserModel cur = UserModel.GetCurrent();
             if(cur == null)
             {
                 // no user -> show visible events
-                where.Append(" AND (visible = 1)");
+                where.Append(" AND (e.visible = 1)");
             }
             else if (!cur.Admin)
             {

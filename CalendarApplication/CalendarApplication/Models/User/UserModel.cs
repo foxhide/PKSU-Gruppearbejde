@@ -120,7 +120,7 @@ namespace CalendarApplication.Models.User
                 else
                 {
                     System.Web.Security.FormsAuthentication.SignOut();
-                    throw new InactiveUserException("You are not logged in as an active user.");
+                    throw new InactiveUserException("You are not logged in as an active user, so you have been logged out.");
                 }
             }
             else
