@@ -36,6 +36,17 @@ namespace CalendarApplication.Models.User
         public bool Admin { set; get; }
         public bool Active { set; get; }
 
+        [Serializable()]
+        public class InactiveUserException : Exception
+        {
+            public InactiveUserException() : base() { }
+            public InactiveUserException(string message) : base(message) { }
+            public InactiveUserException(string message, Exception inner) : base(message,inner) { }
+
+            protected InactiveUserException(System.Runtime.Serialization.SerializationInfo info,
+                        System.Runtime.Serialization.StreamingContext context) { }
+        }
+
         /// <summary>
         /// Gets the data for the user specified by the user ID
         /// </summary>
@@ -44,7 +55,7 @@ namespace CalendarApplication.Models.User
         public static UserModel GetUser(int ID)
         {
             MySqlConnect msc = new MySqlConnect();
-            string cmd = "SELECT userId,userName,firstName,lastName,phoneNum,email,admin FROM users WHERE userId = @uid";
+            string cmd = "SELECT userId,userName,firstName,lastName,phoneNum,email,admin,active FROM users WHERE userId = @uid";
             object[] argval = { ID };
             string[] argnam = { "@uid" };
             CustomQuery query = new CustomQuery { Cmd = cmd, ArgNames = argnam, Args = argval };
@@ -59,7 +70,8 @@ namespace CalendarApplication.Models.User
                 LastName = dt.Rows[0]["lastName"] as string,
                 Phone = dt.Rows[0]["phoneNum"] as string,
                 Email = dt.Rows[0]["email"] as string,
-                Admin = (bool)dt.Rows[0]["admin"]
+                Admin = (bool)dt.Rows[0]["admin"],
+                Active = (bool)dt.Rows[0]["active"]
             };
 
             return result;
@@ -92,12 +104,29 @@ namespace CalendarApplication.Models.User
 
         /// <summary>
         /// Gets a model of the currently signed in user
+        /// If user is inactive, they are logged out automatically and an exception is thrown.
         /// </summary>
         /// <returns>A model of the currently signed in user</returns>
         public static UserModel GetCurrent()
         {
             int id = GetCurrentUserID();
-            return (id >= 0 ? GetUser(id) : null);
+            if (id > 0)
+            {
+                UserModel user = GetUser(id);
+                if (user.Active)
+                {
+                    return user;
+                }
+                else
+                {
+                    System.Web.Security.FormsAuthentication.SignOut();
+                    throw new InactiveUserException("You are not logged in as an active user.");
+                }
+            }
+            else
+            {
+                return null;
+            }
         }
 
         /// <summary>

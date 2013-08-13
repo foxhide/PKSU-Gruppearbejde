@@ -20,7 +20,7 @@ namespace CalendarApplication.Models.Account
         public string LastName { get; set; }
 
         [Required]
-        [StringLength(45, ErrorMessage = "The {0} field must be at less than {1} characters.")]
+        [StringLength(70, ErrorMessage = "The {0} field must be at less than {1} characters.")]
         [Display(Name = "E-mail")]
         public string Email { get; set; }
 
