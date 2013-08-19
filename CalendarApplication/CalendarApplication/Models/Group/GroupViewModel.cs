@@ -52,7 +52,7 @@ namespace CalendarApplication.Models.Group
         {
             if (id != -1)
             {
-                string cmd = "SELECT * FROM groupApplicants WHERE userId = @uid AND groupId = @gid";
+                string cmd = "SELECT * FROM groupapplicants WHERE userId = @uid AND groupId = @gid";
                 string[] argnam = { "@uid", "@gid" };
                 object[] args = { id, this.ID };
                 Database.CustomQuery query = new Database.CustomQuery{ Args = args, ArgNames = argnam, Cmd = cmd };

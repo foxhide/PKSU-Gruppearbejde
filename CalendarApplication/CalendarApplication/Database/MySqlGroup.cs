@@ -123,7 +123,7 @@ namespace CalendarApplication.Database
                     if (groupmodel.Open)
                     {
                         // delete any applicants if open (might have been closed before, negligible cost if not)
-                        cmd.CommandText = "DELETE FROM groupApplicants WHERE groupId = @groupId";
+                        cmd.CommandText = "DELETE FROM groupapplicants WHERE groupId = @groupId";
                         cmd.Prepare();
                         cmd.ExecuteNonQuery();
                     }
@@ -323,7 +323,7 @@ namespace CalendarApplication.Database
 
                             if (appl.Delete)
                             {
-                                command = "DELETE FROM groupApplicants WHERE userId = @userId AND groupId = @groupId";
+                                command = "DELETE FROM groupapplicants WHERE userId = @userId AND groupId = @groupId";
                                 cmd.Parameters["@userId"].Value = appl.UserID;
 
                                 cmd.CommandText = command;
@@ -335,7 +335,7 @@ namespace CalendarApplication.Database
                             else
                             if (appl.Accept)
                             {
-                                command = "INSERT INTO groupMembers (groupId, userId, groupLeader, canCreate) VALUES (@groupId, @userId, @leader, @create)";
+                                command = "INSERT INTO groupmembers (groupId, userId, groupLeader, canCreate) VALUES (@groupId, @userId, @leader, @create)";
                                 cmd.Parameters["@userId"].Value = appl.UserID;
                                 cmd.Parameters["@create"].Value = appl.MakeLeader || appl.MakeCreator;
                                 cmd.Parameters["@leader"].Value = appl.MakeLeader;
@@ -345,9 +345,7 @@ namespace CalendarApplication.Database
                                 cmd.ExecuteNonQuery();
 
                                 // remove application when accepted
-                                command = "DELETE FROM groupApplicants WHERE userId = @userId AND groupId = @groupId";
-                                cmd.Parameters["@userId"].Value = appl.UserID;
-
+                                command = "DELETE FROM groupapplicants WHERE userId = @userId AND groupId = @groupId";
                                 cmd.CommandText = command;
 
                                 cmd.Prepare();
@@ -402,13 +400,13 @@ namespace CalendarApplication.Database
                     cmd.Parameters.AddWithValue("@leader", false);
                     if (open)
                     {
-                        cmd.CommandText = "INSERT INTO groupMembers (groupId, userId, groupLeader, canCreate) VALUES (@groupId, @userId, @leader, @create)";
+                        cmd.CommandText = "INSERT INTO groupmembers (groupId, userId, groupLeader, canCreate) VALUES (@groupId, @userId, @leader, @create)";
                         cmd.Prepare();
                         cmd.ExecuteNonQuery();
                     }
                     else
                     {
-                        cmd.CommandText = "INSERT INTO groupApplicants(groupId, userId) VALUES (@groupId, @userId)";
+                        cmd.CommandText = "INSERT INTO groupapplicants(groupId, userId) VALUES (@groupId, @userId)";
                         cmd.Prepare();
                         cmd.ExecuteNonQuery();
                     }
@@ -435,7 +433,7 @@ namespace CalendarApplication.Database
 
         /// <summary>
         /// Gets count of all applications to groups
-        /// If a user occurs more than once in groupApplications table, all entries are counted
+        /// If a user occurs more than once in group applications table, all entries are counted
         /// </summary>
         /// <returns>count of all applcations to groups</returns>
         public int GetApplicantCountAdmin()
@@ -454,7 +452,7 @@ namespace CalendarApplication.Database
                     cmd.Connection = this.connection;
                     cmd.Transaction = mst;
 
-                    string count = "SELECT COUNT(*) FROM groupApplicants";
+                    string count = "SELECT COUNT(*) FROM groupapplicants";
 
                     cmd.CommandText = count;
                     cmd.Prepare();
@@ -478,7 +476,7 @@ namespace CalendarApplication.Database
         }
         /// <summary>
         /// Method for getting a count of applicants for groups where user is leader
-        /// If a user occurs more than once in groupApplications table, all entries are counted
+        /// If a user occurs more than once in group applications table, all entries are counted
         /// </summary>
         /// <param name="userId">ID of user</param>
         /// <returns>count of applicants for groups where user is leader</returns>
@@ -500,8 +498,8 @@ namespace CalendarApplication.Database
                     cmd.Connection = this.connection;
                     cmd.Transaction = mst;
 
-                    string count = "SELECT COUNT(*) FROM groupApplicants NATURAL JOIN "
-                                   + "(SELECT groupId FROM users NATURAL JOIN groupMembers WHERE userId = @uid AND groupLeader = 1) AS g";
+                    string count = "SELECT COUNT(*) FROM groupapplicants NATURAL JOIN "
+                                   + "(SELECT groupId FROM users NATURAL JOIN groupmembers WHERE userId = @uid AND groupLeader = 1) AS g";
                     cmd.Parameters.AddWithValue("@uid", userId);
                     cmd.CommandText = count;
                     cmd.Prepare();

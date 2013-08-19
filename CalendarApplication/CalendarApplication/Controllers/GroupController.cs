@@ -235,13 +235,13 @@ namespace CalendarApplication.Controllers
                 {
                     return RedirectToAction("Index", "Home", null);
                 }
-                cmd = "SELECT groupId,groupName,userId,firstName,lastName FROM groupApplicants NATURAL JOIN "
-                             + "(SELECT groupId FROM users NATURAL JOIN groupMembers WHERE userId = @uid AND groupLeader = 1) AS g "
+                cmd = "SELECT groupId,groupName,userId,firstName,lastName FROM groupapplicants NATURAL JOIN "
+                             + "(SELECT groupId FROM users NATURAL JOIN groupmembers WHERE userId = @uid AND groupLeader = 1) AS g "
                              + "NATURAL JOIN groups NATURAL JOIN users ORDER BY groupName,groupId,firstName";
             }
             else
             {
-                cmd = "SELECT groupId,groupName,userId,firstName,lastName FROM groupApplicants "
+                cmd = "SELECT groupId,groupName,userId,firstName,lastName FROM groupapplicants "
                              + "NATURAL JOIN groups NATURAL JOIN users ORDER BY groupName,groupId,firstName";
 
             }
@@ -326,7 +326,7 @@ namespace CalendarApplication.Controllers
         public bool isLeader(int userId)
         {
             bool result = false;
-            string cmd = "SELECT groupId FROM groupMembers WHERE userId = @uid AND groupLeader = 1";
+            string cmd = "SELECT groupId FROM groupmembers WHERE userId = @uid AND groupLeader = 1";
             string[] argnam = { "@uid" };
             object[] args = { userId };
             CustomQuery query = new CustomQuery { Cmd = cmd, ArgNames = argnam, Args = args };
