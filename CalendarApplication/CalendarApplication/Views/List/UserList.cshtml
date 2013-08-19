@@ -9,13 +9,13 @@
 
 @using (Html.BeginForm())
 {
-    using(Html.BeginListView("Users", new string[] { "Last Name", "First Name", "User Name", "Email" , "Phone #" , "Admin" }))
+    using (Html.BeginListView("Users", new string[] { "First Name", "Last Name", "User Name", "Email", "Phone #", "Admin" }))
                 {
                     for (int i = 0; i < Model.UserList.Count; i++)
                     {
                         <tr>
-                            <td>@Html.ActionLink(Model.UserList[i].LastName, "Index", "User", new { userId = Model.UserList[i].ID }, null) </td>
                             <td>@Html.ActionLink(Model.UserList[i].FirstName, "Index", "User", new { userId = Model.UserList[i].ID }, null) </td>
+                            <td>@Html.ActionLink(Model.UserList[i].LastName, "Index", "User", new { userId = Model.UserList[i].ID }, null) </td>
                             <td>@Model.UserList[i].UserName</td>
                             <td><a href="mailto:@Model.UserList[i].Email">@Model.UserList[i].Email</a> </td>
                             <td>@Model.UserList[i].Phone </td>

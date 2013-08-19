@@ -612,6 +612,7 @@ namespace CalendarApplication.Database
                                                   + " VALUES ( @nid , @editusr );";
                     cmd.Parameters.AddWithValue("@editusr", null);
                     cmd.Prepare();
+                    if (eem.UserEditorList == null) { eem.UserEditorList = new List<SelectListItem>(); }
                     foreach (SelectListItem edtusr in eem.UserEditorList)
                     {
                         if (edtusr.Selected)
@@ -629,6 +630,7 @@ namespace CalendarApplication.Database
                                                   + " VALUES ( @nid , @edtgrpid );";
                     cmd.Parameters.AddWithValue("@edtgrpid", null);
                     cmd.Prepare();
+                    if (eem.GroupEditorList == null) { eem.GroupEditorList = new List<SelectListItem>(); }
                     foreach (SelectListItem edtgrp in eem.GroupEditorList)
                     {
                         if (edtgrp.Selected)
@@ -648,6 +650,7 @@ namespace CalendarApplication.Database
                                                       + " VALUES ( @nid , @visgrpid );";
                         cmd.Parameters.AddWithValue("@visgrpid", null);
                         cmd.Prepare();
+                        if (eem.GroupVisibleList == null) { eem.GroupVisibleList = new List<SelectListItem>(); }
                         foreach (SelectListItem edtgrp in eem.GroupVisibleList)
                         {
                             if (edtgrp.Selected)
