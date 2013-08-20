@@ -209,6 +209,8 @@
     <Content Include="Global.asax" />
     <Content Include="Content\themes\base\images\Thumbs.db" />
     <None Include="Scripts\jquery-1.5.1-vsdoc.js" />
+    <Content Include="Scripts\calendar-script-select-extn-mouse.js" />
+    <Content Include="Scripts\calendar-script-select-extn-touch.js" />
     <Content Include="Scripts\calendar-script.js" />
     <Content Include="Scripts\create-eventtype.js" />
     <Content Include="Scripts\date-picker-validator.js" />
