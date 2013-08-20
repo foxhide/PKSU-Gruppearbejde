@@ -1,9 +1,12 @@
+/* Basic layout */
 body
 {
     font-size: .85em;
     font-family: "Trebuchet MS", Verdana, Helvetica, Sans-Serif;
     color: #232323;
     background-color: #fff;
+    padding:0;
+    margin:0;
 }
 
 header,
@@ -13,10 +16,6 @@ section {
     display: block;
 }
 
-/* Classes for GUI
------------------------------------------------------------*/
-
-/* Some basic layout */
 table {
     margin: 0 auto;
 }
@@ -24,42 +23,31 @@ th, td {
     vertical-align: top;
     padding: 10px;
 }
-body {
-    margin:0;
-}
 
 /* Classes for layout */
-table.layout-style-basic {
-    border-collapse:collapse;
-    height:100%;
+.header {
     width:100%;
-    margin:0;
-    padding:0;
 }
-table.layout-style-basic td.layout-body {
-    padding-left:50px;
+.layout-body {
+    margin-left:50px;
+    margin-right:auto;
 }
-table.layout-style-basic tr.account-header {
+.account-header {
     background-color:lightgrey;
-    width:100%;
-    height:30px;
+    text-align:right;
+    padding:6px;
+    padding-right:10px;
 }
-table.layout-style-basic tr.nav-header {
+.nav-header {
     background-color:black;
-    width:100%;
     height:40px;
-    padding:0;
-}
-table.layout-style-basic tr.nav-header th {
-    padding:0;
-    margin:0 auto;
-    padding-left:30px;
+    padding-left:20px;
 }
 
 table.nav-bar {
     height:100%;
     border-collapse:collapse;
-    margin:0;
+    margin:auto 0;
 }
 table.nav-bar td {
     background-color:black;
@@ -67,12 +55,12 @@ table.nav-bar td {
     border-left:3px grey solid;
     border-right:3px grey solid;
     cursor:pointer;
-    width:72px;
+    width:90px;
     height:100%;
-    padding:0;
     vertical-align:middle;
     position:relative;
     z-index:1;
+    padding:0;
 }
 table.nav-bar div.box {
     width:100%;
@@ -94,7 +82,7 @@ table.nav-bar td.selected:hover {
 table.nav-bar div.drop {
     position:absolute;
     z-index:2;
-    width:78px;
+    width:96px;
     left:-3px;
     display:none;
 }
@@ -103,6 +91,7 @@ table.nav-bar-drop {
 }
 table.nav-bar-drop td {
     height:40px;
+    text-align:center;
 }
 
 /* No-Script error */
