@@ -106,8 +106,7 @@ namespace CalendarApplication.Helpers
             }
             else if (model.Datatype == Fieldtype.File)
             {
-                //////////////////////////// needs work ////////////////////////
-                builder.AppendLine("<input type='file' id='" + id + "'>");
+                builder.AppendLine("<input type='file' id='" + id + "' name='" + name + ".File'>");
             }
             else if (model.Datatype == Fieldtype.UserList)
             {

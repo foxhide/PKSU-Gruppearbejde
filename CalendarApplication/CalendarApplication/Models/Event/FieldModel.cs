@@ -15,6 +15,7 @@ namespace CalendarApplication.Models.Event
         public float? FloatValue { get; set; }
         public string StringValue { get; set; }
         public bool BoolValue { get; set; }
+        public HttpPostedFileBase File { get; set; }
         public DateTime DateValue { get; set; }
 
         public List<SelectListItem> List { get; set; }

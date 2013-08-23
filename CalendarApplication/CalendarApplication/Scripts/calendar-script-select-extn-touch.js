@@ -50,7 +50,7 @@ function addDragFunctions(roomId) {
     // Add mouse movement and release for the room divs
     $("#room_" + roomId)
     .unbind("mousedown")
-    .touchmove(function (e) {
+    .bind('touchmove',function (e) {
         if (flagDown) {
             // Dragging down
             s_bottom = e.pageY - $("#room_wrap_" + roomId).position().top;
@@ -73,13 +73,13 @@ function addDragFunctions(roomId) {
         // Update time counter
         $("#time_counter").css({ top: (e.pageY - 5) + "px", left: (e.pageX + 10) + "px" });
     })
-    .touchend(function (e) {
+    .bind('touchend',function (e) {
         flagDown = false;
         flagUp = false;
         $("#time_counter").hide();
         checkAllRooms();
     })
-    .touchcancel(function (e) {
+    .bind('touchcancel',function (e) {
         if (flagUp || flagDown) {
             // We were dragging
             checkAllRooms();

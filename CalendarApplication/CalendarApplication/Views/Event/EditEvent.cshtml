@@ -25,7 +25,8 @@
     }
 </style>
 
-@using (Html.BeginForm()) {
+@using (Html.BeginForm("EditEvent","Event",FormMethod.Post, new { enctype="multipart/form-data" }))
+{
     @Html.HiddenFor(m => m.ID)
 
     <table style="margin-left:40px;margin-right:auto;width:70%;border:1px lightgrey solid">
@@ -36,20 +37,20 @@
                 @Html.HiddenFor(m => m.State)
 
                 @Html.LabelFor(m => m.Name, new { style = "font-weight:bold" })
-                @Html.TextBoxFor(m => m.Name, new { onchange="{ setState(); validateInput('Name','Text',true,true); }" })
+                @Html.TextBoxFor(m => m.Name, new { onchange = "{ setState(); validateInput('Name','Text',true,true); }" })
                 <div class="validation-summary-errors" id="Name_Error" style="display:none">
                     The event must have a Name!
                 </div>
                 <br />
                 <br />
                 @Html.LabelFor(m => m.SelectedEventType, new { style = "font-weight:bold" })
-                @if(Model.CanChangeType)
+                @if (Model.CanChangeType)
                 {
                     <div style="position:relative;z-index:1">
                         @Html.DropDownListFor(m => Model.SelectedEventType,
                                                 new SelectList(Model.EventTypes, "Value", "Text"),
-                                                new { onchange="typeCheck(this.value)", style="position:absolute;z-index:1" })
-                        @if(Model.ID != -1)
+                                                new { onchange = "typeCheck(this.value)", style = "position:absolute;z-index:1" })
+                        @if (Model.ID != -1)
                         {
                             <div id="type_warning">
                                 Warning! Changing the type will delete the data previously added for this event when changes are saved.
@@ -59,14 +60,16 @@
                                 <br />
                                 @Html.CheckBoxFor(m => m.DeleteFiles)<span style="font-size:8pt">Delete files too.</span>
                             </div>
-                        }else{<script>typeCheckResponse(true,@Model.SelectedEventType)</script>}
+                        }
+                        else
+                        {<script>typeCheckResponse(true,@Model.SelectedEventType)</script>}
                     </div>
                 }
                 else
                 {
                     @Html.DropDownListFor(m => Model.SelectedEventType,
                                             new SelectList(Model.EventTypes, "Value", "Text"),
-                                            new { disabled="disabled" })
+                                            new { disabled = "disabled" })
                     @Html.HiddenFor(m => m.SelectedEventType);
                 }
                 <div class="validation-summary-errors" id="SelectedEventType_Error" style="display:none">
@@ -86,7 +89,7 @@
                 <br />
 
                 @Html.LabelFor(m => m.Start, new { style = "font-weight:bold" }) <br />
-                @if(Model.Start > DateTime.Now)
+                @if (Model.Start > DateTime.Now)
                 {
                     @Html.DateTimeEditorFor(m => m.Start, "g.today,l.End", "dateRoomUpdate()")
                 }
@@ -98,7 +101,7 @@
                 }
                 <br />
                 @Html.LabelFor(m => m.End, new { style = "font-weight:bold" }) <br />
-                @if(Model.End > DateTime.Now)
+                @if (Model.End > DateTime.Now)
                 {
                     @Html.DateTimeEditorFor(m => m.End, "g.today,g.Start", "dateRoomUpdate()")
                 }
@@ -126,7 +129,7 @@
                 <div id="event_specifics">
                     @if (Model.TypeSpecifics != null && Model.TypeSpecifics.Count > 0)
                     {
-                        @Html.Partial("EventSpecificList",Model)
+                        @Html.Partial("EventSpecificList", Model)
                     }
                 </div>
                 <input type="button" value="@(Model.ID == -1 ? "Create event" : "Save changes")"
@@ -143,9 +146,10 @@
                     @Html.ListEditorFor(m => m.GroupEditorList, "Groups Selected", "Groups Available")
                     <br />
 
-                    Visible: @Html.CheckBoxFor(m => m.Visible, new { onchange="disableLists('GroupVisibleList',this.checked)" })
+                    Visible: @Html.CheckBoxFor(m => m.Visible, new { onchange = "disableLists('GroupVisibleList',this.checked)" })
                     @Html.ListEditorFor(m => m.GroupVisibleList, "Groups Selected", "Groups Available")
-                    @if(Model.Visible) { <script>disableLists('GroupVisibleList', true)</script> }
+                    @if (Model.Visible)
+                    { <script>disableLists('GroupVisibleList', true)</script> }
                 </fieldset>
             </td>
         </tr>

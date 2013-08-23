@@ -4,10 +4,10 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using MySql.Data.MySqlClient;
-using System.Windows.Forms;
 
 using CalendarApplication.Models.Event;
 using CalendarApplication.Models.EventType;
+using System.IO;
 
 namespace CalendarApplication.Database
 {
@@ -521,13 +521,17 @@ namespace CalendarApplication.Database
                             for (int i = 0; i < eem.TypeSpecifics.Count; i++)
                             {
                                 FieldModel fm = eem.TypeSpecifics[i];
-                                if (fm.Datatype == Fieldtype.GroupList
+                                if (fm.Datatype == Fieldtype.File)
+                                {
+                                    fm.IntValue = this.UploadFile(fm.File,mst);
+                                }
+                                else if (fm.Datatype == Fieldtype.GroupList
                                         || fm.Datatype == Fieldtype.UserList
                                         || fm.Datatype == Fieldtype.FileList)
                                 {
                                     this.InsertListValues(newId, fm, mst);
                                 }
-                                if (fm.Datatype == Fieldtype.TextList) { this.InsertStringValues(newId, fm, mst); }
+                                else if (fm.Datatype == Fieldtype.TextList) { this.InsertStringValues(newId, fm, mst); }
                                 prologue += "field_" + fm.ID;
                                 string value = "@fieldval" + i;
                                 epilogue += value;
@@ -827,6 +831,16 @@ namespace CalendarApplication.Database
 
             }
             return true;
+        }
+
+        public int UploadFile(HttpPostedFileBase file, MySqlTransaction currentTrans)
+        {
+            MySqlCommand cmd = new MySqlCommand();
+            cmd.Transaction = currentTrans;
+            string path = HttpContext.Current.Server.MapPath("~/App_Data/Files");
+            path = Path.Combine(path, file.FileName);
+            file.SaveAs(path);
+            return -1;
         }
 
         /// <summary>
