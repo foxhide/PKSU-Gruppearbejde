@@ -144,11 +144,9 @@ namespace CalendarApplication.Database
                     int memberSize = groupmodel.groupMembers.Count;
                     int leaderSize = groupmodel.groupLeaders.Count;
                     
-                    cmd.CommandText = "INSERT INTO groupmembers (groupId, userId, groupLeader, canCreate) VALUES (@groupId, @userId, @groupLeader, @canCreate)";
                     cmd.Parameters.AddWithValue("@userId", null);
                     cmd.Parameters.AddWithValue("@groupLeader", false);
                     cmd.Parameters.AddWithValue("@canCreate", false);
-                    cmd.Prepare();
 
                     for (int i = 0; i < memberSize; i++)
                     {
