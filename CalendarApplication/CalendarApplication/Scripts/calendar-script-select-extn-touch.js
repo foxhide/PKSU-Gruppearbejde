@@ -11,7 +11,7 @@ function addSelectionFunction(roomId) {
     .unbind("touchmove")
     .unbind("touchend")
     .unbind("touchcancel")
-    .touchstart(function (e) {
+    .mousedown(function (e) {
         if (!selection) {
             s_top = e.pageY - $("#room_wrap_" + roomId).position().top;
             s_top = s_top > 660 ? 660 : s_top;
@@ -49,7 +49,7 @@ function addDragFunctions(roomId) {
     })
     // Add mouse movement and release for the room divs
     $("#room_" + roomId)
-    .unbind("touchstart")
+    .unbind("mousedown")
     .touchmove(function (e) {
         if (flagDown) {
             // Dragging down
