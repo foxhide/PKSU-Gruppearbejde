@@ -154,8 +154,16 @@ namespace CalendarApplication.Database
                     {
                         if (groupmodel.groupMembers[i].Selected)
                         {
+                            cmd.CommandText = "INSERT INTO groupmembers (groupId, userId, groupLeader, canCreate) VALUES (@groupId, @userId, @groupLeader, @canCreate)";
                             cmd.Parameters["@userId"].Value = int.Parse(groupmodel.groupMembers[i].Value);
+                            cmd.Prepare();
                             cmd.ExecuteNonQuery();
+
+                            //make sure to delete applications just in case they were applicants before
+                            cmd.CommandText = "DELETE FROM groupapplicants WHERE userId = @userId AND groupId = @groupId";
+                            cmd.Prepare();
+                            cmd.ExecuteNonQuery();
+
                         }
                     }
 
