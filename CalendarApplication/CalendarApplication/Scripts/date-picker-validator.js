@@ -128,7 +128,7 @@ function setDate(id, date) {
     $("#" + id + "_Minute").val(date.getMinutes());
 
     var date_hidden = $("#" + id);
-    date_hidden.val(pad(date.getDate()) + "-" + pad(date.getMonth()) + "-" + date.getFullYear() + " "
+    date_hidden.val(pad(date.getDate()) + "-" + pad(date.getMonth()+1) + "-" + date.getFullYear() + " "
                         + pad(date.getHours()) + ":" + pad(date.getMinutes()) + ":00");
 }
 
