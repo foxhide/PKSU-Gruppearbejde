@@ -115,7 +115,7 @@ else
                         style="width:100%" />
                 </td></tr>
             }
-            @if (UserModel.GetCurrentUserID() != -1 && u.Admin && Model.Start > DateTime.Now)
+            @if (UserModel.GetCurrentUserID() != -1 && u.Admin)
             {
                 <tr><td>
                     @using (Html.BeginForm(new { ReturnUrl = ViewBag.ReturnUrl }))
