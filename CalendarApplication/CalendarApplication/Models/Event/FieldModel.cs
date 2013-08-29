@@ -15,7 +15,8 @@ namespace CalendarApplication.Models.Event
         public float? FloatValue { get; set; }
         public string StringValue { get; set; }
         public bool BoolValue { get; set; }
-        public HttpPostedFileBase File { get; set; }
+        public FileModel File { get; set; }
+        public List<FileModel> FileList { get; set; }
         public DateTime DateValue { get; set; }
 
         public List<SelectListItem> List { get; set; }
@@ -29,12 +30,14 @@ namespace CalendarApplication.Models.Event
                 case Fieldtype.User: if (this.IntValue < 1) { return null; } else { return this.IntValue; } //int or null, userId
                 case Fieldtype.Group: if (this.IntValue < 1) { return null; } else { return this.IntValue; } //int or null, groupId
                 case Fieldtype.Text: return this.StringValue;
-                case Fieldtype.File: if (this.IntValue < 1) { return null; } else { return this.IntValue; } //int or null, fileId
+                // need to check whether file exists or has an input when called from eventcontroller for required creation / approval
+                // will not insert a fileId that is 0 when this is called from mysqlevent when inserting fileid into table
+                case Fieldtype.File: if ((this.File.ID > 0 && this.File.Active) || this.File.InputFile != null) { return this.File.ID; } else { return null; } //int or null, fileId
                 case Fieldtype.Datetime: return this.DateValue;
                 case Fieldtype.Bool: return this.BoolValue; //bool
                 // Lists are handled in seperate tables, just insert dummy value - null is returned if no elements, used for
                 // checking if list has selected items in checking the type specifics
-                case Fieldtype.FileList: if (this.CheckList()) { return false; } else { return null; }
+                case Fieldtype.FileList: if (this.CheckFileList()) { return false; } else { return null; }
                 case Fieldtype.GroupList: if (this.CheckList()) { return false; } else { return null; }
                 case Fieldtype.UserList: if (this.CheckList()) { return false; } else { return null; }
                 case Fieldtype.TextList: if (this.CheckStringList()) { return false; } else { return null; }
@@ -69,6 +72,23 @@ namespace CalendarApplication.Models.Event
                 foreach (StringListModel slm in this.StringList)
                 {
                     if (slm.Active && !String.IsNullOrWhiteSpace(slm.Text)) { return true; }
+                }
+            }
+            return false;
+        }
+
+
+        /// <summary>
+        /// Checks if at least one file in the file list is active and has an input file or older file
+        /// </summary>
+        /// <returns>True if at least one active file, otherwise false</returns>
+        public bool CheckFileList()
+        {
+            if (this.FileList != null)
+            {
+                foreach (FileModel fm in this.FileList)
+                {
+                    if (fm.Active && (fm.ID > 0 || fm.InputFile != null)) { return true; }
                 }
             }
             return false;

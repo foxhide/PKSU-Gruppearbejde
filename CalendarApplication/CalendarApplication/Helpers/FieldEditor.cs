@@ -54,7 +54,7 @@ namespace CalendarApplication.Helpers
             }
             else if (model.Datatype == Fieldtype.Text)
             {
-                builder.AppendLine("<div id='" + id + "_char_counter'>Characters left: " + model.VarcharLength + "</div>");
+                builder.AppendLine("<div id='" + id + "_char_counter'>Characters left: " + (model.VarcharLength - (string.IsNullOrWhiteSpace(model.StringValue) ? 0 : model.StringValue.Length)) + "</div>");
                 string counterInc = "onkeyup=\"updateCounter('" + id + "'," + model.VarcharLength + "); setState(); validateInput('" + id + "','Text',true,true)\"";
                 if (model.VarcharLength < 50)
                 {
@@ -106,7 +106,37 @@ namespace CalendarApplication.Helpers
             }
             else if (model.Datatype == Fieldtype.File)
             {
-                builder.AppendLine("<input type='file' id='" + id + "' name='" + name + ".File'>");
+                if (model.File == null) { model.File = new FileModel(); }
+                if (model.File.ID > 0)
+                {
+                    builder.AppendLine("<div id='" + id + "'>");
+                    builder.AppendLine("<div id='" + id + "_Current'>");
+                    builder.AppendLine("<text>" + model.File.CurrentFileName + "</text>");
+                    builder.AppendLine("<input type='hidden' id='" + id + "_Active' ");
+                    builder.AppendLine("name='" + name + ".File.Active' value='true'>");
+                    builder.AppendLine("<input type='hidden' id='" + id + "_Delete' ");
+                    builder.AppendLine("name='" + name + ".File.Delete' value='false'>");
+                    builder.AppendLine("<input type='hidden' id='" + id + "_ID' ");
+                    builder.AppendLine("name='" + name + ".File.ID' value='" + model.File.ID + "'>");
+                    builder.AppendLine("<input type=\"button\" value=\"Delete file permanently\" onclick=\"deleteFile('" + id + "'); setState();\" />");
+                    builder.AppendLine("<input type=\"button\" value=\"Remove only\" onclick=\"removeFile('" + id + "'); setState();\" />");
+                    builder.AppendLine("</div>");
+                    builder.AppendLine("<div id='" + id + "_New' style='display:none' >");
+                    builder.AppendLine("<input type='file' id='" + id + "_Input' name='" + name + ".File.InputFile'>");
+                    builder.AppendLine("</div>");
+                    builder.AppendLine("</div>");
+                }
+                else
+                {
+                    builder.AppendLine("<div id='" + id + "'>");
+                    builder.AppendLine("<input type='file' id='" + id + "_Input' name='" + name + ".File.InputFile'");
+                    builder.AppendLine("onchange=\"setState(); validateInput('" + id + "','File',true,true);\" >");
+                    builder.AppendLine("<input type='hidden' id='" + id + "_ID' ");
+                    builder.AppendLine("name='" + name + ".File.ID' value='" + 0 + "'>");
+                    builder.AppendLine("<input type='hidden' id='" + id + "_Active' ");
+                    builder.AppendLine("name='" + name + ".File.Active' value='true'>");
+                    builder.AppendLine("</div>");
+                }
             }
             else if (model.Datatype == Fieldtype.UserList)
             {
@@ -122,8 +152,27 @@ namespace CalendarApplication.Helpers
             }
             else if (model.Datatype == Fieldtype.FileList)
             {
-                //////////////////////////// needs work ////////////////////////
-                builder.AppendLine("<text>File list</text>");
+                builder.AppendLine("<div id='" + id + "'>");                
+                if (model.FileList == null) { model.FileList = new List<FileModel>(); }
+                string viewName = name + ".FileList";
+                for (int i = 0; i < model.FileList.Count; i++)
+                {
+                    builder.AppendLine("<div id='" + id + "_" + i + "'>");
+                    builder.AppendLine("<text>" + (model.FileList[i].CurrentFileName as string) + "</text>");
+                    builder.AppendLine("<input type='hidden' id='" + id + "_" + i + "_Active' ");
+                    builder.AppendLine("name='" + viewName + "[" + i + "].Active' value='true'>");
+                    builder.AppendLine("<input type='hidden' id='" + id + "_" + i + "_Delete' ");
+                    builder.AppendLine("name='" + viewName + "[" + i + "].Delete' value='false'>");
+                    builder.AppendLine("<input type='hidden' id='" + id + "_" + i + "_ID' ");
+                    builder.AppendLine("name='" + viewName + "[" + i + "].ID' value='" + model.FileList[i].ID + "'>");
+                    builder.AppendLine("<input type=\"button\" value=\"Delete file permanently\" onclick=\"deleteFileList('" + id + "_" + i + "'); setState();\" />");
+                    builder.AppendLine("<input type=\"button\" value=\"Remove only\" onclick=\"removeFileList('" + id + "_" + i + "'); setState();\" />");
+                    builder.AppendLine("</div>");
+
+                }
+                builder.AppendLine("</div>");
+                builder.AppendLine("<input type='button' value='Add' onclick='addFileListField(\"" + id + "\",\"" + viewName + "\")' />");
+                builder.AppendLine("<script>fileCounter['" + id + "'] = " + model.FileList.Count + ";</script>");
             }
             else if (model.Datatype == Fieldtype.TextList)
             {
@@ -149,7 +198,7 @@ namespace CalendarApplication.Helpers
                 }
                 builder.AppendLine("</div>");
                 builder.AppendLine("<input type='button' value='Add' onclick='addStringListField(\"" + id + "\",\"" + viewName + "\")' />");
-                builder.AppendLine("<script>stringCounter['" + id + "'] = " + model.StringList.Count + ";</script>");                
+                builder.AppendLine("<script>stringCounter['" + id + "'] = " + model.StringList.Count + ";</script>");
             }
             else
             {

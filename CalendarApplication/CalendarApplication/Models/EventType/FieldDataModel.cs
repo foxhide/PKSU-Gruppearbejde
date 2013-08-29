@@ -73,6 +73,8 @@ namespace CalendarApplication.Models.EventType
         public Fieldtype Datatype { set; get; }
         public int VarcharLength { set; get; }
 
+        public bool FileDelete { set; get; }
+
         public int ViewID { set; get; }
 
         public string GetDBType()

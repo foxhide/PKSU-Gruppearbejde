@@ -37,6 +37,26 @@ function removeField(viewId, mid, datatype) {
     }
 }
 
+/* Removes field and sets files for deletion */
+function removeField(viewId, mid, datatype, del) {
+    var field_number = id2field[viewId];
+    var field = document.getElementById("field_" + field_number);
+    field.parentElement.removeChild(field);
+    id2field[viewId] = -1;
+    field2id[field_number] = -1;
+    if (mid != -1) {
+        var list = document.getElementById('fields');
+        var newField = document.createElement('div');
+        var fieldId = 'field_' + field_number;
+        newField.id = fieldId;
+        newField.innerHTML = "<input type='hidden' id='ViewID_" + viewId + "' name='TypeSpecific[" + viewId + "].ViewID' value='-1' />"
+                                + "<input type='hidden' id='id_rem_" + viewId + "' name='TypeSpecific[" + viewId + "].ID' value='" + mid + "'/>"
+                                + "<input type='hidden' id='id_rem_" + viewId + "' name='TypeSpecific[" + viewId + "].Datatype' value='" + datatype + "'/>"
+                                + "<input type='hidden' id='id_rem_" + viewId + "' name='TypeSpecific[" + viewId + "].FileDelete' value='" + del + "'/>";
+        list.appendChild(newField);
+    }
+}
+
 /* Inserts new field */
 function newField() {
     var list = document.getElementById('fields');

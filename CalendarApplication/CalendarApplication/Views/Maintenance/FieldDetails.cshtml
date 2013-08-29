@@ -20,22 +20,45 @@
                     <td><label for='Type_@(Model.ViewID)'>Datatype of field</label></td>
                     <td><label for='Desc_@(Model.ViewID)'>Description of field</label></td>
                     <th rowspan="4" style="vertical-align:middle">
-                        <button type="button" onclick=removeField(@(Model.ViewID),@(Model.ID),@((int)Model.Datatype))>Remove</button>
+                        @if (Model.ID > 0)
+                        {
+                        <input type="button" onclick="$('#delete_prompt_@(Model.ViewID)').show()" value="Remove" />
+                        <div id="delete_prompt_@(Model.ViewID)" style="color:white;background-color:red;text-align:center;position:relative;z-index:2;display:none;width:260px;">
+                            <b>Really delete this field?</b><br />
+                            Data will be removed permanently when changes are saved.<br />
+                            @if (Model.Datatype == Fieldtype.File || Model.Datatype == Fieldtype.FileList)
+                            {
+                                <b>Should files be deleted permanently?</b><br />
+                                <input type="button" onclick=removeField(@(Model.ViewID),@(Model.ID),@((int)Model.Datatype),'true') value="Delete files" />
+                                <input type="button" onclick=removeField(@(Model.ViewID),@(Model.ID),@((int)Model.Datatype)) value="Keep files" />
+                                <input type="button" onclick="$('#delete_prompt_@(Model.ViewID)').hide()" value="Cancel" />
+                            }
+                            else
+                            {
+                                <input type="button" onclick=removeField(@(Model.ViewID),@(Model.ID),@((int)Model.Datatype)) value="Continue" />
+                                <input type="button" onclick="$('#delete_prompt_@(Model.ViewID)').hide()" value="Cancel" />
+                            }
+                        </div>
+                        }
+                        else
+                        {
+                            <input type="button" onclick=removeField(@(Model.ViewID),@(Model.ID),@((int)Model.Datatype)) value="Remove" />
+                        }
                     </th>
                 </tr>
                 <tr>
                     <td><input type='text' id='Name_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].Name' value="@(Model.Name)" onkeypress="$('#Name_@(Model.ViewID)').removeClass('input-validation-error')"></td>
                     <td>
-                    @if(Model.ID == -1)
+                    @if (Model.ID == -1)
                     {
                         <select id='Type_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].Datatype' onchange="updateVarChar(@(Model.ViewID));">
                             @for (int i = 0; i < FieldDataModel.DATA_TYPES.Count; i++)
                             {
                                 //disable files and filelists until they work properly
-                                if(i != 5 && i != 9)
-                                { 
-                                    <option value="@(i)" @(i == (int)Model.Datatype?"Selected":"")>@FieldDataModel.DATA_TYPES[i]</option>
-                                }
+                                //if(i != 5 && i != 9)
+                                //{ 
+                                    <option value="@(i)" @(i == (int)Model.Datatype ? "Selected" : "")>@FieldDataModel.DATA_TYPES[i]</option>
+                                //}
                             }
                         </select>
                     }
@@ -52,7 +75,7 @@
                 <tr>
                     <td>
                         <input type='checkbox' id='Reqc_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].RequiredCreate'
-                        @(Model.RequiredCreate?" checked":"") value="true" onclick='updateReqForAppr(@(Model.ViewID))'>
+                        @(Model.RequiredCreate ? " checked" : "") value="true" onclick='updateReqForAppr(@(Model.ViewID))'>
                         <label for='Reqc_@(Model.ViewID)'>Required for creation</label>
                     </td>
                     <td>
@@ -67,7 +90,7 @@
                 <tr>
                     <td style="text-align:center">
                         <input type='checkbox' id='Reqa_@(Model.ViewID)' name='TypeSpecific[@(Model.ViewID)].RequiredApprove'
-                        @(Model.RequiredApprove?" checked":"") value="true" @(Model.RequiredCreate?" disabled='true'":"")>
+                        @(Model.RequiredApprove ? " checked" : "") value="true" @(Model.RequiredCreate ? " disabled='true'" : "")>
                         <label for='Reqa_@(Model.ViewID)'>Required for approval</label>
                     </td>
                     <td>

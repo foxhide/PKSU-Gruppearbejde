@@ -53,6 +53,7 @@
 else
 {
     <h2>Event: @Model.Name</h2>
+    <h3 style="color:red">@TempData["errorMsg"]</h3>
     
     <style>
         /* Styles used for event display */
@@ -118,7 +119,7 @@ else
             @if (UserModel.GetCurrentUserID() != -1 && u.Admin)
             {
                 <tr><td>
-                    @using (Html.BeginForm(new { ReturnUrl = ViewBag.ReturnUrl }))
+                    @using (Html.BeginForm("Delete", "Event"))
                     {
                         @Html.HiddenFor(model => Model.ID)
                         <div style="position:relative;height:30px;width:100%">
@@ -209,7 +210,10 @@ else
                                                         else
                                                         { @fm.StringValue } break;
                             case Fieldtype.Text:        @fm.StringValue break;
-                            case Fieldtype.File:        @fm.IntValue break;
+                            case Fieldtype.File:        if (fm.File != null && fm.File.ID > 0)
+                                                        { @Html.ActionLink(fm.File.CurrentFileName, "GetFile", "Event", new { fileId = fm.File.ID }, null) }
+                                                        else
+                                                        { @("None") } break;
                             case Fieldtype.Datetime:    @fm.DateValue break;
                             case Fieldtype.Bool:        <div style="width:26px;height:26px" class="@(fm.BoolValue ? "tick" : "red_cross")"></div> break;
                             case Fieldtype.UserList:    using (Html.BeginListView("list_" + fm.ID, null, 100, "auto"))
@@ -224,10 +228,10 @@ else
                                                         break;
                             case Fieldtype.FileList:    using (Html.BeginListView("list_" + fm.ID, null, 100, "auto"))
                                                         {
-                                                            foreach (SelectListItem group in fm.List)
+                                                            foreach (FileModel file in fm.FileList)
                                                             {
                                                                 <tr><td>
-                                                                    @fm.IntValue
+                                                                    @Html.ActionLink(file.CurrentFileName, "GetFile", "Event", new { fileId = file.ID }, null)
                                                                 </td></tr>
                                                             }
                                                         }

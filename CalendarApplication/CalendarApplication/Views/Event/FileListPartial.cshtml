@@ -1,0 +1,10 @@
+﻿@model CalendarApplication.Models.Event.FileModel
+
+    <input type='file' id='@(Model.ViewID + "_" + Model.Place)_Input'
+        name='@(Model.ViewName + "[" + Model.Place + "]").InputFile'
+        onchange="setState(); validateInput('@(Model.ViewID)','FileList',true,true);" />
+    <input type='hidden' id='@(Model.ViewID + "_" + Model.Place)_Active' name='@(Model.ViewName +
+        "[" + Model.Place + "].Active")' value='true'>
+    <input type='hidden' id='@(Model.ViewID + "_" + Model.Place)_ID' name='@(Model.ViewName +
+            "[" + Model.Place + "].ID")' value='0'>
+    <input type='button' value='Remove' onclick="removeFileList('@(Model.ViewID + "_" + Model.Place)'); setState();" />

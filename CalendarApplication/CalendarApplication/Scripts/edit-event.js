@@ -30,9 +30,13 @@ function typeCheckResponse(response,old) {
 // Number of fields variable
 var numberOfFields = 0;
 
-/* Variable object for editing strings in the string list.
+/* Variable object for strings in string lists.
    Use as a map, i.e. stringCounter['stringListField'] = countOfStrings. */
 var stringCounter = {};
+
+/* Variable object for files in file lists.
+   Use as a map, i.e. fileCounter['FileListField'] = countOfFiles. */
+var fileCounter = {};
 
 /* Get the partial view for the given event type. If type == 0 (non selected),
    the event_specifics div will be set empty */
@@ -103,8 +107,7 @@ function checkApprove() {
         var jid = "#" + id;
         var req = $(jid + "_RequiredApprove").val();
         if (req.toLowerCase() == "true") {
-            var dataType = $(jid + "_Datatype").val();
-            dataType = dataType.substring(dataType.length - 4) == "List" && dataType != "TextList" ? "List" : dataType;
+            var dataType = $(jid + "_Datatype").val();            
             if (!validateInput(id, dataType, false, false)) { return false; }
         }
     }
@@ -123,7 +126,6 @@ function checkCreate() {
         var req = $(jid + "_RequiredCreate").val();
         if (req.toLowerCase() == "true") {
             var dataType = $(jid + "_Datatype").val();
-            dataType = dataType.substring(dataType.length - 4) == "List" && dataType != "TextList" ? "List" : dataType;
             ok = validateInput(id, dataType, true, false) && ok;
         }
     }
@@ -147,7 +149,7 @@ function validateInput(id,type,showError,removeOnly) {
         if (showError) { setValidationMessage(jid, jid + "_Error", result && !removeOnly); }
         return !result;
     }
-    else if (type == "List") {
+    else if (type == "GroupList" || type == "UserList") {
         var result = getListSelected(id).length == 0;
         if (showError) { setValidationMessage(jid + "_select", jid + "_Error", result && !removeOnly); }
         return !result;
@@ -161,7 +163,23 @@ function validateInput(id,type,showError,removeOnly) {
         }
         if (showError) { setValidationMessage(jid, jid + "_Error", result && !removeOnly); }
         return !result;
-        
+    }
+    else if (type == "File") {
+        var result = ($(jid + "_ID").val() == 0 && $(jid + "_Input").val() == "")
+                     || ($(jid + "_Active").val().toLowerCase() == "false" && $(jid + "_Input").val() == "");
+        if (showError) { setValidationMessage(jid, jid + "_Error", result && !removeOnly); }
+        return !result;
+    }
+    else if (type == "FileList") {
+        var fieldCount = fileCounter[id];
+        var result = true;
+        for (var i = 0; i < fieldCount; i++) {
+            result = ($(jid + "_" + i + "_Active").val().toLowerCase() == "false"
+                      || $(jid + "_" + i + "_ID").val() == 0 && $(jid + "_" + i + "_Input").val() == "");
+            if (!result) { break; }
+        }
+        if (showError) { setValidationMessage(jid, jid + "_Error", result && !removeOnly); }
+        return !result;
     }
     return true;
 }
@@ -260,4 +278,56 @@ function removeStringListField(field) {
         act.value = false;
         var el = document.getElementById(field);
         el.style.display = 'none';
+}
+
+/* Function for removing a file from the view and showing a new input
+   field = identifier for the file field */
+function removeFile(field) {
+    $("#" + field + "_Active").val(false);
+    $("#" + field + "_Current").hide();
+    $("#" + field + "_New").show();
+}
+
+/* Function for removing a file from the view and setting it for deletion
+   field = identifier for the file field */
+function deleteFile(field) {
+    $("#" + field + "_Delete").val(true);
+    removeFile(field);
+}
+
+/* Function for removing a file from the file list
+   field = identifier for the file list field */
+function removeFileList(field) {
+    $("#" + field + "_Active").val(false);
+    $("#" + field).hide();
+}
+
+/* Function for removing a file from the file list and setting it for deletion
+   field = identifier for the file field */
+function deleteFileList(field) {
+    $("#" + field + "_Delete").val(true);
+    removeFileList(field);
+}
+
+/* Function for adding files to a file list
+   field = identifier for the file list field,
+   name = name of the file list field (i.e. TypeSpecifics[i].FileList) */
+function addFileListField(field, name) {
+    var fieldCount = fileCounter[field];
+    // Get partial view from server, using ajax
+    $.ajax({
+        url: "/Event/GetFileListPartial/",
+        type: 'GET',
+        data: { viewId: field, viewName: name, place: fieldCount },
+        dataType: 'html',
+        success: function (result) {
+            var list = document.getElementById(field);
+            var newField = document.createElement('div');
+            var fieldId = field + '_' + fieldCount;
+            newField.id = fieldId;
+            list.appendChild(newField);
+            $('#' + fieldId).html(result);
+            fileCounter[field] = fieldCount + 1;
+        }
+    });
 }

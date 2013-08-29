@@ -145,6 +145,7 @@
     <Compile Include="Models\Event\EventWithDetails.cs" />
     <Compile Include="Models\EventType\FieldDataModel.cs" />
     <Compile Include="Models\Event\FieldModel.cs" />
+    <Compile Include="Models\Event\FileModel.cs" />
     <Compile Include="Models\Event\Room.cs" />
     <Compile Include="Models\Account\LoginModel.cs" />
     <Compile Include="Models\Event\RoomListModel.cs" />
@@ -275,8 +276,10 @@
     <Content Include="Views\List\RoomList.cshtml" />
     <Content Include="Views\Event\StringListPartial.cshtml" />
     <Content Include="Views\Group\ViewApplicants.cshtml" />
+    <Content Include="Views\Event\FileListPartial.cshtml" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="App_Data\Errors\" />
     <Folder Include="App_Data\Files\" />
   </ItemGroup>
   <ItemGroup>

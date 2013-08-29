@@ -110,9 +110,8 @@ namespace CalendarApplication.Controllers
                         {
                             case Fieldtype.Float: fm.FloatValue = ds.Tables[0].Rows[0]["field_" + fm.ID] as float?; break;
 
-                            case Fieldtype.File: if (DBNull.Value.Equals(ds.Tables[0].Rows[0]["field_" + fm.ID])) { fm.IntValue = 0; }
-                                else { fm.IntValue = (int)ds.Tables[0].Rows[0]["field_" + fm.ID]; }
-                                fm.StringValue = "File system not yet implemented."; break;
+                            case Fieldtype.File: if (DBNull.Value.Equals(ds.Tables[0].Rows[0]["field_" + fm.ID])) { fm.File = new FileModel(); }
+                                                 else { fm.File = GetFileDetails((int)ds.Tables[0].Rows[0]["field_" + fm.ID], con); } break;
 
                             case Fieldtype.Text: fm.StringValue = ds.Tables[0].Rows[0]["field_" + fm.ID] as string; break;
 
@@ -143,11 +142,10 @@ namespace CalendarApplication.Controllers
                                     fm.StringValue = MySqlGroup.getGroup(fm.IntValue).Name;
                                 }
                                 break;
-                            case Fieldtype.UserList: fm.List = GetList(fm.Datatype, eventId, fm.ID, con); break; // userlist, grouplist and filelist handled in GetList
+                            case Fieldtype.UserList: fm.List = GetList(fm.Datatype, eventId, fm.ID, con); break; // userlist and grouplist handled in GetList
                             case Fieldtype.GroupList: fm.List = GetList(fm.Datatype, eventId, fm.ID, con); break;
-                            case Fieldtype.FileList: fm.List = GetList(fm.Datatype, eventId, fm.ID, con); break;
-                            case Fieldtype.TextList: fm.StringList = GetStringList(fm.Datatype, eventId, fm.ID, con); break; // textlist handled in GetStringList
-
+                            case Fieldtype.FileList: fm.FileList = GetFileList(eventId, fm.ID, con); break; // filelist handled in GetFileList
+                            case Fieldtype.TextList: fm.StringList = GetStringList(eventId, fm.ID, con); break; // textlist handled in GetStringList
                         }
                         result.TypeSpecifics.Add(fm);
                     }
@@ -161,6 +159,32 @@ namespace CalendarApplication.Controllers
             return result;
         }
 
+        /// <summary>
+        /// Getter for a FileModel pertaining to a particular fileId.
+        /// </summary>
+        /// <param name="msc">MySqlConnect object</param>
+        /// <param name="fileId">Id of file</param>
+        /// <returns>A FileModel with file name and file id</returns>
+        private FileModel GetFileDetails(int fileId, MySqlConnect msc)
+        {
+            FileModel result = new FileModel();
+            CustomQuery query = new CustomQuery();
+            query.ArgNames = new[] { "@fid" };
+            query.Args = new[] { (object)fileId };
+
+            query.Cmd = "SELECT fileId,fileName FROM files"
+                        + " WHERE fileId = @fid";
+            DataTable dt = msc.ExecuteQuery(query);
+            if (dt != null && dt.Rows.Count == 1)
+            {
+                result.CurrentFileName = (string)dt.Rows[0]["fileName"];
+                result.ID = (int)dt.Rows[0]["fileId"];
+                result.Active = true;
+            }
+            return result;
+        }
+
+
         private List<SelectListItem> GetList(Fieldtype type, int eventId, int fieldId, MySqlConnect msc)
         {
             List<SelectListItem> result = new List<SelectListItem>();
@@ -168,11 +192,7 @@ namespace CalendarApplication.Controllers
             query.ArgNames = new[] { "@eid", "@fid" };
             query.Args = new[] { (object)eventId, (object)fieldId };
 
-            if (type == Fieldtype.FileList)
-            {
-                // Do something here!
-            }
-            else if (type == Fieldtype.UserList)
+            if (type == Fieldtype.UserList)
             {
                 query.Cmd = "SELECT userId,firstName,lastName FROM users NATURAL JOIN userlist"
                             + " WHERE eventId = @eid AND fieldId = @fid ORDER BY firstName";
@@ -221,39 +241,79 @@ namespace CalendarApplication.Controllers
             return result;
         }
 
-        private List<StringListModel> GetStringList(Fieldtype type, int eventId, int fieldId, MySqlConnect msc)
+        /// <summary>
+        /// Getter for a StringListModel list of string values pertaining to a particular event and field.
+        /// </summary>
+        /// <param name="msc">MySqlConnect object</param>
+        /// <param name="eventId">Id of event</param>
+        /// <param name="fieldId">Id of field</param>
+        /// <returns>A StringListModel list of strings and stringListIds</returns>
+        private List<StringListModel> GetStringList(int eventId, int fieldId, MySqlConnect msc)
         {
             List<StringListModel> result = new List<StringListModel>();
             CustomQuery query = new CustomQuery();
             query.ArgNames = new[] { "@eid", "@fid" };
             query.Args = new[] { (object)eventId, (object)fieldId };
 
-            if (type == Fieldtype.TextList)
+            
+            query.Cmd = "SELECT text,stringListId FROM stringlist"
+                        + " WHERE eventId = @eid AND fieldId = @fid";
+            DataTable dt = msc.ExecuteQuery(query);
+            if (dt != null)
             {
-                query.Cmd = "SELECT text,stringListId FROM stringlist"
-                            + " WHERE eventId = @eid AND fieldId = @fid";
-                DataTable dt = msc.ExecuteQuery(query);
-                if (dt != null)
+                for (int i = 0; i < dt.Rows.Count; i++)
                 {
-                    for (int i = 0; i < dt.Rows.Count; i++)
+                    result.Add(new StringListModel
                     {
-                        result.Add(new StringListModel
-                        {
-                            Text = (string)dt.Rows[i]["text"],
-                            ID = (int)dt.Rows[i]["stringListId"],
-                            Active = true,
-                            Place = i
-                        });
-                    }
-                }
-                else
-                {
-                    TempData["errorMsg"] = msc.ErrorMessage;
+                        Text = (string)dt.Rows[i]["text"],
+                        ID = (int)dt.Rows[i]["stringListId"],
+                        Active = true,
+                        Place = i
+                    });
                 }
             }
             else
             {
-                TempData["errorMsg"] = "Wrong argument for GetStringList...";
+                TempData["errorMsg"] = msc.ErrorMessage;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Getter for a FileModel list of file values pertaining to a particular event and field.
+        /// </summary>
+        /// <param name="msc">MySqlConnect object</param>
+        /// <param name="eventId">Id of event</param>
+        /// <param name="fieldId">Id of field</param>
+        /// <returns>A FileModel list with file names and file ids</returns>
+        private List<FileModel> GetFileList(int eventId, int fieldId, MySqlConnect msc)
+        {
+            List<FileModel> result = new List<FileModel>();
+            CustomQuery query = new CustomQuery();
+            query.ArgNames = new[] { "@eid", "@fid" };
+            query.Args = new[] { (object)eventId, (object)fieldId };
+
+
+            query.Cmd = "SELECT fileId,fileName FROM files NATURAL JOIN filelist"
+                        + " WHERE eventId = @eid AND fieldId = @fid ORDER BY fileId";
+            DataTable dt = msc.ExecuteQuery(query);
+            if (dt != null)
+            {
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    result.Add(new FileModel
+                    {
+                        CurrentFileName = (string)dt.Rows[i]["fileName"],
+                        ID = (int)dt.Rows[i]["fileId"],
+                        Active = true,
+                        Delete = false,
+                        Place = i
+                    });
+                }
+            }
+            else
+            {
+                TempData["errorMsg"] = msc.ErrorMessage;
             }
             return result;
         }
@@ -629,7 +689,6 @@ namespace CalendarApplication.Controllers
             List<SelectListItem> groups = null;      // List for group list
             List<SelectListItem> usersDrop = null;   // List for user dropdown
             List<SelectListItem> groupsDrop = null;  // List for group dropdown
-            List<StringListModel> stringList = null;  // List for text list
             string specQuery = "SELECT * FROM eventtypefields WHERE eventTypeId = @etid ORDER BY fieldOrder";
             object[] argval = { type };
             string[] argnam = { "@etid" };
@@ -672,11 +731,10 @@ namespace CalendarApplication.Controllers
                                 fm.List = groups; break;
                             case Fieldtype.Group: if (groupsDrop == null) { groupsDrop = this.GetGroups(msc, true); }
                                 fm.List = groupsDrop; fm.IntValue = 0; break;
-                            case Fieldtype.TextList: if (stringList == null) { stringList = new List<StringListModel>(); }
-                                fm.StringList = stringList; break;
+                            case Fieldtype.TextList: fm.StringList = new List<StringListModel>(); break;
                             case Fieldtype.Text: fm.StringValue = ""; break;
-                            //case Fieldtype.FileList:
-                            case Fieldtype.File: fm.StringValue = ""; fm.IntValue = 0; break;
+                            case Fieldtype.FileList: fm.FileList = new List<FileModel>(); break;
+                            case Fieldtype.File: fm.File = new FileModel(); break;
                             case Fieldtype.Datetime: fm.DateValue = DateTime.Now; break;
                             case Fieldtype.Bool: fm.BoolValue = false; break; //bool
                         }
@@ -700,11 +758,12 @@ namespace CalendarApplication.Controllers
                                                 fm.List = groupsDrop;
                                                 fm.IntValue = row["field_" + fm.ID] is DBNull ? 0 : (int)row["field_" + fm.ID];
                                                 break;
-                            case Fieldtype.TextList: fm.StringList = this.GetStringValues(msc, eventId, fm.ID); break;
+                            case Fieldtype.TextList: fm.StringList = this.GetStringList(eventId, fm.ID, msc); break;
                             case Fieldtype.Text: fm.StringValue = row["field_" + fm.ID] is DBNull ? "" : (string)row["field_" + fm.ID];
                                                 break;
-                            //case Fieldtype.FileList:
-                            case Fieldtype.File: fm.StringValue = ""; fm.IntValue = (int)row["field_" + fm.ID]; break;
+                            case Fieldtype.FileList: fm.FileList = GetFileList(eventId, fm.ID, msc); break;
+                            case Fieldtype.File: if (row["field_" + fm.ID] is DBNull) { fm.File = new FileModel(); }
+                                                 else { fm.File = GetFileDetails((int)row["field_" + fm.ID], msc); } break;
                             case Fieldtype.Datetime: fm.DateValue = row["field_" + fm.ID] is DBNull ? new DateTime(1, 1, 1) : (DateTime)row["field_" + fm.ID]; break;
                             case Fieldtype.Bool: fm.BoolValue = row["field_" + fm.ID] is DBNull ? false : (bool)row["field_" + fm.ID]; break; //bool
                         }
@@ -765,39 +824,6 @@ namespace CalendarApplication.Controllers
                         Value = ((int)dr["userId"]).ToString(),
                         Text = (string)dr["firstName"] + " " + (string)dr["lastName"]
                     });
-                }
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// Getter for a StringListModel list of string values pertaining to a particular event and field.
-        /// </summary>
-        /// <param name="msc">MySqlConnect object</param>
-        /// <param name="eventId">Id of event</param>
-        /// <param name="fieldId">Id of field</param>
-        /// <returns>A StringListModel list of strings and stringListIds</returns>
-        private List<StringListModel> GetStringValues(MySqlConnect msc, int eventId, int fieldId)
-        {
-            List<StringListModel> result = new List<StringListModel>();
-            string cmd = "SELECT text,stringListId FROM stringlist WHERE eventId = @eid AND fieldId = @fid ORDER BY stringListId";
-            string[] argnam = new string[] { "@eid", "@fid" };
-            object[] args = new object[] { eventId, fieldId };
-            CustomQuery query = new CustomQuery { Cmd = cmd, ArgNames = argnam, Args = args };
-            DataTable dt = msc.ExecuteQuery(query);
-            if (dt != null)
-            {
-                for (int i = 0; i < dt.Rows.Count; i++)
-                {
-                    if (dt.Rows[i] != null) {
-                        result.Add(new StringListModel
-                        {
-                            ID = (int)dt.Rows[i]["stringListId"],
-                            Text = dt.Rows[i]["text"] as string,
-                            Active = true,
-                            Place = i
-                        });
-                    }
                 }
             }
             return result;
@@ -1081,7 +1107,7 @@ namespace CalendarApplication.Controllers
         /// <param name="delFiles">Whether all files associated with the event should also be deleted</param>
         /// <returns>calendar view, view of this event on error</returns>
         [HttpPost]
-        public ActionResult Index(EventWithDetails model, bool delFiles)
+        public ActionResult Delete(EventWithDetails model, bool delFiles)
         {
             // Check if user is logged in and is admin
             if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
@@ -1119,15 +1145,21 @@ namespace CalendarApplication.Controllers
         }
 
         /// <summary>
-        /// Deletes an event and all files associated with event (FILE DELETION NOT IMPLEMENTED YET)
+        /// Deletes an event and all files associated with event
         /// </summary>
         /// <param name="eventId">Id of the event to be deleted</param>
         /// <returns>calendar view, view of this event on error</returns>
         private ActionResult DeleteEventAndFiles(int eventId)
         {
             MySqlEvent mse = new MySqlEvent();
-            bool ok = mse.DeleteEvent(eventId);
-            if (!ok)
+            bool ok1 = mse.DeleteFilesByEvent(eventId);
+            if (!ok1)
+            {
+                TempData["errorMsg"] = mse.ErrorMessage;
+                return View(GetEvent(eventId));
+            }
+            bool ok2 = mse.DeleteEvent(eventId);
+            if (!ok2)
             {
                 TempData["errorMsg"] = mse.ErrorMessage;
                 return View(GetEvent(eventId));
@@ -1136,10 +1168,44 @@ namespace CalendarApplication.Controllers
             return RedirectToAction("", "Calendar", null);
         }
 
+        public ActionResult GetFile(int fileId)
+        {
+            if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
+            MySqlConnect msc = new MySqlConnect();
+            string cmd = "SELECT pathToFile,fileName FROM files WHERE fileId = @fid";
+            CustomQuery query = new CustomQuery { ArgNames = new[] { "@fid" }, Args = new[] { (object)fileId }, Cmd = cmd};
+            DataTable dt = msc.ExecuteQuery(query);
+            if (dt != null && dt.Rows.Count == 1)
+            {
+                string path = HttpContext.Server.MapPath((string)dt.Rows[0]["pathToFile"]);
+                return (FileResult)File(path, "application/octet-stream", (string)dt.Rows[0]["fileName"]);
+            }
+            else
+            {
+                return JavaScript(" alert('" + (msc.ErrorMessage == null ? "File not found in database!" : msc.ErrorMessage) + "');");
+            }
+
+        }
+
         // Returns the partial for adding a textbox to a string list
         public ActionResult GetStringListPartial(string viewName, string viewId, int place)
         {
             return PartialView("StringListPartial", new StringListModel { ID = -1, Active = true, Place = place, Text = "", ViewID = viewId, ViewName = viewName});
+        }
+
+        // Returns the partial for adding a file field to a file list
+        public ActionResult GetFileListPartial(string viewName, string viewId, int place)
+        {
+            FileModel model = new FileModel
+            {
+                Active = true,
+                ID = 0,
+                InputFile = null,
+                Place = place,
+                ViewID = viewId,
+                ViewName = viewName
+            };
+            return PartialView("FileListPartial", model);
         }
     }
 }
