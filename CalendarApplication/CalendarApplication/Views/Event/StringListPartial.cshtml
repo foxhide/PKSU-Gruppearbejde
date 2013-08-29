@@ -9,4 +9,4 @@
         "[" + Model.Place + "].Active")' value='true'>
     <input type='hidden' id='@(Model.ViewID + "_" + Model.Place)_ID' name='@(Model.ViewName +
             "[" + Model.Place + "].ID")' value='-1'>
-    <input type='button' value='Remove' onclick="removeStringListField('@(Model.ViewID + "_" + Model.Place)'; setState();)" />
+    <input type='button' value='Remove' onclick="removeStringListField('@(Model.ViewID + "_" + Model.Place)'); setState();" />

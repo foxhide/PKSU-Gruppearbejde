@@ -28,7 +28,7 @@ namespace CalendarApplication.Models.EventType
             {
                 "Number",
                 "Text",
-                "Date",
+                "Date and time",
                 "User",
                 "Group",
                 "File",

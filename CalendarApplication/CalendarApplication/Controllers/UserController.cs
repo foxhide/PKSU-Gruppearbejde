@@ -18,7 +18,7 @@ namespace CalendarApplication.Controllers
         public ActionResult Index(int userId)
         {
             // Check if user is logged in
-            if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Index", "Home", null); }
+            if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
 
             UserViewModel result = new UserViewModel { ID = userId };
             string userinfo = "SELECT * FROM users WHERE userId = @userId";

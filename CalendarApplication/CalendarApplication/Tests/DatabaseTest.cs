@@ -16,6 +16,12 @@ using CalendarApplication.Models.Maintenance;
 
 namespace CalendarApplication.Tests
 {
+    
+    /// <summary>
+    /// This test class does not include many newer functions added in later versions
+    /// and has been deprecated since somewhere around version 0.1 or 0.2
+    /// Testing event types will also leave tables behind in the database. 
+    /// </summary>
     [TestClass]
     public class DatabaseTest
     {

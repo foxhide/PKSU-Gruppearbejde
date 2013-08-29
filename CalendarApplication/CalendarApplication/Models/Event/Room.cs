@@ -15,6 +15,7 @@ namespace CalendarApplication.Models.Event
         public string Name { set; get; }
 
         [Display(Name = "Description")]
+        [StringLength(100, ErrorMessage = "The {0} field must be less than {1} characters long.")]
         public string Description { set; get; }
 
         [Display(Name = "Capacity")]
