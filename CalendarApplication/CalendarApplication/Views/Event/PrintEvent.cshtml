@@ -121,7 +121,7 @@
                                         case Fieldtype.Group:
                                         case Fieldtype.Text:        @fm.StringValue break;
                                         case Fieldtype.File:        @fm.File.CurrentFileName break;
-                                        case Fieldtype.Datetime:    @fm.DateValue break;
+                                        case Fieldtype.Datetime:    @Calendar.GetDateTimeString(fm.DateValue) break;
                                         case Fieldtype.Bool:        <img src="@Url.Content("~/Content/images/" + (fm.BoolValue ? "ok.png" : "error.png"))" width="22" height="22"/> break;
                                         case Fieldtype.UserList:
                                         case Fieldtype.GroupList:   for (int i = 0; i < fm.List.Count(); i++)
