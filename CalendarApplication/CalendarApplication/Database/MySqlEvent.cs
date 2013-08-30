@@ -1220,11 +1220,11 @@ namespace CalendarApplication.Database
         }
 
         /// <summary>
-        /// Delete all files tied to an event
+        /// Delete all files tied to a specific event or all files NOT tied to any event
         /// </summary>
-        /// <param name="id">event id</param>
+        /// <param name="id">event id (or null to delete files not tied to any events)</param>
         /// <returns>bool indicating success or failure</returns>
-        public bool DeleteFilesByEvent(int id)
+        public bool DeleteFilesByEvent(int? id)
         {
             if (this.OpenConnection())
             {
@@ -1238,8 +1238,15 @@ namespace CalendarApplication.Database
                     mst = connection.BeginTransaction();
                     cmd.Connection = connection;
                     cmd.Transaction = mst;
+                    if (id == null)
+                    {
+                        cmd.CommandText = "SELECT pathToFile FROM files WHERE eventId IS NULL";
+                    }
+                    else
+                    {
+                        cmd.CommandText = "SELECT pathToFile FROM files WHERE eventId = @evid";
+                    }
 
-                    cmd.CommandText = "SELECT pathToFile FROM files WHERE eventId = @evid";
                     cmd.Parameters.AddWithValue("@evid", id);
                     cmd.Prepare();
                     MySqlDataReader dataReader = cmd.ExecuteReader();
@@ -1265,8 +1272,14 @@ namespace CalendarApplication.Database
 
                     //Close the connection
                     dataReader.Close();
-
-                    cmd.CommandText = "DELETE FROM files WHERE eventId = @evid";
+                    if (id == null)
+                    {
+                        cmd.CommandText = "DELETE FROM files WHERE eventId IS NULL";
+                    }
+                    else
+                    {
+                        cmd.CommandText = "DELETE FROM files WHERE eventId = @evid";
+                    }
                     cmd.Prepare();
                     cmd.ExecuteNonQuery();
 
@@ -1364,6 +1377,9 @@ namespace CalendarApplication.Database
 
                 try
                 {
+                    mst = connection.BeginTransaction();
+                    cmd.Connection = connection;
+                    cmd.Transaction = mst;
                     cmd.CommandText = "SELECT pathToFile FROM files WHERE fileId = @fid";
                     cmd.Parameters.AddWithValue("@fid", id);
                     cmd.Prepare();
@@ -1599,9 +1615,11 @@ namespace CalendarApplication.Database
                 string errorName = "FileDeletionError" + DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".txt";
                 string path = HttpContext.Current.Server.MapPath("/App_Data/Errors");
                 path = Path.Combine(path, errorName);
-                using (StreamWriter sw = File.CreateText(path))
+                // if more than one error message is written in a single second, they will all appear in one file
+                using (StreamWriter sw = new StreamWriter(path,true))
                 {
                     sw.WriteLine("The following files were deleted from database but not file system. Please delete manually:");
+                    sw.WriteLine();
                     foreach (string filePath in undeleted)
                     {
                         sw.WriteLine(filePath);

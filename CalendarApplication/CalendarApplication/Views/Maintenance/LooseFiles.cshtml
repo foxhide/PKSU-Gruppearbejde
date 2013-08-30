@@ -1,0 +1,67 @@
+﻿@model CalendarApplication.Models.User.FileListModel
+
+@{
+    ViewBag.Title = "Loose Files";
+}
+<script>
+    function deleteFile(id){
+        $.ajax({
+            url: "/Maintenance/DeleteFile/",
+            type: 'POST',
+            data: { fileId: id },
+            success: function (result) {
+                if(result)
+                {
+                    $('#button_' + id).hide();
+                    $('#success_' + id).show();
+                }
+                else
+                {
+                    $('#button_' + id).hide();
+                    $('#fail_' + id).show();
+                }                
+            }
+        });
+    }
+</script>
+<h2>Files not tied to any event</h2>
+
+<h3 style="color:red">@TempData["errorMsg"]</h3>
+
+@using (Html.BeginForm())
+{
+    if(Model.Files.Count > 0)
+    {
+        using (Html.BeginListView("Files", new string[] { "File", "Uploaded by", "Upload time", "Delete" }))
+                    {
+                        for (int i = 0; i < Model.Files.Count; i++)
+                        {
+                            <tr>
+                                <td>@Html.ActionLink(Model.Files[i].CurrentFileName, "GetFile", "Event", new { fileId = Model.Files[i].ID }, null) </td>
+                                @if(Model.Files[i].UploaderID == -1)
+                                {
+                                    <td>No user found</td>
+                                }
+                                else
+                                {
+                                    <td>@Html.ActionLink(Model.Files[i].UploaderName, "Index", "User", new { userId = Model.Files[i].UploaderID }, null)</td>
+                                }
+                                <td>@Model.Files[i].Uploaded</td>
+                                <td>
+                                    <div class="tick" id="success_@Model.Files[i].ID" style="width:26px;height:26px;margin:auto;display:none"></div>
+                                    <div class="red_cross" id="fail_@Model.Files[i].ID" style="width:26px;height:26px;margin:auto;display:none">Refresh page for error info</div>
+                                    <div id="button_@Model.Files[i].ID">
+                                        <input type="button" value="Delete" onclick="deleteFile(@(Model.Files[i].ID))" />
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    <br />
+                    <input type="submit" value="Delete All" />
+    }
+    else
+    {
+        @: No files found.
+    }
+}

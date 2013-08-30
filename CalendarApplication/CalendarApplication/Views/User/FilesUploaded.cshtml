@@ -1,0 +1,40 @@
+﻿@model CalendarApplication.Models.User.FileListModel
+
+@{
+    ViewBag.Title = "Files uploaded";
+}
+
+@if(Model.Files.Count > 0)
+{
+    <h2>Files uploaded by @Html.ActionLink(Model.Files[0].UploaderName, "Index", "User", new { userId = Model.Files[0].UploaderID }, null)</h2>
+
+    <h3 style="color:red">@TempData["errorMsg"]</h3>
+
+    using (Html.BeginForm())
+    {
+        using (Html.BeginListView("Files", new string[] { "File", "Upload time", "Tied to event" }))
+                    {
+                        for (int i = 0; i < Model.Files.Count; i++)
+                        {
+                            <tr>
+                                <td>@Html.ActionLink(Model.Files[i].CurrentFileName, "GetFile", "Event", new { fileId = Model.Files[i].ID }, null) </td>
+                                <td>@Model.Files[i].Uploaded</td>
+                                @if(Model.Files[i].EventID == -1)
+                                {
+                                    <td>None</td>
+                                }
+                                else
+                                {
+                                    <td>@Html.ActionLink(Model.Files[i].EventName, "Index", "Event", new { eventId = Model.Files[i].EventID }, null)</td>
+                                }
+                            </tr>
+                        }
+                    }
+                    <br />
+    }
+}
+else
+{
+    <h2>No files found.</h2>
+    <h3 style="color:red">@TempData["errorMsg"]</h3>
+}

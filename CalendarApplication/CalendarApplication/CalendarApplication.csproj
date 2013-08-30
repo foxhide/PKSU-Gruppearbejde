@@ -160,6 +160,7 @@
     <Compile Include="Models\Maintenance\ManageEventTypeModel.cs" />
     <Compile Include="Models\Maintenance\ManageUserModel.cs" />
     <Compile Include="Models\Account\AccountEditModel.cs" />
+    <Compile Include="Models\User\FileListModel.cs" />
     <Compile Include="Models\User\UserListModel.cs" />
     <Compile Include="Models\User\UserModel.cs" />
     <Compile Include="Models\User\UserViewModel.cs" />
@@ -277,6 +278,8 @@
     <Content Include="Views\Event\StringListPartial.cshtml" />
     <Content Include="Views\Group\ViewApplicants.cshtml" />
     <Content Include="Views\Event\FileListPartial.cshtml" />
+    <Content Include="Views\Maintenance\LooseFiles.cshtml" />
+    <Content Include="Views\User\FilesUploaded.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\Errors\" />

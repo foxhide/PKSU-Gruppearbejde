@@ -1188,12 +1188,14 @@ namespace CalendarApplication.Controllers
         }
 
         // Returns the partial for adding a textbox to a string list
+        [HttpGet]
         public ActionResult GetStringListPartial(string viewName, string viewId, int place)
         {
             return PartialView("StringListPartial", new StringListModel { ID = -1, Active = true, Place = place, Text = "", ViewID = viewId, ViewName = viewName});
         }
 
         // Returns the partial for adding a file field to a file list
+        [HttpGet]
         public ActionResult GetFileListPartial(string viewName, string viewId, int place)
         {
             FileModel model = new FileModel

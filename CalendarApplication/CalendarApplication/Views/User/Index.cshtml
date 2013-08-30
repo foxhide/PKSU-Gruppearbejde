@@ -14,8 +14,9 @@
     <h2>Error loading user!</h2>
 }
 else {
+    UserModel usr = UserModel.GetCurrent();
     <h2>User: @Model.UserName</h2>
-    <h3 id="active_msg" style="color:red;display:@(Model.Active?"none":"normal")">This user is no longer active!</h3>
+    <h3 id="active_msg" style="color:red;display:@(Model.Active?"none":"normal")">This user is not active!</h3>
     
     <script>
         var isAdmin = @(Model.Admin.ToString().ToLowerInvariant());
@@ -117,6 +118,11 @@ else {
                 @if (UserModel.GetCurrentUserID() == Model.ID)
                 {
                     @Html.ActionLink("Edit Profile", "EditUser", "Account", new { userId = Model.ID }, null)
+                    <br /> @Html.ActionLink("View uploaded files", "FilesUploaded", "User", new { userId = Model.ID}, null)
+                }
+                else if (usr.Admin)
+                {
+                    @Html.ActionLink("View uploaded files", "FilesUploaded", "User", new { userId = Model.ID}, null)
                 }
             </td>
             <td id="groups" style="padding-right:100px">
@@ -155,7 +161,7 @@ else {
                     }
                 }
             </td>
-            @if (UserModel.GetCurrentUserID() != -1 && UserModel.GetCurrent().Admin && UserModel.GetCurrentUserID() != Model.ID)
+            @if (UserModel.GetCurrentUserID() != -1 && usr.Admin && UserModel.GetCurrentUserID() != Model.ID)
             {
                 <td id="options" style="width:150px;position:relative">
                     <b>Admin options</b>

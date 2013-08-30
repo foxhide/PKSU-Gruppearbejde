@@ -441,7 +441,7 @@ namespace CalendarApplication.Controllers
         /// HttpPost for room edit
         /// </summary>
         /// <param name="room">Room model from the view</param>
-        /// <returns>A redirect to Home/Index on success, otherwise a return to room view.</returns>
+        /// <returns>Redirect to Maintenance/Index on success, return to room view on failure.</returns>
         [HttpPost]
         public ActionResult EditRoom(CalendarApplication.Models.Event.Room room)
         {
@@ -468,6 +468,96 @@ namespace CalendarApplication.Controllers
             TempData["errorMsg"] = sqlrm.ErrorMessage;
             return View(room);
         }
+
+        /// <summary>
+        /// Gets page for loose files (files not tied to an event)
+        /// </summary>
+        /// <returns></returns>
+        public ActionResult LooseFiles()
+        {
+            // Check if user is logged in and is admin
+            if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
+            else if (!UserModel.GetCurrent().Admin) { return RedirectToAction("Index", "Home", null); }
+
+            FileListModel model = new FileListModel();
+            MySqlConnect sql = new MySqlConnect();
+            string que = "SELECT f.fileId,f.fileName,f.uploaded,u.userId,u.firstName,u.lastName"
+                         + " FROM files AS f NATURAL LEFT JOIN users AS u WHERE f.eventId IS NULL ORDER BY f.uploaded DESC";
+            string[] argnam = { };
+            object[] args = { };
+            CustomQuery query = new CustomQuery { Cmd = que, Args = args, ArgNames = argnam };
+            DataTable dt = sql.ExecuteQuery(query);
+            if (dt != null)
+            {
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    if (!(dt.Rows[i]["fileId"] is DBNull))
+                    {
+                        Models.Event.FileModel file = new Models.Event.FileModel();
+                        file.CurrentFileName = dt.Rows[i]["fileName"] as string;
+                        file.ID = (int)dt.Rows[i]["fileId"];
+                        file.UploaderID = dt.Rows[i]["userId"] as int? ?? -1;
+                        file.UploaderName = (dt.Rows[i]["firstName"] as string) + " " + (dt.Rows[i]["lastName"] as string);
+                        file.Uploaded = dt.Rows[i]["uploaded"] as DateTime? ?? new DateTime(1, 1, 1);
+                        model.Files.Add(file);
+                    }
+                }
+            }
+            else
+            {
+                TempData["errorMsg"] = sql.ErrorMessage;
+            }
+
+            return View(model);
+        }
+
+        /// <summary>
+        /// HttpPost for LooseFiles (deletes all loose files)
+        /// </summary>
+        /// <param name="model">file list model (irrelevant)</param>
+        /// <returns>goes to Maintenance/Index on success</returns>
+        [HttpPost]
+        public ActionResult LooseFiles(FileListModel model)
+        {
+            // Check if user is logged in and is admin
+            if (UserModel.GetCurrentUserID() == -1) { return RedirectToAction("Login", "Account", null); }
+            else if (!UserModel.GetCurrent().Admin) { return RedirectToAction("Index", "Home", null); }
+
+            MySqlEvent mse = new MySqlEvent();
+
+            bool ok = mse.DeleteFilesByEvent(null);
+            if (!ok)
+            {
+                TempData["errorMsg"] = mse.ErrorMessage;
+                return RedirectToAction("LooseFiles", "Maintenance", null);
+            }
+
+            return RedirectToAction("Index", "Maintenance", null);
+        }
+
+
+        /// <summary>
+        /// Deletes a file
+        /// </summary>
+        /// <param name="fileId">id of file</param>
+        /// <returns>bool indicating success</returns>
+        [HttpPost]
+        public bool DeleteFile(int fileId)
+        {
+            // Check if user is logged in and is admin
+            if (UserModel.GetCurrentUserID() == -1) { return false; }
+            else if (!UserModel.GetCurrent().Admin) { return false; }
+            
+            MySqlEvent mse = new MySqlEvent();
+
+            bool ok = mse.DeleteFileByID(fileId);
+            if (!ok)
+            {
+                TempData["errorMsg"] = mse.ErrorMessage;
+            }
+            return ok;
+        }
+
     }
 
 }
