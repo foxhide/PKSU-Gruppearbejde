@@ -214,7 +214,7 @@ else
                                                         { @Html.ActionLink(fm.File.CurrentFileName, "GetFile", "Event", new { fileId = fm.File.ID }, null) }
                                                         else
                                                         { @("None") } break;
-                            case Fieldtype.Datetime:    @fm.DateValue break;
+                            case Fieldtype.Datetime:    @Calendar.GetDateTimeString(fm.DateValue) break;
                             case Fieldtype.Bool:        <div style="width:26px;height:26px" class="@(fm.BoolValue ? "tick" : "red_cross")"></div> break;
                             case Fieldtype.UserList:    using (Html.BeginListView("list_" + fm.ID, null, 100, "auto"))
                                                         {
